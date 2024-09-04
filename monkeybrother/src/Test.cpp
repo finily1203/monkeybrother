@@ -3,6 +3,6 @@
 
 namespace monkeybrother {
 	void Print() {
-		printf("hellow world\n");
+		printf("hellow world welcome to monkeybrother engine!\n");
 	}
 }
