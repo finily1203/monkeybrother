@@ -1,0 +1,16 @@
+# Ignore Visual Studio temporary files, build results, and
+# user-specific files
+.vs/
+*.user
+*.suo
+*.vcxproj.user
+*.vcxproj.filters
+
+# Ignore build directories
+[Bb]in/
+[Oo]bj/
+
+# Ignore database files created by Visual Studio
+*.VC.db
+*.VC.db-shm
+*.VC.db-wal
