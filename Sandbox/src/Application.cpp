@@ -5,5 +5,3 @@ namespace monkeybrother {
 void main() {
 	monkeybrother::Print();
 }
-
-// Test
