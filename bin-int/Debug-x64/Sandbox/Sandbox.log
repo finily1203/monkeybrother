@@ -1,3 +1,2 @@
-﻿  Application.cpp
-C:\dev\monkeybrother\Sandbox\src\Application.cpp(5,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+﻿  LINK : C:\dev\monkeybrother\bin\Debug-x64\Sandbox\Sandbox.exe not found or not built by the last incremental link; performing full link
   Sandbox.vcxproj -> C:\dev\monkeybrother\bin\Debug-x64\Sandbox\Sandbox.exe
