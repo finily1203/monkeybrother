@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\dev\monkeybrother\bin\Debug-x64\monkeybrother\monkeybrother.dll</FullPath>
+      <FullPath>C:\Users\Joel Chu\Documents\GitHub\monkeybrother\bin\Debug-x64\monkeybrother\monkeybrother.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\dev\monkeybrother\bin\Debug-x64\Sandbox\Sandbox.exe</FullPath>
+      <FullPath>C:\Users\Joel Chu\Documents\GitHub\monkeybrother\bin\Debug-x64\Sandbox\Sandbox.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
