@@ -110,14 +110,17 @@ void GLFWFunctions::showFPS(GLFWwindow* window) {
     double currTime = glfwGetTime();
     static double prevTime = glfwGetTime();
     double dt = currTime - prevTime;
-    double count = 0.0;
+    GLFWFunctions::fps = 1000 / dt;
 
-    double elapsedTime = currTime - prevTime;
-    if (dt > 1.0) {
-		GLFWFunctions::fps = 1.0 / elapsedTime;
-		prevTime = currTime;
-        count = 0.0;
-	}
+ //   double count = 0.0;
+ //   count++;
+
+ //   double elapsedTime = currTime - prevTime;
+ //   if (dt > 1.0) {
+	//	GLFWFunctions::fps = elapsedTime / count;
+	//	prevTime = currTime;
+ //       count = 0.0;
+	//}
 }
 
 void GLFWFunctions::glfwCleanup() {

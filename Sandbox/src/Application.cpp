@@ -1,5 +1,5 @@
+#include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include "GlfwFunctions.h"
-#include <GLFW/glfw3.h>
 #include <iostream>
 
 
