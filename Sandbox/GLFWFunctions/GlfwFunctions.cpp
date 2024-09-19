@@ -4,6 +4,7 @@
 bool GLFWFunctions::isAKeyPressed = false;
 GLFWwindow* GLFWFunctions::pWindow = nullptr;
 double GLFWFunctions::fps = 0.0;
+double GLFWFunctions::delta_time = 0.0;
 
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -22,7 +23,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
 
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
-    
+
     callEvents();
 
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -56,8 +57,8 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
 
     if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == false) {
-		GLFWFunctions::isAKeyPressed = true;
-	} 
+        GLFWFunctions::isAKeyPressed = true;
+    }
     else if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == true) {
         GLFWFunctions::isAKeyPressed = false;
     }
@@ -70,59 +71,64 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
-    #ifdef _DEBUG
+#ifdef _DEBUG
         std::cout << "Left mouse button ";
-    #endif
+#endif
         break;
     case GLFW_MOUSE_BUTTON_RIGHT:
-    #ifdef _DEBUG
+#ifdef _DEBUG
         std::cout << "Right mouse button ";
-    #endif
+#endif
         break;
     }
     switch (action) {
     case GLFW_PRESS:
-    #ifdef _DEBUG
+#ifdef _DEBUG
         std::cout << "pressed" << std::endl;
-    #endif
+#endif
         break;
     case GLFW_RELEASE:
-    #ifdef _DEBUG
+#ifdef _DEBUG
         std::cout << "released" << std::endl;
-    #endif
+#endif
         break;
     }
 }
 
-void GLFWFunctions::cursorPositionEvent(GLFWwindow * window, double xpos, double ypos) {
-    #ifdef _DEBUG
-	std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
-    #endif
+void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
+#ifdef _DEBUG
+    std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
+#endif
 }
 
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-    #ifdef _DEBUG
-	std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
-	#endif
+#ifdef _DEBUG
+    std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
+#endif
 }
 
-void GLFWFunctions::showFPS(GLFWwindow* window) {
-    double currTime = glfwGetTime();
+void GLFWFunctions::getFps(double fpsCalculateInt) {
+
     static double prevTime = glfwGetTime();
-    double dt = currTime - prevTime;
-    GLFWFunctions::fps = 1000 / dt;
+    double currTime = glfwGetTime();
+    GLFWFunctions::delta_time = currTime - prevTime;
+    prevTime = currTime;
 
- //   double count = 0.0;
- //   count++;
+    static double frameCount = 0;
+    static double startTime = glfwGetTime();
+    double elapsedTime = currTime - startTime;
+    frameCount++;
 
- //   double elapsedTime = currTime - prevTime;
- //   if (dt > 1.0) {
-	//	GLFWFunctions::fps = elapsedTime / count;
-	//	prevTime = currTime;
- //       count = 0.0;
-	//}
+    static double fpsInterval = 1.0;
+
+    if (elapsedTime > fpsInterval) {
+        GLFWFunctions::fps = frameCount / elapsedTime;
+
+        startTime = currTime;
+        frameCount = 0.0;
+    }
 }
 
 void GLFWFunctions::glfwCleanup() {
-	glfwTerminate();
+    glfwTerminate();
 }

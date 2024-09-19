@@ -1,3 +1,7 @@
+//HEADER GUARDS//
+#ifndef GLFW_FUNCTIONS_H
+#define GLFW_FUNCTIONS_H
+
 #include <GLFW/glfw3.h>
 #include <string>
 
@@ -13,9 +17,13 @@ struct GLFWFunctions {
 
 	static void glfwCleanup();
 
-	static void showFPS(GLFWwindow* window);
+	static void getFps(double fpsCalculateInt);
 
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
 	static double fps;
+	static double delta_time;
 };
+
+#endif
+//END HEADER GUARDS//
