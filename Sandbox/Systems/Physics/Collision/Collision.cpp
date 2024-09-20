@@ -1,6 +1,5 @@
 #include "Collision.h"
-#include <vector>
-#include <iostream>
+#include "../GLFWFunctions/GlfwFunctions.h"
 
 namespace CollisionFramework {
 
@@ -14,7 +13,7 @@ namespace CollisionFramework {
 		if (aabb1.max.GetX() < aabb2.min.GetX() || aabb1.max.GetY() < aabb2.min.GetY() || aabb1.min.GetX() > aabb2.max.GetX() || aabb1.min.GetY() > aabb2.max.GetY()) { // if no overlap
 			//Step 2: Initialize and calculate new velocity of Vb
 			float tFirst = 0;
-			float tLast = /*(float)AEFrameRateControllerGetFrameTime()*/ 1; // GET FROM OWEN
+			float tLast = GLFWFunctions::fps;
 
 			myMath::Vector2D Vb;
 			myMath::Vector2D(vel1.GetX() - vel2.GetX(), vel1.GetY() - vel2.GetY());

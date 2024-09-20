@@ -1,5 +1,6 @@
 #include "../MathLibrary/vector2D.h"
 #include "../MathLibrary/matrix3x3.h"
+#include <cmath>
 
 #ifndef MHMath_COLLISION_H_
 #define MHMath_COLLISION_H_

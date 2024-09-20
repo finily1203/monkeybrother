@@ -1,4 +1,5 @@
 #include "Physics.h"
+#include "../GLFWFunctions/GlfwFunctions.h"
 #include <cmath>
 
 namespace PhysicsFramework {
@@ -11,7 +12,7 @@ namespace PhysicsFramework {
 		float gravityX = gravity * sinf(slopeAngle);
 		float gravityY = gravity * cosf(slopeAngle);
 
-		SetVelocity({ GetVelocity().GetX() + gravityX * 0.01667f, GetVelocity().GetY() + gravityY * 0.01667f });
+		SetVelocity({ GetVelocity().GetX() + gravityX * GLFWFunctions::delta_time, GetVelocity().GetY() + gravity * GLFWFunctions::delta_time });
 
 	}
 
