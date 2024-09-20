@@ -98,6 +98,8 @@
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
     <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
+    <ClCompile Include="MathLibrary\matrix3x3.cpp" />
+    <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +110,8 @@
     <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="MathLibrary\matrix3x3.h" />
+    <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
