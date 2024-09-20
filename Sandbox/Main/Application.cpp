@@ -4,6 +4,7 @@
 #include "Engine.h"
 #include "WindowSystem.h"
 #include "TestEntityAndComponent.h"
+#include "Debug.h"
 
 
 namespace monkeybrother {
@@ -12,7 +13,6 @@ namespace monkeybrother {
 
 int main() {
 	monkeybrother::Print();
-
 	Engine* engine = new Engine();
 	//EntityManager entityManager;
 	//entityManager.testEntityManager();
@@ -25,9 +25,15 @@ int main() {
 	engine->addSystem(windowSystem);
 
 	engine->initialiseSystem();
+	Debug DebugTool;
 	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
+		
+		DebugTool.Run(GLFWFunctions::fps);
+		DebugTool.Display();
 		engine->updateSystem();
+		glfwSwapBuffers(GLFWFunctions::pWindow);
 	}
+
 	engine->cleanupSystem();
 	delete engine;
 

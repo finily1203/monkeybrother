@@ -23,7 +23,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
 
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
-
+    glfwSwapInterval(1); //vsync
     callEvents();
 
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
