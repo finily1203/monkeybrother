@@ -1,6 +1,7 @@
 #pragma once
 #include "GlfwFunctions.h"
 #include "Systems.h"
+#include <Shader.h>
 
 //create class for windows application
 class WindowSystem : public Systems

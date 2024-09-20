@@ -1,11 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\GlfwFunctions.cpp" />
+    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Main\Application.cpp" />
+    <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
+    <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
+    <ClCompile Include="EntityManager\EntityManager.cpp" />
+    <ClCompile Include="WindowSystem\WindowSystem.cpp" />
+    <ClCompile Include="Graphics\Shader.cpp" />
+    <ClCompile Include="Graphics\GraphicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\GlfwFunctions.h" />
+    <ClInclude Include="EntityManager\ComponentBase.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\Systems.h" />
+    <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
+    <ClInclude Include="AllTests\TestEntityAndComponent.h" />
+    <ClInclude Include="EntityManager\ComponentManager.h" />
+    <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="WindowSystem\WindowSystem.h" />
+    <ClInclude Include="Graphics\Shader.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\GraphicsSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -16,8 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Basic.shader">
-      <Filter>res\shader</Filter>
-    </None>
+    <None Include="Graphics\Basic.shader" />
   </ItemGroup>
 </Project>
