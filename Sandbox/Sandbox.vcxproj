@@ -66,6 +66,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -75,16 +79,20 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;%(AdditionalIncludeDirectories);$(SolutionDir)\monkeybrother\Sandbox\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;%(AdditionalIncludeDirectories);$(SolutionDir)\monkeybrother\Sandbox\include;$(SolutionDir)\lib\imGui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\monkeybrother\monkeybrother.vcxproj">
@@ -92,17 +100,27 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
+    <ClCompile Include="ImGui\imgui.cpp" />
+    <ClCompile Include="ImGui\imgui_draw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="ImGui\imgui_tables.cpp" />
+    <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
     <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
+    <ClCompile Include="MathLibrary\matrix3x3.cpp" />
+    <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
@@ -113,6 +131,8 @@
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="MathLibrary\matrix3x3.h" />
+    <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

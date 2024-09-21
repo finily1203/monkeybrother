@@ -1,4 +1,5 @@
 #include "WindowSystem.h"
+#include "Debug.h"
 #include <iostream>
 #include <GraphicsSystem.h>
 
