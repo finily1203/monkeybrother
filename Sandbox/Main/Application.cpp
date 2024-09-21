@@ -22,14 +22,13 @@ int main() {
 	//TestEntityAndComponent();
 
 	WindowSystem* windowSystem = new WindowSystem();
+	DebugSystem* DebugTool = new DebugSystem();
 	engine->addSystem(windowSystem);
+	engine->addSystem(DebugTool);
 
 	engine->initialiseSystem();
-	Debug DebugTool;
 	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 		
-		DebugTool.Run(GLFWFunctions::fps);
-		DebugTool.Display();
 		engine->updateSystem();
 		glfwSwapBuffers(GLFWFunctions::pWindow);
 	}

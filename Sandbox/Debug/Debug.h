@@ -7,21 +7,31 @@
 #include <unordered_map>
 #include <GLFW/glfw3.h> 
 #include "GlfwFunctions.h"
+#include "Systems.h"
 
-class Debug {
+class DebugSystem : public Systems {
 public:
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
 	//ImFont* font1;
 	//ImFont* font2;
 	std::vector<const char*> systems = { "Collision", "Physics", "Graphics" };
-	Debug();
-	~Debug();
-	
-	float get_deltaTime() { return ImGui::GetIO().DeltaTime; }
+	DebugSystem();
+	~DebugSystem();
 
-	void Run(double& fps);
+	void initialise() override;
+	void update() override;
+	void cleanup() override;
 
-	void Display();
+	void startLoop();
+
+	void startSystemTiming(const std::string& systemName);
+
+	void endSystemTiming(const std::string& systemName);
+
+	void endLoop();
+	//void Run(double& fps);
+
+	//void Display();
 
 private:
 	ImGuiIO* io;
@@ -29,5 +39,7 @@ private:
 	double loopStartTime;
 	double totalLoopTime;
 };
-
+//std::unordered_map<std::string, double> systemTimes;
+	//double loopStartTime;
+	//double totalLoopTime;
 static bool LegacyKeyDuplicationCheck(ImGuiKey key);
