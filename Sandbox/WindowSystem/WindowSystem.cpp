@@ -31,7 +31,7 @@ void WindowSystem::initialise() {
 }
 
 void WindowSystem::update() {
-	DebugSystem::StartSystemTiming("Windows");
+	
 	glfwPollEvents();
 
 	if (glfwWindowShouldClose(GLFWFunctions::pWindow)) {
@@ -55,7 +55,7 @@ void WindowSystem::update() {
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;
 	}
-	DebugSystem::EndSystemTiming("Windows");
+	
 }
 
 void WindowSystem::cleanup() {
