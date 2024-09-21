@@ -34,7 +34,6 @@
 *.pch
 
 # Libraries
-*.lib
 *.a
 *.la
 *.lo
@@ -71,3 +70,8 @@ dkms.conf
 # Others
 *.log
 *.tlog
+
+# Ignore all bin and obj directories recursively
+bin/
+bin-int/
+obj/
