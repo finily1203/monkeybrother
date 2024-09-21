@@ -16,7 +16,7 @@ int main() {
 	Engine* engine = new Engine();
 	//EntityManager entityManager;
 	//entityManager.testEntityManager();
-
+	
 	//testComponentManager();
 
 	//TestEntityAndComponent();
@@ -26,9 +26,12 @@ int main() {
 	
 	engine->initialiseSystem();
 	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-
+		DebugSystem::StartLoop(); //Get time for start of gameloop
+		
 		engine->updateSystem();
 		
+		DebugSystem::EndLoop(); //Get time for end of gameloop
+		DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 	}
 
 	engine->cleanupSystem();

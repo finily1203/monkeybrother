@@ -1,6 +1,14 @@
 #include "Debug.h"
 
 
+std::vector<double> DebugSystem::systemGameLoopPercent;
+std::unordered_map<const char*, double> DebugSystem::systemTimes;
+double DebugSystem::loopStartTime = 0.0;
+double DebugSystem::totalLoopTime = 0.0;
+double DebugSystem::lastUpdateTime = 0.0;
+std::vector<const char*> DebugSystem::systems;
+int DebugSystem::systemCount = 0;
+
 DebugSystem::DebugSystem() : io{ nullptr } {}
 
 DebugSystem::~DebugSystem() {}
@@ -11,8 +19,8 @@ void DebugSystem::Initialise() {
 	io = &ImGui::GetIO();
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-	//font1 = io.Fonts->AddFontFromFileTTF("Assets/yourfont.ttf", 20);
-	//font2 = io.Fonts->AddFontFromFileTTF("Assets/yourfont.ttf", 15);
+	font1 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20);
+	font2 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 15);
 	ImGui::StyleColorsDark();
 
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -26,6 +34,7 @@ void DebugSystem::Initialise() {
 	ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
 
 	ImGui_ImplOpenGL3_Init("#version 130");
+	lastUpdateTime = glfwGetTime();
 }
 
 void DebugSystem::Update() {
@@ -45,25 +54,23 @@ void DebugSystem::Update() {
 		ImGui::Text("FPS: %.1f", GLFWFunctions::fps);
 		//ImGui::PopFont();
 
-		if (ImGui::BeginTable("Debug", 3, flags, outer_size)) {
+		if (ImGui::BeginTable("DebugTool", 2, flags, outer_size)) {
 
 			ImGui::TableSetupColumn("Systems");
-			ImGui::TableSetupColumn("Game Loop Time (ms)");
 			ImGui::TableSetupColumn("Game Loop %");
 			ImGui::TableHeadersRow();
 			/*for (const auto& [systemName, systemTime] : systemTimes) {
 
 			}*/
-			for (int i{ 0 }; i < 3; i++) {
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				ImGui::Text(systems[i]);
-				ImGui::TableNextColumn();
-				ImGui::Text("-");
-				ImGui::TableNextColumn();
-				ImGui::Text("-");
+			//size_t count = std::min(systems.size(), systemGameLoopPercent.size());
+			for (int i{}; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					ImGui::Text(systems[i]);
+					ImGui::TableNextColumn();
+					ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
 			}
-
+			
 			ImGui::EndTable();
 		}
 
@@ -72,20 +79,14 @@ void DebugSystem::Update() {
 	if (ImGui::CollapsingHeader("Input Data")) {
 		ImGui::SeparatorText("Mouse Coordinates");
 		if (ImGui::IsMousePosValid())
-			ImGui::Text("Mouse pos: (%g, %g)", io->MousePos.x, io->MousePos.y);
+			ImGui::Text("Mouse position: (%g, %g)", io->MousePos.x, io->MousePos.y);
 		else
-			ImGui::Text("Mouse pos: <INVALID>");
-		/*ImGui::Text("Mouse down:");
-		for (int i = 0; i < (int)(sizeof(io->MouseDown) / sizeof(*(io->MouseDown))); i++) {
-			if (ImGui::IsMouseDown(i)) {
-				ImGui::SameLine();
-				ImGui::Text("b%d (%.02f secs)", i, io->MouseDownDuration[i]);
-			}
-		}*/
+			ImGui::Text("Mouse position: <INVALID>");
 
-		ImGui::SeparatorText("Mouse/Keys pressed:\n");
+		ImGui::SeparatorText("Mouse/Keys Input\n");
+		ImGui::Text("Mouse/Key pressed:");
+
 		ImGuiKey startKey = (ImGuiKey)0;
-
 		//Check that key exist in ImGuiKey data (includes legacy and modern keys)
 		for (ImGuiKey key = startKey; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
 		{
@@ -93,12 +94,23 @@ void DebugSystem::Update() {
 			if (LegacyKeyDuplicationCheck(key) //Check if key is the legacy version
 				|| !ImGui::IsKeyDown(key)) //Check if key is pressed
 				continue; //iterates the next key in ImGuiKey
-			ImGui::Text("\"%s\"", ImGui::GetKeyName(key));
+			
 			ImGui::SameLine();
+			ImGui::Text("\"%s\"", ImGui::GetKeyName(key));
 		}
-
-
+		ImGui::NewLine();
 	}
+	if (ImGui::CollapsingHeader("Object Creation")) {
+		static int clicked = 0;
+		if (ImGui::Button("Create Circle"))
+			clicked++;
+		if (clicked & 1)
+		{
+			ImGui::SameLine();
+			ImGui::Text("Circle created");
+		}
+	}
+
 
 	//Rendering of UI
 	ImGui::Render();
@@ -117,107 +129,56 @@ void DebugSystem::Cleanup() {
 	ImGui::DestroyContext();
 }
 
-void DebugSystem::startLoop() {
+void DebugSystem::UpdateSystemTimes() {
+	double currentTime = glfwGetTime();
+	if (currentTime - lastUpdateTime >= 1.0) {  // Check if 1 second has passed
+		systemGameLoopPercent.clear();
+		// Update system times and percentages
+		for (int i{}; i < systemCount; i++) {
+			systemGameLoopPercent.push_back(SystemPercentage(systems[i]));
+		}
+		lastUpdateTime = currentTime;
+	}
+}
+
+void DebugSystem::StartLoop() {
 	loopStartTime = glfwGetTime();
+	systemCount = 0;
+	systems.clear();
 	systemTimes.clear();
+	//systemGameLoopPercent.clear();
 }
 
-void DebugSystem::startSystemTiming(const std::string& systemName) {
+void DebugSystem::StartSystemTiming(const char* systemName) {
+	systems.push_back(systemName);
 	systemTimes[systemName] -= glfwGetTime() - loopStartTime;
+	systemCount++;
 }
 
-void DebugSystem::endSystemTiming(const std::string& systemName) {
+void DebugSystem::EndSystemTiming(const char* systemName) {
 	systemTimes[systemName] += glfwGetTime() - loopStartTime;
 }
 
-void DebugSystem::endLoop() {
+void DebugSystem::EndLoop() {
+	
 	totalLoopTime = GLFWFunctions::delta_time;
 }
+
+double DebugSystem::SystemPercentage(const char* systemName){
+	auto it = systemTimes.find(systemName);
+	if (it != systemTimes.end()) {
+		return (it->second / totalLoopTime) * 100.0;
+	}
+	
+	return 0.0;
+}
+
+//double DebugSystem::TotalLoopTime() const {
+//	return totalLoopTime * 1000.0; // Convert to milliseconds
+//}
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
 		&& ImGui::GetIO().KeyMap[key] != -1; //Check if legacy key is mapped in ImGui key map
 }
-
-//void Debug::Run(double& fps) {
-//	ImGui_ImplOpenGL3_NewFrame();
-//	ImGui_ImplGlfw_NewFrame();
-//	ImGui::NewFrame();
-//
-//	//ImGui::ShowDemoWindow();
-//	if (ImGui::CollapsingHeader("Performance Data")) {
-//		static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | /*ImGuiTableFlags_ScrollY |*/
-//			ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
-//
-//		ImVec2 outer_size = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f);
-//		//ImVec2 outer_size = ImVec2(0.0f, 50.f);
-//
-//		//ImGui::PushFont(font1);
-//		ImGui::Text("FPS: %.1f", fps);
-//		//ImGui::PopFont();
-//
-//		if (ImGui::BeginTable("Debug", 3, flags, outer_size)) {
-//
-//			ImGui::TableSetupColumn("Systems");
-//			ImGui::TableSetupColumn("Game Loop Time (ms)");
-//			ImGui::TableSetupColumn("Game Loop %");
-//			ImGui::TableHeadersRow();
-//
-//			for (int i{ 0 }; i < 3; i++) {
-//				ImGui::TableNextRow();
-//				ImGui::TableNextColumn();
-//				ImGui::Text(systems[i]);
-//				ImGui::TableNextColumn();
-//				ImGui::Text("-");
-//				ImGui::TableNextColumn();
-//				ImGui::Text("-");
-//			}
-//
-//			ImGui::EndTable();
-//		}
-//
-//	}
-//
-//	if (ImGui::CollapsingHeader("Input Data")) {
-//		ImGui::SeparatorText("Mouse Coordinates");
-//		if (ImGui::IsMousePosValid())
-//			ImGui::Text("Mouse pos: (%g, %g)", io->MousePos.x, io->MousePos.y);
-//		else
-//			ImGui::Text("Mouse pos: <INVALID>");
-//		/*ImGui::Text("Mouse down:");
-//		for (int i = 0; i < (int)(sizeof(io->MouseDown) / sizeof(*(io->MouseDown))); i++) {
-//			if (ImGui::IsMouseDown(i)) {
-//				ImGui::SameLine();
-//				ImGui::Text("b%d (%.02f secs)", i, io->MouseDownDuration[i]);
-//			}
-//		}*/
-//			
-//		ImGui::SeparatorText("Mouse/Keys pressed:\n");         
-//		ImGuiKey startKey = (ImGuiKey)0;
-//
-//		//Check that key exist in ImGuiKey data (includes legacy and modern keys)
-//		for (ImGuiKey key = startKey; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
-//		{ 
-//			//Don't render if key is typed legacy OR if the key is not pressed (avoid duplication)
-//			if (LegacyKeyDuplicationCheck(key) //Check if key is the legacy version
-//				|| !ImGui::IsKeyDown(key)) //Check if key is pressed
-//				continue; //iterates the next key in ImGuiKey
-//			ImGui::Text( "\"%s\"", ImGui::GetKeyName(key)); 
-//			ImGui::SameLine();
-//		}
-//
-//		
-//	}
-//
-//}  //Run
-
-//void Debug::Display() {
-//	ImGui::Render();
-//	int display_w, display_h;
-//	glfwGetFramebufferSize(GLFWFunctions::pWindow, &display_w, &display_h);
-//	glViewport(0, 0, display_w, display_h);
-//	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-//	glClear(GL_COLOR_BUFFER_BIT);
-//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//} //Display
