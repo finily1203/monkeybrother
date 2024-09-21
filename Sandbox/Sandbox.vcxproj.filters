@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Main\Application.cpp" />
+    <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
+    <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
+    <ClCompile Include="EntityManager\EntityManager.cpp" />
+    <ClCompile Include="WindowSystem\WindowSystem.cpp" />
+    <ClCompile Include="Graphics\Shader.cpp" />
+    <ClCompile Include="Graphics\GraphicsSystem.cpp" />
+    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="ImGui\imgui.cpp" />
+    <ClCompile Include="ImGui\imgui_draw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="ImGui\imgui_tables.cpp" />
+    <ClCompile Include="ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="MathLibrary\matrix3x3.cpp" />
+    <ClCompile Include="MathLibrary\vector2D.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EntityManager\ComponentBase.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\Systems.h" />
+    <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
+    <ClInclude Include="AllTests\TestEntityAndComponent.h" />
+    <ClInclude Include="EntityManager\ComponentManager.h" />
+    <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="WindowSystem\WindowSystem.h" />
+    <ClInclude Include="Graphics\Shader.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\GraphicsSystem.h" />
+    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="MathLibrary\matrix3x3.h" />
+    <ClInclude Include="MathLibrary\vector2D.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="res">
+      <UniqueIdentifier>{87d0706a-ed49-427b-b9e2-3018e52d37df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\shader">
+      <UniqueIdentifier>{7b5a52f2-1458-4491-bd12-efbd3bffb88b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Basic.shader" />
+  </ItemGroup>
+</Project>
