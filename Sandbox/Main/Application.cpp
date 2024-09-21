@@ -22,15 +22,13 @@ int main() {
 	//TestEntityAndComponent();
 
 	WindowSystem* windowSystem = new WindowSystem();
-	DebugSystem* DebugTool = new DebugSystem();
 	engine->addSystem(windowSystem);
-	engine->addSystem(DebugTool);
-
+	
 	engine->initialiseSystem();
 	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-		
+
 		engine->updateSystem();
-		glfwSwapBuffers(GLFWFunctions::pWindow);
+		
 	}
 
 	engine->cleanupSystem();

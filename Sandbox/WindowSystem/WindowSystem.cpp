@@ -5,6 +5,7 @@
 
 
 GraphicsSystem graphicsSystem;
+DebugSystem* DebugTool = new DebugSystem();
 
 void WindowSystem::initialise() {
 	if (!GLFWFunctions::init(1600, 900, "Testing Application 123")) {
@@ -25,27 +26,32 @@ void WindowSystem::initialise() {
 	// Set the clear colorglClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	graphicsSystem.Initialize();
+
+	DebugTool->Initialise();
 }
 
 void WindowSystem::update() {
 	glfwPollEvents();
-	GLFWFunctions::getFps(1);
 
 	if (glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 		glfwSetWindowShouldClose(GLFWFunctions::pWindow, GLFW_TRUE);
 	}
-
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	graphicsSystem.Render();
+	DebugTool->Update();
+	
 	glfwSwapBuffers(GLFWFunctions::pWindow);
+	
 	glfwPollEvents();
-
+	GLFWFunctions::getFps(1);
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;
 	}
 }
 
 void WindowSystem::cleanup() {
-	GLFWFunctions::glfwCleanup();
+	//GLFWFunctions::glfwCleanup();
 	graphicsSystem.Cleanup();
+	DebugTool->Cleanup();
 }

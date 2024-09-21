@@ -5,7 +5,7 @@ DebugSystem::DebugSystem() : io{ nullptr } {}
 
 DebugSystem::~DebugSystem() {}
 
-void DebugSystem::initialise() {
+void DebugSystem::Initialise() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = &ImGui::GetIO();
@@ -28,7 +28,7 @@ void DebugSystem::initialise() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void DebugSystem::update() {
+void DebugSystem::Update() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -106,12 +106,12 @@ void DebugSystem::update() {
 	glfwGetFramebufferSize(GLFWFunctions::pWindow, &display_w, &display_h);
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 }
 
-void DebugSystem::cleanup() {
+void DebugSystem::Cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

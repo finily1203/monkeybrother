@@ -9,7 +9,7 @@
 #include "GlfwFunctions.h"
 #include "Systems.h"
 
-class DebugSystem : public Systems {
+class DebugSystem {
 public:
 	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
 	//ImFont* font1;
@@ -18,9 +18,9 @@ public:
 	DebugSystem();
 	~DebugSystem();
 
-	void initialise() override;
-	void update() override;
-	void cleanup() override;
+	void Initialise();
+	void Update();
+	void Cleanup();
 
 	void startLoop();
 
