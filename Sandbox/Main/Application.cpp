@@ -1,10 +1,10 @@
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
-#include "GlfwFunctions.h"
 #include <iostream>
-#include "Engine.h"
 #include "WindowSystem.h"
 #include "TestEntityAndComponent.h"
 #include "Debug.h"
+#include "GlfwFunctions.h"
+#include "Engine.h"
 
 
 namespace monkeybrother {

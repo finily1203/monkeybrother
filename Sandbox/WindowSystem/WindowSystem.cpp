@@ -1,7 +1,8 @@
-#include "WindowSystem.h"
-#include "Debug.h"
-#include <iostream>
 #include <GraphicsSystem.h>
+#include "Debug.h"
+#include "WindowSystem.h"
+#include <iostream>
+
 
 GraphicsSystem graphicsSystem;
 

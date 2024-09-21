@@ -10,6 +10,15 @@
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
+    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="ImGui\imgui.cpp" />
+    <ClCompile Include="ImGui\imgui_draw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="ImGui\imgui_tables.cpp" />
+    <ClCompile Include="ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="MathLibrary\matrix3x3.cpp" />
+    <ClCompile Include="MathLibrary\vector2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -23,6 +32,9 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
+    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="MathLibrary\matrix3x3.h" />
+    <ClInclude Include="MathLibrary\vector2D.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)Sandbox\include;%(AdditionalIncludeDirectories);$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\Graphics</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
