@@ -1,4 +1,5 @@
 #include "ComponentManager.h"
+#include "ECSDefinitions.h"
 
 template <typename T>
 void ComponentManager::registerComponentHandler() {

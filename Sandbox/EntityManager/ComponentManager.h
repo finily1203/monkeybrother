@@ -1,13 +1,16 @@
 #pragma once
-#include "EntityManager.h" //Remove later
 #include "ComponentBase.h"
+#include "EntityManager.h"
+
+#include <queue>
+#include <array>
+#include <bitset>
+#include <string>
 #include <unordered_map>
 #include <string>
 #include <cassert>
 #include <iostream>
-
-using ComponentType = std::uint8_t;
-const ComponentType MAX_COMPONENTS = 32;
+#include <set>
 
 //Purpose of ComponentManager is to talk to all the ComponentHandlers -> ComponentBase.h
 class ComponentManager

@@ -1,12 +1,15 @@
-//ANYTHING U SEE WITH ENTITY ENTITY WILL HAVE THE ASSERT STATEMENT
-
 #pragma once
-#include "EntityManager.h" //Remove later
+#include "EntityManager.h"
+
+#include <queue>
+#include <array>
+#include <bitset>
+#include <string>
 #include <unordered_map>
 #include <string>
 #include <cassert>
 #include <iostream>
-
+#include <set>
 
 //Create a generic instance / Base form of a Component Class
 //Every component class will inherit from this class

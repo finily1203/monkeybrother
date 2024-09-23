@@ -1,4 +1,5 @@
 #include "EntityManager.h"
+#include "ECSDefinitions.h"
 #include <iostream>
 
 EntityManager::EntityManager() {
@@ -70,44 +71,41 @@ unsigned int EntityManager::getAvailableEntCount() {
 	return availableEnt.size();
 }
 
-void EntityManager::testEntityManager() {
-	std::cout << "Create Entity Test" << std::endl;
-
-	Entity ent1 = createEntity();
-	Entity ent2 = createEntity();
-	Entity ent3 = createEntity();
-
-	std::cout << "Entity 1: " << ent1 << std::endl;
-	std::cout << "Entity 2: " << ent2 << std::endl;
-	std::cout << "Entity 3: " << ent3 << std::endl;
-
-	std::cout << "Set Signature Test" << std::endl;
-	ComponentSig physicsSig;
-	ComponentSig renderSig;
-	ComponentSig inputSig;
-	physicsSig.set(0);
-	renderSig.set(1);
-	inputSig.set(2);
-	setSignature(ent1, physicsSig);
-	setSignature(ent2, renderSig);
-	setSignature(ent3, inputSig);
-
-	std::cout << "1st Entity contains: " << getSignature(ent1)  << std::endl; //physicsSig
-	std::cout << "2nd Entity contains: " << getSignature(ent2)  << std::endl; //renderSig
-	std::cout << "3rd Entity contains: " << getSignature(ent3)  << std::endl; //inputSig
-	std::cout << "Entities Left: "		 << liveEntCount	    << std::endl; //3
-	std::cout << "Available Entities: "  << availableEnt.size() << std::endl; //4997
-
-
-	std::cout << "Destroy Entity Test" << std::endl;
-	destroyEntity(ent1);
-
-	std::cout << "1st Entity contains: " << getSignature(ent1)  << std::endl; //empty
-	std::cout << "2nd Entity contains: " << getSignature(ent2)  << std::endl; //renderSig
-	std::cout << "3rd Entity contains: " << getSignature(ent3)  << std::endl; //inputSig
-	std::cout << "Entities Left: "		 << liveEntCount	    << std::endl; //2
-	std::cout << "Available Entities: "  << availableEnt.size() << std::endl; //4997
-}
-
-
-//SET UP A WAY FOR COMPONENTS NAMES TO BE TIED TO COMPONENT SIGNATURES//
+//void EntityManager::testEntityManager() {
+//	std::cout << "Create Entity Test" << std::endl;
+//
+//	Entity ent1 = createEntity();
+//	Entity ent2 = createEntity();
+//	Entity ent3 = createEntity();
+//
+//	std::cout << "Entity 1: " << ent1 << std::endl;
+//	std::cout << "Entity 2: " << ent2 << std::endl;
+//	std::cout << "Entity 3: " << ent3 << std::endl;
+//
+//	std::cout << "Set Signature Test" << std::endl;
+//	ComponentSig physicsSig;
+//	ComponentSig renderSig;
+//	ComponentSig inputSig;
+//	physicsSig.set(0);
+//	renderSig.set(1);
+//	inputSig.set(2);
+//	setSignature(ent1, physicsSig);
+//	setSignature(ent2, renderSig);
+//	setSignature(ent3, inputSig);
+//
+//	std::cout << "1st Entity contains: " << getSignature(ent1)  << std::endl; //physicsSig
+//	std::cout << "2nd Entity contains: " << getSignature(ent2)  << std::endl; //renderSig
+//	std::cout << "3rd Entity contains: " << getSignature(ent3)  << std::endl; //inputSig
+//	std::cout << "Entities Left: "		 << liveEntCount	    << std::endl; //3
+//	std::cout << "Available Entities: "  << availableEnt.size() << std::endl; //4997
+//
+//
+//	std::cout << "Destroy Entity Test" << std::endl;
+//	destroyEntity(ent1);
+//
+//	std::cout << "1st Entity contains: " << getSignature(ent1)  << std::endl; //empty
+//	std::cout << "2nd Entity contains: " << getSignature(ent2)  << std::endl; //renderSig
+//	std::cout << "3rd Entity contains: " << getSignature(ent3)  << std::endl; //inputSig
+//	std::cout << "Entities Left: "		 << liveEntCount	    << std::endl; //2
+//	std::cout << "Available Entities: "  << availableEnt.size() << std::endl; //4997
+//}

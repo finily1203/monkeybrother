@@ -103,6 +103,8 @@
     <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="EntityManager\SystemManager.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -124,6 +126,9 @@
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
+    <ClInclude Include="EntityManager\ECSCoordinator.h" />
+    <ClInclude Include="EntityManager\ECSDefinitions.h" />
+    <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
     <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />

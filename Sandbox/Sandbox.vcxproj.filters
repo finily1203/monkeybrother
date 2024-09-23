@@ -19,6 +19,8 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
+    <ClCompile Include="EntityManager\SystemManager.cpp" />
+    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -35,6 +37,9 @@
     <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
+    <ClInclude Include="EntityManager\SystemManager.h" />
+    <ClInclude Include="EntityManager\ECSCoordinator.h" />
+    <ClInclude Include="EntityManager\ECSDefinitions.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
