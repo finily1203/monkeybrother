@@ -1,12 +1,15 @@
-//ANYTHING U SEE WITH ENTITY ENTITY WILL HAVE THE ASSERT STATEMENT
-
 #pragma once
-#include "EntityManager.h" //Remove later
+#include "EntityManager.h"
+
+#include <queue>
+#include <array>
+#include <bitset>
+#include <string>
 #include <unordered_map>
 #include <string>
 #include <cassert>
 #include <iostream>
-
+#include <set>
 
 //Create a generic instance / Base form of a Component Class
 //Every component class will inherit from this class
@@ -21,7 +24,7 @@ public:
 
 //Manages components of type T of an entity
 template <typename T>
-class ComponentHandler
+class ComponentHandler : public ComponentBase
 {
 public:
 	void addComponentHandler(Entity entity, T component)
@@ -41,8 +44,6 @@ public:
 	void removeComponentHandler(Entity entity)
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
-		//check if component already exists
-		assert(entityToIndexMap.find(entity) == entityToIndexMap.end() && "Component already exists in the entity");
 
 		auto it = entityToIndexMap.find(entity);
 		assert(it != entityToIndexMap.end() && "Component does not exist in the entity");
