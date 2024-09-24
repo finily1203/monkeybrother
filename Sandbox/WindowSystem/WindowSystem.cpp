@@ -41,7 +41,8 @@ void WindowSystem::update() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	DebugSystem::StartSystemTiming("Graphics"); //Get start of graphics gameloop
-	graphicsSystem.Render();
+	graphicsSystem.Update(GLFWFunctions::delta_time);
+	graphicsSystem.Render(GLFWFunctions::delta_time);
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
