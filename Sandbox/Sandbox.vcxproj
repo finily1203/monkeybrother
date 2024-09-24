@@ -140,6 +140,9 @@
   <ItemGroup>
     <None Include="Graphics\Basic.shader" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Debug\Assets\liberation-mono.ttf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

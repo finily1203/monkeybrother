@@ -49,4 +49,7 @@
   <ItemGroup>
     <None Include="Graphics\Basic.shader" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Debug\Assets\liberation-mono.ttf" />
+  </ItemGroup>
 </Project>
