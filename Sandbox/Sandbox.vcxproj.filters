@@ -52,4 +52,8 @@
   <ItemGroup>
     <Font Include="Debug\Assets\liberation-mono.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Graphics\Assets\demon_spritesheet.png" />
+    <Image Include="Graphics\Assets\moss.png" />
+  </ItemGroup>
 </Project>
