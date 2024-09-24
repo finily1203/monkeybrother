@@ -21,6 +21,7 @@
     <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="EntityManager\SystemManager.cpp" />
     <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="EntityManager\ECSCoordinator.h" />
     <ClInclude Include="EntityManager\ECSDefinitions.h" />
+    <ClInclude Include="ObjectFactory\ObjectFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

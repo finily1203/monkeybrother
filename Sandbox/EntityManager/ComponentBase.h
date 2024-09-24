@@ -24,7 +24,7 @@ public:
 
 //Manages components of type T of an entity
 template <typename T>
-class ComponentHandler
+class ComponentHandler : public ComponentBase
 {
 public:
 	void addComponentHandler(Entity entity, T component)
@@ -44,8 +44,6 @@ public:
 	void removeComponentHandler(Entity entity)
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
-		//check if component already exists
-		assert(entityToIndexMap.find(entity) == entityToIndexMap.end() && "Component already exists in the entity");
 
 		auto it = entityToIndexMap.find(entity);
 		assert(it != entityToIndexMap.end() && "Component does not exist in the entity");

@@ -6,6 +6,7 @@ public:
 	ObjectFactory();
 	~ObjectFactory();
 
+	Entity CreateObjectFromFile(const std::string& filename);
 
 
 };

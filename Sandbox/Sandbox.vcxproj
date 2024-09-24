@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\MathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -119,6 +119,7 @@
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
+    <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,7 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
+    <ClInclude Include="ObjectFactory\ObjectFactory.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

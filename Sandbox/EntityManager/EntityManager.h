@@ -21,7 +21,6 @@ public:
 	void setSignature(Entity entity, ComponentSig signature);
 	void rmvSignature(Entity entity, ComponentSig signature);
 	ComponentSig getSignature(Entity entity);
-	void testEntityManager();
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
 
