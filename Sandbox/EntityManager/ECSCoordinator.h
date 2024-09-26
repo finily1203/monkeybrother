@@ -1,0 +1,247 @@
+#pragma once
+#include "EntityManager.h"
+#include "ComponentManager.h"
+#include "SystemManager.h"
+#include "ECSDefinitions.h"
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include "vector2D.h"
+
+
+class ECSCoordinator
+{
+public:
+	ECSCoordinator();
+
+	//Entity Manager Functions
+	Entity createEntity();
+	/*Entity createEntity(const std::string& filename);*/
+	void destroyEntity(Entity entity);
+	
+	//Component Manager Functions
+	template <typename T>
+	void registerComponent();
+	template <typename T>
+	void addComponent(Entity entity, T component);
+	template <typename T>
+	void removeComponent(Entity entity);
+	template <typename T>
+	T& getComponent(Entity entity);
+	template <typename T>
+	ComponentType getComponentType();
+
+	//System Manager Functions
+	template <typename T>
+	std::shared_ptr<T> registerSystem();
+	template <typename T>
+	void setSystemSignature(ComponentSig signature);
+
+
+	void test();
+
+private:
+	std::unique_ptr<EntityManager> entityManager;
+	std::unique_ptr<ComponentManager> componentManager;
+	std::unique_ptr<SystemManager> systemManager;
+};
+
+ECSCoordinator::ECSCoordinator()
+{
+	entityManager = std::make_unique<EntityManager>();
+	componentManager = std::make_unique<ComponentManager>();
+	systemManager = std::make_unique<SystemManager>();
+}
+
+Entity ECSCoordinator::createEntity()
+{
+	return entityManager->createEntity();
+}
+
+void ECSCoordinator::destroyEntity(Entity entity)
+{
+	//remove entity from all systems
+	entityManager->destroyEntity(entity);
+	componentManager->entityRemoved(entity);
+	systemManager->entityRemoved(entity);
+}
+
+template <typename T>
+void ECSCoordinator::registerComponent()
+{
+	componentManager->registerComponentHandler<T>();
+}
+
+template <typename T>
+void ECSCoordinator::addComponent(Entity entity, T component)
+{
+	componentManager->addComponent<T>(entity, component);
+
+	//update entity signature
+	auto signature = entityManager->getSignature(entity);
+	signature.set(componentManager->getComponentType<T>(), true);
+	entityManager->setSignature(entity, signature);
+
+	//update system signature
+	systemManager->entitySigChange(entity, signature);
+}
+
+template <typename T>
+void ECSCoordinator::removeComponent(Entity entity)
+{
+	componentManager->removeComponent<T>(entity);
+
+	//update entity signature
+	auto signature = entityManager->getSignature(entity);
+	signature.set(componentManager->getComponentType<T>(), false);
+	entityManager->rmvSignature(entity, signature);
+
+	//update system signature
+	systemManager->entitySigChange(entity, signature);
+}
+
+template <typename T>
+T& ECSCoordinator::getComponent(Entity entity)
+{
+	return componentManager->getComponent<T>(entity);
+}
+
+template <typename T>
+ComponentType ECSCoordinator::getComponentType()
+{
+	return componentManager->getComponentType<T>();
+}
+
+template <typename T>
+std::shared_ptr<T> ECSCoordinator::registerSystem()
+{
+	return systemManager->registerSystem<T>();
+}
+
+template <typename T>
+void ECSCoordinator::setSystemSignature(ComponentSig signature)
+{
+	systemManager->setSystemSignature<T>(signature);
+}
+
+//Entity ECSCoordinator::createEntity(const std::string& filename)
+//{
+//	std::ifstream ifs(filename);
+//	std::string line;
+//
+//	Entity entity = createEntity();
+//
+//	std::string entityName;
+//	std::vector<std::string> addSystems;
+//	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> addComponents;
+//
+//	while (std::getline(ifs, line)) {
+//		if (line == "Name:") {
+//			std::getline(ifs, entityName);
+//		}
+//
+//
+//	}
+//}
+
+struct Position {
+	myMath::Vector2D pos;
+};
+
+struct Size {
+	myMath::Vector2D scale;
+};
+
+struct velocity {
+	float speed;
+};
+
+class PlayerSystem : public System {
+public:
+	void update() {
+		std::cout << "PlayerSystem update" << std::endl;
+	}
+};
+
+void ECSCoordinator::test() {
+	std::cout << "testing ECS" << std::endl;
+	//create player entity
+	Entity player = createEntity();
+	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
+	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
+
+	//register components
+	std::cout << "REGISTER TEST" << std::endl;
+	registerComponent<Position>();
+	registerComponent<Size>();
+	registerComponent<velocity>();
+
+	auto playerSystem = registerSystem<PlayerSystem>();
+
+	addComponent(player, Position{ myMath::Vector2D(0, 0) });
+	addComponent(player, Size{ myMath::Vector2D(1, 1) });
+	addComponent(player, velocity{ 5 });
+	std::cout << std::endl;
+
+	//set system signature
+	std::cout << "SET SYSTEM SIG TEST" << std::endl;
+	ComponentSig playerSig;
+	std::cout << "Player signature: " << playerSig << std::endl;
+	playerSig.set(getComponentType<Position>(), true);
+	playerSig.set(getComponentType<Size>(), true);
+	playerSig.set(getComponentType<velocity>(), true);
+	setSystemSignature<PlayerSystem>(playerSig);
+	std::cout << std::endl;
+
+
+	playerSystem->update();
+
+	//get component
+	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
+	playerSig = entityManager->getSignature(player);
+	std::cout << "Player signature: " << playerSig << std::endl;
+
+	// Check if specific components are present
+	bool hasPosition = playerSig.test(getComponentType<Position>());
+	bool hasSize = playerSig.test(getComponentType<Size>());
+	bool hasVelocity = playerSig.test(getComponentType<velocity>());
+
+	// Retrieve components if they exist
+	if (hasPosition) {
+		Position playerPosition = getComponent<Position>(player);
+		std::cout << "Player position: " << playerPosition.pos.GetX() << ", " << playerPosition.pos.GetY() << std::endl;
+	}
+
+	if (hasSize) {
+		Size playerSize = getComponent<Size>(player);
+		std::cout << "Player size: " << playerSize.scale.GetX() << ", " << playerSize.scale.GetY() << std::endl;
+	}
+
+	if (hasVelocity) {
+		velocity playerVelocity = getComponent<velocity>(player);
+		std::cout << "Player velocity: " << playerVelocity.speed << std::endl;
+	}
+	std::cout << std::endl;
+
+	//remove component
+	std::cout << "REMOVE COMPONENT TEST" << std::endl;
+	removeComponent<Position>(player);
+	removeComponent<Size>(player);
+	removeComponent<velocity>(player);
+	playerSig = entityManager->getSignature(player);
+	std::cout << "Player signature: " << playerSig << std::endl << std::endl;
+
+	//remove entity
+	std::cout << "REMOVE ENTITY TEST" << std::endl;
+	destroyEntity(player);
+	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
+	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
+}
+
+//player
+//Components
+//pos x, y
+//speed (velocity)
+//size (width, height)
+//sprite (texture, width, height)
