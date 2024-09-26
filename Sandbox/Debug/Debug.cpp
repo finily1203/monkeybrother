@@ -2,23 +2,27 @@
 
 
 std::vector<double> DebugSystem::systemGameLoopPercent;
+bool DebugSystem::showGUI = false;
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
 double DebugSystem::loopStartTime = 0.0;
 double DebugSystem::totalLoopTime = 0.0;
 double DebugSystem::lastUpdateTime = 0.0;
 std::vector<const char*> DebugSystem::systems;
 int DebugSystem::systemCount = 0;
+std::ofstream CrashLog::logFile;
 
-DebugSystem::DebugSystem() : io{ nullptr } {}
+DebugSystem::DebugSystem() : io{ nullptr }, font1{ nullptr }, font2{ nullptr } {}
 
 DebugSystem::~DebugSystem() {}
 
 void DebugSystem::Initialise() {
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = &ImGui::GetIO();
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	
 	font1 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20);
 	font2 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 15);
 	ImGui::StyleColorsDark();
@@ -38,6 +42,7 @@ void DebugSystem::Initialise() {
 }
 
 void DebugSystem::Update() {
+	if (showGUI) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -111,15 +116,16 @@ void DebugSystem::Update() {
 		}
 	}
 
-
-	//Rendering of UI
-	ImGui::Render();
-	int display_w, display_h;
-	glfwGetFramebufferSize(GLFWFunctions::pWindow, &display_w, &display_h);
-	glViewport(0, 0, display_w, display_h);
-	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	
+		//Rendering of UI
+		ImGui::Render();
+		int display_w, display_h;
+		glfwGetFramebufferSize(GLFWFunctions::pWindow, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		//glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+		//glClear(GL_COLOR_BUFFER_BIT);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 
 }
 
@@ -127,6 +133,14 @@ void DebugSystem::Cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+}
+
+void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
+	{
+		showGUI = !showGUI;
+	}
 }
 
 void DebugSystem::UpdateSystemTimes() {
@@ -173,12 +187,71 @@ double DebugSystem::SystemPercentage(const char* systemName){
 	return 0.0;
 }
 
-//double DebugSystem::TotalLoopTime() const {
-//	return totalLoopTime * 1000.0; // Convert to milliseconds
-//}
-
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
 		&& ImGui::GetIO().KeyMap[key] != -1; //Check if legacy key is mapped in ImGui key map
+}
+
+void CrashLog::Initialise() {
+	logFile.open("crash-log.txt", std::ios::out | std::ios::trunc);
+	if (logFile.is_open()) {
+		logFile << "Log started at: " << getCurrentTimestamp() << std::endl;
+		logFile.flush();
+	}
+	else {
+		std::cerr << "Failed to open crash-log.txt" << std::endl;
+	}
+}
+
+void CrashLog::Cleanup() {
+	if (logFile.is_open()) {
+		LogDebugMessage("Log end");
+		logFile.close();
+	}
+}
+
+void CrashLog::LogDebugMessage(const std::string& message, const char* file, int line) {
+	if(logFile.is_open()) {
+		if (file && line) {
+			logFile << "[" << getCurrentTimestamp() << "] " << message << " at " << file << " line " << line << std::endl;
+			logFile.flush();
+		}
+		else logFile << "[" << getCurrentTimestamp() << "] " << message << std::endl;
+	}
+}
+
+void CrashLog::SignalHandler(int signum) {
+	switch (signum) {
+	case SIGSEGV:
+		CrashLog::LogDebugMessage("Signal: SIGSEV (Segmentation Fault)");
+		CrashLog::LogDebugMessage("Program accessed memory it shouldn't (e.g. dereferencing a null pointer)");
+		CrashLog::LogDebugMessage("Log end");
+		break;
+	case SIGABRT:
+		CrashLog::LogDebugMessage("Signal: SIGABRT (Abort())");
+		CrashLog::LogDebugMessage("Program detected a serious error and called abort()");
+		CrashLog::LogDebugMessage("Log end");
+		break;
+	case SIGFPE:
+		CrashLog::LogDebugMessage("Signal: SIGFPE (Floating-point exception)");
+		CrashLog::LogDebugMessage("Program detected mathematical error (e.g. division by zero)");
+		CrashLog::LogDebugMessage("Log end");
+		break;
+	case SIGILL:
+		CrashLog::LogDebugMessage("SIGILL (Illegal instruction)");
+		CrashLog::LogDebugMessage("Program tried to execute an invalid machine instruction");
+		CrashLog::LogDebugMessage("Log end");
+		break;
+	default:
+		CrashLog::LogDebugMessage("Unknown signal: " + std::to_string(signum));
+	}
+	std::exit(signum);
+}
+
+void CrashLog::SignalChecks() {
+	std::signal(SIGSEGV, SignalHandler);
+	std::signal(SIGABRT, SignalHandler);
+	std::signal(SIGFPE, SignalHandler);
+	std::signal(SIGILL, SignalHandler);
 }
