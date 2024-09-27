@@ -13,12 +13,38 @@ namespace monkeybrother {
 }
 
 int main() {
+	try {
+		CrashLog::SignalChecks();
+		CrashLog::Initialise();
+		CrashLog::LogDebugMessage("Starting engine initialization");
+		monkeybrother::Print();
+		Engine* engine = new Engine();
+		//EntityManager entityManager;
+		//entityManager.testEntityManager();
+
+		//testComponentManager();
+
+		//TestEntityAndComponent();
+		WindowSystem* windowSystem = new WindowSystem();
+		engine->addSystem(windowSystem);
+	monkeybrother::Print();
+	Engine* engine = new Engine();
 	monkeybrother::Print();
 	Engine* engine = new Engine();
 	ECSCoordinator* ecsCoordinator = new ECSCoordinator();
 	ecsCoordinator->test();
 
 
+		engine->initialiseSystem();
+
+		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
+			DebugSystem::StartLoop(); //Get time for start of gameloop
+
+			engine->updateSystem();
+
+			DebugSystem::EndLoop(); //Get time for end of gameloop
+			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
+		}
 	WindowSystem* windowSystem = new WindowSystem();
 	engine->addSystem(windowSystem);
 
@@ -34,5 +60,15 @@ int main() {
 
 	delete engine;
 
+		engine->cleanupSystem();
+		delete engine;
+		CrashLog::Cleanup();
+	}
+	catch (const CrashLog::Exception& e) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
+		CrashLog::LogDebugMessage(e.message, e.file, e.line);
+		CrashLog::LogDebugMessage("End Log");
+	}
+	
 	return 0;
 }

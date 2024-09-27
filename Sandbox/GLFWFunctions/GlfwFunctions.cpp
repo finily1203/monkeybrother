@@ -1,3 +1,4 @@
+#include "Debug.h"
 #include "GlfwFunctions.h"
 #include <iostream>
 
@@ -19,7 +20,8 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (!GLFWFunctions::pWindow)
     {
-        std::cerr << "Failed to create window" << std::endl;
+        throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
+        //std::cerr << "Failed to create window" << std::endl;
         glfwTerminate();
         return false;
     }
@@ -37,6 +39,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
 void GLFWFunctions::callEvents() {
 
     glfwSetKeyCallback(GLFWFunctions::pWindow, GLFWFunctions::keyboardEvent);
+    glfwSetKeyCallback(GLFWFunctions::pWindow, DebugSystem::key_callback);
     glfwSetMouseButtonCallback(GLFWFunctions::pWindow, GLFWFunctions::mouseButtonEvent);
     glfwSetCursorPosCallback(GLFWFunctions::pWindow, GLFWFunctions::cursorPositionEvent);
     glfwSetScrollCallback(GLFWFunctions::pWindow, GLFWFunctions::scrollEvent);
