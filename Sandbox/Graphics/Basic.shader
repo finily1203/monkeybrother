@@ -5,8 +5,10 @@ layout(location = 1) in vec2 texCoords;
 
 out vec2 TexCoords; // Pass to fragment shader
 
+uniform mat3 uModel_to_NDC;
+
 void main() {
-    gl_Position = vec4(position, 1.0);
+    gl_Position = vec4(uModel_to_NDC * vec3(position), 1.0);
     TexCoords = texCoords;
 }
 

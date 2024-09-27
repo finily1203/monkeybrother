@@ -6,6 +6,65 @@
 
 GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
+GraphicsSystem::GLObject gameObject;
+Shader *shader = nullptr;
+GLboolean left_turn_flag = false;
+GLboolean right_turn_flag = false;
+GLboolean scale_up_flag = false;
+GLboolean scale_down_flag = false;
+GLboolean move_up_flag = false;
+GLboolean move_down_flag = false;
+GLboolean move_left_flag = false;
+GLboolean move_right_flag = false;
+
+void WindowSystem::keyboardInputUpdateFlag() {
+	left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
+	right_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_RIGHT) != 0;
+	scale_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_UP) != 0;
+	scale_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_DOWN) != 0;
+	move_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_W) != 0;
+	move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
+	move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
+	move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
+}
+
+void WindowSystem::logicUpdate() {
+	if (left_turn_flag) {
+		gameObject.orientation.y = 1.0f;
+	}
+	else if (right_turn_flag) {
+		gameObject.orientation.y = -1.0f;
+	}
+	else {
+		gameObject.orientation.y = 0.0f;
+	}
+	
+	if (scale_up_flag) {
+		if (gameObject.scaling.x < 5.0f && gameObject.scaling.y < 5.0f) {
+			gameObject.scaling.x += 0.178f;
+			gameObject.scaling.y += 0.1f;
+		}
+	}
+	else if (scale_down_flag) {
+		if (gameObject.scaling.x > 0.1f && gameObject.scaling.y > 0.1f) {
+			gameObject.scaling.x -= 0.178f;
+			gameObject.scaling.y -= 0.1f;
+		}
+	}
+
+	if (move_up_flag) {
+		gameObject.position.y += 0.1f;
+	}
+	else if (move_down_flag) {
+		gameObject.position.y -= 0.1f;
+	}
+	if (move_left_flag) {
+		gameObject.position.x -= 0.1f;
+	}
+	else if (move_right_flag) {
+		gameObject.position.x += 0.1f;
+	}
+}
 
 void WindowSystem::initialise() {
 	if (!GLFWFunctions::init(1600, 900, "Testing Application 123")) {
@@ -28,6 +87,10 @@ void WindowSystem::initialise() {
 	graphicsSystem.Initialize();
 
 	DebugTool->Initialise();
+
+	gameObject.init();
+
+	shader = graphicsSystem.GetShader();
 }
 
 void WindowSystem::update() {
@@ -40,9 +103,15 @@ void WindowSystem::update() {
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	keyboardInputUpdateFlag();
+
+	logicUpdate();
+
 	DebugSystem::StartSystemTiming("Graphics"); //Get start of graphics gameloop
 	graphicsSystem.Update(GLFWFunctions::delta_time);
-	graphicsSystem.Render(GLFWFunctions::delta_time);
+	//graphicsSystem.Render(GLFWFunctions::delta_time);
+	gameObject.update(GLFWFunctions::delta_time);
+	gameObject.draw(shader, graphicsSystem);
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
@@ -64,3 +133,5 @@ void WindowSystem::cleanup() {
 	graphicsSystem.Cleanup();
 	DebugTool->Cleanup();
 }
+
+

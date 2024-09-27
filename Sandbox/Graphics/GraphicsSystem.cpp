@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <iostream>
-#include <glm/glm.hpp>
+
 
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
@@ -65,10 +65,10 @@ void GraphicsSystem::Initialize() {
     // Quad vertices using normalized frame size (0.0 to 1.0)
     float vertices[] = {
         // positions                    // Assume center of the quad is at (0, 0)
-        quadWidth / 2.0f,  quadHeight / 2.0f, 0.0f,  // top right
-        quadWidth / 2.0f, -quadHeight / 2.0f, 0.0f,  // bottom right
-       -quadWidth / 2.0f, -quadHeight / 2.0f, 0.0f,  // bottom left
-       -quadWidth / 2.0f,  quadHeight / 2.0f, 0.0f   // top left
+        quadWidth / 2.0f,  quadHeight / 2.0f, 1.0f,  // top right
+        quadWidth / 2.0f, -quadHeight / 2.0f, 1.0f,  // bottom right
+       -quadWidth / 2.0f, -quadHeight / 2.0f, 1.0f,  // bottom left
+       -quadWidth / 2.0f,  quadHeight / 2.0f, 1.0f   // top left
     };
 
     unsigned int indices[] = {
@@ -115,10 +115,15 @@ void GraphicsSystem::Render(float deltaTime) {
     glBindVertexArray(m_VAO);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void GraphicsSystem::Cleanup() {
     ReleaseResources();
+}
+
+Shader* GraphicsSystem::GetShader() const{
+	return m_Shader.get();
 }
 
 void GraphicsSystem::ReleaseResources() {
@@ -127,4 +132,68 @@ void GraphicsSystem::ReleaseResources() {
     glDeleteBuffers(1, &m_EBO);
     glDeleteTextures(1, &m_Texture);
     glDeleteVertexArrays(1, &m_VAO);
+}
+
+void GraphicsSystem::GLObject::init() {
+	position = { 0.0f, 0.0f };
+	orientation = { 0.0f, 1.0f };
+	scaling = { 1.78f, 1.0f };
+	mdl_xform = glm::mat3{ 1.0 };
+	mdl_to_ndc_xform = glm::mat3{ 1.0 };
+}
+
+void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
+    glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 };
+
+    Scaling =
+    {
+        scaling.x, 0		 , 0,
+        0        , scaling.y , 0,
+        0        , 0         , 1
+    };
+
+    orientation.x += static_cast<GLfloat>(orientation.y * time_per_frame * 100.0f);
+
+    Rotating =
+    {
+         glm::cos(glm::radians(orientation.x)), glm::sin(glm::radians(orientation.x)), 0,
+        -glm::sin(glm::radians(orientation.x)), glm::cos(glm::radians(orientation.x)), 0,
+         0, 0, 1
+    };
+    Translating =
+    {
+        1,		    0 ,		     0,
+        0,		    1 ,		     0,
+        position.x, position.y , 1
+    };
+    // TODO:: change the NDC matrix to be calculated based on the window size
+    NDC = 
+    {
+        2.0f / 1600.0f,  0,              0,
+        0,               2.0f / 900.0f,  0,
+        0,               0,              1 };
+
+    mdl_xform = Translating * (Rotating * Scaling);
+    mdl_to_ndc_xform =  mdl_xform;
+}
+
+void GraphicsSystem::GLObject::draw(Shader* shader, const GraphicsSystem& graphicEngine) const{
+    // load shader program in use by this object
+    shader->Bind();
+    // bind VAO of this object
+    glBindVertexArray(graphicEngine.m_VAO);
+    glBindTexture(GL_TEXTURE_2D, graphicEngine.m_Texture);
+
+    GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
+    if (uniformLoc != -1) {
+		glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+	}
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+    // unbind VAO
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+	// unbind shader program
+	shader->Unbind();
 }
