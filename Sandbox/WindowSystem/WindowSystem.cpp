@@ -31,6 +31,7 @@ void WindowSystem::initialise() {
 }
 
 void WindowSystem::update() {
+	
 	glfwPollEvents();
 
 	if (glfwWindowShouldClose(GLFWFunctions::pWindow)) {
@@ -38,9 +39,15 @@ void WindowSystem::update() {
 	}
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DebugSystem::StartSystemTiming("Graphics"); //Get start of graphics gameloop
 	graphicsSystem.Render();
+	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
+
+	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
 	DebugTool->Update();
-	
+	DebugSystem::EndSystemTiming("Debug"); //Get end of debug gameloop
+
 	glfwSwapBuffers(GLFWFunctions::pWindow);
 	
 	glfwPollEvents();
@@ -48,6 +55,7 @@ void WindowSystem::update() {
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;
 	}
+	
 }
 
 void WindowSystem::cleanup() {
