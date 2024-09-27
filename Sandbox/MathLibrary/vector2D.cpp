@@ -72,26 +72,26 @@ namespace myMath
     float LengthVector2D(Vector2D const& vector)
     {
         // formula to find the length of a vector
-        return (std::sqrt(std::pow(vector.GetX(), 2) + std::pow(vector.GetY(), 2)));
+        return static_cast<float>(std::sqrt(std::pow(vector.GetX(), 2) + std::pow(vector.GetY(), 2)));
     }
 
     // finding squared length of vector function
     float SquareLengthVector2D(Vector2D const& vector)
     {
         // formula to find the squared length of a vector
-        return (std::pow(vector.GetX(), 2) + std::pow(vector.GetY(), 2));
+        return static_cast<float>(std::pow(vector.GetX(), 2) + std::pow(vector.GetY(), 2));
     }
 
     // finding distance between two vectors
     float DistanceVector2D(Vector2D const& vectorOne, Vector2D const& vectorTwo)
     {
-        return (std::sqrt(std::pow(vectorOne.GetX() - vectorTwo.GetX(), 2) + std::pow(vectorOne.GetY() - vectorTwo.GetY(), 2)));
+        return static_cast<float>(std::sqrt(std::pow(vectorOne.GetX() - vectorTwo.GetX(), 2) + std::pow(vectorOne.GetY() - vectorTwo.GetY(), 2)));
     }
 
     // finding squared distance between two vectors
     float SquareDistanceVector2D(Vector2D const& vectorOne, Vector2D const& vectorTwo)
     {
-        return (std::pow(vectorOne.GetX() - vectorTwo.GetX(), 2) + std::pow(vectorTwo.GetY() - vectorTwo.GetY(), 2));
+        return static_cast<float>(std::pow(vectorOne.GetX() - vectorTwo.GetX(), 2) + std::pow(vectorTwo.GetY() - vectorTwo.GetY(), 2));
     }
 
     // finding dot product of two vectors

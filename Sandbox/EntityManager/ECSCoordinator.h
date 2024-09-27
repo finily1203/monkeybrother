@@ -8,6 +8,8 @@
 #include <fstream>
 #include <vector>
 #include "vector2D.h"
+#include "../Serialization/jsonSerialization.h"
+#include "../Serialization/serialization.h"
 
 
 class ECSCoordinator
@@ -31,6 +33,9 @@ public:
 	T& getComponent(Entity entity);
 	template <typename T>
 	ComponentType getComponentType();
+
+	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void SaveJSONFromEntity(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 
 	//System Manager Functions
 	template <typename T>
@@ -147,14 +152,41 @@ void ECSCoordinator::setSystemSignature(ComponentSig signature)
 
 struct Position {
 	myMath::Vector2D pos;
+
+	void Serialize(Serializer::BaseSerializer& serializer)
+	{
+		float x, y;
+
+		ReadObjectStream(serializer, x, "Player.position.pos.x");
+		ReadObjectStream(serializer, y, "Player.position.pos.y");
+
+		pos.SetX(x);
+		pos.SetY(y);
+	}
 };
 
 struct Size {
 	myMath::Vector2D scale;
+
+	void Serialize(Serializer::BaseSerializer& serializer)
+	{
+		float x, y;
+
+		ReadObjectStream(serializer, x, "Player.size.scale.x");
+		ReadObjectStream(serializer, y, "Player.size.scale.y");
+
+		scale.SetX(x);
+		scale.SetY(y);
+	}
 };
 
 struct velocity {
 	float speed;
+
+	void Serialize(Serializer::BaseSerializer& serializer)
+	{
+		ReadObjectStream(serializer, speed, "Player.velocity.speed");
+	}
 };
 
 class PlayerSystem : public System {
@@ -163,6 +195,32 @@ public:
 		std::cout << "PlayerSystem update" << std::endl;
 	}
 };
+
+void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
+{
+	Serializer::JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	for (const auto& entityKey : serializer.GetEntityKeys())
+	{
+		Position position;
+		serializer.ReadObject(position, entityKey + ".position");
+		ecs.addComponent(entity, position);
+
+		Size size;
+		serializer.ReadObject(size, entityKey + ".size");
+		ecs.addComponent(entity, size);
+
+		velocity vel;
+		serializer.ReadObject(vel, entityKey + ".velocity");
+		ecs.addComponent(entity, vel);
+	}
+}
 
 void ECSCoordinator::test() {
 	std::cout << "testing ECS" << std::endl;
@@ -237,6 +295,61 @@ void ECSCoordinator::test() {
 	destroyEntity(player);
 	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
 	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
+
+	std::cout << std::endl;
+
+	Entity loadedEntity = createEntity();
+	LoadEntityFromJSON(*this, loadedEntity, "./Serialization/player.json");
+	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
+	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
+
+	playerSig.set(getComponentType<Position>(), true);
+	playerSig.set(getComponentType<Size>(), true);
+	playerSig.set(getComponentType<velocity>(), true);
+	setSystemSignature<PlayerSystem>(playerSig);
+	std::cout << std::endl;
+
+	playerSystem->update();
+
+	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
+	playerSig = entityManager->getSignature(loadedEntity);
+	std::cout << "Player signature: " << playerSig << std::endl;
+
+	if (entityManager->getSignature(loadedEntity).test(getComponentType<Position>()))
+	{
+		Position loadedPos = getComponent<Position>(loadedEntity);
+		std::cout << "Loaded Position from JSON: " << loadedPos.pos.GetX() << ", " << loadedPos.pos.GetY() << std::endl;
+	}
+
+	if (entityManager->getSignature(loadedEntity).test(getComponentType<Size>()))
+	{
+		Size loadedSize = getComponent<Size>(loadedEntity);
+		std::cout << "Loaded Size from JSON: " << loadedSize.scale.GetX() << ", " << loadedSize.scale.GetY() << std::endl;
+	}
+
+	if (entityManager->getSignature(loadedEntity).test(getComponentType<velocity>()))
+	{
+		velocity loadedVel = getComponent<velocity>(loadedEntity);
+		std::cout << "Loaded Velocity from JSON: " << loadedVel.speed << std::endl;
+	}
+
+	std::cout << std::endl;
+
+
+	// remove component
+	std::cout << "REMOVE COMPONENT TEST" << std::endl;
+	removeComponent<Position>(loadedEntity);
+	removeComponent<Size>(loadedEntity);
+	removeComponent<velocity>(loadedEntity);
+	playerSig = entityManager->getSignature(loadedEntity);
+	std::cout << "Player signature: " << playerSig << std::endl << std::endl;
+
+	// remove entity
+	std::cout << "REMOVE ENTITY TEST" << std::endl;
+	destroyEntity(loadedEntity);
+	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
+	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
+	std::cout << std::endl;
 }
 
 //player
