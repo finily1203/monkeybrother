@@ -23,6 +23,9 @@ struct GLFWFunctions {
 	static GLFWwindow* pWindow;
 	static double fps;
 	static double delta_time;
+	static float volume;
+	static bool audioPaused;
+	static bool audioStopped;
 };
 
 #endif
