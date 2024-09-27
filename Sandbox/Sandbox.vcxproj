@@ -121,7 +121,6 @@
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
-    <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,8 +142,6 @@
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="ObjectFactory\ObjectFactory.h" />
-    <ClInclude Include="Serialization\jsonSerialization.h" />
-    <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

@@ -22,7 +22,6 @@
     <ClCompile Include="EntityManager\SystemManager.cpp" />
     <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
     <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
-    <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -44,8 +43,6 @@
     <ClInclude Include="EntityManager\ECSCoordinator.h" />
     <ClInclude Include="EntityManager\ECSDefinitions.h" />
     <ClInclude Include="ObjectFactory\ObjectFactory.h" />
-    <ClInclude Include="Serialization\serialization.h" />
-    <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="AudioSystem\AudioSystem.h" />
   </ItemGroup>
   <ItemGroup>

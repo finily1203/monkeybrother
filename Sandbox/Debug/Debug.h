@@ -12,8 +12,9 @@
 class DebugSystem {
 public:
 	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
-	ImFont* font1;
-	ImFont* font2;
+	//ImFont* font1;
+	//ImFont* font2;
+	std::vector<const char*> systems = { "Collision", "Physics", "Graphics" };
 	DebugSystem();
 	~DebugSystem();
 
@@ -21,27 +22,24 @@ public:
 	void Update();
 	void Cleanup();
 
-	static void StartLoop();
+	void startLoop();
 
-	static void StartSystemTiming(const char* systemName);
+	void startSystemTiming(const std::string& systemName);
 
-	static void EndSystemTiming(const char* systemName);
+	void endSystemTiming(const std::string& systemName);
 
-	static void EndLoop();
+	void endLoop();
+	//void Run(double& fps);
 
-	static double SystemPercentage(const char* systemName);
-
-	static void UpdateSystemTimes();
+	//void Display();
 
 private:
 	ImGuiIO* io;
-	static std::unordered_map<const char*, double> systemTimes;
-	static double loopStartTime;
-	static double totalLoopTime;
-	static double lastUpdateTime;
-	static std::vector<const char*> systems;
-	static std::vector<double> systemGameLoopPercent;
-	static int systemCount;
+	std::unordered_map<std::string, double> systemTimes;
+	double loopStartTime;
+	double totalLoopTime;
 };
-
+//std::unordered_map<std::string, double> systemTimes;
+	//double loopStartTime;
+	//double totalLoopTime;
 static bool LegacyKeyDuplicationCheck(ImGuiKey key);
