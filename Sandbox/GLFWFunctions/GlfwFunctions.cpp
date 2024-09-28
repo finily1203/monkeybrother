@@ -6,6 +6,9 @@ bool GLFWFunctions::isAKeyPressed = false;
 GLFWwindow* GLFWFunctions::pWindow = nullptr;
 double GLFWFunctions::fps = 0.0;
 double GLFWFunctions::delta_time = 0.0;
+float GLFWFunctions::volume = 0.5f;
+bool GLFWFunctions::audioPaused = false;
+bool GLFWFunctions::audioStopped = false;
 
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -64,6 +67,32 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == true) {
         GLFWFunctions::isAKeyPressed = false;
     }
+
+    if (GLFW_KEY_P == key && GLFW_PRESS == action && GLFWFunctions::audioPaused == false) {
+        GLFWFunctions::audioPaused = true;
+    }
+    else if (GLFW_KEY_P == key && GLFW_PRESS == action && GLFWFunctions::audioPaused == true) {
+        GLFWFunctions::audioPaused = false;
+    }
+
+    if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
+        GLFWFunctions::audioStopped = true;
+    }
+    else if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == true) {
+        GLFWFunctions::audioStopped = false;
+    }
+
+    if (GLFW_KEY_COMMA == key && GLFW_PRESS == action) {
+        volume = std::max(0.1f, volume - 0.1f);
+        std::cout << "Volume: " << volume << std::endl;
+    }
+    
+    if (GLFW_KEY_PERIOD == key && GLFW_PRESS == action) {
+        volume = std::min(1.f, volume + 0.1f);
+        std::cout << "Volume: " << volume << std::endl;
+    }
+
+
 
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);

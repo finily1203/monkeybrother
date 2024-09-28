@@ -5,6 +5,7 @@
 #include "GlfwFunctions.h"
 #include "Engine.h"
 #include "ECSCoordinator.h"
+#include "AudioSystem.h"
 
 
 namespace monkeybrother {
@@ -19,7 +20,6 @@ int main() {
 		Engine* engine = new Engine();
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
-		monkeybrother::Print();
 		ECSCoordinator* ecsCoordinator = new ECSCoordinator();
 		ecsCoordinator->test();
 
@@ -34,9 +34,21 @@ int main() {
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
 
+		AudioSystem* audioSystem = new AudioSystem();
+		engine->addSystem(audioSystem);
+	
+		engine->initialiseSystem();
+		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
+			engine->updateSystem();
+		}
+
 		engine->cleanupSystem();
+
 		delete engine;
-		CrashLog::Cleanup();
+
+			engine->cleanupSystem();
+			delete engine;
+			CrashLog::Cleanup();
 	}
 	catch (const CrashLog::Exception& e) {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
