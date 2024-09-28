@@ -15,9 +15,7 @@ GraphicsSystem::~GraphicsSystem() {
 }
 
 void GraphicsSystem::Initialize() {
-    glClearColor(1.f, 1.f, 1.f, 1.f);
-
-    vps.push_back({ 0, 0, 1600, 900});
+   
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
