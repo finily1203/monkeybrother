@@ -15,7 +15,7 @@ private:
 
     GLuint CompileShader(GLenum type, const std::string& source);
 
-    GLint GetUniformLocation(const std::string& name);
+    
 
 public:
    
@@ -32,6 +32,8 @@ public:
     void SetUniform1i(const std::string& name, int value);
 
     static ShaderProgramSource ParseShader(const std::string& filepath);
+
+    GLint GetUniformLocation(const std::string& name);
 
 };
 

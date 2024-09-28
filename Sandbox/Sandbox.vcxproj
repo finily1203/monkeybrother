@@ -103,6 +103,7 @@
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -134,6 +135,7 @@
     <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="Graphics\AnimationData.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
@@ -146,6 +148,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Graphics\Basic.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Debug\Assets\liberation-mono.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Graphics\Assets\demon_spritesheet.png" />
+    <Image Include="Graphics\Assets\moss.png" />
+    <Image Include="Graphics\Assets\tomatohead1.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
