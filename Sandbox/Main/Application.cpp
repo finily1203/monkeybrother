@@ -16,20 +16,12 @@ int main() {
 		CrashLog::SignalChecks();
 		CrashLog::Initialise();
 		CrashLog::LogDebugMessage("Starting engine initialization");
-		monkeybrother::Print();
 		Engine* engine = new Engine();
-		//EntityManager entityManager;
-		//entityManager.testEntityManager();
-
-		//testComponentManager();
-
-		//TestEntityAndComponent();
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
-	monkeybrother::Print();
-	Engine* engine = new Engine();
-	ECSCoordinator* ecsCoordinator = new ECSCoordinator();
-	ecsCoordinator->test();
+		monkeybrother::Print();
+		ECSCoordinator* ecsCoordinator = new ECSCoordinator();
+		ecsCoordinator->test();
 
 		engine->initialiseSystem();
 

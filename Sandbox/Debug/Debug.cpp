@@ -107,13 +107,57 @@ void DebugSystem::Update() {
 	}
 	if (ImGui::CollapsingHeader("Object Creation")) {
 		static int clicked = 0;
-		if (ImGui::Button("Create Circle"))
+		static int i0 = 123;
+		float value = 0.0f;
+		const char* label = "Width";
+		const char* label2 = "Height";
+		const char* label3 = "Size";
+		ImGui::SeparatorText("Platform Object");
+		
+		static float f1 = 5.0f;
+		static float f2 = 5.0f;
+		static float f3 = 5.0f;
+		// Get available width
+		float availWidth = ImGui::GetContentRegionAvail().x;
+		
+
+		// Calculate the minimum width for the label
+		ImGui::AlignTextToFramePadding();
+		float labelWidth = ImGui::CalcTextSize(label2).x + ImGui::GetStyle().ItemInnerSpacing.x;
+
+
+		// Set the width for the slider, ensuring it doesn't go below a minimum value
+		float sliderWidth = std::max(10.0f, 150.f);
+
+		ImGui::SetNextItemWidth(sliderWidth);
+		ImGui::SliderFloat(label, &f1, 0.0f, 10.0f, "%.1f");
+		ImGui::SetNextItemWidth(sliderWidth);
+		ImGui::SliderFloat(label2, &f2, 0.0f, 10.0f, "%.1f");
+
+		ImGui::NewLine();
+		if (ImGui::Button("Create Platform"))
 			clicked++;
 		if (clicked & 1)
 		{
 			ImGui::SameLine();
-			ImGui::Text("Circle created");
+			ImGui::Text("Platform created");
 		}
+
+
+		ImGui::SeparatorText("Player Object");
+		ImGui::SetNextItemWidth(sliderWidth);
+		ImGui::SliderFloat(label3, &f3, 0.0f, 10.0f, "%.1f");
+
+		ImGui::NewLine();
+		if (ImGui::Button("Create PLayer"))
+			clicked++;
+		if (clicked & 1)
+		{
+			ImGui::SameLine();
+			ImGui::Text("Player created");
+		}
+
+		
 	}
 
 	

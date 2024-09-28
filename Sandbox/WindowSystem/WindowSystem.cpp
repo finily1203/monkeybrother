@@ -12,7 +12,7 @@ void WindowSystem::initialise() {
 		std::cout << "Failed to initialise GLFW" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	
+
 	GLenum glewInitResult = glewInit(); if (glewInitResult != GLEW_OK) {
 		std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewInitResult) << std::endl;
 		glfwTerminate();
