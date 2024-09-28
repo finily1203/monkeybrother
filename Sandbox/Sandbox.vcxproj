@@ -102,10 +102,7 @@
   <ItemGroup>
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
-    <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
-    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
-    <ClCompile Include="EntityManager\SystemManager.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />

@@ -3,6 +3,7 @@
 #include "ComponentManager.h"
 #include "SystemManager.h"
 #include "ECSDefinitions.h"
+#include "GlfwFunctions.h"
 
 #include <iostream>
 #include <fstream>
@@ -12,10 +13,15 @@
 #include "../Serialization/serialization.h"
 
 
-class ECSCoordinator
+class ECSCoordinator : public Systems
 {
 public:
-	ECSCoordinator();
+	ECSCoordinator() = default;
+	~ECSCoordinator() = default;
+
+	void initialise() override;
+	void update() override;
+	void cleanup() override;
 
 	//Entity Manager Functions
 	Entity createEntity();
@@ -43,7 +49,6 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
-
 	void test();
 
 private:
@@ -52,11 +57,20 @@ private:
 	std::unique_ptr<SystemManager> systemManager;
 };
 
-ECSCoordinator::ECSCoordinator()
-{
+void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
 	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
+}
+
+void ECSCoordinator::update() {
+	systemManager->update();
+}
+
+void ECSCoordinator::cleanup() {
+	entityManager->cleanup();
+	componentManager->cleanup();
+	systemManager->cleanup();
 }
 
 Entity ECSCoordinator::createEntity()
@@ -130,26 +144,6 @@ void ECSCoordinator::setSystemSignature(ComponentSig signature)
 	systemManager->setSystemSignature<T>(signature);
 }
 
-//Entity ECSCoordinator::createEntity(const std::string& filename)
-//{
-//	std::ifstream ifs(filename);
-//	std::string line;
-//
-//	Entity entity = createEntity();
-//
-//	std::string entityName;
-//	std::vector<std::string> addSystems;
-//	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> addComponents;
-//
-//	while (std::getline(ifs, line)) {
-//		if (line == "Name:") {
-//			std::getline(ifs, entityName);
-//		}
-//
-//
-//	}
-//}
-
 struct Position {
 	myMath::Vector2D pos;
 
@@ -191,7 +185,7 @@ struct velocity {
 
 class PlayerSystem : public System {
 public:
-	void update() {
+	void update(float dt) override {
 		std::cout << "PlayerSystem update" << std::endl;
 	}
 };
@@ -253,7 +247,7 @@ void ECSCoordinator::test() {
 	std::cout << std::endl;
 
 
-	playerSystem->update();
+	playerSystem->update(GLFWFunctions::delta_time);
 
 	//get component
 	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
@@ -309,7 +303,7 @@ void ECSCoordinator::test() {
 	setSystemSignature<PlayerSystem>(playerSig);
 	std::cout << std::endl;
 
-	playerSystem->update();
+	playerSystem->update(GLFWFunctions::delta_time);
 
 	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
 	playerSig = entityManager->getSignature(loadedEntity);
@@ -351,10 +345,3 @@ void ECSCoordinator::test() {
 	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
 	std::cout << std::endl;
 }
-
-//player
-//Components
-//pos x, y
-//speed (velocity)
-//size (width, height)
-//sprite (texture, width, height)

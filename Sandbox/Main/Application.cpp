@@ -29,9 +29,13 @@ int main() {
 		engine->addSystem(windowSystem);
 
 		ECSCoordinator* ecsCoordinator = new ECSCoordinator();
-		ecsCoordinator->test();
+		engine->addSystem(ecsCoordinator);
+
+		AudioSystem* audioSystem = new AudioSystem();
+		engine->addSystem(audioSystem);
 
 		engine->initialiseSystem();
+		ecsCoordinator->test();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			DebugSystem::StartLoop(); //Get time for start of gameloop
@@ -42,21 +46,11 @@ int main() {
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
 
-		AudioSystem* audioSystem = new AudioSystem();
-		engine->addSystem(audioSystem);
-	
-		engine->initialiseSystem();
-		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			engine->updateSystem();
-		}
 
 		engine->cleanupSystem();
-
 		delete engine;
 
-			engine->cleanupSystem();
-			delete engine;
-			CrashLog::Cleanup();
+		CrashLog::Cleanup();
 	}
 	catch (const CrashLog::Exception& e) {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;

@@ -1,5 +1,2 @@
-Log started at: 2024-09-28 01:20:55
-[2024-09-28 01:20:55] Starting engine initialization
-[2024-09-28 01:20:58] Signal: SIGABRT (Abort())
-[2024-09-28 01:20:58] Program detected a serious error and called abort()
-[2024-09-28 01:20:58] Log end
+Log started at: 2024-09-28 14:07:07
+[2024-09-28 14:07:07] Starting engine initialization

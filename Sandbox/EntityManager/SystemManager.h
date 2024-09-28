@@ -14,6 +14,8 @@
 class System {
 public:
 	std::set<Entity> entities;
+	virtual ~System() = default;
+	virtual void update(float dt) = 0;
 };
 
 class SystemManager
@@ -32,6 +34,10 @@ public:
 
 	//Change the signature of the entity
 	void entitySigChange(Entity entity, ComponentSig entitySig);
+
+	void update();
+
+	void cleanup();
 
 private:
 	std::unordered_map<std::string, ComponentSig> systemSignatures;
@@ -79,4 +85,16 @@ void SystemManager::entitySigChange(Entity entity, ComponentSig entitySig) {
 			system->entities.erase(entity);
 		}
 	}
+}
+
+void SystemManager::update() {
+	for (auto const& pair : Systems) {
+		auto const& system = pair.second;
+		system->update(GLFWFunctions::delta_time);
+	}
+}
+
+void SystemManager::cleanup() {
+	Systems.clear();
+	systemSignatures.clear();
 }
