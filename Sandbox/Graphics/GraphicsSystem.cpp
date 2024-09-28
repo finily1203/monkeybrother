@@ -134,10 +134,10 @@ void GraphicsSystem::ReleaseResources() {
     glDeleteVertexArrays(1, &m_VAO);
 }
 
-void GraphicsSystem::GLObject::init() {
-	position = { 0.0f, 0.0f };
-	orientation = { 0.0f, 1.0f };
-	scaling = { 1.78f, 1.0f };
+void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation,glm::vec2 rhsScaling,glm::vec2 rhsPosition) {
+	orientation = rhsOrientation;
+    scaling = rhsScaling;
+    position = rhsPosition;
 	mdl_xform = glm::mat3{ 1.0 };
 	mdl_to_ndc_xform = glm::mat3{ 1.0 };
 }

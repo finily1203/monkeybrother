@@ -32,7 +32,7 @@ public:
         glm::mat3 mdl_xform;
         glm::mat3 mdl_to_ndc_xform;
 
-        void init ();
+        void init (glm::vec2 orientation, glm::vec2 scaling, glm::vec2 position);
         void update(GLdouble time_per_frame);
         void draw(Shader* shader, const GraphicsSystem& vao) const;
     };

@@ -6,7 +6,7 @@
 
 GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
-GraphicsSystem::GLObject gameObject;
+GraphicsSystem::GLObject gameObject, gameObject2;
 Shader *shader = nullptr;
 GLboolean left_turn_flag = false;
 GLboolean right_turn_flag = false;
@@ -53,16 +53,16 @@ void WindowSystem::logicUpdate() {
 	}
 
 	if (move_up_flag) {
-		gameObject.position.y += 0.1f;
+		gameObject.position.y += 1 * GLFWFunctions::delta_time;
 	}
 	else if (move_down_flag) {
-		gameObject.position.y -= 0.1f;
+		gameObject.position.y -= 1 * GLFWFunctions::delta_time;
 	}
 	if (move_left_flag) {
-		gameObject.position.x -= 0.1f;
+		gameObject.position.x -= 1 * GLFWFunctions::delta_time;
 	}
 	else if (move_right_flag) {
-		gameObject.position.x += 0.1f;
+		gameObject.position.x += 1 * GLFWFunctions::delta_time;
 	}
 }
 
@@ -88,7 +88,8 @@ void WindowSystem::initialise() {
 
 	DebugTool->Initialise();
 
-	gameObject.init();
+	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
+	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
 
 	shader = graphicsSystem.GetShader();
 }
@@ -111,7 +112,9 @@ void WindowSystem::update() {
 	graphicsSystem.Update(GLFWFunctions::delta_time);
 	//graphicsSystem.Render(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
+	gameObject2.update(GLFWFunctions::delta_time);
 	gameObject.draw(shader, graphicsSystem);
+	gameObject2.draw(shader, graphicsSystem);
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
