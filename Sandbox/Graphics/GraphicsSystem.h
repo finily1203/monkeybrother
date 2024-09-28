@@ -23,6 +23,9 @@ public:
     void Cleanup();
 
     Shader* GetShader() const;
+    GLuint GetTexture() const { return m_Texture; }
+    GLuint GetTexture2() const { return m_Texture2; }
+    GLuint GetVAO() const { return m_VAO; }
 
     struct GLViewport {
         GLint x, y;
@@ -41,14 +44,14 @@ public:
 
         void init (glm::vec2 orientation, glm::vec2 scaling, glm::vec2 position);
         void update(GLdouble time_per_frame);
-        void draw(Shader* shader, const GraphicsSystem& vao) const;
+        void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
     };
 private:
     GLuint m_VAO;
     GLuint m_VBO;       // VBO for vertex positions
     GLuint m_UVBO;      // Separate VBO for texture coordinates (UVs)
     GLuint m_EBO;       // Element Buffer Object
-    GLuint m_Texture;
+    GLuint m_Texture, m_Texture2;
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
 

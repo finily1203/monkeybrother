@@ -55,5 +55,6 @@
   <ItemGroup>
     <Image Include="Graphics\Assets\demon_spritesheet.png" />
     <Image Include="Graphics\Assets\moss.png" />
+    <Image Include="Graphics\Assets\tomatohead1.png" />
   </ItemGroup>
 </Project>

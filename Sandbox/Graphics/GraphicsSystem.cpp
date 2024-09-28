@@ -27,7 +27,7 @@ void GraphicsSystem::Initialize() {
         return;
     }
 
-    // Load texture
+    // Load texture 1
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load("./Graphics/Assets/demon_spritesheet.png", &width, &height, &nrChannels, 0);
@@ -53,6 +53,28 @@ void GraphicsSystem::Initialize() {
         stbi_image_free(data);
         return;
     }
+
+    // Loat texture 2
+    glGenTextures(1, &m_Texture2);
+    glBindTexture(GL_TEXTURE_2D, m_Texture2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
+    if (data) {
+		GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(data);
+    }
+    else {
+		std::cerr << "Failed to load texture!" << std::endl;
+		stbi_image_free(data);
+		return;
+    }
+
+
 
     // Calculate the frame width and height based on the number of columns
     int columns = 4;  // Adjust to match your spritesheet
@@ -148,6 +170,7 @@ void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation,glm::vec2 rhsScalin
 
 void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 };
+    GLfloat aspect_ratio = 1600 / 900;// TODO::change this to be calculated based on the window size
 
     Scaling =
     {
@@ -181,12 +204,12 @@ void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
     mdl_to_ndc_xform =  mdl_xform;
 }
 
-void GraphicsSystem::GLObject::draw(Shader* shader, const GraphicsSystem& graphicEngine) const{
+void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const{
     // load shader program in use by this object
     shader->Bind();
     // bind VAO of this object
-    glBindVertexArray(graphicEngine.m_VAO);
-    glBindTexture(GL_TEXTURE_2D, graphicEngine.m_Texture);
+    glBindVertexArray(vao);
+    glBindTexture(GL_TEXTURE_2D, tex);
 
     GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {

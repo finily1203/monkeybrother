@@ -30,26 +30,27 @@ void WindowSystem::keyboardInputUpdateFlag() {
 }
 
 void WindowSystem::logicUpdate() {
+	GLfloat aspect_ratio = 1600 / 900;// TODO::change this to be calculated based on the window size
 	if (left_turn_flag) {
-		gameObject.orientation.y = 1.0f;
+		gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time;
 	}
 	else if (right_turn_flag) {
-		gameObject.orientation.y = -1.0f;
+		gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time;
 	}
 	else {
-		gameObject.orientation.y = 0.0f;
+		gameObject.orientation.y = 0.0f * GLFWFunctions::delta_time;
 	}
 	
 	if (scale_up_flag) {
 		if (gameObject.scaling.x < 5.0f && gameObject.scaling.y < 5.0f) {
-			gameObject.scaling.x += 0.178f;
-			gameObject.scaling.y += 0.1f;
+			gameObject.scaling.x += 1.78f * GLFWFunctions::delta_time;
+			gameObject.scaling.y += 1.0f * GLFWFunctions::delta_time;
 		}
 	}
 	else if (scale_down_flag) {
 		if (gameObject.scaling.x > 0.1f && gameObject.scaling.y > 0.1f) {
-			gameObject.scaling.x -= 0.178f;
-			gameObject.scaling.y -= 0.1f;
+			gameObject.scaling.x -= 1.78f * GLFWFunctions::delta_time;
+			gameObject.scaling.y -= 1.0f * GLFWFunctions::delta_time;
 		}
 	}
 
@@ -107,7 +108,7 @@ void WindowSystem::update() {
 
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
-	GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });
+	GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
 
 	keyboardInputUpdateFlag();
 
@@ -118,8 +119,8 @@ void WindowSystem::update() {
 	graphicsSystem.Render(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
 	gameObject2.update(GLFWFunctions::delta_time);
-	gameObject.draw(shader, graphicsSystem);
-	gameObject2.draw(shader, graphicsSystem);
+	gameObject.draw(shader, graphicsSystem.GetVAO(),graphicsSystem.GetTexture() );
+	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
