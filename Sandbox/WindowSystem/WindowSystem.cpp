@@ -6,7 +6,7 @@
 
 GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
-GraphicsSystem::GLObject gameObject, gameObject2;
+GraphicsSystem::GLObject gameObject, gameObject2, background;
 Shader *shader = nullptr;
 GLboolean left_turn_flag = false;
 GLboolean right_turn_flag = false;
@@ -30,7 +30,6 @@ void WindowSystem::keyboardInputUpdateFlag() {
 }
 
 void WindowSystem::logicUpdate() {
-	GLfloat aspect_ratio = 1600 / 900;// TODO::change this to be calculated based on the window size
 	if (left_turn_flag) {
 		gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time;
 	}
@@ -92,6 +91,10 @@ void WindowSystem::initialise() {
 
 	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
 	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
+	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 8, 2.0f }, glm::vec2{ 0.0f, 0.0f });
+	gameObject.is_animated = GL_TRUE;
+	gameObject2.is_animated = GL_TRUE;
+	background.is_animated = GL_FALSE;
 
 	shader = graphicsSystem.GetShader();
 }
@@ -108,6 +111,7 @@ void WindowSystem::update() {
 
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
+	// TODO:: Set the viewport incase the window was resized
 	GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
 
 	keyboardInputUpdateFlag();
@@ -115,12 +119,17 @@ void WindowSystem::update() {
 	logicUpdate();
 
 	DebugSystem::StartSystemTiming("Graphics"); //Get start of graphics gameloop
-	graphicsSystem.Update(GLFWFunctions::delta_time);
+	
+	graphicsSystem.Update(GLFWFunctions::delta_time, false);
 	graphicsSystem.Render(GLFWFunctions::delta_time);
+	background.update(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
 	gameObject2.update(GLFWFunctions::delta_time);
+	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
 	gameObject.draw(shader, graphicsSystem.GetVAO(),graphicsSystem.GetTexture() );
 	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop

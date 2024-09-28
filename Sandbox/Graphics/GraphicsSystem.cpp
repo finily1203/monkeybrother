@@ -74,6 +74,26 @@ void GraphicsSystem::Initialize() {
 		return;
     }
 
+    // Load texture 3
+    glGenTextures(1, &m_Texture3);
+    glBindTexture(GL_TEXTURE_2D, m_Texture3);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+    }
+    else {
+        std::cerr << "Failed to load texture!" << std::endl;
+        stbi_image_free(data);
+        return;
+    }
+
 
 
     // Calculate the frame width and height based on the number of columns
@@ -95,6 +115,13 @@ void GraphicsSystem::Initialize() {
        -quadWidth / 2.0f,  quadHeight / 2.0f, 1.0f   // top left
     };
 
+    float uvCoord[] = {
+		1.0f, 1.0f,  // top right
+		1.0f, 0.0f,  // bottom right
+		0.0f, 0.0f,  // bottom left
+		0.0f, 1.0f   // top left
+	};
+
     unsigned int indices[] = {
         0, 1, 3,  // First triangle
         1, 2, 3   // Second triangle
@@ -114,7 +141,7 @@ void GraphicsSystem::Initialize() {
     // UV VBO (initial UVs)
     glGenBuffers(1, &m_UVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 4, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 4, uvCoord, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
@@ -125,23 +152,29 @@ void GraphicsSystem::Initialize() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
-void GraphicsSystem::Update(float deltaTime) {
-    m_AnimationData->Update(deltaTime);
-
-    const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-    glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
+    if (isAnimated == GL_TRUE) {
+        m_AnimationData->Update(deltaTime);
+        const auto& uvCoords = m_AnimationData->GetCurrentUVs();
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+    }
+    else {
+		// Update the UV coordinates for the current frame
+        float uvCoord[] = {
+			1.0f, 1.0f,  // top right
+			1.0f, 0.0f,  // bottom right
+			0.0f, 0.0f,  // bottom left
+			0.0f, 1.0f   // top left
+		};
+		glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
+	}
 }
 
 void GraphicsSystem::Render(float deltaTime) {
-    /*m_Shader->Bind();
-    glBindTexture(GL_TEXTURE_2D, m_Texture);
-    glBindVertexArray(m_VAO);
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);*/
     glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(100, 100, 1400, 700);
+    glViewport(0, 0, 1600, 900);
 }
 
 void GraphicsSystem::Cleanup() {
