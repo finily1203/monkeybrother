@@ -27,13 +27,9 @@ int main() {
 		//TestEntityAndComponent();
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
-	monkeybrother::Print();
-	Engine* engine = new Engine();
-	monkeybrother::Print();
-	Engine* engine = new Engine();
-	ECSCoordinator* ecsCoordinator = new ECSCoordinator();
-	ecsCoordinator->test();
 
+		ECSCoordinator* ecsCoordinator = new ECSCoordinator();
+		ecsCoordinator->test();
 
 		engine->initialiseSystem();
 
@@ -45,24 +41,22 @@ int main() {
 			DebugSystem::EndLoop(); //Get time for end of gameloop
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
-	WindowSystem* windowSystem = new WindowSystem();
-	engine->addSystem(windowSystem);
 
-	AudioSystem* audioSystem = new AudioSystem();
-	engine->addSystem(audioSystem);
+		AudioSystem* audioSystem = new AudioSystem();
+		engine->addSystem(audioSystem);
 	
-	engine->initialiseSystem();
-	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-		engine->updateSystem();
-	}
-
-	engine->cleanupSystem();
-
-	delete engine;
+		engine->initialiseSystem();
+		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
+			engine->updateSystem();
+		}
 
 		engine->cleanupSystem();
+
 		delete engine;
-		CrashLog::Cleanup();
+
+			engine->cleanupSystem();
+			delete engine;
+			CrashLog::Cleanup();
 	}
 	catch (const CrashLog::Exception& e) {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
