@@ -24,6 +24,13 @@ public:
 
     Shader* GetShader() const;
 
+    struct GLViewport {
+        GLint x, y;
+        GLsizei width, height;
+    };
+
+    static std::vector<GLViewport> vps; // container for viewports
+
     struct GLObject {
         glm::vec2 orientation;
         glm::vec2 scaling;

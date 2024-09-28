@@ -16,6 +16,7 @@ GLboolean move_up_flag = false;
 GLboolean move_down_flag = false;
 GLboolean move_left_flag = false;
 GLboolean move_right_flag = false;
+std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
 void WindowSystem::keyboardInputUpdateFlag() {
 	left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
@@ -110,7 +111,7 @@ void WindowSystem::update() {
 
 	DebugSystem::StartSystemTiming("Graphics"); //Get start of graphics gameloop
 	graphicsSystem.Update(GLFWFunctions::delta_time);
-	//graphicsSystem.Render(GLFWFunctions::delta_time);
+	graphicsSystem.Render(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
 	gameObject2.update(GLFWFunctions::delta_time);
 	gameObject.draw(shader, graphicsSystem);

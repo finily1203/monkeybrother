@@ -15,6 +15,10 @@ GraphicsSystem::~GraphicsSystem() {
 }
 
 void GraphicsSystem::Initialize() {
+    glClearColor(1.f, 1.f, 1.f, 1.f);
+
+    vps.push_back({ 0, 0, 1600, 900});
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -110,12 +114,14 @@ void GraphicsSystem::Update(float deltaTime) {
 }
 
 void GraphicsSystem::Render(float deltaTime) {
-    m_Shader->Bind();
+    /*m_Shader->Bind();
     glBindTexture(GL_TEXTURE_2D, m_Texture);
     glBindVertexArray(m_VAO);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);*/
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(100, 100, 1400, 700);
 }
 
 void GraphicsSystem::Cleanup() {
