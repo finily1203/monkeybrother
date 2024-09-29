@@ -7,7 +7,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Shader;
+//class Shader;
+struct AABB {
+	glm::vec2 min;
+	glm::vec2 max;
+};
 
 class GraphicsSystem {
 public:
@@ -22,7 +26,8 @@ public:
     void Render(float deltaTime);
     void Cleanup();
 
-    Shader* GetShader() const;
+    Shader* GetShader() const{ return m_Shader.get(); }
+    Shader* GetShader2() const{ return m_Shader2.get(); }
     GLuint GetTexture() const { return m_Texture; }
     GLuint GetTexture2() const { return m_Texture2; }
     GLuint GetTexture3() const { return m_Texture3; }
@@ -55,7 +60,7 @@ private:
     GLuint m_UVBO;      // Separate VBO for texture coordinates (UVs)
     GLuint m_EBO;       // Element Buffer Object
     GLuint m_Texture, m_Texture2, m_Texture3;
-    std::unique_ptr<Shader> m_Shader;
+    std::unique_ptr<Shader> m_Shader, m_Shader2;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
 
     void ReleaseResources();

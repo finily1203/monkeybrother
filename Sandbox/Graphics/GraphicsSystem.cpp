@@ -3,6 +3,22 @@
 #include "stb_image.h"
 #include <iostream>
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+	x;\
+	ASSERT(GLLogCall(#x, __FILE__,__LINE__))
+
+static void GLClearError() {
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGL Error] (" << error << "): " << function << " " << file << ":" << line << std::endl;
+        return false;
+    }
+    return true;
+}
 
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
@@ -26,6 +42,13 @@ void GraphicsSystem::Initialize() {
         std::cerr << "Shader compilation failed." << std::endl;
         return;
     }
+
+    ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
+    m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
+    if (!m_Shader2->IsCompiled()) {
+		std::cerr << "Shader compilation failed." << std::endl;
+		return;
+	}
 
     // Load texture 1
     int width, height, nrChannels;
@@ -150,6 +173,11 @@ void GraphicsSystem::Initialize() {
     glGenBuffers(1, &m_EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // get the location of the uniform variable in the shader
+    /*int location = m_Shader2->GetUniformLocation("u_Color");
+    ASSERT(location != -1);
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));*/
 }
 
 void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
@@ -179,10 +207,6 @@ void GraphicsSystem::Render(float deltaTime) {
 
 void GraphicsSystem::Cleanup() {
     ReleaseResources();
-}
-
-Shader* GraphicsSystem::GetShader() const{
-	return m_Shader.get();
 }
 
 void GraphicsSystem::ReleaseResources() {

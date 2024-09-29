@@ -8,6 +8,7 @@ GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
 GraphicsSystem::GLObject gameObject, gameObject2, background;
 Shader *shader = nullptr;
+Shader *shader2 = nullptr;
 GLboolean left_turn_flag = false;
 GLboolean right_turn_flag = false;
 GLboolean scale_up_flag = false;
@@ -16,6 +17,8 @@ GLboolean move_up_flag = false;
 GLboolean move_down_flag = false;
 GLboolean move_left_flag = false;
 GLboolean move_right_flag = false;
+GLboolean debug_flag = false;
+static bool f1_key_pressed = false;
 std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
 void WindowSystem::keyboardInputUpdateFlag() {
@@ -27,6 +30,17 @@ void WindowSystem::keyboardInputUpdateFlag() {
 	move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
 	move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
 	move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
+
+	// Check if F1 is pressed and trigger the toggle only once
+	if (glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_F1) == GLFW_PRESS) {
+		if (!f1_key_pressed) {
+			debug_flag = !debug_flag; // Toggle debug mode
+			f1_key_pressed = true;    // Mark F1 as pressed
+		}
+	}
+	else {
+		f1_key_pressed = false; // Reset when F1 is released
+	}
 }
 
 void WindowSystem::logicUpdate() {
@@ -65,6 +79,7 @@ void WindowSystem::logicUpdate() {
 	else if (move_right_flag) {
 		gameObject.position.x += 1 * GLFWFunctions::delta_time;
 	}
+
 }
 
 void WindowSystem::initialise() {
@@ -97,6 +112,7 @@ void WindowSystem::initialise() {
 	background.is_animated = GL_FALSE;
 
 	shader = graphicsSystem.GetShader();
+	shader2 = graphicsSystem.GetShader2();
 }
 
 void WindowSystem::update() {
@@ -127,8 +143,19 @@ void WindowSystem::update() {
 	gameObject2.update(GLFWFunctions::delta_time);
 	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
 	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-	gameObject.draw(shader, graphicsSystem.GetVAO(),graphicsSystem.GetTexture() );
-	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	if (debug_flag) {
+		gameObject.draw(shader, graphicsSystem.GetVAO(), 0);
+		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	}
+	else {
+		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	}
+	if (debug_flag) {
+		gameObject2.draw(shader, graphicsSystem.GetVAO(), 0);
+		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	}
+	else
+		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
