@@ -27,7 +27,7 @@ public:
     GLuint GetTexture2() const { return m_Texture2; }
     GLuint GetTexture3() const { return m_Texture3; }
     GLuint GetVAO() const { return m_VAO; }
-
+    void SetCurrentAction(int actionRow);
 
     struct GLViewport {
         GLint x, y;
@@ -45,9 +45,10 @@ public:
         glm::mat3 mdl_to_ndc_xform;
         GLboolean is_animated;
 
-        void init (glm::vec2 orientation, glm::vec2 scaling, glm::vec2 position);
+        void init(glm::vec2 orientation, glm::vec2 scaling, glm::vec2 position);
         void update(GLdouble time_per_frame);
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
+
     };
 private:
     GLuint m_VAO;
@@ -57,6 +58,7 @@ private:
     GLuint m_Texture, m_Texture2, m_Texture3;
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
+    std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
 
     void ReleaseResources();
 };
