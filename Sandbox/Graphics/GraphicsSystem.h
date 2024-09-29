@@ -9,13 +9,13 @@
 
 class Shader;
 
+
 class GraphicsSystem {
 public:
     GraphicsSystem();
     ~GraphicsSystem();
 
-    GraphicsSystem(const GraphicsSystem& other);
-    GraphicsSystem& operator=(const GraphicsSystem& other);
+
 
     void Initialize();
     void Update(float deltaTime, GLboolean isAnimated);
@@ -62,3 +62,4 @@ private:
 
     void ReleaseResources();
 };
+
