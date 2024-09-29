@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
@@ -19,10 +18,10 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
-    <ClCompile Include="EntityManager\SystemManager.cpp" />
-    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
+    <ClCompile Include="AudioSystem\AudioSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -39,12 +38,14 @@
     <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
+    <ClInclude Include="Graphics\AnimationData.h" />
     <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="EntityManager\ECSCoordinator.h" />
     <ClInclude Include="EntityManager\ECSDefinitions.h" />
     <ClInclude Include="ObjectFactory\ObjectFactory.h" />
     <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
+    <ClInclude Include="AudioSystem\AudioSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -56,5 +57,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Graphics\Basic.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Debug\Assets\liberation-mono.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Graphics\Assets\demon_spritesheet.png" />
+    <Image Include="Graphics\Assets\moss.png" />
+    <Image Include="Graphics\Assets\tomatohead1.png" />
   </ItemGroup>
 </Project>

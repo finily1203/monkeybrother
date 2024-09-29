@@ -24,6 +24,8 @@ public:
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
 
+	void cleanup();
+
 private:
 	//thinking of the ID as a last in first out kind of thing
 	std::queue<Entity> availableEnt; //use queue to add and remove entities

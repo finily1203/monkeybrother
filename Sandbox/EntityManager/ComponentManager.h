@@ -38,6 +38,8 @@ public:
 
 	void entityRemoved(Entity entity);
 
+	void cleanup();
+
 private:
 	//Mark down all the component types by linking them to a const char*
 	std::map<const std::string, ComponentType> componentTypes;
@@ -103,4 +105,10 @@ void ComponentManager::entityRemoved(Entity entity) {
 		auto const& component = pair.second;
 		component->entityRemoved(entity);
 	}
+}
+
+void ComponentManager::cleanup() {
+	componentHandlers.clear();
+	componentTypes.clear();
+	nextComponentType = 0;
 }
