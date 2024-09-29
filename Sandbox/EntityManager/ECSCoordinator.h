@@ -35,7 +35,8 @@ public:
 	ComponentType getComponentType();
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	void SaveJSONFromEntity(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void UpdateEntityPosition(Entity& entity, float x, float y);
 
 	//System Manager Functions
 	template <typename T>
@@ -153,39 +154,71 @@ void ECSCoordinator::setSystemSignature(ComponentSig signature)
 struct Position {
 	myMath::Vector2D pos;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
 
-		ReadObjectStream(serializer, x, "Player.position.pos.x");
-		ReadObjectStream(serializer, y, "Player.position.pos.y");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, x, "Player.position.pos.x");
+			ReadObjectStream(serializer, y, "Player.position.pos.y");
 
-		pos.SetX(x);
-		pos.SetY(y);
+			pos.SetX(x);
+			pos.SetY(y);
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			float x = pos.GetX();
+			float y = pos.GetY();
+
+			WriteObjectStream(serializer, x, "Player.position.pos.x");
+			WriteObjectStream(serializer, y, "Player.position.pos.y");
+		}
 	}
 };
 
 struct Size {
 	myMath::Vector2D scale;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
 
-		ReadObjectStream(serializer, x, "Player.size.scale.x");
-		ReadObjectStream(serializer, y, "Player.size.scale.y");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, x, "Player.size.scale.x");
+			ReadObjectStream(serializer, y, "Player.size.scale.y");
 
-		scale.SetX(x);
-		scale.SetY(y);
+			scale.SetX(x);
+			scale.SetY(y);
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			float x = scale.GetX();
+			float y = scale.GetY();
+
+			WriteObjectStream(serializer, x, "Player.size.scale.x");
+			WriteObjectStream(serializer, y, "Player.size.scale.y");
+		}
 	}
 };
 
 struct velocity {
 	float speed;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
-		ReadObjectStream(serializer, speed, "Player.velocity.speed");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, speed, "Player.velocity.speed");
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			WriteObjectStream(serializer, speed, "Player.velocity.speed");
+		}
 	}
 };
 
@@ -206,19 +239,61 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 		return;
 	}
 
-	for (const auto& entityKey : serializer.GetEntityKeys())
+	Position position;
+	serializer.ReadObject(position, "Player.position");
+	ecs.addComponent(entity, position);
+
+	Size size;
+	serializer.ReadObject(size, "Player.size");
+	ecs.addComponent(entity, size);
+
+	velocity vel;
+	serializer.ReadObject(vel, "Player.velocity");
+	ecs.addComponent(entity, vel);
+}
+
+void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename) 
+{
+	Serializer::JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
 	{
-		Position position;
-		serializer.ReadObject(position, entityKey + ".position");
-		ecs.addComponent(entity, position);
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
 
-		Size size;
-		serializer.ReadObject(size, entityKey + ".size");
-		ecs.addComponent(entity, size);
+	// Get the current components of the entity
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<Position>()))
+	{
+		Position position = getComponent<Position>(entity);
+		serializer.WriteObject(position, "Player.position");
+	}
 
-		velocity vel;
-		serializer.ReadObject(vel, entityKey + ".velocity");
-		ecs.addComponent(entity, vel);
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<Size>()))
+	{
+		Size size = getComponent<Size>(entity);
+		serializer.WriteObject(size, "Player.size");
+	}
+
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<velocity>()))
+	{
+		velocity vel = getComponent<velocity>(entity);
+		serializer.WriteObject(vel, "Player.velocity");
+	}
+
+	if (!serializer.Save(filename)) 
+	{
+		std::cout << "Error: could not save to file " << filename << std::endl;
+	}
+}
+
+void ECSCoordinator::UpdateEntityPosition(Entity& entity, float x, float y)
+{
+	if (entityManager->getSignature(entity).test(getComponentType<Position>()))
+	{
+		Position& position = getComponent<Position>(entity);
+		position.pos.SetX(x);
+		position.pos.SetY(y);
 	}
 }
 
@@ -335,6 +410,10 @@ void ECSCoordinator::test() {
 
 	std::cout << std::endl;
 
+	float x = 12.533f, y = -63.1567f;
+	UpdateEntityPosition(loadedEntity, x, y);
+
+	SaveEntityToJSON(*this, loadedEntity, "./Serialization/player.json");
 
 	// remove component
 	std::cout << "REMOVE COMPONENT TEST" << std::endl;

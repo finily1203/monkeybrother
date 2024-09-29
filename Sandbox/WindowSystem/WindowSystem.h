@@ -2,6 +2,8 @@
 #include "GlfwFunctions.h"
 #include "Systems.h"
 #include <Shader.h>
+#include "../Nlohmann/json.hpp"
+#include <fstream>
 
 //create class for windows application
 class WindowSystem : public Systems
