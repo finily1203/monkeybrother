@@ -6,7 +6,7 @@
 
 GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
-GraphicsSystem::GLObject gameObject, gameObject2, background;
+GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 Shader* shader = nullptr;
 GLboolean left_turn_flag = false;
 GLboolean right_turn_flag = false;
@@ -129,6 +129,7 @@ void WindowSystem::initialise() {
 	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
 	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
 	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 8, 2.0f }, glm::vec2{ 0.0f, 0.0f });
+	blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 2.0f, 0.5f }, glm::vec2{ 0.0f, 0.0f });
 	gameObject.is_animated = GL_TRUE;
 	gameObject2.is_animated = GL_TRUE;
 	background.is_animated = GL_FALSE;
@@ -159,10 +160,15 @@ void WindowSystem::update() {
 
 	graphicsSystem.Update(GLFWFunctions::delta_time, false);
 	graphicsSystem.Render(GLFWFunctions::delta_time);
+
 	background.update(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
 	gameObject2.update(GLFWFunctions::delta_time);
+	blackBox.update(GLFWFunctions::delta_time);
+
 	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+	blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
+	// animation update
 	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
 	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
 	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
