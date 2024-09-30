@@ -34,6 +34,10 @@ int main() {
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
 
+		engine->cleanupSystem();
+
+		delete engine;
+
 		AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(audioSystem);
 	
@@ -42,9 +46,6 @@ int main() {
 			engine->updateSystem();
 		}
 
-		engine->cleanupSystem();
-
-		delete engine;
 
 			engine->cleanupSystem();
 			delete engine;
