@@ -218,9 +218,9 @@ void GraphicsSystem::Cleanup() {
     ReleaseResources();
 }
 
-Shader* GraphicsSystem::GetShader() const {
-    return m_Shader.get();
-}
+//Shader* GraphicsSystem::GetShader() const {
+//    return m_Shader.get();
+//}
 
 void GraphicsSystem::ReleaseResources() {
     glDeleteBuffers(1, &m_VBO);

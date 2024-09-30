@@ -8,6 +8,7 @@ GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
 GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 Shader* shader = nullptr;
+Shader* shader2 = nullptr;
 GLboolean left_turn_flag = false;
 GLboolean right_turn_flag = false;
 GLboolean scale_up_flag = false;
