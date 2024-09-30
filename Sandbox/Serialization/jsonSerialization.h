@@ -14,16 +14,22 @@ namespace Serializer
 	{
 	public:
 		virtual bool Open(std::string const&);
+		virtual bool Save(std::string const&);
 		virtual bool IsGood();
 
 		template <typename T>
 		void ReadObject(T&, std::string const&);
 
+		template <typename T>
+		void WriteObject(T&, std::string const&);
+
 		virtual void ReadInt(int&, std::string const&);
 		virtual void ReadFloat(float&, std::string const&);
 		virtual void ReadString(std::string&, std::string const&);
 
-		std::vector<std::string> GetEntityKeys();
+		virtual void WriteInt(int&, std::string const&);
+		virtual void WriteFloat(float&, std::string const&);
+		virtual void WriteString(std::string&, std::string const&);
 
 	private:
 		nlohmann::json jsonObj;
@@ -33,10 +39,10 @@ namespace Serializer
 	template <typename T>
 	void JSONSerializer::ReadObject(T& gameObj, std::string const& parentKey)
 	{
-		// initialize keyStream to the parentKey
+		// string buffer that contains the sequence of characters of parentKey
 		std::istringstream keyStream(parentKey);
 
-		// holds each segment of the JSON key
+		// holds each different key from the keyStream
 		std::string keySegment;
 		nlohmann::json currentObj = jsonObj;
 
@@ -59,6 +65,27 @@ namespace Serializer
 			}
 		}
 
-		gameObj.Serialize(*this);
+		// read the data from JSON file to the game object
+		gameObj.Serialize(*this, SerializationMode::READ);
+	}
+
+	template <typename T>
+	void JSONSerializer::WriteObject(T& gameObj, std::string const& parentKey)
+	{
+		// string buffer that contains the sequence of characters of parentKey
+		std::istringstream keyStream(parentKey);
+		
+		// holds each different key from the keyStream
+		std::string keySegment;
+		nlohmann::json* currentObj = &jsonObj;
+
+		// this read each of the key in parentKey one by one
+		while (std::getline(keyStream, keySegment, '.'))
+		{
+			currentObj = &((*currentObj)[keySegment]);
+		}
+
+		// write the game object data to the JSON file
+		gameObj.Serialize(*this, SerializationMode::WRITE);
 	}
 }

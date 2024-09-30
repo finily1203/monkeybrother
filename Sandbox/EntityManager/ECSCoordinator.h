@@ -3,6 +3,7 @@
 #include "ComponentManager.h"
 #include "SystemManager.h"
 #include "ECSDefinitions.h"
+#include "GlfwFunctions.h"
 
 #include <iostream>
 #include <fstream>
@@ -12,10 +13,15 @@
 #include "../Serialization/serialization.h"
 
 
-class ECSCoordinator
+class ECSCoordinator : public Systems
 {
 public:
-	ECSCoordinator();
+	ECSCoordinator() = default;
+	~ECSCoordinator() = default;
+
+	void initialise() override;
+	void update() override;
+	void cleanup() override;
 
 	//Entity Manager Functions
 	Entity createEntity();
@@ -34,15 +40,19 @@ public:
 	template <typename T>
 	ComponentType getComponentType();
 
+	//Clone Entity Function
+	Entity cloneEntity(Entity entity);
+
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	void SaveJSONFromEntity(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void UpdateEntityPosition(Entity& entity, float x, float y);
 
 	//System Manager Functions
 	template <typename T>
 	std::shared_ptr<T> registerSystem();
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
-
 
 	void test();
 
@@ -52,11 +62,20 @@ private:
 	std::unique_ptr<SystemManager> systemManager;
 };
 
-ECSCoordinator::ECSCoordinator()
-{
+void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
 	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
+}
+
+void ECSCoordinator::update() {
+	systemManager->update();
+}
+
+void ECSCoordinator::cleanup() {
+	entityManager->cleanup();
+	componentManager->cleanup();
+	systemManager->cleanup();
 }
 
 Entity ECSCoordinator::createEntity()
@@ -130,68 +149,80 @@ void ECSCoordinator::setSystemSignature(ComponentSig signature)
 	systemManager->setSystemSignature<T>(signature);
 }
 
-//Entity ECSCoordinator::createEntity(const std::string& filename)
-//{
-//	std::ifstream ifs(filename);
-//	std::string line;
-//
-//	Entity entity = createEntity();
-//
-//	std::string entityName;
-//	std::vector<std::string> addSystems;
-//	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> addComponents;
-//
-//	while (std::getline(ifs, line)) {
-//		if (line == "Name:") {
-//			std::getline(ifs, entityName);
-//		}
-//
-//
-//	}
-//}
-
 struct Position {
 	myMath::Vector2D pos;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
 
-		ReadObjectStream(serializer, x, "Player.position.pos.x");
-		ReadObjectStream(serializer, y, "Player.position.pos.y");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, x, "Player.position.pos.x");
+			ReadObjectStream(serializer, y, "Player.position.pos.y");
 
-		pos.SetX(x);
-		pos.SetY(y);
+			pos.SetX(x);
+			pos.SetY(y);
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			float x = pos.GetX();
+			float y = pos.GetY();
+
+			WriteObjectStream(serializer, x, "Player.position.pos.x");
+			WriteObjectStream(serializer, y, "Player.position.pos.y");
+		}
 	}
 };
 
 struct Size {
 	myMath::Vector2D scale;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
 
-		ReadObjectStream(serializer, x, "Player.size.scale.x");
-		ReadObjectStream(serializer, y, "Player.size.scale.y");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, x, "Player.size.scale.x");
+			ReadObjectStream(serializer, y, "Player.size.scale.y");
 
-		scale.SetX(x);
-		scale.SetY(y);
+			scale.SetX(x);
+			scale.SetY(y);
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			float x = scale.GetX();
+			float y = scale.GetY();
+
+			WriteObjectStream(serializer, x, "Player.size.scale.x");
+			WriteObjectStream(serializer, y, "Player.size.scale.y");
+		}
 	}
 };
 
 struct velocity {
 	float speed;
 
-	void Serialize(Serializer::BaseSerializer& serializer)
+	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
-		ReadObjectStream(serializer, speed, "Player.velocity.speed");
+		if (mode == Serializer::SerializationMode::READ)
+		{
+			ReadObjectStream(serializer, speed, "Player.velocity.speed");
+		}
+
+		else if (mode == Serializer::SerializationMode::WRITE)
+		{
+			WriteObjectStream(serializer, speed, "Player.velocity.speed");
+		}
 	}
 };
 
 class PlayerSystem : public System {
 public:
-	void update() {
+	void update(float dt) override {
 		std::cout << "PlayerSystem update" << std::endl;
 	}
 };
@@ -206,19 +237,61 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 		return;
 	}
 
-	for (const auto& entityKey : serializer.GetEntityKeys())
+	Position position;
+	serializer.ReadObject(position, "Player.position");
+	ecs.addComponent(entity, position);
+
+	Size size;
+	serializer.ReadObject(size, "Player.size");
+	ecs.addComponent(entity, size);
+
+	velocity vel;
+	serializer.ReadObject(vel, "Player.velocity");
+	ecs.addComponent(entity, vel);
+}
+
+void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename) 
+{
+	Serializer::JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
 	{
-		Position position;
-		serializer.ReadObject(position, entityKey + ".position");
-		ecs.addComponent(entity, position);
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
 
-		Size size;
-		serializer.ReadObject(size, entityKey + ".size");
-		ecs.addComponent(entity, size);
+	// Get the current components of the entity
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<Position>()))
+	{
+		Position position = getComponent<Position>(entity);
+		serializer.WriteObject(position, "Player.position");
+	}
 
-		velocity vel;
-		serializer.ReadObject(vel, entityKey + ".velocity");
-		ecs.addComponent(entity, vel);
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<Size>()))
+	{
+		Size size = getComponent<Size>(entity);
+		serializer.WriteObject(size, "Player.size");
+	}
+
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<velocity>()))
+	{
+		velocity vel = getComponent<velocity>(entity);
+		serializer.WriteObject(vel, "Player.velocity");
+	}
+
+	if (!serializer.Save(filename)) 
+	{
+		std::cout << "Error: could not save to file " << filename << std::endl;
+	}
+}
+
+void ECSCoordinator::UpdateEntityPosition(Entity& entity, float x, float y)
+{
+	if (entityManager->getSignature(entity).test(getComponentType<Position>()))
+	{
+		Position& position = getComponent<Position>(entity);
+		position.pos.SetX(x);
+		position.pos.SetY(y);
 	}
 }
 
@@ -253,7 +326,7 @@ void ECSCoordinator::test() {
 	std::cout << std::endl;
 
 
-	playerSystem->update();
+	playerSystem->update(GLFWFunctions::delta_time);
 
 	//get component
 	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
@@ -309,7 +382,7 @@ void ECSCoordinator::test() {
 	setSystemSignature<PlayerSystem>(playerSig);
 	std::cout << std::endl;
 
-	playerSystem->update();
+	playerSystem->update(GLFWFunctions::delta_time);
 
 	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
 	playerSig = entityManager->getSignature(loadedEntity);
@@ -335,6 +408,10 @@ void ECSCoordinator::test() {
 
 	std::cout << std::endl;
 
+	float x = 12.533f, y = -63.1567f;
+	UpdateEntityPosition(loadedEntity, x, y);
+
+	SaveEntityToJSON(*this, loadedEntity, "./Serialization/player.json");
 
 	// remove component
 	std::cout << "REMOVE COMPONENT TEST" << std::endl;
@@ -352,9 +429,32 @@ void ECSCoordinator::test() {
 	std::cout << std::endl;
 }
 
-//player
-//Components
-//pos x, y
-//speed (velocity)
-//size (width, height)
-//sprite (texture, width, height)
+Entity ECSCoordinator::cloneEntity(Entity entity)
+{
+	//Create new entity
+	//Get all signatures of entity
+	//check entity of each component and add into new entity
+	//return new entity
+
+	Entity newEntity = createEntity();
+
+	auto signature = entityManager->getSignature(entity);
+
+	for (auto i = 0u; i < MAX_COMPONENTS; i++)
+	{
+		if (signature[i])
+		{
+			if (i == getComponentType<Position>()) {
+				componentManager->cloneComponent<Position>(entity, newEntity);
+			}
+			else if (i == getComponentType<Size>()) {
+				componentManager->cloneComponent<Size>(entity, newEntity);
+			}
+			else if (i == getComponentType<velocity>()) {
+				componentManager->cloneComponent<velocity>(entity, newEntity);
+			}
+		}
+
+		return newEntity;
+	}
+}

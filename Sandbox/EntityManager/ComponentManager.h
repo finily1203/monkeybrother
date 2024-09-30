@@ -35,8 +35,14 @@ public:
 	template <typename T>
 	std::shared_ptr<ComponentHandler<T>> getComponentHandler();
 
+	//for clone entity
+	template <typename T>
+	void cloneComponent(Entity entity, Entity newEntity);
+
 
 	void entityRemoved(Entity entity);
+
+	void cleanup();
 
 private:
 	//Mark down all the component types by linking them to a const char*
@@ -98,9 +104,21 @@ std::shared_ptr<ComponentHandler<T>> ComponentManager::getComponentHandler() {
 	return std::dynamic_pointer_cast<ComponentHandler<T>>(componentHandlers[typeName]);
 }
 
+template <typename T>
+void ComponentManager::cloneComponent(Entity entity, Entity newEntity) {
+	T component = getComponent<T>(entity);
+	addComponent<T>(newEntity, component);
+}
+
 void ComponentManager::entityRemoved(Entity entity) {
 	for (auto const& pair : componentHandlers) {
 		auto const& component = pair.second;
 		component->entityRemoved(entity);
 	}
+}
+
+void ComponentManager::cleanup() {
+	componentHandlers.clear();
+	componentTypes.clear();
+	nextComponentType = 0;
 }
