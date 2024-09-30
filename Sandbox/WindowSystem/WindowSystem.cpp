@@ -154,9 +154,10 @@ void WindowSystem::update() {
 		gameObject2.draw(shader, graphicsSystem.GetVAO(), 0);
 		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 	}
-	else
+	else {
 		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-
+	}
+		
 	DebugSystem::EndSystemTiming("Graphics"); //Get end of graphics gameloop
 
 	DebugSystem::StartSystemTiming("Debug"); //Get start of debug gameloop
