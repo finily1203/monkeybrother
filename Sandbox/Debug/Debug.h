@@ -7,6 +7,9 @@
 #include "GlfwFunctions.h"
 
 #include "Systems.h"
+#include "matrix3x3.h"
+#include "GraphicsSystem.h"
+#include "WindowSystem.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,6 +32,8 @@ public:
 	void Update();
 	void Cleanup();
 
+	static void ToggleAllWindows(bool show);
+
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 	static void StartLoop();
@@ -48,6 +53,7 @@ private:
 	ImFont* font1;
 	ImFont* font2;
 	static bool showGUI;
+	static bool checkFrame;
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
 	static double totalLoopTime;
@@ -87,9 +93,26 @@ private:
 	}
 };
 
-//void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity,
-//	GLsizei length, const GLchar* message, const void* userParam);
-//
-//void openLogFile();
-//
-//void closeLogFile();
+class GameViewWindow {
+public:
+
+	static void Initialise();
+
+	static void Update();
+
+
+private:
+
+	static int viewportWidth;
+	static int viewportHeight;
+	static GLuint viewportTexture;
+
+	static void SetupViewportTexture();
+
+	static void CaptureMainWindow();
+	static void Cleanup();
+
+	static ImVec2 GetLargestSizeForViewport();
+
+	static ImVec2 GetCenteredPosForViewport(ImVec2 aspectSize);
+};
