@@ -266,3 +266,40 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
     // unbind shader program
     shader->Unbind();
 }
+
+void GraphicsSystem::drawDebugLines(const GLObject& obj) {
+
+    glBegin(GL_LINES);
+
+    // Set color for debug lines
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
+
+
+    float spriteWidth = obj.scaling.x / 4; // Width of one sprite (assuming 4 columns in the sprite sheet)
+    float spriteHeight = obj.scaling.y;     // Height of the sprite
+
+
+    float halfWidth = spriteWidth * 0.5f;
+    float halfHeight = spriteHeight * 0.5f;
+
+
+    glm::vec2 bottomLeft = obj.position + glm::vec2(-halfWidth, -halfHeight);
+    glm::vec2 bottomRight = obj.position + glm::vec2(halfWidth, -halfHeight);
+    glm::vec2 topRight = obj.position + glm::vec2(halfWidth, halfHeight);
+    glm::vec2 topLeft = obj.position + glm::vec2(-halfWidth, halfHeight);
+
+    // Draw the AABB lines
+    glVertex2f(bottomLeft.x, bottomLeft.y); // Bottom left
+    glVertex2f(bottomRight.x, bottomRight.y); // Bottom right
+
+    glVertex2f(bottomRight.x, bottomRight.y); // Bottom right
+    glVertex2f(topRight.x, topRight.y); // Top right
+
+    glVertex2f(topRight.x, topRight.y); // Top right
+    glVertex2f(topLeft.x, topLeft.y); // Top left
+
+    glVertex2f(topLeft.x, topLeft.y); // Top left
+    glVertex2f(bottomLeft.x, bottomLeft.y); // Back to bottom left
+
+    glEnd();
+}

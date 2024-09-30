@@ -7,8 +7,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Shader;
 
+struct AABB {
+    glm::vec2 min; // Minimum corner (bottom-left)
+    glm::vec2 max; // Maximum corner (top-right)
+
+    // Constructor
+    AABB(const glm::vec2& position, const glm::vec2& scaling);
+
+    // Check for collision with another AABB
+    bool intersects(const AABB& other) const;
+};
 
 class GraphicsSystem {
 public:
@@ -50,6 +59,8 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
+    void drawDebugLines(const GLObject& obj);
+
 private:
     GLuint m_VAO;
     GLuint m_VBO;       // VBO for vertex positions
