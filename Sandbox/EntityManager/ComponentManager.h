@@ -35,6 +35,10 @@ public:
 	template <typename T>
 	std::shared_ptr<ComponentHandler<T>> getComponentHandler();
 
+	//for clone entity
+	template <typename T>
+	void cloneComponent(Entity entity, Entity newEntity);
+
 
 	void entityRemoved(Entity entity);
 
@@ -98,6 +102,12 @@ std::shared_ptr<ComponentHandler<T>> ComponentManager::getComponentHandler() {
 	assert(componentTypes.find(typeName) != componentTypes.end() && "Component not registered");
 
 	return std::dynamic_pointer_cast<ComponentHandler<T>>(componentHandlers[typeName]);
+}
+
+template <typename T>
+void ComponentManager::cloneComponent(Entity entity, Entity newEntity) {
+	T component = getComponent<T>(entity);
+	addComponent<T>(newEntity, component);
 }
 
 void ComponentManager::entityRemoved(Entity entity) {

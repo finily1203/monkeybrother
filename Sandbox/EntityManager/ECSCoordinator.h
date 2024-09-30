@@ -40,6 +40,10 @@ public:
 	template <typename T>
 	ComponentType getComponentType();
 
+	//Clone Entity Function
+	Entity cloneEntity(Entity entity);
+
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void SaveJSONFromEntity(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 
@@ -344,4 +348,34 @@ void ECSCoordinator::test() {
 	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
 	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
 	std::cout << std::endl;
+}
+
+Entity ECSCoordinator::cloneEntity(Entity entity)
+{
+	//Create new entity
+	//Get all signatures of entity
+	//check entity of each component and add into new entity
+	//return new entity
+
+	Entity newEntity = createEntity();
+
+	auto signature = entityManager->getSignature(entity);
+
+	for (auto i = 0u; i < MAX_COMPONENTS; i++)
+	{
+		if (signature[i])
+		{
+			if (i == getComponentType<Position>()) {
+				componentManager->cloneComponent<Position>(entity, newEntity);
+			}
+			else if (i == getComponentType<Size>()) {
+				componentManager->cloneComponent<Size>(entity, newEntity);
+			}
+			else if (i == getComponentType<velocity>()) {
+				componentManager->cloneComponent<velocity>(entity, newEntity);
+			}
+		}
+
+		return newEntity;
+	}
 }

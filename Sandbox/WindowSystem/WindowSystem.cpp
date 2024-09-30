@@ -126,10 +126,10 @@ void WindowSystem::update() {
 	DebugTool->Update();
 	DebugSystem::EndSystemTiming("Debug"); //Get end of debug gameloop
 
-	glfwSwapBuffers(GLFWFunctions::pWindow);
-	
-	glfwPollEvents();
 	GLFWFunctions::getFps(1);
+
+	glfwSwapBuffers(GLFWFunctions::pWindow);
+	glfwPollEvents();
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;
 	}

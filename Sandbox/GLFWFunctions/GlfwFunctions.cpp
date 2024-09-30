@@ -1,6 +1,8 @@
 #include "Debug.h"
 #include "GlfwFunctions.h"
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 bool GLFWFunctions::isAKeyPressed = false;
 GLFWwindow* GLFWFunctions::pWindow = nullptr;
@@ -28,7 +30,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
 
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
-    glfwSwapInterval(1); //vsync
+    glfwSwapInterval(0); //vsync
     callEvents();
 
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -155,10 +157,16 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
 
     if (elapsedTime > fpsInterval) {
         GLFWFunctions::fps = frameCount / elapsedTime;
+        if (GLFWFunctions::fps > 60) {
+            fps = 60.0;
+        } else {
+			fps = GLFWFunctions::fps;
+		}
 
         startTime = currTime;
         frameCount = 0.0;
     }
+
 }
 
 void GLFWFunctions::glfwCleanup() {
