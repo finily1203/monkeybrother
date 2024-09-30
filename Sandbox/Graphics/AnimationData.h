@@ -1,25 +1,58 @@
 #pragma once
+
 #include <vector>
-#include <glm/glm.hpp>  
+#include <glm/vec2.hpp>
+#include <string>
+#include <map>
+#include <iostream>
 
 class AnimationData {
 public:
-    AnimationData(int totalFrames, float frameDuration, int sheetColumns, int sheetRows);
+    AnimationData(int totalFrames, float frameDuration, int columns, int rows);
 
     void Update(float deltaTime);
-    const std::vector<glm::vec2>& GetCurrentUVs() const;
-    int GetCurrentFrame() const;
+    void SetCurrentAction(int action);
+    void UpdateUVCoordinates();
+
+   
+    inline const std::vector<glm::vec2>& GetCurrentUVs() const {
+        return currentUVs;
+    }
+
+    inline int GetCurrentFrame() const {
+        return currentFrame;
+    }
+
+    inline int GetCurrentAction() const {
+        return currentAction;
+    }
+
+    void ResetAnimation();
+
+    void SetFrameDuration(float duration);
+    void SetSpeedMultiplier(float multiplier);
+    void SetLooping(bool shouldLoop);
+
+    void AddFrameEvent(int frame, const std::string& eventName);
+    void TriggerFrameEvents();
 
 private:
-    int m_TotalFrames;
-    float m_FrameDuration;
-    int m_CurrentFrame;
-    float m_ElapsedTime;
+    
+    int totalFrames;
+    int columns;
+    int rows;
+    int framesPerAction;
+    int currentFrame;
+    int currentAction;
+    float timeAccumulator;
+    float frameDuration;
+    float speedMultiplier;
+    bool looping;
+    bool uvDirty;
 
-    int m_SheetColumns;
-    int m_SheetRows;
+    float frameWidth;
+    float frameHeight;
 
-    std::vector<glm::vec2> m_CurrentUVs;  // UV coordinates for the current frame
-
-    void CalculateUVsForFrame(int frame);
+    std::vector<glm::vec2> currentUVs;
+    std::map<int, std::vector<std::string>> frameEvents;
 };

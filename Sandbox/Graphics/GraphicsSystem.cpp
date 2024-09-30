@@ -23,7 +23,9 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(4, 0.1f, 4, 1); // 5 frames
+    m_AnimationData = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
+    idleAnimation = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
+
 }
 
 GraphicsSystem::~GraphicsSystem() {
@@ -31,7 +33,7 @@ GraphicsSystem::~GraphicsSystem() {
 }
 
 void GraphicsSystem::Initialize() {
-   
+
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -53,8 +55,8 @@ void GraphicsSystem::Initialize() {
     // Load texture 1
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("./Graphics/Assets/demon_spritesheet.png", &width, &height, &nrChannels, 0);
-    
+    unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
+
     if (data) {
         GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
 
@@ -71,7 +73,8 @@ void GraphicsSystem::Initialize() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
 
         stbi_image_free(data);
-    } else {
+    }
+    else {
         std::cerr << "Failed to load texture!" << std::endl;
         stbi_image_free(data);
         return;
@@ -86,15 +89,15 @@ void GraphicsSystem::Initialize() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
     if (data) {
-		GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		stbi_image_free(data);
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
     }
     else {
-		std::cerr << "Failed to load texture!" << std::endl;
-		stbi_image_free(data);
-		return;
+        std::cerr << "Failed to load texture!" << std::endl;
+        stbi_image_free(data);
+        return;
     }
 
     // Load texture 3
@@ -139,11 +142,11 @@ void GraphicsSystem::Initialize() {
     };
 
     float uvCoord[] = {
-		1.0f, 1.0f,  // top right
-		1.0f, 0.0f,  // bottom right
-		0.0f, 0.0f,  // bottom left
-		0.0f, 1.0f   // top left
-	};
+        1.0f, 1.0f,  // top right
+        1.0f, 0.0f,  // bottom right
+        0.0f, 0.0f,  // bottom left
+        0.0f, 1.0f   // top left
+    };
 
     unsigned int indices[] = {
         0, 1, 3,  // First triangle
@@ -184,22 +187,28 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
         m_AnimationData->Update(deltaTime);
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
+        idleAnimation->Update(deltaTime);
+        const auto& idleUVs = idleAnimation->GetCurrentUVs();
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
     }
     else {
-		// Update the UV coordinates for the current frame
+        // Update the UV coordinates for the current frame
         float uvCoord[] = {
-			1.0f, 1.0f,  // top right
-			1.0f, 0.0f,  // bottom right
-			0.0f, 0.0f,  // bottom left
-			0.0f, 1.0f   // top left
-		};
-		glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
-	}
+            1.0f, 1.0f,  // top right
+            1.0f, 0.0f,  // bottom right
+            0.0f, 0.0f,  // bottom left
+            0.0f, 1.0f   // top left
+        };
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
+    }
 }
-
+void GraphicsSystem::SetCurrentAction(int actionRow) {
+    if (m_AnimationData) {
+        m_AnimationData->SetCurrentAction(actionRow);  // Switch the action (e.g., walk, attack)
+    }
+}
 void GraphicsSystem::Render(float deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, 1600, 900);
@@ -207,6 +216,10 @@ void GraphicsSystem::Render(float deltaTime) {
 
 void GraphicsSystem::Cleanup() {
     ReleaseResources();
+}
+
+Shader* GraphicsSystem::GetShader() const {
+    return m_Shader.get();
 }
 
 void GraphicsSystem::ReleaseResources() {
@@ -217,12 +230,12 @@ void GraphicsSystem::ReleaseResources() {
     glDeleteVertexArrays(1, &m_VAO);
 }
 
-void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation,glm::vec2 rhsScaling,glm::vec2 rhsPosition) {
-	orientation = rhsOrientation;
+void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScaling, glm::vec2 rhsPosition) {
+    orientation = rhsOrientation;
     scaling = rhsScaling;
     position = rhsPosition;
-	mdl_xform = glm::mat3{ 1.0 };
-	mdl_to_ndc_xform = glm::mat3{ 1.0 };
+    mdl_xform = glm::mat3{ 1.0 };
+    mdl_to_ndc_xform = glm::mat3{ 1.0 };
 }
 
 void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
@@ -251,17 +264,17 @@ void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
         position.x, position.y , 1
     };
     // TODO:: change the NDC matrix to be calculated based on the window size
-    NDC = 
+    NDC =
     {
         2.0f / 1600.0f,  0,              0,
         0,               2.0f / 900.0f,  0,
         0,               0,              1 };
 
     mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform =  mdl_xform;
+    mdl_to_ndc_xform = mdl_xform;
 }
 
-void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const{
+void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const {
     // load shader program in use by this object
     shader->Bind();
     // bind VAO of this object
@@ -270,14 +283,64 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
 
     GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
-		glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
-	}
+        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+    }
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
     // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-	// unbind shader program
-	shader->Unbind();
+    // unbind shader program
+    shader->Unbind();
+}
+
+void GraphicsSystem::drawDebugLines(const GLObject& obj) {
+
+    glBegin(GL_LINES);
+
+    // Set color for debug lines
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
+
+
+    float spriteWidth = obj.scaling.x / 4; // Width of one sprite (assuming 4 columns in the sprite sheet)
+    float spriteHeight = obj.scaling.y;     // Height of the sprite
+
+
+    float halfWidth = spriteWidth * 0.5f;
+    float halfHeight = spriteHeight * 0.5f;
+
+
+    glm::vec2 bottomLeft = glm::vec2(-halfWidth, -halfHeight);
+    glm::vec2 bottomRight = glm::vec2(halfWidth, -halfHeight);
+    glm::vec2 topRight = glm::vec2(halfWidth, halfHeight);
+    glm::vec2 topLeft = glm::vec2(-halfWidth, halfHeight);
+
+    // Create a rotation matrix based on the object's rotation angle (around the z-axis)
+    glm::mat2 Rotating =
+    {
+         glm::cos(glm::radians(obj.orientation.x)), glm::sin(glm::radians(obj.orientation.x)),
+        -glm::sin(glm::radians(obj.orientation.x)), glm::cos(glm::radians(obj.orientation.x))
+    };
+
+    // Rotate and translate each corner based on the object's rotation and position
+    glm::vec2 rotatedBottomLeft = obj.position + Rotating * bottomLeft;
+    glm::vec2 rotatedBottomRight = obj.position + Rotating * bottomRight;
+    glm::vec2 rotatedTopRight = obj.position + Rotating * topRight;
+    glm::vec2 rotatedTopLeft = obj.position + Rotating * topLeft;
+
+    // Draw the AABB lines
+    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Bottom left
+    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
+
+    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
+    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
+
+    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
+    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
+
+    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
+    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Back to bottom left
+
+    glEnd();
 }
