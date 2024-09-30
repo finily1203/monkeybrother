@@ -105,7 +105,23 @@ void WindowSystem::logicUpdate() {
 
 
 void WindowSystem::initialise() {
-	if (!GLFWFunctions::init(1600, 900, "Testing Application 123")) {
+	nlohmann::json windowConfigJSON;
+	std::ifstream windowConfigFile("./Serialization/windowConfig.json");
+
+	if (!windowConfigFile.is_open())
+	{
+		std::cout << "Unable to open JSON file" << std::endl;
+		return;
+	}
+
+	windowConfigFile >> windowConfigJSON;
+	windowConfigFile.close();
+
+	int windowWidth = windowConfigJSON["width"].get<int>();
+	int windowHeight = windowConfigJSON["height"].get<int>();
+	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
+
+	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle.c_str())) {
 		std::cout << "Failed to initialise GLFW" << std::endl;
 		exit(EXIT_FAILURE);
 	}
