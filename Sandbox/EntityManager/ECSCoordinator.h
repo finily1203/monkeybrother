@@ -12,6 +12,7 @@
 #include "GraphicsSystem.h"
 #include "Systems.h"
 
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -63,6 +64,7 @@ public:
 	void setSystemSignature(ComponentSig signature);
 
 	void test();
+	void test2();
 
 private:
 	std::unique_ptr<EntityManager> entityManager;

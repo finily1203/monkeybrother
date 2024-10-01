@@ -1,6 +1,6 @@
 #include "ECSCoordinator.h"
-
-//extern ECSCoordinator* ecsCoordinator;
+#include "TransformComponent.h"
+#include "GraphicSystemECS.h"
 
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
@@ -33,6 +33,27 @@ void ECSCoordinator::destroyEntity(Entity entity)
 	entityManager->destroyEntity(entity);
 	componentManager->entityRemoved(entity);
 	systemManager->entityRemoved(entity);
+}
+
+void ECSCoordinator::test2() {
+	std::cout << "testing ECS with graphics side" << std::endl << std::endl;
+
+	std::cout << "Registering component" << std::endl;
+	registerComponent<TransformComponent>();
+
+	std::cout << "Registering system and set Signature" << std::endl;
+	auto graphicSystem = std::make_shared<GraphicSystemECS>();
+	registerSystem<GraphicSystemECS>();
+	{
+		ComponentSig graphicSystemSig;
+		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
+	}
+
+	graphicSystem->initialise();
+
+	std::cout << "Set entity" << std::endl;
+	Entity entity = createEntity();
+	addComponent(entity, TransformComponent{glm::vec2(50.f, 50.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
 }
 
 struct Position {
