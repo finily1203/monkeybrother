@@ -30,12 +30,20 @@ int main() {
 		engine->addSystem(&ecsCoordinator);
 
 		engine->initialiseSystem();
+		//ecsCoordinator.test();
 		ecsCoordinator.test2();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			DebugSystem::StartLoop(); //Get time for start of gameloop
 
+			//If user presses clone button ("C"), clone first object
+			if (GLFWFunctions::cloneObject) {
+				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
+				GLFWFunctions::cloneObject = false;
+			}
+
 			engine->updateSystem();
+			glfwSwapBuffers(GLFWFunctions::pWindow);
 
 			DebugSystem::EndLoop(); //Get time for end of gameloop
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data

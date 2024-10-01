@@ -19,6 +19,7 @@ void GraphicSystemECS::update(float dt) {
 		//std::cout << "Entity: " << entity << " Rotation: " << transform.orientation.x << ", " << transform.orientation.y << std::endl;
 
 		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
+		std::cout << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
 
 		if (GLFWFunctions::left_turn_flag) {
 			transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
@@ -67,7 +68,11 @@ void GraphicSystemECS::update(float dt) {
 			graphics.glObject.position = transform.position;
 		}
 
+		//graphicsSystem.Update(GLFWFunctions::delta_time, false);
+
+		graphics.glObject.update(GLFWFunctions::delta_time);
 		graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
+
 	}
 }
 

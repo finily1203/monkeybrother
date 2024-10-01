@@ -154,8 +154,8 @@ void WindowSystem::update() {
 	blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
 	// animation update
 	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	//gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	//gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
 	if (GLFWFunctions::debug_flag) {
 		graphicsSystem.drawDebugLines(gameObject);
@@ -180,7 +180,7 @@ void WindowSystem::update() {
 
 	GLFWFunctions::getFps(1);
 
-	glfwSwapBuffers(GLFWFunctions::pWindow);
+	//glfwSwapBuffers(GLFWFunctions::pWindow);
 
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;

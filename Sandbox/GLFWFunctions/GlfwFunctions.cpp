@@ -12,6 +12,7 @@ float GLFWFunctions::volume = 0.5f;
 bool GLFWFunctions::audioPaused = false;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
+bool GLFWFunctions::cloneObject = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -114,6 +115,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (GLFW_KEY_PERIOD == key && GLFW_PRESS == action) {
         volume = std::min(1.f, volume + 0.1f);
         std::cout << "Volume: " << volume << std::endl;
+    }
+
+    if (GLFW_KEY_C == key && GLFW_PRESS == action && GLFWFunctions::cloneObject == false) {
+        GLFWFunctions::cloneObject = true;
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;

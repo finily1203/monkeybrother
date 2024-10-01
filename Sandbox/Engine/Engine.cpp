@@ -20,11 +20,11 @@ void Engine::initialiseSystem() {
 }
 
 void Engine::updateSystem() {
+	ecsCoordinator.update();
+
 	for (auto& system : m_systems) {
 		system->update();
 	}
-
-	ecsCoordinator.update();
 }
 
 void Engine::cleanupSystem() {

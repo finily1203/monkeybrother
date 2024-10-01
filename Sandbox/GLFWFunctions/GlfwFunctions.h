@@ -26,6 +26,7 @@ struct GLFWFunctions {
 	static float volume;
 	static bool audioPaused;
 	static bool audioStopped;
+	static bool cloneObject;
 
 	static GLboolean left_turn_flag;
 	static GLboolean right_turn_flag;

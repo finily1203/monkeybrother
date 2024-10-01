@@ -52,6 +52,7 @@ public:
 	//Clone Entity Function
 	Entity cloneEntity(Entity entity);
 	unsigned int getEntityNum();
+	Entity getFirstEntity();
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
@@ -70,6 +71,8 @@ private:
 	std::unique_ptr<EntityManager> entityManager;
 	std::unique_ptr<ComponentManager> componentManager;
 	std::unique_ptr<SystemManager> systemManager;
+
+	Entity firstEntity;
 };
 
 template <typename T>

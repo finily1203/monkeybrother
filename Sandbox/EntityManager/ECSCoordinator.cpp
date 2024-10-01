@@ -12,6 +12,7 @@ void ECSCoordinator::initialise() {
 
 void ECSCoordinator::update() {
 	systemManager->update();
+
 }
 
 void ECSCoordinator::cleanup() {
@@ -24,9 +25,17 @@ unsigned int ECSCoordinator::getEntityNum() {
 	return entityManager->getLiveEntCount();
 }
 
+Entity ECSCoordinator::getFirstEntity() {
+	return firstEntity;
+}
+
 Entity ECSCoordinator::createEntity()
 {
-	return entityManager->createEntity();
+	Entity newEntity = entityManager->createEntity();
+	if(!firstEntity) {
+		firstEntity = newEntity;	
+	}
+	return newEntity;
 }
 
 void ECSCoordinator::destroyEntity(Entity entity)
@@ -57,29 +66,16 @@ void ECSCoordinator::test2() {
 
 	std::cout << "Set entity" << std::endl;
 	Entity entity = createEntity();
-	addComponent(entity, TransformComponent{glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+	addComponent(entity, TransformComponent{glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.5f, 0.5f)});
 	GraphicsComponent gfxComp1{};
-	gfxComp1.glObject.init(glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.2f), glm::vec2(0.5f, 0.5f));
 	addComponent(entity, gfxComp1);
 
-	//Entity entity2 = createEntity();
-	//addComponent(entity2, TransformComponent{glm::vec2(150.f, 150.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
-
-	//Entity entity3 = createEntity();
-	//addComponent(entity3, TransformComponent{glm::vec2(250.f, 250.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
-
-	//Entity entity4 = createEntity();
-	//addComponent(entity4, TransformComponent{glm::vec2(350.f, 350.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
-
-	//Entity entity5 = createEntity();
-	//addComponent(entity5, TransformComponent{glm::vec2(450.f, 450.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
-
-	//GraphicsSystem::GLObject box1, box2, box3, box4, box5;
-	//box1.init(glm::vec2(50.f, 50.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
-	//box2.init(glm::vec2(150.f, 150.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
-	//box3.init(glm::vec2(250.f, 250.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
-	//box4.init(glm::vec2(350.f, 350.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
-	//box5.init(glm::vec2(450.f, 450.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	Entity entity2 = createEntity();
+	addComponent(entity2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.75f, 0.75f) });
+	GraphicsComponent gfxComp2{};
+	gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.2f), glm::vec2(0.75f, 0.75f));
+	addComponent(entity2, gfxComp2);
 
 }
 
@@ -374,31 +370,20 @@ void ECSCoordinator::test() {
 
 Entity ECSCoordinator::cloneEntity(Entity entity)
 {
-	//Create new entity
-	//Get all signatures of entity
-	//check entity of each component and add into new entity
-	//return new entity
-
 	Entity newEntity = createEntity();
 
-	auto signature = entityManager->getSignature(entity);
-
-	for (auto i = 0u; i < MAX_COMPONENTS; i++)
+	if(entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
-		if (signature[i])
-		{
-			if (i == getComponentType<Position>()) {
-				componentManager->cloneComponent<Position>(entity, newEntity);
-			}
-			else if (i == getComponentType<Size>()) {
-				componentManager->cloneComponent<Size>(entity, newEntity);
-			}
-			else if (i == getComponentType<velocity>()) {
-				componentManager->cloneComponent<velocity>(entity, newEntity);
-			}
-		}
+		TransformComponent transform = getComponent<TransformComponent>(entity);
+		transform.position += glm::vec2(0.1f, 0.1f);
+		addComponent(newEntity, transform);
+	}
 
-		return newEntity;
+	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
+	{
+		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
+		graphics.glObject.position += glm::vec2(0.1f, 0.1f);
+		addComponent(newEntity, graphics);
 	}
 
 	return newEntity;
