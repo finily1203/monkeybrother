@@ -6,6 +6,7 @@
 #include "AnimationData.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Systems.h"
 
 
 struct AABB {
@@ -19,17 +20,18 @@ struct AABB {
     bool intersects(const AABB& other) const;
 };
 
-class GraphicsSystem {
+class GraphicsSystem : public GameSystems
+{
 public:
     GraphicsSystem();
     ~GraphicsSystem();
 
 
-
-    void Initialize();
+    void initialise() override;
+    void update() override;
     void Update(float deltaTime, GLboolean isAnimated);
     void Render(float deltaTime);
-    void Cleanup();
+    void cleanup() override;
 
     Shader* GetShader() const{ return m_Shader.get(); }
     Shader* GetShader2() const{ return m_Shader2.get(); }

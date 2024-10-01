@@ -19,12 +19,7 @@ int main() {
 		CrashLog::LogDebugMessage("Starting engine initialization");
 		monkeybrother::Print();
 		Engine* engine = new Engine();
-		//EntityManager entityManager;
-		//entityManager.testEntityManager();
 
-		//testComponentManager();
-
-		//TestEntityAndComponent();
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
 

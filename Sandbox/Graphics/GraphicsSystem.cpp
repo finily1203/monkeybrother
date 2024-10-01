@@ -29,10 +29,10 @@ GraphicsSystem::GraphicsSystem()
 }
 
 GraphicsSystem::~GraphicsSystem() {
-    Cleanup();
+    cleanup();
 }
 
-void GraphicsSystem::Initialize() {
+void GraphicsSystem::initialise() {
 
 
     glEnable(GL_BLEND);
@@ -183,6 +183,8 @@ void GraphicsSystem::Initialize() {
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));*/
 }
 
+void GraphicsSystem::update() {}
+
 void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
         m_AnimationData->Update(deltaTime);
@@ -214,7 +216,7 @@ void GraphicsSystem::Render(float deltaTime) {
     glViewport(0, 0, 1600, 900);
 }
 
-void GraphicsSystem::Cleanup() {
+void GraphicsSystem::cleanup() {
     ReleaseResources();
 }
 
@@ -236,6 +238,8 @@ void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScali
     position = rhsPosition;
     mdl_xform = glm::mat3{ 1.0 };
     mdl_to_ndc_xform = glm::mat3{ 1.0 };
+    color = glm::vec3 { 1.0, 1.0, 1.0 };
+    GLboolean isAnimated = GL_FALSE;
 }
 
 void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {

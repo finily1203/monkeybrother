@@ -1,4 +1,5 @@
 #include "Debug.h"
+#include "GlfwFunctions.h"
 
 
 std::vector<double> DebugSystem::systemGameLoopPercent;
@@ -42,7 +43,7 @@ void DebugSystem::Initialise() {
 }
 
 void DebugSystem::Update() {
-	if (showGUI) {
+	if (GLFWFunctions::isGuiOpen) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -107,12 +108,12 @@ void DebugSystem::Update() {
 	}
 	if (ImGui::CollapsingHeader("Object Creation")) {
 		static int clicked = 0;
-		if (ImGui::Button("Create Circle"))
+		if (ImGui::Button("Create Rectangle"))
 			clicked++;
 		if (clicked & 1)
 		{
 			ImGui::SameLine();
-			ImGui::Text("Circle created");
+			ImGui::Text("Rectangle created");
 		}
 	}
 
@@ -135,13 +136,13 @@ void DebugSystem::Cleanup() {
 	ImGui::DestroyContext();
 }
 
-void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
-	{
-		showGUI = !showGUI;
-	}
-}
+//void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+//{
+//	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
+//	{
+//		showGUI = !showGUI;
+//	}
+//}
 
 void DebugSystem::UpdateSystemTimes() {
 	double currentTime = glfwGetTime();

@@ -1,16 +1,28 @@
 #include "Debug.h"
 #include "GlfwFunctions.h"
 #include <iostream>
-#include <chrono>
-#include <thread>
+//#include <chrono>
+//#include <thread>
 
 bool GLFWFunctions::isAKeyPressed = false;
 GLFWwindow* GLFWFunctions::pWindow = nullptr;
 double GLFWFunctions::fps = 0.0;
-double GLFWFunctions::delta_time = 0.0;
+float GLFWFunctions::delta_time = 0.0;
 float GLFWFunctions::volume = 0.5f;
 bool GLFWFunctions::audioPaused = false;
 bool GLFWFunctions::audioStopped = false;
+bool GLFWFunctions::isGuiOpen = false;
+
+GLboolean GLFWFunctions::left_turn_flag = false;
+GLboolean GLFWFunctions::right_turn_flag = false;
+GLboolean GLFWFunctions::scale_up_flag = false;
+GLboolean GLFWFunctions::scale_down_flag = false;
+GLboolean GLFWFunctions::move_up_flag = false;
+GLboolean GLFWFunctions::move_down_flag = false;
+GLboolean GLFWFunctions::move_left_flag = false;
+GLboolean GLFWFunctions::move_right_flag = false;
+GLboolean GLFWFunctions::debug_flag = false;
+
 
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -41,7 +53,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
 void GLFWFunctions::callEvents() {
 
     glfwSetKeyCallback(GLFWFunctions::pWindow, GLFWFunctions::keyboardEvent);
-    glfwSetKeyCallback(GLFWFunctions::pWindow, DebugSystem::key_callback);
+    //glfwSetKeyCallback(GLFWFunctions::pWindow, DebugSystem::key_callback);
     glfwSetMouseButtonCallback(GLFWFunctions::pWindow, GLFWFunctions::mouseButtonEvent);
     glfwSetCursorPosCallback(GLFWFunctions::pWindow, GLFWFunctions::cursorPositionEvent);
     glfwSetScrollCallback(GLFWFunctions::pWindow, GLFWFunctions::scrollEvent);
@@ -62,6 +74,15 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 #ifdef _DEBUG
         std::cout << "Key released" << std::endl;
 #endif
+    }
+
+    if (GLFW_KEY_F1 == key && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == false) {
+        GLFWFunctions::isGuiOpen = true;
+        GLFWFunctions::debug_flag = true;
+    }
+    else if (GLFW_KEY_F1 == key && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == true) {
+        GLFWFunctions::isGuiOpen = false;
+        GLFWFunctions::debug_flag = false;
     }
 
     if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == false) {
@@ -95,6 +116,14 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         std::cout << "Volume: " << volume << std::endl;
     }
 
+    GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
+    GLFWFunctions::right_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_RIGHT) != 0;
+    GLFWFunctions::scale_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_UP) != 0;
+    GLFWFunctions::scale_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_DOWN) != 0;
+    GLFWFunctions::move_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_W) != 0;
+    GLFWFunctions::move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
+    GLFWFunctions::move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
+    GLFWFunctions::move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
 
 
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {

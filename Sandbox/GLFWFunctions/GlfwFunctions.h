@@ -22,10 +22,22 @@ struct GLFWFunctions {
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
 	static double fps;
-	static double delta_time;
+	static float delta_time;
 	static float volume;
 	static bool audioPaused;
 	static bool audioStopped;
+
+	static GLboolean left_turn_flag;
+	static GLboolean right_turn_flag;
+	static GLboolean scale_up_flag;
+	static GLboolean scale_down_flag;
+	static GLboolean move_up_flag;
+	static GLboolean move_down_flag;
+	static GLboolean move_left_flag;
+	static GLboolean move_right_flag;
+	static GLboolean debug_flag;
+
+	static bool isGuiOpen;
 };
 
 #endif
