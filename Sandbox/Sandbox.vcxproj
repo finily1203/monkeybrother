@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioSystem\AudioSystem.h" />
+    <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />

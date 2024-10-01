@@ -1,6 +1,8 @@
 #include "ECSCoordinator.h"
 #include "TransformComponent.h"
+#include "GraphicsComponent.h"
 #include "GraphicSystemECS.h"
+#include "GraphicsSystem.h"
 
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
@@ -40,6 +42,7 @@ void ECSCoordinator::test2() {
 
 	std::cout << "Registering component" << std::endl;
 	registerComponent<TransformComponent>();
+	registerComponent<GraphicsComponent>();
 
 	std::cout << "Registering system and set Signature" << std::endl;
 	auto graphicSystem = std::make_shared<GraphicSystemECS>();
@@ -47,6 +50,7 @@ void ECSCoordinator::test2() {
 	{
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
+		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
 	}
 
 	graphicSystem->initialise();
@@ -54,6 +58,29 @@ void ECSCoordinator::test2() {
 	std::cout << "Set entity" << std::endl;
 	Entity entity = createEntity();
 	addComponent(entity, TransformComponent{glm::vec2(50.f, 50.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+	GraphicsComponent gfxComp1{};
+	gfxComp1.glObject.init(glm::vec2(50.f, 50.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	addComponent(entity, gfxComp1);
+
+	//Entity entity2 = createEntity();
+	//addComponent(entity2, TransformComponent{glm::vec2(150.f, 150.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+
+	//Entity entity3 = createEntity();
+	//addComponent(entity3, TransformComponent{glm::vec2(250.f, 250.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+
+	//Entity entity4 = createEntity();
+	//addComponent(entity4, TransformComponent{glm::vec2(350.f, 350.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+
+	//Entity entity5 = createEntity();
+	//addComponent(entity5, TransformComponent{glm::vec2(450.f, 450.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f)});
+
+	//GraphicsSystem::GLObject box1, box2, box3, box4, box5;
+	//box1.init(glm::vec2(50.f, 50.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	//box2.init(glm::vec2(150.f, 150.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	//box3.init(glm::vec2(250.f, 250.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	//box4.init(glm::vec2(350.f, 350.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+	//box5.init(glm::vec2(450.f, 450.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.f, 0.f));
+
 }
 
 struct Position {

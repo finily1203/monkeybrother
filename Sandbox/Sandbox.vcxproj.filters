@@ -50,6 +50,7 @@
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
+    <ClInclude Include="Components\GraphicsComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

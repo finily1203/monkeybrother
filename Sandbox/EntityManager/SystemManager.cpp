@@ -15,9 +15,6 @@ void SystemManager::entitySigChange(Entity entity, ComponentSig entitySig) {
 		auto const& system = pair.second;
 		auto const& systemSig = systemSignatures[type];
 
-		std::cout << "Checking entity " << entity << " with signature: " << entitySig << std::endl;
-		std::cout << "System signature: " << systemSig << std::endl;
-
 		//check if entity signature matches system signature
 		if ((entitySig & systemSig) == systemSig) {
 			system->entities.insert(entity);
