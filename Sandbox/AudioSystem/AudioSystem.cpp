@@ -22,7 +22,8 @@ void AudioSystem::initialise() {
         return;
     }
 
-    addSong(R"(C:\Users\Joel Chu\Downloads\Mood_Lofi.wav)");
+    addSong("../assets/audio/Mood_Lofi.wav");
+    addSong("../assets/audio/All_My_Fellas.wav");
     playSong(0);
 }
 
@@ -71,6 +72,13 @@ void AudioSystem::update() {
                     std::cout << "Audio resumed." << std::endl;
                 }
             }
+        }
+
+        if (GLFWFunctions::nextSong) {
+            int newIndex = (getSongIndex() + 1) % audioSongList.size();
+            playSong(newIndex);
+
+            GLFWFunctions::nextSong = false;
         }
 
         result = audioChannel->setVolume(GLFWFunctions::volume);
