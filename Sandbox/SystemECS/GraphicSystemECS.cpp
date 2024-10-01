@@ -8,17 +8,13 @@
 void GraphicSystemECS::initialise() {}
 
 void GraphicSystemECS::update(float dt) {
-	if(m_graphicsSystem == nullptr) {
-		std::cerr << "Graphics System is not set" << std::endl;
-	}
-
-	Shader* shader = m_graphicsSystem->GetShader();
+	Shader* shader = graphicsSystem.GetShader();
 
 	for (auto entity : entities) {
 		//check if entity has transform component
 
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		//std::cout << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
+		std::cout << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
 		//std::cout << "Entity: " << entity << " Scale: " << transform.scale.x << ", " << transform.scale.y << std::endl;
 		//std::cout << "Entity: " << entity << " Rotation: " << transform.orientation.x << ", " << transform.orientation.y << std::endl;
 
@@ -71,7 +67,7 @@ void GraphicSystemECS::update(float dt) {
 			graphics.glObject.position = transform.position;
 		}
 
-		graphics.glObject.draw(shader, m_graphicsSystem->GetVAO(), 0);
+		graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
 	}
 }
 

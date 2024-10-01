@@ -2,9 +2,10 @@
 #include "Debug.h"
 #include "WindowSystem.h"
 #include <iostream>
+#include "GlobalCoordinator.h"
 
 
-GraphicsSystem graphicsSystem;
+//GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
 GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 Shader* shader = nullptr;

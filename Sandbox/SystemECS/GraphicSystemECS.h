@@ -12,5 +12,4 @@ public:
 	void cleanup() override;
 
 private:
-	GraphicsSystem* m_graphicsSystem;
 };
