@@ -39,6 +39,10 @@ public:
 	template <typename T>
 	void cloneComponent(Entity entity, Entity newEntity);
 
+	//for checking if entity has component
+	template <typename T>
+	bool hasComponent(Entity entity);
+
 
 	void entityRemoved(Entity entity);
 
@@ -108,4 +112,9 @@ template <typename T>
 void ComponentManager::cloneComponent(Entity entity, Entity newEntity) {
 	T component = getComponent<T>(entity);
 	addComponent<T>(newEntity, component);
+}
+
+template <typename T>
+bool ComponentManager::hasComponent(Entity entity) {
+	return getComponentHandler<T>()->hasComponentHandler(entity);
 }

@@ -14,6 +14,7 @@ bool GLFWFunctions::nextSong = false;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
 bool GLFWFunctions::cloneObject = false;
+bool GLFWFunctions::isJump = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -124,6 +125,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     if (GLFW_KEY_C == key && GLFW_PRESS == action && GLFWFunctions::cloneObject == false) {
         GLFWFunctions::cloneObject = true;
+    }
+
+    if (GLFW_KEY_SPACE == key && GLFW_PRESS == action && GLFWFunctions::isJump == false) {
+        GLFWFunctions::isJump = true;
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;

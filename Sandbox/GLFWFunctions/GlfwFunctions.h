@@ -28,6 +28,7 @@ struct GLFWFunctions {
 	static bool nextSong;
 	static bool audioStopped;
 	static bool cloneObject;
+	static bool isJump;
 
 	static GLboolean left_turn_flag;
 	static GLboolean right_turn_flag;

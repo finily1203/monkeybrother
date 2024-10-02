@@ -60,6 +60,12 @@ public:
 		return componentArray[entityToIndexMap[entity]];
 	}
 
+	bool hasComponentHandler(Entity entity)
+	{
+		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
+		return entityToIndexMap.find(entity) != entityToIndexMap.end();
+	}
+
 	//follow base class
 	void entityRemoved(Entity entity)
 	{

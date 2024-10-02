@@ -24,7 +24,7 @@ void AudioSystem::initialise() {
 
     addSong("../assets/audio/Mood_Lofi.wav");
     addSong("../assets/audio/All_My_Fellas.wav");
-    playSong(0);
+    //playSong(0);
 }
 
 void AudioSystem::update() {

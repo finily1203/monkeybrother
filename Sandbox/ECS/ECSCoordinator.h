@@ -49,10 +49,12 @@ public:
 	template <typename T>
 	ComponentType getComponentType();
 
-	//Clone Entity Function
+	//Helper Functions to ECSCoordinator
 	Entity cloneEntity(Entity entity);
 	unsigned int getEntityNum();
 	Entity getFirstEntity();
+	template <typename T>
+	bool hasComponent(Entity entity);
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
@@ -66,6 +68,7 @@ public:
 
 	void test();
 	void test2();
+	void test3();
 
 private:
 	std::unique_ptr<EntityManager> entityManager;
@@ -135,3 +138,8 @@ void ECSCoordinator::setSystemSignature(ComponentSig signature)
 	systemManager->setSystemSignature<T>(signature);
 }
 
+template <typename T>
+bool ECSCoordinator::hasComponent(Entity entity)
+{
+	return componentManager->hasComponent<T>(entity);
+}

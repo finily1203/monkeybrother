@@ -1,7 +1,11 @@
 #include "ECSCoordinator.h"
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
+#include "AABBComponent.h"
+#include "MovementComponent.h"
+#include "ClosestPlatform.h"
 #include "GraphicSystemECS.h"
+#include "PhyColliSystemECS.h"
 #include "GraphicsSystem.h"
 
 void ECSCoordinator::initialise() {
@@ -387,4 +391,71 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 	}
 
 	return newEntity;
+}
+
+void ECSCoordinator::test3() {
+	std::cout << "Register Everything" << std::endl;
+	registerComponent<GraphicsComponent>();
+	registerComponent<TransformComponent>();
+	registerComponent<AABBComponent>();
+	registerComponent<MovementComponent>();
+	registerComponent<ClosestPlatform>();
+
+	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
+	registerSystem<PhysicsSystemECS>();
+	{
+		ComponentSig physicsSystemSig;
+		physicsSystemSig.set(getComponentType<TransformComponent>(), true);
+		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
+		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
+		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
+	}
+
+	physicsSystem->initialise();
+
+	auto graphicSystem = std::make_shared<GraphicSystemECS>();
+	registerSystem<GraphicSystemECS>();
+	{
+		ComponentSig graphicSystemSig;
+		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
+		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
+	}
+
+
+	graphicSystem->initialise();
+	
+
+	std::cout << "Create Platforms" << std::endl;
+	Entity platform1 = createEntity();
+	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(2.5f, 0.1f), glm::vec2(0.0f, 0.3f) });
+	GraphicsComponent gfxComp1{};
+	gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(2.5f, 0.1f), glm::vec2(0.0f, 0.3f));
+	addComponent(platform1, gfxComp1);
+	addComponent(platform1, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(platform1, ClosestPlatform{ false });
+
+	Entity platform2 = createEntity();
+	addComponent(platform2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1.5f, 0.1f), glm::vec2(0.4f, 0.7f) });
+	GraphicsComponent gfxComp2{};
+	gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(1.5f, 0.1f), glm::vec2(0.4f, 0.7f));
+	addComponent(platform2, gfxComp2);
+	addComponent(platform2, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(platform2, ClosestPlatform{ false });
+
+	Entity platform3 = createEntity();
+	addComponent(platform3, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(1.5f, 0.1f), glm::vec2(-0.5f, -0.3f) });
+	GraphicsComponent gfxComp3{};
+	gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(2.5f, 0.1f), glm::vec2(-0.5f, -0.3f));
+	addComponent(platform3, gfxComp3);
+	addComponent(platform3, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(platform3, ClosestPlatform{ false });
+
+	std::cout << "Create Player" << std::endl;
+	Entity player =	createEntity();
+	addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(0.3f, 0.15f), glm::vec2(0.0f, 0.5f) });
+	GraphicsComponent gfxComp4{};
+	gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.3f, 0.15f), glm::vec2(0.0f, 0.5f));
+	addComponent(player, gfxComp4);
+	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(player, MovementComponent{ 0.01f });
 }
