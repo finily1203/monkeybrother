@@ -11,6 +11,8 @@
 #include "GlfwFunctions.h"
 #include "GraphicsSystem.h"
 #include "Systems.h"
+#include "TransformComponent.h"
+#include "GraphicsComponent.h"
 
 
 #include <iostream>
@@ -56,7 +58,7 @@ public:
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	void UpdateEntityPosition(Entity& entity, float x, float y);
+	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&);
 
 	//System Manager Functions
 	template <typename T>

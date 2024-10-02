@@ -1,10 +1,22 @@
 #pragma once
+/********************************************************************************************************
+/*!
+	\file		jsonSerialization.h
+	\project	Mosscape
+	\author		Ian Loi, ian.loi, 2301393
+	\brief		jsonSerialization.h contains the JSON Serialization class that inherits from the BaseSerializer
+				class. This file contains the functions of ReadObject and WriteObject, ReadObject reads data
+				from JSON file and assign to the particular entity's data, whereas WriteObject writes the
+				entity's data to the JSON file. Both are of template types.
+
+All content © 2024 DigiPen Institute of Technology Singapore. All rights reserved.
+*/
+/********************************************************************************************************/
 
 
 #include "serialization.h"
 #include "../Nlohmann/json.hpp"
 #include <fstream>
-#include <vector>
 #include <sstream>
 
 
@@ -30,6 +42,8 @@ namespace Serializer
 		virtual void WriteInt(int&, std::string const&);
 		virtual void WriteFloat(float&, std::string const&);
 		virtual void WriteString(std::string&, std::string const&);
+
+		nlohmann::json GetJSONObject() const;
 
 	private:
 		nlohmann::json jsonObj;
@@ -65,8 +79,14 @@ namespace Serializer
 			}
 		}
 
-		// read the data from JSON file to the game object
-		gameObj.Serialize(*this, SerializationMode::READ);
+		if (std::is_same_v<T, glm::vec2>)
+		{
+			if (currentObj.is_object() && currentObj.contains("x") && currentObj.contains("y"))
+			{
+				gameObj.x = currentObj["x"].get<float>();
+				gameObj.y = currentObj["y"].get<float>();
+			}
+		}
 	}
 
 	template <typename T>
@@ -85,7 +105,7 @@ namespace Serializer
 			currentObj = &((*currentObj)[keySegment]);
 		}
 
-		// write the game object data to the JSON file
-		gameObj.Serialize(*this, SerializationMode::WRITE);
+		(*currentObj)["x"] = gameObj.x;
+		(*currentObj)["y"] = gameObj.y;
 	}
 }
