@@ -86,8 +86,10 @@ void DebugSystem::Update() {
 
 			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
-			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+			ImGui::SeparatorText("Performance Viewer");
 
+			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+				
 				ImGui::TableSetupColumn("Systems");
 				ImGui::TableSetupColumn("Game Loop %"); 
 				ImGui::TableHeadersRow();
@@ -449,8 +451,8 @@ void Console::DrawImpl(const char* title) {
 	ImGui::Separator();
 
 	// Reserve enough left-over height for 1 separator + 1 input text
-	const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+	const float heightReserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -heightReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
 
 	if (clear)
 		items.clear();
@@ -459,7 +461,7 @@ void Console::DrawImpl(const char* title) {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 	for (const auto& item : items)
-		ImGui::TextUnformatted(item.c_str());
+		ImGui::TextUnformatted(item.c_str()); //Render log messages
 	ImGui::PopStyleVar();
 
 	// Auto-scroll logic

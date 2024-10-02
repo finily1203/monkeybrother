@@ -127,16 +127,23 @@ public:
 			items.push_back(currentLog.str());
 			currentLog.str("");
 			currentLog.clear();
+
+			// Check if we've exceeded the maximum number of logs
+			if (items.size() > MAX_LOGS) {
+				items.erase(items.begin(), items.begin() + (items.size() - MAX_LOGS));
+			}
 		}
 		return *this;
 	}
 
 private:
+	static const size_t MAX_LOGS = 1000;
 	static Console* instance;
     static std::vector<std::string> items;
     static bool autoScroll;
     static float lastScrollY;
 	static std::ostringstream currentLog;
+
 	Console() {}
 	void DrawImpl(const char* title); //ImGui console GUI format
 };
