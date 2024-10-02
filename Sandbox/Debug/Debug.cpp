@@ -1,8 +1,7 @@
 #include "Debug.h"
 #include "GlfwFunctions.h"
 
-bool DebugSystem::showGUI = false;
-bool DebugSystem::checkFrame = false;
+//Variables for DebugSystem
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
 double DebugSystem::loopStartTime = 0.0;
 double DebugSystem::totalLoopTime = 0.0;
@@ -11,32 +10,39 @@ std::vector<const char*> DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
 int DebugSystem::systemCount = 0;
 
+//Variables for CrashLog
 std::ofstream CrashLog::logFile;
 
+//Variables for GameViewWindow
 int GameViewWindow::viewportHeight = 0;
 int GameViewWindow::viewportWidth = 0;
 GLuint GameViewWindow::viewportTexture = 0;
 
-DebugSystem::DebugSystem() : io{ nullptr }, font1{ nullptr }, font2{ nullptr } {}
+//Variables for Console
+std::vector<std::string> Console::items;
+bool Console::autoScroll = true;
+float Console::lastScrollY = 0.0f;
+Console* Console::instance = nullptr;
+std::ostringstream Console::currentLog;
+
+DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 
 DebugSystem::~DebugSystem() {}
 
 void DebugSystem::Initialise() {
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = &ImGui::GetIO();
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;      // Enable Multiple Viewport
-	font1 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20);
-	font2 = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 15);
-	ImGui::StyleColorsDark();
+	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multiple Viewport
+	font = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20); 
 
+	ImGui::StyleColorsDark();
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_Separator] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
 	style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); //outer border of table
-	style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); //inner border of table
+	style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);  //inner border of table
 	style.SeparatorTextBorderSize = 3.0f;
 	style.TabBorderSize = 3.0f;
 
@@ -52,69 +58,62 @@ void DebugSystem::Initialise() {
 }
 
 void DebugSystem::Update() {
-	if (GLFWFunctions::isGuiOpen) {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking);
-	ImGui::PopStyleVar(3);
-	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-	ImGui::End();
-	
-	//ImGui::ShowDemoWindow();
-	ImGui::Begin("Debug");
-		if (ImGui::CollapsingHeader("Performance Data")) {
-			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | /*ImGuiTableFlags_ScrollY |*/
+	if (GLFWFunctions::isGuiOpen) { //F1 key to open imgui GUI
+		
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking);
+		ImGui::PopStyleVar(3);
+		ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+		ImGui::End();
+
+		ImGui::Begin("Debug");
+		if (ImGui::CollapsingHeader("Performance Data")) { //Create collapsing header for perfomance data
+			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
-	
-			ImVec2 outer_size = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f);
-			//ImVec2 outer_size = ImVec2(0.0f, 50.f);
-	
-			//ImGui::PushFont(font1);
-			ImGui::Text("FPS: %.1f", GLFWFunctions::fps);
-			//ImGui::PopFont();
-	
-			if (ImGui::BeginTable("DebugTool", 2, flags, outer_size)) {
-	
+
+			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); 
+
+			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
+
+			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+
 				ImGui::TableSetupColumn("Systems");
-				ImGui::TableSetupColumn("Game Loop %");
+				ImGui::TableSetupColumn("Game Loop %"); 
 				ImGui::TableHeadersRow();
-				/*for (const auto& [systemName, systemTime] : systemTimes) {
-	
-				}*/
-				//size_t count = std::min(systems.size(), systemGameLoopPercent.size());
+
 				for (int i{}; i < systemCount && i < systemGameLoopPercent.size(); i++) {
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
-					ImGui::Text(systems[i]);
+					ImGui::Text(systems[i]); //Display system's name
 					ImGui::TableNextColumn();
-					ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+					ImGui::Text("%.2f%%", systemGameLoopPercent[i]); //Display system's game loop percentage
 				}
-	
+
 				ImGui::EndTable();
 			}
-	
 		}
-	
-		if (ImGui::CollapsingHeader("Input Data")) {
+
+		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
 			ImGui::SeparatorText("Mouse Coordinates");
 			if (ImGui::IsMousePosValid())
-				ImGui::Text("Mouse position: (%g, %g)", io->MousePos.x, io->MousePos.y);
+				ImGui::Text("Mouse position: (%g, %g)", io->MousePos.x, io->MousePos.y); //Display mouse position data
 			else
 				ImGui::Text("Mouse position: <INVALID>");
-	
+
 			ImGui::SeparatorText("Mouse/Keys Input\n");
-			ImGui::Text("Mouse/Key pressed:");
-	
+			ImGui::Text("Mouse/Key pressed:"); //Display mouse/key input data
+
 			ImGuiKey startKey = (ImGuiKey)0;
 			//Check that key exist in ImGuiKey data (includes legacy and modern keys)
 			for (ImGuiKey key = startKey; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
@@ -123,84 +122,78 @@ void DebugSystem::Update() {
 				if (LegacyKeyDuplicationCheck(key) //Check if key is the legacy version
 					|| !ImGui::IsKeyDown(key)) //Check if key is pressed
 					continue; //iterates the next key in ImGuiKey
-	
+
 				ImGui::SameLine();
 				ImGui::Text("\"%s\"", ImGui::GetKeyName(key));
 			}
 			ImGui::NewLine();
 		}
 		if (ImGui::CollapsingHeader("Object Creation")) {
-			static int clicked = 0;
-			static int i0 = 123;
-			float value = 0.0f;
-			const char* label = "Width";
-			const char* label2 = "Height";
-			const char* label3 = "Size";
+			const char* platformWidthLabel = "Width";
+			const char* platformHeightLabel = "Height";
+			const char* playerSizeLabel = "Size";
 			ImGui::SeparatorText("Platform Object");
-	
-			static float f1 = 5.0f;
-			static float f2 = 5.0f;
-			static float f3 = 5.0f;
+
+			static float widthSlide = 5.0f;
+			static float heightSlide = 5.0f;
+			static float sizeSlide = 5.0f;
 			// Get available width
 			float availWidth = ImGui::GetContentRegionAvail().x;
-	
-	
+
 			// Calculate the minimum width for the label
 			ImGui::AlignTextToFramePadding();
-			float labelWidth = ImGui::CalcTextSize(label2).x + ImGui::GetStyle().ItemInnerSpacing.x;
-	
-	
+			float labelWidth = ImGui::CalcTextSize(platformHeightLabel).x + ImGui::GetStyle().ItemInnerSpacing.x;
+
 			// Set the width for the slider, ensuring it doesn't go below a minimum value
 			float sliderWidth = std::max(10.0f, 150.f);
 			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(label, &f1, 0.0f, 10.0f, "%.1f");
+			ImGui::SliderFloat(platformWidthLabel, &widthSlide, 0.0f, 10.0f, "%.1f");
 			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(label2, &f2, 0.0f, 10.0f, "%.1f");
-	
+			ImGui::SliderFloat(platformHeightLabel, &heightSlide, 0.0f, 10.0f, "%.1f");
+
 			ImGui::NewLine();
-			if (ImGui::Button("Create Platform"))
-				clicked++;
-			if (clicked & 1)
+			bool createPlatform = ImGui::Button("Create Platform");
+			if (createPlatform)
 			{
 				ImGui::SameLine();
 				ImGui::Text("Platform created");
 			}
-	
-	
+
 			ImGui::SeparatorText("Player Object");
 			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(label3, &f3, 0.0f, 10.0f, "%.1f");
-	
+			ImGui::SliderFloat(playerSizeLabel, &sizeSlide, 0.0f, 10.0f, "%.1f");
+
 			ImGui::NewLine();
-			if (ImGui::Button("Create PLayer"))
-				clicked++;
-			if (clicked & 1)
+			bool createPlayer = ImGui::Button("Create PLayer");
+			if (createPlayer)
 			{
 				ImGui::SameLine();
 				ImGui::Text("Player created");
 			}
-	
-	
 		}
-	
-	ImGui::End();
+		ImGui::End();
 
-	ImGui::Begin("Game Viewport");
-	GameViewWindow::Update();
-	ImGui::End();
-	
-	//Rendering of UI
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		GLFWwindow* backup_current_context = glfwGetCurrentContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(backup_current_context);
-	}
+		ImGui::Begin("Game Viewport");
+		GameViewWindow::Update(); //Game viewport system
+		ImGui::End();
+
+		ImGui::Begin("Console");
+		Console::Update("Console"); //ImGui console system
+		ImGui::End();
+
+		//Rendering of UI
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 
 	}
+}
 	
 void DebugSystem::Cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
@@ -208,28 +201,37 @@ void DebugSystem::Cleanup() {
 	ImGui::DestroyContext();
 }
 
-void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
-	{
-		ToggleAllWindows(!showGUI);
-	}
+void DebugSystem::StartLoop() {
+	loopStartTime = glfwGetTime(); //Capture start game loop time
+	systemCount = 0;
+	systems.clear();
+	systemTimes.clear();
 }
 
-void DebugSystem::ToggleAllWindows(bool show) {
-	showGUI = show;
-	if (!show) {
-		// This will hide all windows
-		ImGui::CloseCurrentPopup();
-	}
+void DebugSystem::EndLoop() {
+
+	totalLoopTime = GLFWFunctions::delta_time; //Capture total game loop time
 }
-//void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-//{
-//	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
-//	{
-//		showGUI = !showGUI;
-//	}
-//}
+
+void DebugSystem::StartSystemTiming(const char* systemName) {
+	systems.push_back(systemName); //Log system name
+	systemTimes[systemName] -= glfwGetTime() - loopStartTime; //Capture system's start time loop
+	systemCount++; //Log system quantity
+}
+
+void DebugSystem::EndSystemTiming(const char* systemName) {
+	systemTimes[systemName] += glfwGetTime() - loopStartTime; //Capture system's end time loop
+}
+
+double DebugSystem::SystemPercentage(const char* systemName)
+{
+	auto it = systemTimes.find(systemName);
+	if (it != systemTimes.end()) { //Check if system present
+		return (it->second / totalLoopTime) * 100.0; //Covnert time loop to percentage
+	}
+
+	return 0.0;
+}
 
 void DebugSystem::UpdateSystemTimes() {
 	double currentTime = glfwGetTime();
@@ -243,38 +245,6 @@ void DebugSystem::UpdateSystemTimes() {
 	}
 }
 
-void DebugSystem::StartLoop() {
-	loopStartTime = glfwGetTime();
-	systemCount = 0;
-	systems.clear();
-	systemTimes.clear();
-	//systemGameLoopPercent.clear();
-}
-
-void DebugSystem::StartSystemTiming(const char* systemName) {
-	systems.push_back(systemName);
-	systemTimes[systemName] -= glfwGetTime() - loopStartTime;
-	systemCount++;
-}
-
-void DebugSystem::EndSystemTiming(const char* systemName) {
-	systemTimes[systemName] += glfwGetTime() - loopStartTime;
-}
-
-void DebugSystem::EndLoop() {
-	
-	totalLoopTime = GLFWFunctions::delta_time;
-}
-
-double DebugSystem::SystemPercentage(const char* systemName){
-	auto it = systemTimes.find(systemName);
-	if (it != systemTimes.end()) {
-		return (it->second / totalLoopTime) * 100.0;
-	}
-	
-	return 0.0;
-}
-
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
@@ -282,9 +252,10 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 }
 
 void CrashLog::Initialise() {
-	logFile.open("crash-log.txt", std::ios::out | std::ios::trunc);
+	logFile.open("crash-log.txt", std::ios::out | std::ios::trunc); //Create crash log file
 	if (logFile.is_open()) {
-		logFile << "Log started at: " << getCurrentTimestamp() << std::endl;
+		//Log start of crash logging
+		logFile << "[" << GetCurrentTimestamp() << "] " << "Log started" << std::endl;
 		logFile.flush();
 	}
 	else {
@@ -301,12 +272,21 @@ void CrashLog::Cleanup() {
 
 void CrashLog::LogDebugMessage(const std::string& message, const char* file, int line) {
 	if(logFile.is_open()) {
-		if (file && line) {
-			logFile << "[" << getCurrentTimestamp() << "] " << message << " at " << file << " line " << line << std::endl;
+		if (file && line) { //Log exceptions with file and line location
+			logFile << "[" << GetCurrentTimestamp() << "] " << message << " at " << file << " line " << line << std::endl;
 			logFile.flush();
 		}
-		else logFile << "[" << getCurrentTimestamp() << "] " << message << std::endl;
+		else logFile << "[" << GetCurrentTimestamp() << "] " << message << std::endl;
 	}
+}
+
+std::string CrashLog::GetCurrentTimestamp() {
+	std::time_t now = std::time(nullptr); //Capture PC date and time
+	std::tm timeinfo;
+	localtime_s(&timeinfo, &now);
+	std::ostringstream oss;
+	oss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
+	return oss.str();
 }
 
 void CrashLog::SignalHandler(int signum) {
@@ -338,10 +318,10 @@ void CrashLog::SignalHandler(int signum) {
 }
 
 void CrashLog::SignalChecks() {
-	std::signal(SIGSEGV, SignalHandler);
-	std::signal(SIGABRT, SignalHandler);
-	std::signal(SIGFPE, SignalHandler);
-	std::signal(SIGILL, SignalHandler);
+	std::signal(SIGSEGV, SignalHandler); //Segmentation signal
+	std::signal(SIGABRT, SignalHandler); //Abort signal
+	std::signal(SIGFPE, SignalHandler);  //Floating-point signal
+	std::signal(SIGILL, SignalHandler);  //Illegal signal
 }
 
 void GameViewWindow::Initialise() {
@@ -387,11 +367,9 @@ void GameViewWindow::SetupViewportTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 }
 
 void GameViewWindow::CaptureMainWindow() {
-
 	glBindTexture(GL_TEXTURE_2D, viewportTexture);
 
 	// Store the current read buffer
@@ -409,7 +387,8 @@ void GameViewWindow::CaptureMainWindow() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-ImVec2 GameViewWindow::GetLargestSizeForViewport() {
+ImVec2 GameViewWindow::GetLargestSizeForViewport()
+{
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
 	windowSize.x -= ImGui::GetScrollX();
 	windowSize.y -= ImGui::GetScrollY();
@@ -424,7 +403,8 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport() {
 	return ImVec2(aspectWidth, aspectHeight);
 }
 
-ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize) {
+ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
+{
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
 	windowSize.x -= ImGui::GetScrollX();
 	windowSize.y -= ImGui::GetScrollY();
@@ -434,3 +414,90 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize) {
 
 	return ImVec2(viewportX + ImGui::GetCursorPosX(), viewportY + ImGui::GetCursorPosY());
 }
+
+Console& Console::GetLog() {
+	if (instance == nullptr) {
+		instance = new Console();
+	}
+	return *instance;
+}
+
+void Console::Update(const char* title) {
+	GetLog().DrawImpl(title);
+}
+
+void Console::DrawImpl(const char* title) {
+	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin(title)) {
+		ImGui::End();
+		return;
+	}
+
+	// Options menu
+	if (ImGui::BeginPopup("Options")) {
+		ImGui::Checkbox("Auto-scroll", &autoScroll);
+		ImGui::EndPopup();
+	}
+
+	// Main window
+	if (ImGui::Button("Options"))
+		ImGui::OpenPopup("Options");
+	ImGui::SameLine();
+	bool clear = ImGui::Button("Clear");
+	ImGui::SameLine();
+	bool copy = ImGui::Button("Copy");
+	ImGui::Separator();
+
+	// Reserve enough left-over height for 1 separator + 1 input text
+	const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+	if (clear)
+		items.clear();
+	if (copy)
+		ImGui::LogToClipboard();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+	for (const auto& item : items)
+		ImGui::TextUnformatted(item.c_str());
+	ImGui::PopStyleVar();
+
+	// Auto-scroll logic
+	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+		autoScroll = true;
+	if (ImGui::GetScrollY() < lastScrollY)
+		autoScroll = false;
+	lastScrollY = ImGui::GetScrollY();
+
+	if (autoScroll && ImGui::GetScrollY() < ImGui::GetScrollMaxY())
+		ImGui::SetScrollHereY(1.0f);
+
+	ImGui::EndChild();
+	ImGui::Separator();
+
+	// Command-line
+	static char input_buf[256] = "";
+	if (ImGui::InputText("Input", input_buf, IM_ARRAYSIZE(input_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (input_buf[0]) {
+			*this << "> " << input_buf << std::endl;
+			// Here you would typically parse and execute the command
+			*this << "Command executed: " << input_buf << std::endl;
+		}
+		input_buf[0] = 0; // Clear the input buffer
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Submit")) {
+		if (input_buf[0]) {
+			*this << "> " << input_buf << std::endl;
+			// Here you would typically parse and execute the command
+			*this << "Command executed: " << input_buf << std::endl;
+			input_buf[0] = 0; // Clear the input buffer
+		}
+	}
+
+	ImGui::End();
+}
+
+
+

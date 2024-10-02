@@ -17,7 +17,6 @@ int main() {
 	try {
 		CrashLog::SignalChecks();
 		CrashLog::Initialise();
-		CrashLog::LogDebugMessage("Starting engine initialization");
 		Engine* engine = new Engine();
 
 		WindowSystem* windowSystem = new WindowSystem();
@@ -57,6 +56,16 @@ int main() {
 	catch (const CrashLog::Exception& e) {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
 		CrashLog::LogDebugMessage(e.message, e.file, e.line);
+		CrashLog::LogDebugMessage("End Log");
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << e.what() << std::endl;
+		CrashLog::LogDebugMessage(e.what());
+		CrashLog::LogDebugMessage("End Log");
+	}
+	catch (...) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
+		CrashLog::LogDebugMessage("Unknown exception caught");
 		CrashLog::LogDebugMessage("End Log");
 	}
 	

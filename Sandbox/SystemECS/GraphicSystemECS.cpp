@@ -4,6 +4,7 @@
 #include "GraphicsComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
+#include "Debug.h"
 
 void GraphicSystemECS::initialise() {}
 
@@ -14,11 +15,13 @@ void GraphicSystemECS::update(float dt) {
 		//check if entity has transform component
 
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
 		std::cout << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
 		//std::cout << "Entity: " << entity << " Scale: " << transform.scale.x << ", " << transform.scale.y << std::endl;
 		//std::cout << "Entity: " << entity << " Rotation: " << transform.orientation.x << ", " << transform.orientation.y << std::endl;
 
 		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
+		Console::GetLog() << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
 		std::cout << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
 
 		if (GLFWFunctions::left_turn_flag) {
