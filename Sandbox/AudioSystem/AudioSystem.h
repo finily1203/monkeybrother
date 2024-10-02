@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-class AudioSystem : public Systems
+class AudioSystem : public GameSystems
 {
 public:
 	AudioSystem();

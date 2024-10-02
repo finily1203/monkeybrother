@@ -8,11 +8,11 @@ class Engine
 {
 private:
 	//Using vectors to store systems
-	std::vector<Systems*> systems;
+	std::vector<GameSystems*> m_systems;
 public:
 	//public functions used by engine
 	Engine();
-	void addSystem(Systems* systems);
+	void addSystem(GameSystems* systems);
 	void initialiseSystem();
 	void updateSystem();
 	void cleanupSystem();

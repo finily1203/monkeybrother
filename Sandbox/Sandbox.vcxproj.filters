@@ -4,7 +4,6 @@
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
-    <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
@@ -19,16 +18,19 @@
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="Graphics\AnimationData.cpp" />
-    <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
+    <ClCompile Include="EntityManager\SystemManager.cpp" />
+    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
+    <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
-    <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
@@ -42,10 +44,13 @@
     <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="EntityManager\ECSCoordinator.h" />
     <ClInclude Include="EntityManager\ECSDefinitions.h" />
-    <ClInclude Include="ObjectFactory\ObjectFactory.h" />
     <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="AudioSystem\AudioSystem.h" />
+    <ClInclude Include="Components\TransformComponent.h" />
+    <ClInclude Include="SystemECS\GraphicSystemECS.h" />
+    <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
+    <ClInclude Include="Components\GraphicsComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

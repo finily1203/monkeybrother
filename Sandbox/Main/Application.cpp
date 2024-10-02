@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "ECSCoordinator.h"
 #include "AudioSystem.h"
+#include "GlobalCoordinator.h"
 
 
 namespace monkeybrother {
@@ -18,21 +19,30 @@ int main() {
 		CrashLog::Initialise();
 		CrashLog::LogDebugMessage("Starting engine initialization");
 		Engine* engine = new Engine();
+
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
-		ECSCoordinator* ecsCoordinator = new ECSCoordinator();
-		engine->addSystem(ecsCoordinator);
 
 		AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(audioSystem);
 
+		engine->addSystem(&ecsCoordinator);
+
 		engine->initialiseSystem();
-		ecsCoordinator->test();
+		//ecsCoordinator.test();
+		ecsCoordinator.test2();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			DebugSystem::StartLoop(); //Get time for start of gameloop
 
+			//If user presses clone button ("C"), clone first object
+			if (GLFWFunctions::cloneObject) {
+				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
+				GLFWFunctions::cloneObject = false;
+			}
+
 			engine->updateSystem();
+			glfwSwapBuffers(GLFWFunctions::pWindow);
 
 			DebugSystem::EndLoop(); //Get time for end of gameloop
 			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data

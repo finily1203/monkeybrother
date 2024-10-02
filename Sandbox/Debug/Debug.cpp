@@ -1,4 +1,5 @@
 #include "Debug.h"
+#include "GlfwFunctions.h"
 
 bool DebugSystem::showGUI = false;
 bool DebugSystem::checkFrame = false;
@@ -51,9 +52,7 @@ void DebugSystem::Initialise() {
 }
 
 void DebugSystem::Update() {
-	if (!showGUI) {
-		return;
-	}
+	if (GLFWFunctions::isGuiOpen) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -224,6 +223,13 @@ void DebugSystem::ToggleAllWindows(bool show) {
 		ImGui::CloseCurrentPopup();
 	}
 }
+//void DebugSystem::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+//{
+//	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
+//	{
+//		showGUI = !showGUI;
+//	}
+//}
 
 void DebugSystem::UpdateSystemTimes() {
 	double currentTime = glfwGetTime();

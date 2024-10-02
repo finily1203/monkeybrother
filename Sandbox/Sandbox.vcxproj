@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,7 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,6 +103,10 @@
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="EntityManager\SystemManager.cpp" />
+    <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
@@ -114,16 +118,17 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
-    <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
-    <ClCompile Include="ObjectFactory\ObjectFactory.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
+    <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioSystem\AudioSystem.h" />
+    <ClInclude Include="Components\GraphicsComponent.h" />
+    <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
@@ -132,18 +137,18 @@
     <ClInclude Include="EntityManager\ECSDefinitions.h" />
     <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
-    <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
-    <ClInclude Include="ObjectFactory\ObjectFactory.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
+    <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

@@ -10,6 +10,7 @@
 #include "matrix3x3.h"
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
+#include "SystemManager.h"
 
 #include <iostream>
 #include <fstream>

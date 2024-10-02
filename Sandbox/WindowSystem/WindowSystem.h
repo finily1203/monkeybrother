@@ -6,7 +6,7 @@
 #include <fstream>
 
 //create class for windows application
-class WindowSystem : public Systems
+class WindowSystem : public GameSystems
 {
 public:
 	WindowSystem() = default;
@@ -18,16 +18,6 @@ public:
 	void update() override;
 	void cleanup() override;
 
-	GLboolean left_turn_flag;
-	GLboolean right_turn_flag;
-	GLboolean scale_up_flag;
-	GLboolean scale_down_flag;
-	GLboolean move_up_flag;
-	GLboolean move_down_flag;
-	GLboolean move_left_flag;
-	GLboolean move_right_flag;
-
-	void keyboardInputUpdateFlag();
 	void logicUpdate();
 	
 };
