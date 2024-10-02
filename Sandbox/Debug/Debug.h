@@ -129,7 +129,7 @@ public:
 			currentLog.clear();
 
 			// Check if we've exceeded the maximum number of logs
-			if (items.size() > MAX_LOGS) {
+			if (items.size() > MAX_LOGS && autoDelete) {
 				items.erase(items.begin(), items.begin() + (items.size() - MAX_LOGS));
 			}
 		}
@@ -141,6 +141,7 @@ private:
 	static Console* instance;
     static std::vector<std::string> items;
     static bool autoScroll;
+	static bool autoDelete;
     static float lastScrollY;
 	static std::ostringstream currentLog;
 

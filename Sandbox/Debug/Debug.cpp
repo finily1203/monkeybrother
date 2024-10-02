@@ -21,6 +21,7 @@ GLuint GameViewWindow::viewportTexture = 0;
 //Variables for Console
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
+bool Console::autoDelete = true;
 float Console::lastScrollY = 0.0f;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
@@ -438,6 +439,7 @@ void Console::DrawImpl(const char* title) {
 	// Options menu
 	if (ImGui::BeginPopup("Options")) {
 		ImGui::Checkbox("Auto-scroll", &autoScroll);
+		ImGui::Checkbox("Auto Delete", &autoDelete);
 		ImGui::EndPopup();
 	}
 
@@ -478,23 +480,23 @@ void Console::DrawImpl(const char* title) {
 	ImGui::Separator();
 
 	// Command-line
-	static char input_buf[256] = "";
-	if (ImGui::InputText("Input", input_buf, IM_ARRAYSIZE(input_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
-		if (input_buf[0]) {
-			*this << "> " << input_buf << std::endl;
+	static char inputBuffer[256] = "";
+	if (ImGui::InputText("Input", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (inputBuffer[0]) {
+			*this << "> " << inputBuffer << std::endl;
 			// Here you would typically parse and execute the command
-			*this << "Command executed: " << input_buf << std::endl;
+			*this << "Command executed: " << inputBuffer << std::endl;
 		}
-		input_buf[0] = 0; // Clear the input buffer
+		inputBuffer[0] = 0; // Clear the input buffer
 	}
 
 	ImGui::SameLine();
 	if (ImGui::Button("Submit")) {
-		if (input_buf[0]) {
-			*this << "> " << input_buf << std::endl;
+		if (inputBuffer[0]) {
+			*this << "> " << inputBuffer << std::endl;
 			// Here you would typically parse and execute the command
-			*this << "Command executed: " << input_buf << std::endl;
-			input_buf[0] = 0; // Clear the input buffer
+			*this << "Command executed: " << inputBuffer << std::endl;
+			inputBuffer[0] = 0; // Clear the input buffer
 		}
 	}
 
