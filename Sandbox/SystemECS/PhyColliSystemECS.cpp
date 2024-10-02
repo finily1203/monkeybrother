@@ -4,13 +4,14 @@
 #include "AABBComponent.h"
 #include "MovementComponent.h"
 #include "ClosestPlatform.h"
+#include "GraphicsComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include <unordered_set>
 
 #define M_PI   3.14159265358979323846264338327950288
 
-PhysicsSystemECS::PhysicsSystemECS() : velocity{ 0, 0 }, gravity{ -20.f }, jumpForce{ 11.f }, friction{ 0.1f }, alrJumped{ false }, collisionPoint{ 0,0 } {}
+PhysicsSystemECS::PhysicsSystemECS() : velocity{ 0, 0 }, gravity{ -0.000002f }, jumpForce{ 11.f }, friction{ 0.1f }, alrJumped{ false }, collisionPoint{ 0,0 } {}
 
 void PhysicsSystemECS::initialise() {}
 
@@ -36,19 +37,6 @@ void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
 Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
     float closestDistance = 100000.f;  // Initialize to a large number
 
-    // Find the closest platform to the player
-    //for (Platform& currentPlatform : platforms) {
-    //    float distance = std::sqrt(
-    //        std::pow(player->GetCoordinate().x - currentPlatform.px, 2) +
-    //        std::pow(player->GetCoordinate().y - currentPlatform.py, 2)
-    //    );
-
-    //    // Keep track of the closest platform
-    //    if (distance < closestDistance) {
-    //        closestDistance = distance;
-    //        closestPlatform = &currentPlatform;
-    //    }
-    //}
     glm::vec2 playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     int count = 0;
     int isClosest = 0;
@@ -77,7 +65,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 			}
         }
     }
-    std::cout << "Closest platform: " << isClosest << std::endl;
+    //std::cout << "Closest platform: " << isClosest << std::endl;
 
     return closestPlatform;
 }
@@ -227,6 +215,8 @@ void PhysicsSystemECS::HandleAABBCollision(Entity player, Entity closestPlatform
     { ecsCoordinator.getComponent<AABBComponent>(closestPlatform).right, ecsCoordinator.getComponent<AABBComponent>(closestPlatform).top }
     };
 
+
+
     float firstTimeOfCollision{};
 
     float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.x * (M_PI / 180.f);
@@ -319,6 +309,8 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player) {
         SetVelocity({ GetVelocity().x, jumpForce });
         GLFWFunctions::isJump = false;
     }
+
+    //std::cout << "Velocity: " << GetVelocity().x << ", " << GetVelocity().y << std::endl;
 }
 
 bool CollisionSystemECS::CollisionIntersection_RectRect(const AABB& aabb1,
@@ -595,6 +587,7 @@ void PhysicsSystemECS::update(float dt) {
     HandleAABBCollision(playerEntity, closestPlatformEntity);
     HandlePlayerInput(playerEntity);
 
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;
+    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
+    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;
+    
 }

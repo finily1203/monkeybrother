@@ -19,53 +19,55 @@ void GraphicSystemECS::update(float dt) {
 		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
 
 		bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
-		if (hasMovement) {
-			if (GLFWFunctions::left_turn_flag) {
-				transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
-				graphics.glObject.orientation.y = transform.orientation.y;
-			}
-			else if (GLFWFunctions::right_turn_flag) {
-				transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
-				graphics.glObject.orientation.y = transform.orientation.y;
-			}
-			else {
-				transform.orientation.y = 0.0f;
-				graphics.glObject.orientation.y = transform.orientation.y;
-			}
+		if (hasMovement) {	
+			//if (GLFWFunctions::left_turn_flag) {
+			//	transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.orientation.y = transform.orientation.y;
+			//}
+			//else if (GLFWFunctions::right_turn_flag) {
+			//	transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.orientation.y = transform.orientation.y;
+			//}
+			//else {
+			//	transform.orientation.y = 0.0f;
+			//	graphics.glObject.orientation.y = transform.orientation.y;
+			//}
 
-			// Scaling logic
-			if (GLFWFunctions::scale_up_flag) {
-				if (transform.scale.x < 5.0f && transform.scale.y < 5.0f) {
-					transform.scale.x += 1.78f * GLFWFunctions::delta_time;
-					transform.scale.y += 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.scaling = transform.scale;
-				}
-			}
-			else if (GLFWFunctions::scale_down_flag) {
-				if (transform.scale.x > 0.1f && transform.scale.y > 0.1f) {
-					transform.scale.x -= 1.78f * GLFWFunctions::delta_time;
-					transform.scale.y -= 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.scaling = transform.scale;
-				}
-			}
+			//// Scaling logic
+			//if (GLFWFunctions::scale_up_flag) {
+			//	if (transform.scale.x < 5.0f && transform.scale.y < 5.0f) {
+			//		transform.scale.x += 1.78f * GLFWFunctions::delta_time;
+			//		transform.scale.y += 1.0f * GLFWFunctions::delta_time;
+			//		graphics.glObject.scaling = transform.scale;
+			//	}
+			//}
+			//else if (GLFWFunctions::scale_down_flag) {
+			//	if (transform.scale.x > 0.1f && transform.scale.y > 0.1f) {
+			//		transform.scale.x -= 1.78f * GLFWFunctions::delta_time;
+			//		transform.scale.y -= 1.0f * GLFWFunctions::delta_time;
+			//		graphics.glObject.scaling = transform.scale;
+			//	}
+			//}
 
-			// Movement logic
-			if (GLFWFunctions::move_up_flag) {
-				transform.position.y += 1.0f * GLFWFunctions::delta_time;
-				graphics.glObject.position = transform.position;
-			}
-			if (GLFWFunctions::move_down_flag) {
-				transform.position.y -= 1.0f * GLFWFunctions::delta_time;
-				graphics.glObject.position = transform.position;
-			}
-			if (GLFWFunctions::move_left_flag) {
-				transform.position.x -= 1.0f * GLFWFunctions::delta_time;
-				graphics.glObject.position = transform.position;
-			}
-			if (GLFWFunctions::move_right_flag) {
-				transform.position.x += 1.0f * GLFWFunctions::delta_time;
-				graphics.glObject.position = transform.position;
-			}
+			//// Movement logic
+			//if (GLFWFunctions::move_up_flag) {
+			//	transform.position.y += 1.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.position = transform.position;
+			//}
+			//if (GLFWFunctions::move_down_flag) {
+			//	transform.position.y -= 1.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.position = transform.position;
+			//}
+			//if (GLFWFunctions::move_left_flag) {
+			//	transform.position.x -= 1.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.position = transform.position;
+			//}
+			//if (GLFWFunctions::move_right_flag) {
+			//	transform.position.x += 1.0f * GLFWFunctions::delta_time;
+			//	graphics.glObject.position = transform.position;
+			//}
+
+			graphics.glObject.position = transform.position;
 		}
 		//graphicsSystem.Update(GLFWFunctions::delta_time, false);
 

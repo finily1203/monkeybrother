@@ -409,6 +409,7 @@ void ECSCoordinator::test3() {
 		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
 		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
 		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
+		physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
 	}
 
 	physicsSystem->initialise();
@@ -450,12 +451,21 @@ void ECSCoordinator::test3() {
 	addComponent(platform3, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
 	addComponent(platform3, ClosestPlatform{ false });
 
+	//TEST PLATFORM TO CALCULATE AABB
+	Entity platform4 = createEntity();
+	addComponent(platform4, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(1.f, 1.0f), glm::vec2(-0.5f, 0.3f) });
+	GraphicsComponent gfxComp5{};
+	gfxComp5.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(1.f, 1.f), glm::vec2(-0.5f, 0.3f));
+	addComponent(platform4, gfxComp5);
+	addComponent(platform4, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(platform4, ClosestPlatform{ false });
+
 	std::cout << "Create Player" << std::endl;
 	Entity player =	createEntity();
 	addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(0.3f, 0.15f), glm::vec2(0.0f, 0.5f) });
 	GraphicsComponent gfxComp4{};
 	gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.3f, 0.15f), glm::vec2(0.0f, 0.5f));
 	addComponent(player, gfxComp4);
-	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
-	addComponent(player, MovementComponent{ 0.01f });
+	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f }); 
+	addComponent(player, MovementComponent{ 1.0f });
 }
