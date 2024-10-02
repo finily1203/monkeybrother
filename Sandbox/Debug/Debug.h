@@ -6,6 +6,10 @@
 #include <GLFW/glfw3.h> 
 #include "GlfwFunctions.h"
 
+#include "Systems.h"
+#include "matrix3x3.h"
+#include "GraphicsSystem.h"
+#include "WindowSystem.h"
 #include "SystemManager.h"
 
 #include <iostream>
@@ -29,25 +33,21 @@ public:
 	void Update();
 	void Cleanup();
 
-	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void StartLoop(); //Start record game loop time
 
-	static void StartLoop();
+	static void StartSystemTiming(const char* systemName); //Start record system loop time
 
-	static void StartSystemTiming(const char* systemName);
+	static void EndSystemTiming(const char* systemName); //End record system loop time
 
-	static void EndSystemTiming(const char* systemName);
+	static void EndLoop();  //End record game loop time
 
-	static void EndLoop();
+	static double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
-	static double SystemPercentage(const char* systemName);
-
-	static void UpdateSystemTimes();
+	static void UpdateSystemTimes(); //Update all system loop time
 
 private:
 	ImGuiIO* io;
-	ImFont* font1;
-	ImFont* font2;
-	static bool showGUI;
+	ImFont* font;
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
 	static double totalLoopTime;
@@ -57,16 +57,17 @@ private:
 	static int systemCount;
 };
 
-static bool LegacyKeyDuplicationCheck(ImGuiKey key);
+static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map
 
 class CrashLog {
 public:
 	static void Initialise();
 	static void Cleanup();
+	//Log messages into crash-log.txt
 	static void LogDebugMessage(const std::string& message, const char* file = nullptr, int line = 0);
-	static void SignalHandler(int signum);
-	static void SignalChecks();
-	struct Exception {
+	static void SignalHandler(int signum); //Log specific messages into log file according to signal receive
+	static void SignalChecks(); //Check for program crash signals
+	struct Exception { //Unique exception to record file and line of thrown exceptions
 		std::string message;
 		const char* file;
 		int line;
@@ -77,19 +78,65 @@ public:
 private:
 	static std::ofstream logFile;
 
-	static std::string getCurrentTimestamp() {
-		std::time_t now = std::time(nullptr);
-        std::tm timeinfo;
-        localtime_s(&timeinfo, &now);
-        std::ostringstream oss;
-        oss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
-        return oss.str();
-	}
+	static std::string GetCurrentTimestamp(); //Record time of logging
+		
 };
 
-//void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity,
-//	GLsizei length, const GLchar* message, const void* userParam);
-//
-//void openLogFile();
-//
-//void closeLogFile();
+class GameViewWindow {
+public:
+
+	static void Initialise();
+
+	static void Update();
+
+private:
+
+	static int viewportWidth;
+	static int viewportHeight;
+	static GLuint viewportTexture;
+
+	static void SetupViewportTexture(); //Set up Opengl texture to store game scene
+
+	static void CaptureMainWindow(); //Capture rendered game scene
+
+	static void Cleanup();
+
+	static ImVec2 GetLargestSizeForViewport(); //Resize viewport dynamically while preserving aspect ratio
+
+	static ImVec2 GetCenteredPosForViewport(ImVec2 aspectSize); //Center viewport within available space
+};
+
+class Console {
+public:
+
+	static void Update(const char* title); 
+
+	static Console& GetLog(); //Called for logging
+
+	Console(Console const&) = delete; //Prevents copying
+	void operator=(Console const&) = delete; //Prevent reassigning
+
+	template<typename T>
+	Console& operator<<(const T& value) { //Handle general output
+		currentLog << value;
+		return *this;
+	}
+
+	Console& operator<<(std::ostream& (*manip)(std::ostream&)) { //Handle std::endl
+		if (manip == static_cast<std::ostream & (*)(std::ostream&)>(std::endl)) {
+			items.push_back(currentLog.str());
+			currentLog.str("");
+			currentLog.clear();
+		}
+		return *this;
+	}
+
+private:
+	static Console* instance;
+    static std::vector<std::string> items;
+    static bool autoScroll;
+    static float lastScrollY;
+	static std::ostringstream currentLog;
+	Console() {}
+	void DrawImpl(const char* title); //ImGui console GUI format
+};

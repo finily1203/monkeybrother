@@ -41,7 +41,6 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
         glfwTerminate();
         return false;
     }
-
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
     glfwSwapInterval(0); //vsync
