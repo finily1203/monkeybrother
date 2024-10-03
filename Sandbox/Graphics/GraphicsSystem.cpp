@@ -48,9 +48,9 @@ void GraphicsSystem::initialise() {
     ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
     m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
     if (!m_Shader2->IsCompiled()) {
-		std::cerr << "Shader compilation failed." << std::endl;
-		return;
-	}
+        std::cerr << "Shader compilation failed." << std::endl;
+        return;
+    }
 
     // Load texture 1
     int width, height, nrChannels;
@@ -123,7 +123,7 @@ void GraphicsSystem::initialise() {
 
 
     // Calculate the frame width and height based on the number of columns
-    int columns = 4;  // Adjust to match your spritesheet
+    int columns = 1;  // Adjust to match your spritesheet
     int rows = 1;     // Adjust to match your spritesheet
     float frameWidth = static_cast<float>(width) / columns;
     float frameHeight = static_cast<float>(height) / rows;
@@ -178,9 +178,13 @@ void GraphicsSystem::initialise() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // get the location of the uniform variable in the shader
-    /*int location = m_Shader2->GetUniformLocation("u_Color");
+    m_Shader2->Bind();
+
+    int location = m_Shader2->GetUniformLocation("u_Color");
     ASSERT(location != -1);
-    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));*/
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+
+    m_Shader2->Unbind();
 }
 
 void GraphicsSystem::update() {}
@@ -238,7 +242,7 @@ void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScali
     position = rhsPosition;
     mdl_xform = glm::mat3{ 1.0 };
     mdl_to_ndc_xform = glm::mat3{ 1.0 };
-    color = glm::vec3 { 1.0, 1.0, 1.0 };
+    color = glm::vec3{ 1.0, 1.0, 1.0 };
     GLboolean isAnimated = GL_FALSE;
 }
 
@@ -275,7 +279,7 @@ void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
         0,               0,              1 };
 
     mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform = mdl_xform;
+    mdl_to_ndc_xform = NDC * mdl_xform;
 }
 
 void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const {

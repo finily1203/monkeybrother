@@ -8,12 +8,19 @@
 #include "AudioSystem.h"
 #include "GlobalCoordinator.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 
 namespace monkeybrother {
 	__declspec(dllimport) void Print();
 }
 
 int main() {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+
 	try {
 		CrashLog::SignalChecks();
 		CrashLog::Initialise();
@@ -61,6 +68,8 @@ int main() {
 		CrashLog::LogDebugMessage(e.message, e.file, e.line);
 		CrashLog::LogDebugMessage("End Log");
 	}
-	
+
+	_CrtDumpMemoryLeaks();
+
 	return 0;
 }

@@ -14,7 +14,6 @@ bool GLFWFunctions::nextSong = false;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
 bool GLFWFunctions::cloneObject = false;
-bool GLFWFunctions::isJump = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -25,7 +24,9 @@ GLboolean GLFWFunctions::move_down_flag = false;
 GLboolean GLFWFunctions::move_left_flag = false;
 GLboolean GLFWFunctions::move_right_flag = false;
 GLboolean GLFWFunctions::debug_flag = false;
+GLboolean GLFWFunctions::move_jump_flag = false;
 
+int GLFWFunctions::testMode = 0;
 
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -117,7 +118,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         volume = std::max(0.1f, volume - 0.1f);
         std::cout << "Volume: " << volume << std::endl;
     }
-    
+
     if (GLFW_KEY_PERIOD == key && GLFW_PRESS == action) {
         volume = std::min(1.f, volume + 0.1f);
         std::cout << "Volume: " << volume << std::endl;
@@ -127,8 +128,9 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::cloneObject = true;
     }
 
-    if (GLFW_KEY_SPACE == key && GLFW_PRESS == action && GLFWFunctions::isJump == false) {
-        GLFWFunctions::isJump = true;
+    if (GLFW_KEY_M == key && GLFW_PRESS == action) {
+        GLFWFunctions::testMode = (GLFWFunctions::testMode + 1) % 3;
+
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
@@ -139,6 +141,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     GLFWFunctions::move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
     GLFWFunctions::move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
     GLFWFunctions::move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
+    GLFWFunctions::move_jump_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_SPACE) != 0;
 
 
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
@@ -203,9 +206,10 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
         GLFWFunctions::fps = frameCount / elapsedTime;
         if (GLFWFunctions::fps > 60) {
             fps = 60.0;
-        } else {
-			fps = GLFWFunctions::fps;
-		}
+        }
+        else {
+            fps = GLFWFunctions::fps;
+        }
 
         startTime = currTime;
         frameCount = 0.0;

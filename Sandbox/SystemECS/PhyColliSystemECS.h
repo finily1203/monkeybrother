@@ -30,6 +30,13 @@ public:
 	bool AABBSlopeCollision(Entity platform, Entity player, glm::vec2 velocity);
 
 	CollisionSide circleRectCollision(float circleX, float circleY, float circleRadius, Entity platform);
+
+	glm::vec2 GetCollisionPoint() const { return collisionPoint; }
+	void SetCollisionPoint(glm::vec2 newCollisionPoint) { collisionPoint = newCollisionPoint; }
+
+private:
+	glm::vec2 collisionPoint;
+
 };
 
 class PhysicsSystemECS : public System
@@ -43,11 +50,9 @@ public:
 
 	glm::vec2 GetVelocity() const { return velocity; }
 	bool GetAlrJumped() const { return alrJumped; }
-	glm::vec2 GetCollisionPoint() const { return collisionPoint; }
 
 	void SetVelocity(glm::vec2 newVelocity) { velocity = newVelocity; }
 	void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
-	void SetCollisionPoint(glm::vec2 newCollisionPoint) { collisionPoint = newCollisionPoint; }
 
 	void ApplyGravity(Entity entity, float dt);
 	Entity FindClosestPlatform(Entity player);
@@ -62,7 +67,6 @@ public:
 
 private:
 	glm::vec2 velocity;
-	glm::vec2 collisionPoint;
 	float gravity;
 	float jumpForce;
 	float friction;

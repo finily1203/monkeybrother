@@ -7,10 +7,13 @@
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 
-void GraphicSystemECS::initialise() {}
+void GraphicSystemECS::initialise() {
+	graphicsSystem.initialise();
+}
 
 void GraphicSystemECS::update(float dt) {
 	Shader* shader = graphicsSystem.GetShader();
+	Shader* shader2 = graphicsSystem.GetShader2();
 
 	for (auto entity : entities) {
 		//check if entity has transform component
@@ -19,7 +22,7 @@ void GraphicSystemECS::update(float dt) {
 		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
 
 		bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
-		if (hasMovement) {	
+		if (hasMovement) {
 			//if (GLFWFunctions::left_turn_flag) {
 			//	transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
 			//	graphics.glObject.orientation.y = transform.orientation.y;
@@ -72,9 +75,10 @@ void GraphicSystemECS::update(float dt) {
 		//graphicsSystem.Update(GLFWFunctions::delta_time, false);
 
 		graphics.glObject.update(GLFWFunctions::delta_time);
-		graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
+		graphicsSystem.drawDebugLines(graphics.glObject);
+		graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), 0);
 
 	}
 }
 
-void GraphicSystemECS::cleanup(){}
+void GraphicSystemECS::cleanup() {}

@@ -21,7 +21,7 @@ void WindowSystem::logicUpdate() {
 		gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time;
 	}
 	else {
-		gameObject.orientation.y = 0.0f;  
+		gameObject.orientation.y = 0.0f;
 	}
 
 	// Scaling logic
@@ -63,7 +63,7 @@ void WindowSystem::logicUpdate() {
 		graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
 	}
 
-	
+
 	if (!isMoving) {
 		graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
 	}
@@ -103,15 +103,15 @@ void WindowSystem::initialise() {
 
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
 	glViewport(0, 0, width, height);
-	
+
 
 	graphicsSystem.initialise();
 
 	DebugTool->Initialise();
 
-	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
-	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
-	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 8, 2.0f }, glm::vec2{ 0.0f, 0.0f });
+	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 200.f, 200.0f }, glm::vec2{ -200.f, 0.0f });
+	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 200.f, 200.0f }, glm::vec2{ 200.f, 0.0f });
+	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
 	blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
 	gameObject.is_animated = GL_TRUE;
 	gameObject2.is_animated = GL_TRUE;
@@ -140,7 +140,7 @@ void WindowSystem::update() {
 
 	logicUpdate();
 
-	DebugSystem::StartSystemTiming("Graphics"); 
+	DebugSystem::StartSystemTiming("Graphics");
 
 	graphicsSystem.Update(GLFWFunctions::delta_time, false);
 	graphicsSystem.Render(GLFWFunctions::delta_time);
@@ -148,35 +148,41 @@ void WindowSystem::update() {
 	background.update(GLFWFunctions::delta_time);
 	gameObject.update(GLFWFunctions::delta_time);
 	gameObject2.update(GLFWFunctions::delta_time);
-	//blackBox.update(GLFWFunctions::delta_time);
+	blackBox.update(GLFWFunctions::delta_time);
 
-	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
-	//blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
-	// animation update
 	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-	//gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
-	//if (GLFWFunctions::debug_flag) {
-	//	graphicsSystem.drawDebugLines(gameObject);
-	//	graphicsSystem.drawDebugLines(gameObject2);
+	//if (GLFWFunctions::testMode == 1) {
+	//	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+	//	blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
+	//	//animation update
+
 	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//}
-	//else {
-	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//}
-	//if (GLFWFunctions::debug_flag) {
-	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-	//}
-	//else
 	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
+	//	if (GLFWFunctions::debug_flag) {
+	//		graphicsSystem.drawDebugLines(gameObject);
+	//		graphicsSystem.drawDebugLines(gameObject2);
+	//		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	//	}
+	//	else {
+	//		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	//	}
+	//	if (GLFWFunctions::debug_flag) {
+	//		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	//	}
+	//	else
+	//		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	//}
 
-	DebugSystem::EndSystemTiming("Graphics"); 
 
-	DebugSystem::StartSystemTiming("Debug"); 
+
+
+	DebugSystem::EndSystemTiming("Graphics");
+
+	DebugSystem::StartSystemTiming("Debug");
 	DebugTool->Update();
-	DebugSystem::EndSystemTiming("Debug"); 
+	DebugSystem::EndSystemTiming("Debug");
 
 	GLFWFunctions::getFps(1);
 

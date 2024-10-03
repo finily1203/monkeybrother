@@ -22,9 +22,9 @@ void AudioSystem::initialise() {
         return;
     }
 
-    addSong("../assets/audio/Mood_Lofi.wav");
-    addSong("../assets/audio/All_My_Fellas.wav");
-    //playSong(0);
+    addSong("../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav");
+    addSong("../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav");
+    playSong(0);
 }
 
 void AudioSystem::update() {
@@ -107,14 +107,14 @@ void AudioSystem::cleanup() {
 }
 
 void AudioSystem::addSong(const std::string& songPath) {
-	FMOD::Sound* audioSong = nullptr;
-	FMOD_RESULT result = audioSystem->createSound(songPath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
+    FMOD::Sound* audioSong = nullptr;
+    FMOD_RESULT result = audioSystem->createSound(songPath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
     if (result != FMOD_OK) {
-		std::cout << "FMOD error! (" << result << ") " << std::endl;
-		return;
-	}
+        std::cout << "FMOD error! (" << result << ") " << std::endl;
+        return;
+    }
 
-	audioSongList.push_back(audioSong);
+    audioSongList.push_back(audioSong);
 }
 
 void AudioSystem::playSong(int index) {
@@ -122,19 +122,19 @@ void AudioSystem::playSong(int index) {
         if (audioChannel) {
             FMOD_RESULT result = audioChannel->stop();
             if (result != FMOD_OK) {
-				std::cout << "FMOD stop error! (" << result << ") " << std::endl;
-			}
+                std::cout << "FMOD stop error! (" << result << ") " << std::endl;
+            }
             audioChannel = nullptr;
         }
         FMOD_RESULT result = audioSystem->playSound(audioSongList[index], nullptr, false, &audioChannel);
         setSongIndex(index);
         if (result != FMOD_OK) {
-			std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
-		}
-	}
+            std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+        }
+    }
     else {
-		std::cout << "Invalid index." << std::endl;
-	}
+        std::cout << "Invalid index." << std::endl;
+    }
 }
 
 int AudioSystem::getSongIndex() {
@@ -142,5 +142,5 @@ int AudioSystem::getSongIndex() {
 }
 
 void AudioSystem::setSongIndex(int index) {
-	currSongIndex = index;
+    currSongIndex = index;
 }

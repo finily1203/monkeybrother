@@ -28,7 +28,6 @@ struct GLFWFunctions {
 	static bool nextSong;
 	static bool audioStopped;
 	static bool cloneObject;
-	static bool isJump;
 
 	static GLboolean left_turn_flag;
 	static GLboolean right_turn_flag;
@@ -39,8 +38,11 @@ struct GLFWFunctions {
 	static GLboolean move_left_flag;
 	static GLboolean move_right_flag;
 	static GLboolean debug_flag;
+	static GLboolean move_jump_flag;
 
 	static bool isGuiOpen;
+
+	static int testMode;
 };
 
 #endif
