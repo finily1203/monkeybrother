@@ -8,6 +8,7 @@
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include <unordered_set>
+#include "GLFWFunctions.h"
 
 #define M_PI   3.14159265358979323846264338327950288
 
@@ -682,27 +683,29 @@ CollisionSide CollisionSystemECS::circleRectCollision(float circleX, float circl
 }
 
 void PhysicsSystemECS::update(float dt) {
-    //let it be the first entity
-    Entity playerEntity = ecsCoordinator.getFirstEntity();
-    Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
 
-    for (auto& entity : entities) {
-        bool isPlayer = ecsCoordinator.hasComponent<MovementComponent>(entity);
-        if (isPlayer) {
-            playerEntity = entity;
-            break;
+    if (GLFWFunctions::testMode == 0) {
+        //let it be the first entity
+        Entity playerEntity = ecsCoordinator.getFirstEntity();
+        Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
+
+        for (auto& entity : entities) {
+            bool isPlayer = ecsCoordinator.hasComponent<MovementComponent>(entity);
+            if (isPlayer) {
+                playerEntity = entity;
+                break;
+            }
         }
+
+        closestPlatformEntity = FindClosestPlatform(playerEntity);
+
+        //bool isClosestPlatform = ecsCoordinator.getComponent<ClosestPlatform>(closestPlatformEntity).isClosest;
+        //std::cout << "Is closes platform really closest? " << (isClosestPlatform ? "yes" : "no") << std::endl;
+
+        HandleAABBCollision(playerEntity, closestPlatformEntity);
+        HandlePlayerInput(playerEntity);
+
+        ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
+        ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;
     }
-
-    closestPlatformEntity = FindClosestPlatform(playerEntity);
-
-    //bool isClosestPlatform = ecsCoordinator.getComponent<ClosestPlatform>(closestPlatformEntity).isClosest;
-    //std::cout << "Is closes platform really closest? " << (isClosestPlatform ? "yes" : "no") << std::endl;
-
-    HandleAABBCollision(playerEntity, closestPlatformEntity);
-    HandlePlayerInput(playerEntity);
-
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;
-
 }

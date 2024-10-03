@@ -109,8 +109,8 @@ void WindowSystem::initialise() {
 
 	DebugTool->Initialise();
 
-	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 200.f, 200.0f }, glm::vec2{ -200.f, 0.0f });
-	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 200.f, 200.0f }, glm::vec2{ 200.f, 0.0f });
+	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
+	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ 200.f, 0.0f });
 	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
 	blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
 	gameObject.is_animated = GL_TRUE;
@@ -152,31 +152,28 @@ void WindowSystem::update() {
 
 	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
 
-	//if (GLFWFunctions::testMode == 1) {
-	//	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
-	//	blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
-	//	//animation update
+	if (GLFWFunctions::testMode == 1) {
+		background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+		blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
+		//animation update
 
-	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
-	//	if (GLFWFunctions::debug_flag) {
-	//		graphicsSystem.drawDebugLines(gameObject);
-	//		graphicsSystem.drawDebugLines(gameObject2);
-	//		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//	}
-	//	else {
-	//		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//	}
-	//	if (GLFWFunctions::debug_flag) {
-	//		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-	//	}
-	//	else
-	//		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-	//}
-
-
-
+		if (GLFWFunctions::debug_flag) {
+			graphicsSystem.drawDebugLines(gameObject);
+			graphicsSystem.drawDebugLines(gameObject2);
+			gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+		}
+		else {
+			gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+		}
+		if (GLFWFunctions::debug_flag) {
+			gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+		}
+		else
+			gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	}
 
 	DebugSystem::EndSystemTiming("Graphics");
 

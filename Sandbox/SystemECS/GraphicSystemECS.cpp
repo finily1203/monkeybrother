@@ -75,8 +75,15 @@ void GraphicSystemECS::update(float dt) {
 		//graphicsSystem.Update(GLFWFunctions::delta_time, false);
 
 		graphics.glObject.update(GLFWFunctions::delta_time);
-		graphicsSystem.drawDebugLines(graphics.glObject);
-		graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), 0);
+		if (GLFWFunctions::testMode == 0) 
+		{
+			graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), 0);
+		}
+		else if (GLFWFunctions::testMode == 1) 
+		{
+			graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
+		}
+		
 
 	}
 }
