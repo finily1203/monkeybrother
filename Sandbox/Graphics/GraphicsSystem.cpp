@@ -178,9 +178,11 @@ void GraphicsSystem::initialise() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // get the location of the uniform variable in the shader
-    /*int location = m_Shader2->GetUniformLocation("u_Color");
+    m_Shader2->Bind();
+    int location = m_Shader2->GetUniformLocation("u_Color");
     ASSERT(location != -1);
-    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));*/
+    GLCall(glUniform4f(location, 0.231f, 0.78f, 0.557f, 1.0f));
+    m_Shader2->Unbind();
 }
 
 void GraphicsSystem::update() {}
