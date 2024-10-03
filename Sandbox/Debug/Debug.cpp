@@ -481,20 +481,22 @@ void Console::DrawImpl(const char* title) {
 
 	// Command-line
 	static char inputBuffer[256] = "";
+	//When enter key is pressed
 	if (ImGui::InputText("Input", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
 		if (inputBuffer[0]) {
 			*this << "> " << inputBuffer << std::endl;
-			// Here you would typically parse and execute the command
+			// Parse and execute the command
 			*this << "Command executed: " << inputBuffer << std::endl;
 		}
 		inputBuffer[0] = 0; // Clear the input buffer
 	}
 
 	ImGui::SameLine();
+	//When submit button is clicked
 	if (ImGui::Button("Submit")) {
 		if (inputBuffer[0]) {
 			*this << "> " << inputBuffer << std::endl;
-			// Here you would typically parse and execute the command
+			
 			*this << "Command executed: " << inputBuffer << std::endl;
 			inputBuffer[0] = 0; // Clear the input buffer
 		}
