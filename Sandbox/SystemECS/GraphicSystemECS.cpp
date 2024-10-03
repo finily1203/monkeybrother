@@ -11,6 +11,7 @@ void GraphicSystemECS::initialise() {}
 
 void GraphicSystemECS::update(float dt) {
 	Shader* shader = graphicsSystem.GetShader();
+	Shader* shader2 = graphicsSystem.GetShader2();
 
 	for (auto entity : entities) {
 		//check if entity has transform component
@@ -72,7 +73,7 @@ void GraphicSystemECS::update(float dt) {
 		//graphicsSystem.Update(GLFWFunctions::delta_time, false);
 
 		graphics.glObject.update(GLFWFunctions::delta_time);
-		graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
+		graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), 0);
 
 	}
 }
