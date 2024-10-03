@@ -56,16 +56,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)Sandbox\include;%(AdditionalIncludeDirectories);$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\EntityManager</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother;$(SolutionDir)lib\FMOD\studio\lib\x64;$(SolutionDir)lib\FMOD\core\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;fmodstudioL_vc.lib;fmodL_vc.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -75,16 +79,20 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\GLFW\include;$(SolutionDir)\include;$(SolutionDir)lib\GLEW\include;%(AdditionalIncludeDirectories);$(SolutionDir)\monkeybrother\Sandbox\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\EntityManager;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother;$(SolutionDir)lib\FMOD\studio\lib\x64;$(SolutionDir)lib\FMOD\core\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\monkeybrother\monkeybrother.vcxproj">
@@ -92,31 +100,72 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="AudioSystem\AudioSystem.cpp" />
+    <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
+    <ClCompile Include="EntityManager\SystemManager.cpp" />
+    <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
+    <ClCompile Include="Graphics\AnimationData.cpp" />
+    <ClCompile Include="Graphics\GraphicsSystem.cpp" />
+    <ClCompile Include="Graphics\Shader.cpp" />
+    <ClCompile Include="ImGui\imgui.cpp" />
+    <ClCompile Include="ImGui\imgui_draw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="ImGui\imgui_tables.cpp" />
+    <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
-    <ClCompile Include="AllTests\TestEntityAndComponent.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
     <ClCompile Include="Systems\Physics\Collision\Collision.cpp" />
     <ClCompile Include="Systems\Physics\System\Physics.cpp" />
+    <ClCompile Include="Serialization\jsonSerialization.cpp" />
+    <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioSystem\AudioSystem.h" />
+    <ClInclude Include="Components\GraphicsComponent.h" />
+    <ClInclude Include="Components\TransformComponent.h" />
+    <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
+    <ClInclude Include="EntityManager\ECSCoordinator.h" />
+    <ClInclude Include="EntityManager\ECSDefinitions.h" />
+    <ClInclude Include="EntityManager\SystemManager.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
-    <ClInclude Include="AllTests\TestEntityAndComponent.h" />
     <ClInclude Include="EntityManager\ComponentManager.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
+    <ClInclude Include="Graphics\AnimationData.h" />
+    <ClInclude Include="Graphics\GraphicsSystem.h" />
+    <ClInclude Include="Graphics\Shader.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="Systems\Physics\Collision\Collision.h" />
     <ClInclude Include="Systems\Physics\System\Physics.h" />
+    <ClInclude Include="Serialization\jsonSerialization.h" />
+    <ClInclude Include="Serialization\serialization.h" />
+    <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Basic.shader" />
+    <None Include="Graphics\Basic1.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Debug\Assets\liberation-mono.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Graphics\Assets\demon_spritesheet.png" />
+    <Image Include="Graphics\Assets\moss.png" />
+    <Image Include="Graphics\Assets\tomatohead1.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,9 +1,12 @@
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
-#include "GlfwFunctions.h"
 #include <iostream>
-#include "Engine.h"
 #include "WindowSystem.h"
-#include "TestEntityAndComponent.h"
+#include "Debug.h"
+#include "GlfwFunctions.h"
+#include "Engine.h"
+#include "ECSCoordinator.h"
+#include "AudioSystem.h"
+#include "GlobalCoordinator.h"
 
 
 namespace monkeybrother {
@@ -11,62 +14,60 @@ namespace monkeybrother {
 }
 
 int main() {
-	monkeybrother::Print();
+	try {
+		CrashLog::SignalChecks();
+		CrashLog::Initialise();
+		Engine* engine = new Engine();
 
-	Engine* engine = new Engine();
-	//EntityManager entityManager;
-	//entityManager.testEntityManager();
+		WindowSystem* windowSystem = new WindowSystem();
+		engine->addSystem(windowSystem);
 
-	//testComponentManager();
+		AudioSystem* audioSystem = new AudioSystem();
+		engine->addSystem(audioSystem);
 
-	//TestEntityAndComponent();
+		engine->addSystem(&ecsCoordinator);
 
-	WindowSystem* windowSystem = new WindowSystem();
-	engine->addSystem(windowSystem);
+		engine->initialiseSystem();
+		//ecsCoordinator.test();
+		ecsCoordinator.test2();
 
-	engine->initialiseSystem();
-	while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-		engine->updateSystem();
+		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
+			DebugSystem::StartLoop(); //Get time for start of gameloop
+
+			//If user presses clone button ("C"), clone first object
+			if (GLFWFunctions::cloneObject) {
+				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
+				GLFWFunctions::cloneObject = false;
+			}
+
+			engine->updateSystem();
+			glfwSwapBuffers(GLFWFunctions::pWindow);
+
+			DebugSystem::EndLoop(); //Get time for end of gameloop
+			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
+		}
+
+
+		engine->cleanupSystem();
+		delete engine;
+
+		CrashLog::Cleanup();
 	}
-	engine->cleanupSystem();
-	delete engine;
-
+	catch (const CrashLog::Exception& e) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
+		CrashLog::LogDebugMessage(e.message, e.file, e.line);
+		CrashLog::LogDebugMessage("End Log");
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << e.what() << std::endl;
+		CrashLog::LogDebugMessage(e.what());
+		CrashLog::LogDebugMessage("End Log");
+	}
+	catch (...) {
+		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
+		CrashLog::LogDebugMessage("Unknown exception caught");
+		CrashLog::LogDebugMessage("End Log");
+	}
+	
 	return 0;
 }
-
-
-
-
-//ECS - Entity Component System
-//
-//Entity->The unique ID of an object
-//Component->Data only classes, structs that contains the use of the component.
-//Example:
-//class Entity
-//{
-//    unsigned int idTag;
-//    std::vector<Component*> Components;
-//}
-//
-//struct Component
-//{
-//
-//}
-//
-//struct TransformComponent : public component
-//{
-//    vec4 transformMatrix;
-//    Mesh* mesh;
-//}
-//
-//struct GravityComponent : public component
-//{
-//    float speed;
-//    vec3 direction;
-//}
-//
-//System->Essentially a similar system like update or load but contains only component based scripts
-//Example : GravitySystem / PhysicsSystem->uses both TransformComponent and GravityComponent
-//
-//When rendering a scene, during the update, instead of check per entity, check per component
-//If the entity that shares this component is within the scene, it would perform an action or smth

@@ -1,9 +1,12 @@
 #pragma once
 #include "GlfwFunctions.h"
 #include "Systems.h"
+#include <Shader.h>
+#include "../Nlohmann/json.hpp"
+#include <fstream>
 
 //create class for windows application
-class WindowSystem : public Systems
+class WindowSystem : public GameSystems
 {
 public:
 	WindowSystem() = default;
@@ -14,4 +17,7 @@ public:
 	void initialise() override;
 	void update() override;
 	void cleanup() override;
+
+	void logicUpdate();
+	
 };
