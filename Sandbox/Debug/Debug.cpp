@@ -59,7 +59,7 @@ void DebugSystem::Initialise() {
 
 void DebugSystem::Update() {
 	if (GLFWFunctions::isGuiOpen) { //F1 key to open imgui GUI
-		
+		//std::cout << "GUI Open" << std::endl;
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();

@@ -1,3 +1,13 @@
+/*All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)@team   :  MonkeHood
+@course :  CSD2401@file   :  Application.cpp
+@brief  :
+*Lew Zong Han Owen (z.lew) :  - Integrated a try-catch block to capture custome and standard c++ exceptions for log crashing into
+	external file
+*Joel Chu (c.weiyuan) : Integrated the creation, update and deletion of GameSystems.
+File Contributions: Lew Zong Han Owen (50%)
+File Contributions: Joel Chu (50%)
+/*_______________________________________________________________________________________________________________*/
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include <iostream>
 #include "WindowSystem.h"
@@ -37,16 +47,13 @@ int main() {
 		engine->initialiseSystem();
 		//ecsCoordinator.test();
 		//ecsCoordinator.test2();
+		ecsCoordinator.initialiseSystemsAndComponents();
 		ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			DebugSystem::StartLoop(); //Get time for start of gameloop
 
-			//If user presses clone button ("C"), clone first object
-			if (GLFWFunctions::cloneObject) {
-				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
-				GLFWFunctions::cloneObject = false;
-			}
+
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);

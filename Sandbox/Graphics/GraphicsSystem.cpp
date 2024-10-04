@@ -310,45 +310,46 @@ void GraphicsSystem::drawDebugLines(const GLObject& obj) {
     // Set color for debug lines
     glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
 
+    float spriteWidth = obj.scaling.x;  // Width of one sprite
+    float spriteHeight = obj.scaling.y; // Height of the sprite
 
-    float spriteWidth = obj.scaling.x / 4; // Width of one sprite (assuming 4 columns in the sprite sheet)
-    float spriteHeight = obj.scaling.y;     // Height of the sprite
-
-
-    float halfWidth = spriteWidth * 0.5f;
-    float halfHeight = spriteHeight * 0.5f;
-
+    float halfWidth = spriteWidth / 2;
+    float halfHeight = spriteHeight / 2;
 
     glm::vec2 bottomLeft = glm::vec2(-halfWidth, -halfHeight);
     glm::vec2 bottomRight = glm::vec2(halfWidth, -halfHeight);
     glm::vec2 topRight = glm::vec2(halfWidth, halfHeight);
     glm::vec2 topLeft = glm::vec2(-halfWidth, halfHeight);
 
-    // Create a rotation matrix based on the object's rotation angle (around the z-axis)
-    glm::mat2 Rotating =
-    {
-         glm::cos(glm::radians(obj.orientation.x)), glm::sin(glm::radians(obj.orientation.x)),
-        -glm::sin(glm::radians(obj.orientation.x)), glm::cos(glm::radians(obj.orientation.x))
+    glm::mat2 NDC = glm::mat2{
+        2.0f / 1600.0f,     0,
+        0,                  2.0f / 900.0f
     };
 
-    // Rotate and translate each corner based on the object's rotation and position
-    glm::vec2 rotatedBottomLeft = obj.position + Rotating * bottomLeft;
-    glm::vec2 rotatedBottomRight = obj.position + Rotating * bottomRight;
-    glm::vec2 rotatedTopRight = obj.position + Rotating * topRight;
-    glm::vec2 rotatedTopLeft = obj.position + Rotating * topLeft;
+    // Translate each corner based on the object's position
+    glm::vec2 transformedBottomLeft = obj.position + bottomLeft;
+    glm::vec2 transformedBottomRight = obj.position + bottomRight;
+    glm::vec2 transformedTopRight = obj.position + topRight;
+    glm::vec2 transformedTopLeft = obj.position + topLeft;
+
+    // Convert to NDC space
+    transformedBottomLeft = NDC * transformedBottomLeft;
+    transformedBottomRight = NDC * transformedBottomRight;
+    transformedTopRight = NDC * transformedTopRight;
+    transformedTopLeft = NDC * transformedTopLeft;
 
     // Draw the AABB lines
-    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Bottom left
-    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y);  // Bottom left
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
 
-    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
-    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
 
-    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
-    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
 
-    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
-    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Back to bottom left
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y); // Back to bottom left
 
     glEnd();
 }

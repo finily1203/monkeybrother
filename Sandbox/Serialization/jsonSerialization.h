@@ -87,6 +87,7 @@ namespace Serializer
 				gameObj.y = currentObj["y"].get<float>();
 			}
 		}
+	
 	}
 
 	template <typename T>
