@@ -70,17 +70,24 @@ void ECSCoordinator::test2() {
 
 	std::cout << "Set entity" << std::endl;
 	Entity entity = createEntity();
-	addComponent(entity, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.5f, 0.5f) });
-	GraphicsComponent gfxComp1{};
-	gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.2f), glm::vec2(0.5f, 0.5f));
-	addComponent(entity, gfxComp1);
+	LoadEntityFromJSON(*this, entity, "./Serialization/player.json");
+	
+	// test codes for saving to JSON file
+	//TransformComponent transUpdate = getComponent<TransformComponent>(entity);
+	//GraphicsComponent graphicsUpdate = getComponent<GraphicsComponent>(entity);
+	//transUpdate.position = { 0.32f, -0.83f };
+	//transUpdate.scale = { 0.5f, 0.5f };
+	//transUpdate.orientation = { 0.0f, 0.0f };
+
+	//graphicsUpdate.glObject.position = { -0.5f, -0.61f };
+	//graphicsUpdate.glObject.scaling = { 0.15f, 0.3f };
+	//graphicsUpdate.glObject.orientation = { 0.0f, 0.0f };
+
+	//UpdateEntity(entity, transUpdate, graphicsUpdate);
+	//SaveEntityToJSON(*this, entity, "./Serialization/player.json");
 
 	Entity entity2 = createEntity();
-	addComponent(entity2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.2f), glm::vec2(0.75f, 0.75f) });
-	GraphicsComponent gfxComp2{};
-	gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.2f), glm::vec2(0.75f, 0.75f));
-	addComponent(entity2, gfxComp2);
-
+	LoadEntityFromJSON(*this, entity2, "./Serialization/enemy.json");
 }
 
 struct Position {
@@ -179,18 +186,21 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 		std::cout << "Error: could not open file " << filename << std::endl;
 		return;
 	}
+	
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+	std::string parentEntity = jsonObj.begin().key();
 
-	Position position;
-	serializer.ReadObject(position, "Player.position");
-	ecs.addComponent(entity, position);
+	TransformComponent transform{};
+	serializer.ReadObject(transform.position, parentEntity + ".transform.position");
+	serializer.ReadObject(transform.scale, parentEntity + ".transform.scale");
+	serializer.ReadObject(transform.orientation, parentEntity + ".transform.orientation");
+	ecs.addComponent(entity, transform);
 
-	Size size;
-	serializer.ReadObject(size, "Player.size");
-	ecs.addComponent(entity, size);
-
-	velocity vel;
-	serializer.ReadObject(vel, "Player.velocity");
-	ecs.addComponent(entity, vel);
+	GraphicsComponent graphics{};
+	serializer.ReadObject(graphics.glObject.position, parentEntity + ".graphics.position");
+	serializer.ReadObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
+	serializer.ReadObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
+	ecs.addComponent(entity, graphics);
 }
 
 void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
@@ -203,23 +213,24 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 		return;
 	}
 
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+	std::string parentEntity = jsonObj.begin().key();
+
 	// Get the current components of the entity
-	if (ecs.entityManager->getSignature(entity).test(getComponentType<Position>()))
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
-		Position position = getComponent<Position>(entity);
-		serializer.WriteObject(position, "Player.position");
+		TransformComponent transform = getComponent<TransformComponent>(entity);
+		serializer.WriteObject(transform.position, parentEntity + ".transform.position");
+		serializer.WriteObject(transform.scale, parentEntity + ".transform.scale");
+		serializer.WriteObject(transform.orientation, parentEntity + ".transform.orientation");
 	}
 
-	if (ecs.entityManager->getSignature(entity).test(getComponentType<Size>()))
+	if (ecs.entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
 	{
-		Size size = getComponent<Size>(entity);
-		serializer.WriteObject(size, "Player.size");
-	}
-
-	if (ecs.entityManager->getSignature(entity).test(getComponentType<velocity>()))
-	{
-		velocity vel = getComponent<velocity>(entity);
-		serializer.WriteObject(vel, "Player.velocity");
+		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
+		serializer.WriteObject(graphics.glObject.position, parentEntity + ".graphics.position");
+		serializer.WriteObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
+		serializer.WriteObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
 	}
 
 	if (!serializer.Save(filename))
@@ -228,13 +239,22 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 	}
 }
 
-void ECSCoordinator::UpdateEntityPosition(Entity& entity, float x, float y)
+void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate)
 {
-	if (entityManager->getSignature(entity).test(getComponentType<Position>()))
+	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
-		Position& position = getComponent<Position>(entity);
-		position.pos.SetX(x);
-		position.pos.SetY(y);
+		TransformComponent& transform = getComponent<TransformComponent>(entity);
+		transform.orientation = transUpdate.orientation;
+		transform.position = transUpdate.position;
+		transform.scale = transUpdate.scale;
+	}
+
+	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
+	{
+		GraphicsComponent& graphics = getComponent<GraphicsComponent>(entity);
+		graphics.glObject.position = graphicsUpdate.glObject.position;
+		graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
+		graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
 	}
 }
 
@@ -352,7 +372,7 @@ void ECSCoordinator::test() {
 	std::cout << std::endl;
 
 	float x = 12.533f, y = -63.1567f;
-	UpdateEntityPosition(loadedEntity, x, y);
+	//UpdateEntityPosition(loadedEntity, x, y);
 
 	SaveEntityToJSON(*this, loadedEntity, "./Serialization/player.json");
 

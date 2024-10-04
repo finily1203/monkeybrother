@@ -93,7 +93,6 @@ void WindowSystem::initialise() {
 		exit(EXIT_FAILURE);
 	}
 
-
 	GLenum glewInitResult = glewInit(); if (glewInitResult != GLEW_OK) {
 		std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewInitResult) << std::endl;
 		glfwTerminate();

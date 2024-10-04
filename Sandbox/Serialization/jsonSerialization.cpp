@@ -1,3 +1,17 @@
+/********************************************************************************************************
+/*!
+	\file		jsonSerialization.cpp
+	\project	Mosscape
+	\author		Ian Loi, ian.loi, 2301393
+	\brief		jsonSerialization.cpp handles basic serialization/deserialization operations. This file
+				contains functions that open the JSON file for deserialization, save to JSON file for 
+				serialization and all the operations of reading/writing of int, float and string.
+
+All content © 2024 DigiPen Institute of Technology Singapore. All rights reserved.
+*/
+/********************************************************************************************************/
+
+
 #include "jsonSerialization.h"
 
 
@@ -220,5 +234,10 @@ namespace Serializer
 		}
 
 		*currentObj = data;
+	}
+
+	nlohmann::json JSONSerializer::GetJSONObject() const
+	{
+		return jsonObj;
 	}
 }
