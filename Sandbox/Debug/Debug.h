@@ -1,3 +1,23 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  Debug.h
+@brief  :  This file contains the function declaration of ImGui GUI debugging features which include the debug
+		   window, game viewport window, console window, and crash logging system.
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
+		  indication
+		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
+		- Integrated ImGui console window to allow direct custom debugging output in debugging mode
+		- Integrated a crash logging system to detect and log custom and standard exceptions into a crash-log
+		  text file
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -23,6 +43,7 @@
 #include <csignal>
 #include <cstdlib>
 
+//Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
 class DebugSystem {
 public:
 	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
@@ -59,6 +80,7 @@ private:
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map
 
+//Class to detect custom and standard exceptions, and log crash logs into crash-log text file
 class CrashLog {
 public:
 	static void Initialise();
@@ -82,6 +104,7 @@ private:
 		
 };
 
+//Class for ImGui game viewport window in debugging mode
 class GameViewWindow {
 public:
 
@@ -106,6 +129,7 @@ private:
 	static ImVec2 GetCenteredPosForViewport(ImVec2 aspectSize); //Center viewport within available space
 };
 
+//Class for ImGui console window in debugging mode
 class Console {
 public:
 

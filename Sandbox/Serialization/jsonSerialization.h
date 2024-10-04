@@ -1,17 +1,19 @@
 #pragma once
-/********************************************************************************************************
 /*!
-	\file		jsonSerialization.h
-	\project	Mosscape
-	\author		Ian Loi, ian.loi, 2301393
-	\brief		jsonSerialization.h contains the JSON Serialization class that inherits from the BaseSerializer
-				class. This file contains the functions of ReadObject and WriteObject, ReadObject reads data
-				from JSON file and assign to the particular entity's data, whereas WriteObject writes the
-				entity's data to the JSON file. Both are of template types.
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author  :  Ian Loi (ian.loi)
+@team    :  MonkeHood
+@course  :  CSD2401
+@file    :  jsonSerialization.h
+@brief   :  jsonSerialization.h contains the JSON Serialization class that inherits from the BaseSerializer class.
 
-All content © 2024 DigiPen Institute of Technology Singapore. All rights reserved.
-*/
-/********************************************************************************************************/
+*Ian Loi (ian.loi) : 
+		 - Create functions of ReadObject and WriteObject, ReadObject reads data from JSON file and assign 
+		 to the particular entity's data, whereas WriteObject writes the entity's data to the JSON file.
+
+File Contributions: Ian Loi (100%)
+
+*//*__________________________________________________________________________________________________*/
 
 
 #include "serialization.h"

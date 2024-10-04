@@ -1,3 +1,23 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  Debug.cpp
+@brief  :  This file contains the function definition of ImGui GUI debugging features which include the debug
+		   window, game viewport window, console window, and crash logging system.
+
+*Lew Zong Han Owen (z.lew) : 
+		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
+		  indication
+		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
+		- Integrated ImGui console window to allow direct custom debugging output in debugging mode
+		- Integrated a crash logging system to detect and log custom and standard exceptions into a crash-log 
+		  text file
+	
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "Debug.h"
 #include "GlfwFunctions.h"
 
@@ -26,31 +46,33 @@ float Console::lastScrollY = 0.0f;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
 
+//Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 
+//Destructor for DebugSystem class
 DebugSystem::~DebugSystem() {}
 
 void DebugSystem::Initialise() {
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	io = &ImGui::GetIO();
+	ImGui::CreateContext(); 
+	io = &ImGui::GetIO(); 
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multiple Viewport
-	font = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20); 
+	font = io->Fonts->AddFontFromFileTTF("./Debug/Assets/liberation-mono.ttf", 20);  // Load text font file
 
-	ImGui::StyleColorsDark();
+	ImGui::StyleColorsDark();  // Set theme as dark
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.Colors[ImGuiCol_Separator] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
-	style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); //outer border of table
-	style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);  //inner border of table
+	style.Colors[ImGuiCol_Separator] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); // seperator's color     
+	style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); // table's outer border's color
+	style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);  // table's inner border's color
 	style.SeparatorTextBorderSize = 3.0f;
 	style.TabBorderSize = 3.0f;
 
 
 	ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
 
-	ImGui_ImplOpenGL3_Init("#version 130");
+	ImGui_ImplOpenGL3_Init("#version 130"); 
 
 	GameViewWindow::Initialise();
 
@@ -65,16 +87,20 @@ void DebugSystem::Update() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGuiViewport* viewport = ImGui::GetMainViewport(); //Set viewport to capture main application window
+		//Set next viewport to match the main the viewport 
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
+		//Remove window rounding, border, and padding
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	
 		ImGui::Begin("DockSpace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking);
 		ImGui::PopStyleVar(3);
 		ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
+		//Creates the dock space
 		ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 		ImGui::End();
 
@@ -83,7 +109,7 @@ void DebugSystem::Update() {
 			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 
-			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); 
+			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table 
 
 			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
@@ -204,6 +230,7 @@ void DebugSystem::Cleanup() {
 	ImGui::DestroyContext();
 }
 
+//Capture start game loop time
 void DebugSystem::StartLoop() {
 	loopStartTime = glfwGetTime(); //Capture start game loop time
 	systemCount = 0;
@@ -211,36 +238,40 @@ void DebugSystem::StartLoop() {
 	systemTimes.clear();
 }
 
+//Capture total game loop time
 void DebugSystem::EndLoop() {
 
-	totalLoopTime = GLFWFunctions::delta_time; //Capture total game loop time
+	totalLoopTime = GLFWFunctions::delta_time; 
 }
 
+//Capture system's start time loop
 void DebugSystem::StartSystemTiming(const char* systemName) {
 	systems.push_back(systemName); //Log system name
-	systemTimes[systemName] -= glfwGetTime() - loopStartTime; //Capture system's start time loop
+	systemTimes[systemName] -= glfwGetTime() - loopStartTime; 
 	systemCount++; //Log system quantity
 }
 
+//Capture system's end time loop
 void DebugSystem::EndSystemTiming(const char* systemName) {
-	systemTimes[systemName] += glfwGetTime() - loopStartTime; //Capture system's end time loop
+	systemTimes[systemName] += glfwGetTime() - loopStartTime; 
 }
 
+//Covnert time loop to percentage
 double DebugSystem::SystemPercentage(const char* systemName)
 {
 	auto it = systemTimes.find(systemName);
 	if (it != systemTimes.end()) { //Check if system present
-		return (it->second / totalLoopTime) * 100.0; //Covnert time loop to percentage
+		return (it->second / totalLoopTime) * 100.0; 
 	}
 
 	return 0.0;
 }
 
+// Update system times and percentages
 void DebugSystem::UpdateSystemTimes() {
 	double currentTime = glfwGetTime();
 	if (currentTime - lastUpdateTime >= 1.0) {  // Check if 1 second has passed
 		systemGameLoopPercent.clear();
-		// Update system times and percentages
 		for (int i{}; i < systemCount; i++) {
 			systemGameLoopPercent.push_back(SystemPercentage(systems[i]));
 		}
@@ -248,10 +279,11 @@ void DebugSystem::UpdateSystemTimes() {
 	}
 }
 
+//Check if legacy key is mapped in ImGui key map
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
-		&& ImGui::GetIO().KeyMap[key] != -1; //Check if legacy key is mapped in ImGui key map
+		&& ImGui::GetIO().KeyMap[key] != -1; 
 }
 
 void CrashLog::Initialise() {
@@ -273,6 +305,7 @@ void CrashLog::Cleanup() {
 	}
 }
 
+//Function to log crash messages to crash-log file based on custom exception
 void CrashLog::LogDebugMessage(const std::string& message, const char* file, int line) {
 	if(logFile.is_open()) {
 		if (file && line) { //Log exceptions with file and line location
@@ -283,6 +316,7 @@ void CrashLog::LogDebugMessage(const std::string& message, const char* file, int
 	}
 }
 
+//Log time and date of crash log messages
 std::string CrashLog::GetCurrentTimestamp() {
 	std::time_t now = std::time(nullptr); //Capture PC date and time
 	std::tm timeinfo;
@@ -292,6 +326,7 @@ std::string CrashLog::GetCurrentTimestamp() {
 	return oss.str();
 }
 
+//Handle standard c++ critical signals
 void CrashLog::SignalHandler(int signum) {
 	switch (signum) {
 	case SIGSEGV:
@@ -320,12 +355,14 @@ void CrashLog::SignalHandler(int signum) {
 	std::exit(signum);
 }
 
+//Checks program for standard c++ critical signals
 void CrashLog::SignalChecks() {
 	std::signal(SIGSEGV, SignalHandler); //Segmentation signal
 	std::signal(SIGABRT, SignalHandler); //Abort signal
 	std::signal(SIGFPE, SignalHandler);  //Floating-point signal
 	std::signal(SIGILL, SignalHandler);  //Illegal signal
 }
+
 
 void GameViewWindow::Initialise() {
 	viewportWidth = 1600;
@@ -340,7 +377,7 @@ void GameViewWindow::Update() {
 
 	CaptureMainWindow();
 
-	ImVec2 windowSize = GetLargestSizeForViewport();
+	ImVec2 windowSize = GetLargestSizeForViewport(); 
 
 	ImVec2 renderPos = GetCenteredPosForViewport(windowSize);
 
@@ -357,7 +394,7 @@ void GameViewWindow::Cleanup() {
 		viewportTexture = 0;
 	}
 }
-
+//Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
@@ -371,7 +408,7 @@ void GameViewWindow::SetupViewportTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
+//Capture rendered game scene
 void GameViewWindow::CaptureMainWindow() {
 	glBindTexture(GL_TEXTURE_2D, viewportTexture);
 
@@ -390,6 +427,7 @@ void GameViewWindow::CaptureMainWindow() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+//Function scale real time game scene to the size of the game viewport window
 ImVec2 GameViewWindow::GetLargestSizeForViewport()
 {
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -406,6 +444,7 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport()
 	return ImVec2(aspectWidth, aspectHeight);
 }
 
+//Function to translate the real time game scene to the center of the game viewport window
 ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 {
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
