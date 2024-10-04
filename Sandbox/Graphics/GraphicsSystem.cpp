@@ -1,3 +1,32 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GraphicsSystem.cpp
+@brief  :  This file contains the implementation of the GraphicsSystem class,
+           the GraphicsSystem class is responsible for rendering the game objects.
+
+* Liu YaoTing (yaoting.liu) :
+        - Implementated OpenGL debug function GL Call: It is used to check for OpenGL errors and log them.
+        - Loaded textures and shaders into the GraphicsSystem.
+        - Implemented the initialise function such as creating the VAO, VBO, EBO, UVBO, and loading the textures.
+        - Implemented the initialization of uvCoords.
+        - Implemented GLObject init(Data member Initialization), update (Model Transformations),
+          draw functions.
+
+* Javier Chua (javierjunliang.chua) :
+        - Implemented the initialise function such as creating the VAO, VBO, EBO, UVBO, and loading the textures.
+        - Implemented the update function to update the UV coordinates according to animation.
+        - Loaded textures and shaders into the GraphicsSystem.
+        - Implemented function to change sprite animation according to the action.
+        - Implemented drawDebugLines function to draw the bounding box of the sprite,
+          and the update function to update the model transformation matrix.
+        
+ File Contributions: Liu YaoTing (50%), Javier Chua (50%)
+
+/*_______________________________________________________________________________________________________________*/
+
 #include "GraphicsSystem.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

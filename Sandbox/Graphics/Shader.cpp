@@ -1,3 +1,24 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  Shader.cpp
+@brief  :  This file contains the implementation of the Shader class, which is responsible for
+		   compiling and linking the vertex and fragment shaders, as well as setting the uniform
+		   variables in the shaders.
+
+* Liu YaoTing (yaoting.liu) :
+* 	    - Implemented parsing of shader files to extract the vertex and fragment shader source code.
+*
+* Javier Chua (javierjunliang.chua) :
+*       - Implemented the Shader class, which is responsible for compiling and linking the vertex and fragment shaders,
+*
+*
+* File Contributions: Liu YaoTing (30%), Javier Chua (70%)
+*
+/*_ _ _ _ ________________________________________________________________________________-\*/
+
 #include "Shader.h"
 #include <iostream>
 #include <vector>
