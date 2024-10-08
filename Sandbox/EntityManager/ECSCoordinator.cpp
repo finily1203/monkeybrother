@@ -3,6 +3,41 @@
 #include "GraphicsComponent.h"
 #include "GraphicSystemECS.h"
 #include "GraphicsSystem.h"
+#include <Windows.h>
+
+
+std::string ECSCoordinator::GetExecutablePath()
+{
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+	std::string fullPath(buffer);
+
+	return fullPath.substr(0, fullPath.find_last_of("\\/"));
+}
+
+std::string ECSCoordinator::GetWindowConfigJSONPath()
+{
+	std::string execPath = GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\windowConfig.json";
+
+	return jsonPath;
+}
+
+std::string ECSCoordinator::GetPlayerJSONPath()
+{
+	std::string execPath = GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\player.json";
+
+	return jsonPath;
+}
+
+std::string ECSCoordinator::GetEnemyJSONPath()
+{
+	std::string execPath = GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\enemy.json";
+
+	return jsonPath;
+}
 
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
@@ -66,9 +101,10 @@ void ECSCoordinator::test2() {
 
 	std::cout << "Set entity" << std::endl;
 	Entity entity = createEntity();
-	LoadEntityFromJSON(*this, entity, "./Serialization/player.json");
+	LoadEntityFromJSON(*this, entity, GetPlayerJSONPath());
 	
 	// test codes for saving to JSON file
+	// can be uncommented for the testing of saving to JSON file
 	//TransformComponent transUpdate = getComponent<TransformComponent>(entity);
 	//GraphicsComponent graphicsUpdate = getComponent<GraphicsComponent>(entity);
 	//transUpdate.position = { 0.32f, -0.83f };
@@ -80,10 +116,10 @@ void ECSCoordinator::test2() {
 	//graphicsUpdate.glObject.orientation = { 0.0f, 0.0f };
 
 	//UpdateEntity(entity, transUpdate, graphicsUpdate);
-	//SaveEntityToJSON(*this, entity, "./Serialization/player.json");
+	//SaveEntityToJSON(*this, entity, GetPlayerJSONPath());
 
 	Entity entity2 = createEntity();
-	LoadEntityFromJSON(*this, entity2, "./Serialization/enemy.json");
+	LoadEntityFromJSON(*this, entity2, GetEnemyJSONPath());
 }
 
 struct Position {

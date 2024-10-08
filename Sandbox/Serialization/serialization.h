@@ -1,17 +1,17 @@
 #pragma once
-/********************************************************************************************************
 /*!
-	\file		serialization.h
-	\project	Mosscape
-	\author		Ian Loi, ian.loi, 2301393
-	\brief		serialization.h contains the BaseSerializer class, this is the main serializer class that
-				can be used efficiently if we were to have different serialization modes in the future.
-				This file contains 8 non-member functions that handles the reading and writing of different
-				value types such as game objects, int, float and string.
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author:	Ian Loi (ian.loi)
+@team:      MonkeHood
+@course:    CSD2401
+@file:      serialization.h
+@brief:     serialization.h contains the BaseSerializer class, this is the main serializer class that
+			can be used efficiently if we were to have different serialization modes in the future.
+			Ian Loi (ian.loi): Created 8 non-member functions that handles the reading and writing of 
+							   different value types such as game objects, int, float and string.
+							   100%
+*//*_________________________________________________________________________________________________-*/
 
-All content © 2024 DigiPen Institute of Technology Singapore. All rights reserved.
-*/
-/********************************************************************************************************/
 
 
 #include <glm/glm.hpp>

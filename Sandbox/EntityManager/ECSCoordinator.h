@@ -56,6 +56,11 @@ public:
 	unsigned int getEntityNum();
 	Entity getFirstEntity();
 
+	std::string GetExecutablePath();
+	std::string GetWindowConfigJSONPath();
+	std::string GetPlayerJSONPath();
+	std::string GetEnemyJSONPath();
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&);

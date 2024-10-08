@@ -3,6 +3,7 @@
 #include "WindowSystem.h"
 #include <iostream>
 #include "GlobalCoordinator.h"
+#include "ECSCoordinator.h"
 
 
 //GraphicsSystem graphicsSystem;
@@ -73,7 +74,8 @@ void WindowSystem::logicUpdate() {
 
 void WindowSystem::initialise() {
 	nlohmann::json windowConfigJSON;
-	std::ifstream windowConfigFile("./Serialization/windowConfig.json");
+	ECSCoordinator ecs;
+	std::ifstream windowConfigFile(ecs.GetWindowConfigJSONPath());
 
 	if (!windowConfigFile.is_open())
 	{
