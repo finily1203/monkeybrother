@@ -1,3 +1,14 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   EntityManager.h
+@brief:  This header file declares the EntityManager class for the ECS system.
+		 The EntityManager class is used to manage all the entities in the ECS.
+		 Joel Chu (c.weiyuan): declared the functions in EntityManager class
+							   100%
+*//*___________________________________________________________________________-*/
 //Purpose: To manage entities and their components
 
 #pragma once
@@ -23,6 +34,8 @@ public:
 	ComponentSig getSignature(Entity entity);
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
+
+	std::vector<Entity> getLiveEntities();
 
 	void cleanup();
 

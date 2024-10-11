@@ -1,3 +1,20 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Liu YaoTing (yaoting.liu), Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   WindowSystem.cpp
+@brief:  This source file defines the WindowSystem class. The WindowSystem class is
+		 used to handle the window application for the game engine. It will initialise,
+		 update and cleanup the window system.
+		 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
+								    for the WindowSystem class as well as the init, update,
+									and rendering of those objects
+		  						    (50%)
+		 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
+							   initialise, update and cleanup the window system.
+							   (50%)
+*//*___________________________________________________________________________-*/
 #include <GraphicsSystem.h>
 #include "Debug.h"
 #include "WindowSystem.h"
@@ -14,61 +31,63 @@ Shader* shader2 = nullptr;
 std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
 void WindowSystem::logicUpdate() {
-	// Rotation logic
-	if (GLFWFunctions::left_turn_flag) {
-		gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time;
-	}
-	else if (GLFWFunctions::right_turn_flag) {
-		gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time;
-	}
-	else {
-		gameObject.orientation.y = 0.0f;  
-	}
 
-	// Scaling logic
-	if (GLFWFunctions::scale_up_flag) {
-		if (gameObject.scaling.x < 5.0f && gameObject.scaling.y < 5.0f) {
-			gameObject.scaling.x += 1.78f * GLFWFunctions::delta_time;
-			gameObject.scaling.y += 1.0f * GLFWFunctions::delta_time;
+	if (GLFWFunctions::testMode == 1) {
+		// Rotation logic
+		if (GLFWFunctions::left_turn_flag) {
+			gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time * 2;
 		}
-		graphicsSystem.SetCurrentAction(2);
-	}
-	else if (GLFWFunctions::scale_down_flag) {
-		if (gameObject.scaling.x > 0.1f && gameObject.scaling.y > 0.1f) {
-			gameObject.scaling.x -= 1.78f * GLFWFunctions::delta_time;
-			gameObject.scaling.y -= 1.0f * GLFWFunctions::delta_time;
+		else if (GLFWFunctions::right_turn_flag) {
+			gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time * 2;
 		}
-		graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-	}
+		else {
+			gameObject.orientation.y = 0.0f;
+		}
 
-	// Movement logic
-	bool isMoving = false;
-	if (GLFWFunctions::move_up_flag) {
-		gameObject.position.y += 1.0f * GLFWFunctions::delta_time;
-		isMoving = true;
-		graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-	}
-	if (GLFWFunctions::move_down_flag) {
-		gameObject.position.y -= 1.0f * GLFWFunctions::delta_time;
-		isMoving = true;
-		graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-	}
-	if (GLFWFunctions::move_left_flag) {
-		gameObject.position.x -= 1.0f * GLFWFunctions::delta_time;
-		isMoving = true;
-		graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
-	}
-	if (GLFWFunctions::move_right_flag) {
-		gameObject.position.x += 1.0f * GLFWFunctions::delta_time;
-		isMoving = true;
-		graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
-	}
+		// Scaling logic
+		if (GLFWFunctions::scale_up_flag) {
+			if (gameObject.scaling.x < 600.0f && gameObject.scaling.y < 600.0f) {
+				gameObject.scaling.x += 300.0f * GLFWFunctions::delta_time;
+				gameObject.scaling.y += 300.0f * GLFWFunctions::delta_time;
+			}
+			graphicsSystem.SetCurrentAction(2);
+		}
+		else if (GLFWFunctions::scale_down_flag) {
+			if (gameObject.scaling.x > 50.0f && gameObject.scaling.y > 50.0f) {
+				gameObject.scaling.x -= 300.f * GLFWFunctions::delta_time;
+				gameObject.scaling.y -= 300.0f * GLFWFunctions::delta_time;
+			}
+			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
+		}
 
-	
-	if (!isMoving) {
-		graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-	}
+		// Movement logic
+		bool isMoving = false;
+		if (GLFWFunctions::move_up_flag) {
+			gameObject.position.y += 100.0f * GLFWFunctions::delta_time;
+			isMoving = true;
+			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
+		}
+		if (GLFWFunctions::move_down_flag) {
+			gameObject.position.y -= 100.0f * GLFWFunctions::delta_time;
+			isMoving = true;
+			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
+		}
+		if (GLFWFunctions::move_left_flag) {
+			gameObject.position.x -= 100.0f * GLFWFunctions::delta_time;
+			isMoving = true;
+			graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
+		}
+		if (GLFWFunctions::move_right_flag) {
+			gameObject.position.x += 100.0f * GLFWFunctions::delta_time;
+			isMoving = true;
+			graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
+		}
 
+
+		if (!isMoving) {
+			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
+		}
+	}
 }
 
 
@@ -104,15 +123,15 @@ void WindowSystem::initialise() {
 
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
 	glViewport(0, 0, width, height);
-	
+
 
 	graphicsSystem.initialise();
 
 	DebugTool->Initialise();
 
-	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
-	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
-	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 8, 2.0f }, glm::vec2{ 0.0f, 0.0f });
+	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
+	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ 200.f, 0.0f });
+	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
 	blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
 	gameObject.is_animated = GL_TRUE;
 	gameObject2.is_animated = GL_TRUE;
@@ -135,13 +154,13 @@ void WindowSystem::update() {
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
 	// TODO:: Set the viewport incase the window was resized
-	GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
+	//GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
 
 	//keyboardInputUpdateFlag();
 
 	logicUpdate();
 
-	DebugSystem::StartSystemTiming("Graphics"); 
+	DebugSystem::StartSystemTiming("Graphics");
 
 	graphicsSystem.Update(GLFWFunctions::delta_time, false);
 	graphicsSystem.Render(GLFWFunctions::delta_time);
@@ -151,33 +170,32 @@ void WindowSystem::update() {
 	gameObject2.update(GLFWFunctions::delta_time);
 	blackBox.update(GLFWFunctions::delta_time);
 
-	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
-	blackBox.draw(shader, graphicsSystem.GetVAO(), 0);
-	// animation update
-	graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-	//gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	//graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
 
-	if (GLFWFunctions::debug_flag) {
-		graphicsSystem.drawDebugLines(gameObject);
-		graphicsSystem.drawDebugLines(gameObject2);
+	if (GLFWFunctions::testMode == 1) {
+		// Draw non-animated object (background)
+		background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+
+		// Update animated objects before drawing them
+		graphicsSystem.Update(GLFWFunctions::delta_time, true);
+
+		// Draw game objects
 		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	}
-	else {
-		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	}
-	if (GLFWFunctions::debug_flag) {
-		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-	}
-	else
 		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
+		if (GLFWFunctions::debug_flag) {
+			// Draw debug lines if debug mode is on
+			graphicsSystem.drawDebugLines(gameObject);
+			graphicsSystem.drawDebugLines(gameObject2);
+		}
 
-	DebugSystem::EndSystemTiming("Graphics"); 
+	}
 
-	DebugSystem::StartSystemTiming("Debug"); 
+	DebugSystem::EndSystemTiming("Graphics");
+
+	DebugSystem::StartSystemTiming("Debug");
 	DebugTool->Update();
-	DebugSystem::EndSystemTiming("Debug"); 
+	DebugSystem::EndSystemTiming("Debug");
 
 	GLFWFunctions::getFps(1);
 

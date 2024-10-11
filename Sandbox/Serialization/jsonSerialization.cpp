@@ -1,15 +1,18 @@
 /*!
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-@author:	Ian Loi (ian.loi)
-@team:      MonkeHood
-@course:    CSD2401
-@file:      jsonSerialization.cpp
-@brief:     jsonSerialization.cpp handles basic serialization/deserialization operations. 
-			Ian Loi (ian.loi): Create functions that open a JSON file for deserialization, save 
-							   to JSON file for serialization and all the operations of reading/writing of int, float 
-							   and string.
-							   100%
-*//*_________________________________________________________________________________________________-*/
+@author :  Ian Loi (ian.loi)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  jsonSerialization.cpp
+@brief  :  jsonSerialization.cpp handles basic serialization/deserialization operations.
+
+*Ian Loi (ian.loi) :
+		- Create functions that open a JSON file for deserialization, save to JSON file 
+		  for serialization and all the operations of reading/writing of int, float and string.
+
+File Contributions: Ian Loin (100%)
+				 
+*//*__________________________________________________________________________________________________*/
 
 
 #include "jsonSerialization.h"

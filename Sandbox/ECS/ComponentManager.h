@@ -1,3 +1,20 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ComponentManager.h
+@brief:  This header file declares the ComponentManager class for the ECS system.
+		 The ComponentManager class is used to manage all the components in the ECS
+		 system. It talks to all the ComponentHandlers to add, remove and retrieve
+		 components from the entity. Some of the function definition can be found
+		 here as functions template need to be defined in the header file.
+		 Joel Chu (c.weiyuan): Declared the ComponentManager class and its functions.
+							   Some of the function definitions can be found in here
+							   as well.
+							   100%
+*//*___________________________________________________________________________-*/
+
 #pragma once
 #include "ComponentBase.h"
 #include "EntityManager.h"
@@ -16,18 +33,23 @@
 class ComponentManager
 {
 public:
+	//Register component handler
 	template <typename T>
 	void registerComponentHandler();
 
+	//Add component to entity
 	template <typename T>
 	void addComponent(Entity entity, T component);
 
+	//Remove component from entity
 	template <typename T>
 	void removeComponent(Entity entity);
 
+	//Get component from entity by reference
 	template <typename T>
 	T& getComponent(Entity entity);
 
+	////Get component struct / class to access values inside it
 	template <typename T>
 	ComponentType getComponentType();
 
@@ -39,22 +61,25 @@ public:
 	template <typename T>
 	void cloneComponent(Entity entity, Entity newEntity);
 
+	//for checking if entity has component
+	template <typename T>
+	bool hasComponent(Entity entity);
 
+	//Removes entity from all components
 	void entityRemoved(Entity entity);
 
+	//Cleanup function
 	void cleanup();
 
 private:
-	//Mark down all the component types by linking them to a const char*
 	std::map<const std::string, ComponentType> componentTypes;
 	ComponentType nextComponentType = 0;
 
-	//using a smart pointer to store the component handler
-	//using shared_ptr instead of unique_ptr since unique_ptr can only point to one but shared can point to multiple
 	std::map<const std::string, std::shared_ptr<ComponentBase>> componentHandlers;
 
 };
 
+//Register component handler
 template <typename T>
 void ComponentManager::registerComponentHandler() {
 	//check if component type already exists
@@ -67,27 +92,26 @@ void ComponentManager::registerComponentHandler() {
 	nextComponentType++;
 }
 
+//Adds component to entity
 template <typename T>
 void ComponentManager::addComponent(Entity entity, T component) {
-	//auto* componentHandler = getComponentHandler<T>().get();
-	//componentHandler->addComponentHandler(entity, component);
 	getComponentHandler<T>()->addComponentHandler(entity, component);
 }
 
+//Removes component from entity
 template <typename T>
 void ComponentManager::removeComponent(Entity entity) {
-	//auto* componentHandler = getComponentHandler<T>();
-	//componentHandler->removeComponentHandler(entity);
 	getComponentHandler<T>()->removeComponentHandler(entity);
 }
 
+//Get component from entity by reference
 template <typename T>
 T& ComponentManager::getComponent(Entity entity) {
-	//auto* componentHandler = getComponentHandler<T>();
-	//componentHandler->getComponentHandler(entity);
 	return getComponentHandler<T>()->getComponentHandler(entity);	
 }
 
+
+//Get component struct / class to access values inside it
 template <typename T>
 ComponentType ComponentManager::getComponentType() {
 	const std::string typeName = typeid(T).name();
@@ -96,6 +120,7 @@ ComponentType ComponentManager::getComponentType() {
 	return componentTypes[typeName];
 }
 
+//Helper function
 template <typename T>
 std::shared_ptr<ComponentHandler<T>> ComponentManager::getComponentHandler() {
 	const std::string typeName = typeid(T).name();
@@ -104,8 +129,15 @@ std::shared_ptr<ComponentHandler<T>> ComponentManager::getComponentHandler() {
 	return std::dynamic_pointer_cast<ComponentHandler<T>>(componentHandlers[typeName]);
 }
 
+//To clone entity
 template <typename T>
 void ComponentManager::cloneComponent(Entity entity, Entity newEntity) {
 	T component = getComponent<T>(entity);
 	addComponent<T>(newEntity, component);
+}
+
+//Checks if entity has the component given
+template <typename T>
+bool ComponentManager::hasComponent(Entity entity) {
+	return getComponentHandler<T>()->hasComponentHandler(entity);
 }

@@ -1,17 +1,19 @@
 #pragma once
 /*!
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-@author:	Ian Loi (ian.loi)
-@team:      MonkeHood
-@course:    CSD2401
-@file:      jsonSerialization.h
-@brief:     jsonSerialization.h contains the JSON Serialization class that inherits from 
-			the BaseSerializer class.
-			Ian Loi (ian.loi): Create functions of ReadObject and WriteObject, ReadObject reads data
-							   from JSON file and assign to the particular entity's data, whereas 
-							   WriteObject writes the entity's data to the JSON file.
-							   100%
-*//*_________________________________________________________________________________________________-*/
+@author  :  Ian Loi (ian.loi)
+@team    :  MonkeHood
+@course  :  CSD2401
+@file    :  jsonSerialization.h
+@brief   :  jsonSerialization.h contains the JSON Serialization class that inherits from the BaseSerializer class.
+
+*Ian Loi (ian.loi) : 
+		 - Create functions of ReadObject and WriteObject, ReadObject reads data from JSON file and assign 
+		 to the particular entity's data, whereas WriteObject writes the entity's data to the JSON file.
+
+File Contributions: Ian Loi (100%)
+
+*//*__________________________________________________________________________________________________*/
 
 
 #include "serialization.h"
@@ -87,6 +89,7 @@ namespace Serializer
 				gameObj.y = currentObj["y"].get<float>();
 			}
 		}
+	
 	}
 
 	template <typename T>

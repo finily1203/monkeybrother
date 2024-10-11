@@ -1,7 +1,29 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan), Ian Loi (ian.loi)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ECSCoordinator.cpp
+@brief:  This source file defines the functions found in the ECSCoordinator class.
+		 Joel Chu (c.weiyuan): Defined most of the functions with regards to
+							   the ECS system. This includes the creation,
+							   updating and the destruction of objects.
+							   70%
+		 Ian Loi (ian.loi): Defined the LoadEntityFromJSON, SaveEntityToJSON and 
+						    UpdateEntity functions that load data from JSON file to
+							the entity, save data from entity to JSON file and update
+							entity data respectively.
+						    30%
+*//*___________________________________________________________________________-*/
+
 #include "ECSCoordinator.h"
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
+#include "AABBComponent.h"
+#include "MovementComponent.h"
+#include "ClosestPlatform.h"
 #include "GraphicSystemECS.h"
+#include "PhyColliSystemECS.h"
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
@@ -39,40 +61,68 @@ std::string ECSCoordinator::GetEnemyJSONPath()
 	return jsonPath;
 }
 
+#include <random>
+#include <glm/glm.hpp>
+
+//Initialise the ECS system and links the component manager, entity manager 
+//and system manager
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
+	componentManager = std::make_unique<ComponentManager>();
 	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
 }
 
+//Updates the ECS system
+//based on the test modes it will render a different scene
 void ECSCoordinator::update() {
 	systemManager->update();
+	
 
+	if (GLFWFunctions::goNextMode) {
+		for (Entity entity : entityManager->getLiveEntities()) {
+			destroyEntity(entity);
+		}
+		if (GLFWFunctions::testMode == 0) {
+			test3();
+		}
+		else if (GLFWFunctions::testMode == 1) {
+			test2();
+		}
+		GLFWFunctions::goNextMode = false;
+	}
 }
 
+//Cleans up the ECS system by calling the cleanup function
+//for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
 	entityManager->cleanup();
 	componentManager->cleanup();
 	systemManager->cleanup();
 }
 
+//Returns the number of live entities
 unsigned int ECSCoordinator::getEntityNum() {
 	return entityManager->getLiveEntCount();
 }
 
+//Returns the first entity created
 Entity ECSCoordinator::getFirstEntity() {
 	return firstEntity;
 }
 
+//Creates entity by calling the entity manager function
+//If there is no newEntity, the first entity created will be the newEntity
 Entity ECSCoordinator::createEntity()
 {
 	Entity newEntity = entityManager->createEntity();
-	if(!firstEntity) {
-		firstEntity = newEntity;	
+	if (!firstEntity) {
+		firstEntity = newEntity;
 	}
 	return newEntity;
 }
 
+//Destroy the entity from all parts of the ECS system
 void ECSCoordinator::destroyEntity(Entity entity)
 {
 	//remove entity from all systems
@@ -81,23 +131,10 @@ void ECSCoordinator::destroyEntity(Entity entity)
 	systemManager->entityRemoved(entity);
 }
 
+
+//Used to test for serialization of entities;
 void ECSCoordinator::test2() {
 	std::cout << "testing ECS with graphics side" << std::endl << std::endl;
-
-	std::cout << "Registering component" << std::endl;
-	registerComponent<TransformComponent>();
-	registerComponent<GraphicsComponent>();
-
-	std::cout << "Registering system and set Signature" << std::endl;
-	auto graphicSystem = std::make_shared<GraphicSystemECS>();
-	registerSystem<GraphicSystemECS>();
-	{
-		ComponentSig graphicSystemSig;
-		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
-		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
-	}
-
-	graphicSystem->initialise();
 
 	std::cout << "Set entity" << std::endl;
 	Entity entity = createEntity();
@@ -125,6 +162,8 @@ void ECSCoordinator::test2() {
 struct Position {
 	myMath::Vector2D pos;
 
+	// serializing function for the first test on the ECS component so this function handles
+	// both reading and writing of the position component
 	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
@@ -152,6 +191,8 @@ struct Position {
 struct Size {
 	myMath::Vector2D scale;
 
+	// serializing function for the first test on the ECS component so this function handles
+	// both reading and writing of the size component
 	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		float x, y;
@@ -179,6 +220,8 @@ struct Size {
 struct velocity {
 	float speed;
 
+	// serializing function for the first test on the ECS component so this function handles
+	// both reading and writing of the velocity component
 	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
 	{
 		if (mode == Serializer::SerializationMode::READ)
@@ -209,6 +252,8 @@ public:
 	}
 };
 
+// this is the definition of the function that loads the data from JSON file to the entity
+// open the JSON file and initialize the entity data based on the values read
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
 {
 	Serializer::JSONSerializer serializer;
@@ -219,22 +264,35 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 		return;
 	}
 	
+	// return the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
+	// finding the parent entity key of the JSON object
 	std::string parentEntity = jsonObj.begin().key();
 
 	TransformComponent transform{};
+	// read transform component from the JSON file
+	// read the position first
 	serializer.ReadObject(transform.position, parentEntity + ".transform.position");
+	// read the scale next
 	serializer.ReadObject(transform.scale, parentEntity + ".transform.scale");
+	// read the orientation last
 	serializer.ReadObject(transform.orientation, parentEntity + ".transform.orientation");
 	ecs.addComponent(entity, transform);
 
 	GraphicsComponent graphics{};
+	// read graphics component from the JSON file
+	// read the posution first
 	serializer.ReadObject(graphics.glObject.position, parentEntity + ".graphics.position");
+	// read the scale next
 	serializer.ReadObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
+	// read the orientation last
 	serializer.ReadObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
 	ecs.addComponent(entity, graphics);
+
+	//ecs.addComponent(entity, MovementComponent{ 10.f });
 }
 
+// this function will save the entity's data to the JSON file
 void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
 {
 	Serializer::JSONSerializer serializer;
@@ -245,13 +303,16 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 		return;
 	}
 
+	// returns the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
+	// finding the parent entity key of the JSON object
 	std::string parentEntity = jsonObj.begin().key();
 
 	// Get the current components of the entity
 	if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent transform = getComponent<TransformComponent>(entity);
+		// write the transform component to the JSON file
 		serializer.WriteObject(transform.position, parentEntity + ".transform.position");
 		serializer.WriteObject(transform.scale, parentEntity + ".transform.scale");
 		serializer.WriteObject(transform.orientation, parentEntity + ".transform.orientation");
@@ -259,23 +320,27 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 
 	if (ecs.entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
 	{
+		// write the graphics component to the JSON file
 		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
 		serializer.WriteObject(graphics.glObject.position, parentEntity + ".graphics.position");
 		serializer.WriteObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
 		serializer.WriteObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
 	}
 
+	// saving to JSON file failed execute this block
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
 	}
 }
 
+// this function handles the updating of the entity's data
 void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate)
 {
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent& transform = getComponent<TransformComponent>(entity);
+		// assign the new data of the transform component to the entity's transform component
 		transform.orientation = transUpdate.orientation;
 		transform.position = transUpdate.position;
 		transform.scale = transUpdate.scale;
@@ -284,12 +349,15 @@ void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdat
 	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
 	{
 		GraphicsComponent& graphics = getComponent<GraphicsComponent>(entity);
+		// assign the new data of the graphics component to the entity's graphics component
 		graphics.glObject.position = graphicsUpdate.glObject.position;
 		graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
 		graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
 	}
 }
 
+//First ever test to test the ECS system
+//Currently no longer in use as it is used for testing purposes
 void ECSCoordinator::test() {
 	std::cout << "testing ECS" << std::endl;
 	//create player entity
@@ -424,23 +492,110 @@ void ECSCoordinator::test() {
 	std::cout << std::endl;
 }
 
+//clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
 {
 	Entity newEntity = createEntity();
 
-	if(entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent transform = getComponent<TransformComponent>(entity);
-		transform.position += glm::vec2(0.1f, 0.1f);
+		transform.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
 		addComponent(newEntity, transform);
 	}
 
 	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
 	{
 		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
-		graphics.glObject.position += glm::vec2(0.1f, 0.1f);
+		graphics.glObject.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
 		addComponent(newEntity, graphics);
 	}
 
 	return newEntity;
+}
+
+//Test 3 tests for the creation of platforms and works with the physics and collision system
+void ECSCoordinator::test3() {
+	std::cout << "Create Platforms" << std::endl;
+	Entity platform1 = createEntity();
+	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.0f), glm::vec2(0.0f, -150.f) });
+	GraphicsComponent gfxComp1{};
+	gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(0.0f, -150.0f));
+	addComponent(platform1, gfxComp1);
+	addComponent(platform1, AABBComponent{ -250.f, 250.f,-125.f, -175.f });
+	addComponent(platform1, ClosestPlatform{ false });
+
+	Entity platform2 = createEntity();
+	addComponent(platform2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.f) });
+	GraphicsComponent gfxComp2{};
+	gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.0f));
+	addComponent(platform2, gfxComp2);
+	addComponent(platform2, AABBComponent{ 150.0f, 650.f, 225.f, 175.f });
+	addComponent(platform2, ClosestPlatform{ false });
+
+	Entity platform3 = createEntity();
+	addComponent(platform3, TransformComponent{ glm::vec2(315.f, 0.f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.f) });
+	GraphicsComponent gfxComp3{};
+	gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.0f));
+	addComponent(platform3, gfxComp3);
+	//addComponent(platform3, AABBComponent{ -350.0f, -650.f, -175.f, -225.f });
+	glm::vec2 platformPos = gfxComp3.glObject.position;
+	glm::vec2 platformScl = gfxComp3.glObject.scaling;
+	addComponent(platform3, AABBComponent{ platformPos.x - platformScl.x / 2, platformPos.x + platformScl.x / 2,
+										   platformPos.y + platformScl.y / 2, platformPos.y - platformScl.y / 2 });
+	addComponent(platform3, ClosestPlatform{ false });
+
+	std::cout << "Create Player" << std::endl;
+	Entity player = createEntity();
+	addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
+	GraphicsComponent gfxComp4{};
+	gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f));
+	addComponent(player, gfxComp4);
+	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(player, MovementComponent{ .02f });
+
+}
+
+
+//Initialises all required components and systems for the ECS system
+void ECSCoordinator::initialiseSystemsAndComponents() {
+	std::cout << "Register Everything" << std::endl;
+	registerComponent<GraphicsComponent>();
+	registerComponent<TransformComponent>();
+	registerComponent<AABBComponent>();
+	registerComponent<MovementComponent>();
+	registerComponent<ClosestPlatform>();
+
+	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
+	registerSystem<PhysicsSystemECS>();
+	{
+		ComponentSig physicsSystemSig;
+		physicsSystemSig.set(getComponentType<TransformComponent>(), true);
+		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
+		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
+		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
+		physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
+	}
+
+	physicsSystem->initialise();
+
+	auto graphicSystem = std::make_shared<GraphicSystemECS>();
+	registerSystem<GraphicSystemECS>();
+	{
+		ComponentSig graphicSystemSig;
+		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
+		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
+	}
+
+
+	graphicSystem->initialise();
+}
+
+
+//Helper function to get random value for the cloning object
+float ECSCoordinator::getRandomVal(float min = -100.0f, float max = 100.0f) {
+	std::random_device rd;  
+	std::mt19937 gen(rd()); 
+	std::uniform_real_distribution<float> dis(min, max); 
+	return dis(gen); 
 }

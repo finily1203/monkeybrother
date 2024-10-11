@@ -1,3 +1,32 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GraphicsSystem.cpp
+@brief  :  This file contains the implementation of the GraphicsSystem class,
+           the GraphicsSystem class is responsible for rendering the game objects.
+
+* Liu YaoTing (yaoting.liu) :
+        - Implementated OpenGL debug function GL Call: It is used to check for OpenGL errors and log them.
+        - Loaded textures and shaders into the GraphicsSystem.
+        - Implemented the initialise function such as creating the VAO, VBO, EBO, UVBO, and loading the textures.
+        - Implemented the initialization of uvCoords.
+        - Implemented GLObject init(Data member Initialization), update (Model Transformations),
+          draw functions.
+
+* Javier Chua (javierjunliang.chua) :
+        - Implemented the initialise function such as creating the VAO, VBO, EBO, UVBO, and loading the textures.
+        - Implemented the update function to update the UV coordinates according to animation.
+        - Loaded textures and shaders into the GraphicsSystem.
+        - Implemented function to change sprite animation according to the action.
+        - Implemented drawDebugLines function to draw the bounding box of the sprite,
+          and the update function to update the model transformation matrix.
+        
+ File Contributions: Liu YaoTing (50%), Javier Chua (50%)
+
+/*_______________________________________________________________________________________________________________*/
+
 #include "GraphicsSystem.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -48,9 +77,9 @@ void GraphicsSystem::initialise() {
     ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
     m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
     if (!m_Shader2->IsCompiled()) {
-		std::cerr << "Shader compilation failed." << std::endl;
-		return;
-	}
+        std::cerr << "Shader compilation failed." << std::endl;
+        return;
+    }
 
     // Load texture 1
     int width, height, nrChannels;
@@ -123,7 +152,7 @@ void GraphicsSystem::initialise() {
 
 
     // Calculate the frame width and height based on the number of columns
-    int columns = 4;  // Adjust to match your spritesheet
+    int columns = 1;  // Adjust to match your spritesheet
     int rows = 1;     // Adjust to match your spritesheet
     float frameWidth = static_cast<float>(width) / columns;
     float frameHeight = static_cast<float>(height) / rows;
@@ -178,9 +207,13 @@ void GraphicsSystem::initialise() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // get the location of the uniform variable in the shader
-    /*int location = m_Shader2->GetUniformLocation("u_Color");
+    m_Shader2->Bind();
+
+    int location = m_Shader2->GetUniformLocation("u_Color");
     ASSERT(location != -1);
-    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));*/
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+
+    m_Shader2->Unbind();
 }
 
 void GraphicsSystem::update() {}
@@ -238,7 +271,7 @@ void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScali
     position = rhsPosition;
     mdl_xform = glm::mat3{ 1.0 };
     mdl_to_ndc_xform = glm::mat3{ 1.0 };
-    color = glm::vec3 { 1.0, 1.0, 1.0 };
+    color = glm::vec3{ 1.0, 1.0, 1.0 };
     GLboolean isAnimated = GL_FALSE;
 }
 
@@ -275,7 +308,7 @@ void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
         0,               0,              1 };
 
     mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform = mdl_xform;
+    mdl_to_ndc_xform = NDC * mdl_xform;
 }
 
 void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const {
@@ -306,45 +339,46 @@ void GraphicsSystem::drawDebugLines(const GLObject& obj) {
     // Set color for debug lines
     glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
 
+    float spriteWidth = obj.scaling.x;  // Width of one sprite
+    float spriteHeight = obj.scaling.y; // Height of the sprite
 
-    float spriteWidth = obj.scaling.x / 4; // Width of one sprite (assuming 4 columns in the sprite sheet)
-    float spriteHeight = obj.scaling.y;     // Height of the sprite
-
-
-    float halfWidth = spriteWidth * 0.5f;
-    float halfHeight = spriteHeight * 0.5f;
-
+    float halfWidth = spriteWidth / 2;
+    float halfHeight = spriteHeight / 2;
 
     glm::vec2 bottomLeft = glm::vec2(-halfWidth, -halfHeight);
     glm::vec2 bottomRight = glm::vec2(halfWidth, -halfHeight);
     glm::vec2 topRight = glm::vec2(halfWidth, halfHeight);
     glm::vec2 topLeft = glm::vec2(-halfWidth, halfHeight);
 
-    // Create a rotation matrix based on the object's rotation angle (around the z-axis)
-    glm::mat2 Rotating =
-    {
-         glm::cos(glm::radians(obj.orientation.x)), glm::sin(glm::radians(obj.orientation.x)),
-        -glm::sin(glm::radians(obj.orientation.x)), glm::cos(glm::radians(obj.orientation.x))
+    glm::mat2 NDC = glm::mat2{
+        2.0f / 1600.0f,     0,
+        0,                  2.0f / 900.0f
     };
 
-    // Rotate and translate each corner based on the object's rotation and position
-    glm::vec2 rotatedBottomLeft = obj.position + Rotating * bottomLeft;
-    glm::vec2 rotatedBottomRight = obj.position + Rotating * bottomRight;
-    glm::vec2 rotatedTopRight = obj.position + Rotating * topRight;
-    glm::vec2 rotatedTopLeft = obj.position + Rotating * topLeft;
+    // Translate each corner based on the object's position
+    glm::vec2 transformedBottomLeft = obj.position + bottomLeft;
+    glm::vec2 transformedBottomRight = obj.position + bottomRight;
+    glm::vec2 transformedTopRight = obj.position + topRight;
+    glm::vec2 transformedTopLeft = obj.position + topLeft;
+
+    // Convert to NDC space
+    transformedBottomLeft = NDC * transformedBottomLeft;
+    transformedBottomRight = NDC * transformedBottomRight;
+    transformedTopRight = NDC * transformedTopRight;
+    transformedTopLeft = NDC * transformedTopLeft;
 
     // Draw the AABB lines
-    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Bottom left
-    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y);  // Bottom left
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
 
-    glVertex2f(rotatedBottomRight.x, rotatedBottomRight.y); // Bottom right
-    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
 
-    glVertex2f(rotatedTopRight.x, rotatedTopRight.y); // Top right
-    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
 
-    glVertex2f(rotatedTopLeft.x, rotatedTopLeft.y); // Top left
-    glVertex2f(rotatedBottomLeft.x, rotatedBottomLeft.y); // Back to bottom left
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y); // Back to bottom left
 
     glEnd();
 }

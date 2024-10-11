@@ -1,3 +1,22 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  AnimationData.cpp
+@brief  :  This file contains the implementation of the AnimationData class, which
+		   is responsible for managing the animation data of a game object.
+*
+* Javier Chua (javierjunliang.chua) :
+*       - Implemented the AnimationData class, which is responsible for managing the 
+          animation data of a game object.
+*         This class is used to store the total number of frames, frame duration, number
+          of columns and rows, current frame,
+*
+* File Contributions: Javier Chua (100%)
+*
+/*_ _ _ _ ________________________________________________________________________________-\*/
+
 #include "AnimationData.h"
 #include <stdexcept>
 #include <cassert>
