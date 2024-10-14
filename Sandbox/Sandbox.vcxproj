@@ -101,7 +101,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
+    <ClCompile Include="Debug\Crashlog.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="Debug\GUIConsole.cpp" />
+    <ClCompile Include="Debug\GUIGameViewport.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
@@ -129,7 +132,10 @@
     <ClInclude Include="AudioSystem\AudioSystem.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
+    <ClInclude Include="Debug\Crashlog.h" />
     <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="Debug\GUIConsole.h" />
+    <ClInclude Include="Debug\GUIGameViewport.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />

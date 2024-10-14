@@ -1,4 +1,5 @@
 #include "Debug.h"
+#include "Crashlog.h"
 #include "GlfwFunctions.h"
 #include <iostream>
 //#include <chrono>

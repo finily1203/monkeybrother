@@ -25,6 +25,9 @@
     <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
+    <ClCompile Include="Debug\GUIGameViewport.cpp" />
+    <ClCompile Include="Debug\GUIConsole.cpp" />
+    <ClCompile Include="Debug\Crashlog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -51,6 +54,9 @@
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
+    <ClInclude Include="Debug\GUIGameViewport.h" />
+    <ClInclude Include="Debug\GUIConsole.h" />
+    <ClInclude Include="Debug\Crashlog.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

@@ -2,6 +2,7 @@
 #include "GlfwFunctions.h"
 #include <iostream>
 
+
 AudioSystem::AudioSystem() : audioSystem(nullptr), audioSongList(), audioChannel(nullptr), currSongIndex(0) {}
 AudioSystem::~AudioSystem() {
     cleanup();
@@ -104,6 +105,11 @@ void AudioSystem::cleanup() {
         audioSystem->release();
         audioSystem = nullptr;
     }
+}
+
+//For perfomance viewer
+SystemType AudioSystem::getSystem() {
+    return AudioSystemType;
 }
 
 void AudioSystem::addSong(const std::string& songPath) {

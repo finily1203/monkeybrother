@@ -6,7 +6,6 @@
 
 
 //GraphicsSystem graphicsSystem;
-DebugSystem* DebugTool = new DebugSystem();
 GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 Shader* shader = nullptr;
 Shader* shader2 = nullptr;
@@ -106,8 +105,6 @@ void WindowSystem::initialise() {
 
 	graphicsSystem.initialise();
 
-	DebugTool->Initialise();
-
 	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ -0.5f, 0.0f });
 	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1.78f, 1.0f }, glm::vec2{ 0.5f, 0.0f });
 	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 8, 2.0f }, glm::vec2{ 0.0f, 0.0f });
@@ -139,7 +136,7 @@ void WindowSystem::update() {
 
 	logicUpdate();
 
-	DebugSystem::StartSystemTiming("Graphics"); 
+	//DebugSystem::StartSystemTiming("Graphics"); 
 
 	graphicsSystem.Update(GLFWFunctions::delta_time, false);
 	graphicsSystem.Render(GLFWFunctions::delta_time);
@@ -171,11 +168,7 @@ void WindowSystem::update() {
 		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
 
-	DebugSystem::EndSystemTiming("Graphics"); 
-
-	DebugSystem::StartSystemTiming("Debug"); 
-	DebugTool->Update();
-	DebugSystem::EndSystemTiming("Debug"); 
+	//DebugSystem::EndSystemTiming("Graphics"); 
 
 	GLFWFunctions::getFps(1);
 
@@ -190,7 +183,10 @@ void WindowSystem::update() {
 void WindowSystem::cleanup() {
 	//GLFWFunctions::glfwCleanup();
 	graphicsSystem.cleanup();
-	DebugTool->Cleanup();
 }
 
+//For perfomance viewer
+SystemType WindowSystem::getSystem() {
+	return WindowSystemType;
+}
 

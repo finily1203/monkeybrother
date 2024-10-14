@@ -3,6 +3,7 @@
 #include "GraphicsComponent.h"
 #include "GraphicSystemECS.h"
 #include "GraphicsSystem.h"
+#include "GlobalCoordinator.h"
 
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
@@ -19,6 +20,10 @@ void ECSCoordinator::cleanup() {
 	entityManager->cleanup();
 	componentManager->cleanup();
 	systemManager->cleanup();
+}
+
+SystemType ECSCoordinator::getSystem() {
+	return ECSType;
 }
 
 unsigned int ECSCoordinator::getEntityNum() {

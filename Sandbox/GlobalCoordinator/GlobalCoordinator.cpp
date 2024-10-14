@@ -2,3 +2,4 @@
 
 ECSCoordinator ecsCoordinator;
 GraphicsSystem graphicsSystem;
+DebugSystem debugSystem;

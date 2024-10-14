@@ -31,6 +31,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <iostream>
+#include "GlobalCoordinator.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -59,6 +60,11 @@ GraphicsSystem::GraphicsSystem()
 
 GraphicsSystem::~GraphicsSystem() {
     cleanup();
+}
+
+//For perfomance viewer
+SystemType GraphicsSystem::getSystem() {
+    return GraphicsSystemType;
 }
 
 void GraphicsSystem::initialise() {

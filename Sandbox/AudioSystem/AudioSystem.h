@@ -3,6 +3,7 @@
 #include "fmod.hpp"
 #include <vector>
 #include <string>
+#include "GlobalCoordinator.h"
 
 class AudioSystem : public GameSystems
 {
@@ -15,6 +16,7 @@ public:
 	void initialise() override;
 	void update() override;
 	void cleanup() override;
+	SystemType getSystem() override; //For perfomance viewer
 
 	void addSong(const std::string& songPath);
 	void playSong(int index);

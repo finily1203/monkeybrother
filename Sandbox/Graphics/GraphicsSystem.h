@@ -31,6 +31,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
+#include <string>
 
 
 struct AABB {
@@ -56,6 +57,7 @@ public:
     void Update(float deltaTime, GLboolean isAnimated);
     void Render(float deltaTime);
     void cleanup() override;
+    SystemType getSystem() override; //For perfomance viewer
 
     Shader* GetShader() const{ return m_Shader.get(); }
     Shader* GetShader2() const{ return m_Shader2.get(); }

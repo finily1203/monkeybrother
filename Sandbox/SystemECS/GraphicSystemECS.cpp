@@ -5,6 +5,7 @@
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
+#include "GUIConsole.h"
 
 void GraphicSystemECS::initialise() {}
 

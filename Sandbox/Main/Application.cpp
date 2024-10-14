@@ -1,12 +1,12 @@
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include <iostream>
 #include "WindowSystem.h"
-#include "Debug.h"
 #include "GlfwFunctions.h"
 #include "Engine.h"
 #include "ECSCoordinator.h"
 #include "AudioSystem.h"
 #include "GlobalCoordinator.h"
+#include "Crashlog.h"
 
 
 namespace monkeybrother {
@@ -27,13 +27,13 @@ int main() {
 
 		engine->addSystem(&ecsCoordinator);
 
+		engine->addSystem(&debugSystem);
+
 		engine->initialiseSystem();
 		//ecsCoordinator.test();
 		ecsCoordinator.test2();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			DebugSystem::StartLoop(); //Get time for start of gameloop
-
 			//If user presses clone button ("C"), clone first object
 			if (GLFWFunctions::cloneObject) {
 				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
@@ -42,9 +42,6 @@ int main() {
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);
-
-			DebugSystem::EndLoop(); //Get time for end of gameloop
-			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
 
 
