@@ -22,93 +22,119 @@ File Contributions: Ian Loi (100%)
 #include <sstream>
 
 
-namespace Serializer
+class JSONSerializer : public BaseSerializer
 {
-	class JSONSerializer : public BaseSerializer
-	{
-	public:
-		virtual bool Open(std::string const&);
-		virtual bool Save(std::string const&);
-		virtual bool IsGood();
+public:
+	virtual bool Open(std::string const&);
+	virtual bool Save(std::string const&);
+	virtual bool IsGood();
 
-		template <typename T>
-		void ReadObject(T&, std::string const&);
-
-		template <typename T>
-		void WriteObject(T&, std::string const&);
-
-		virtual void ReadInt(int&, std::string const&);
-		virtual void ReadFloat(float&, std::string const&);
-		virtual void ReadString(std::string&, std::string const&);
-
-		virtual void WriteInt(int&, std::string const&);
-		virtual void WriteFloat(float&, std::string const&);
-		virtual void WriteString(std::string&, std::string const&);
-
-		nlohmann::json GetJSONObject() const;
-
-	private:
-		nlohmann::json jsonObj;
-		std::ifstream fileStream;
-	};
+	void ReadSpecificObject(glm::vec2&, nlohmann::json const&);
+	void ReadSpecificObject(glm::mat3&, nlohmann::json const&);
 
 	template <typename T>
-	void JSONSerializer::ReadObject(T& gameObj, std::string const& parentKey)
+	void ReadObject(T&, std::string const&, std::string const&);
+
+	template <typename T>
+	void WriteObject(T&, std::string const&);
+
+	virtual void ReadInt(int&, std::string const&);
+	virtual void ReadFloat(float&, std::string const&);
+	virtual void ReadString(std::string&, std::string const&);
+
+	virtual void WriteInt(int&, std::string const&);
+	virtual void WriteFloat(float&, std::string const&);
+	virtual void WriteString(std::string&, std::string const&);
+
+	nlohmann::json GetJSONObject() const;
+
+private:
+	nlohmann::json jsonObj;
+	std::ifstream fileStream;
+};
+
+template <typename T>
+void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::string const& parentKey)
+{
+	// string buffer that contains the sequence of characters of parentKey
+	std::istringstream keyStream(parentKey);
+
+	// holds each different key from the keyStream
+	std::string keySegment;
+	nlohmann::json currentObj = jsonObj;
+
+	while (std::getline(keyStream, keySegment, '.'))
 	{
-		// string buffer that contains the sequence of characters of parentKey
-		std::istringstream keyStream(parentKey);
-
-		// holds each different key from the keyStream
-		std::string keySegment;
-		nlohmann::json currentObj = jsonObj;
-
-		// this read each of the key in parentKey one by one 
-		// (eg. Player.pos.x -> Player will be the first key, followed by pos and so on)
-		while (std::getline(keyStream, keySegment, '.'))
+		// Check if we're at the "entities" key and need to handle the array
+		if (keySegment == "entities")
 		{
-			// finding the current key part in the JSON object
-			auto it = currentObj.find(keySegment);
+			// boolean to check if entityId is in the JSON object
+			bool found = false;
 
-			if (it != currentObj.end())
+			// loop through every entities in the array of the JSON object
+			for (const auto& entity : currentObj["entities"])
 			{
-				// key is found, move deeper down into the nested JSON objects
-				currentObj = *it;
+				// checks for the different entities in the array
+				if (entity["id"] == entityId)
+				{
+					// set the current object to be the current entity
+					currentObj = entity;
+					
+					// set to true since the entity Id is found in the JSON object
+					found = true;
+
+					// stop looking through the JSON object since we found the entity
+					break; 
+				}
 			}
 
-			else
+			// If no matching entity was found, return early
+			if (!found)
 			{
+				std::cout << "Entity with id " << entityId << " not found" << std::endl;
 				return;
 			}
 		}
-
-		if (std::is_same_v<T, glm::vec2>)
+		else
 		{
-			if (currentObj.is_object() && currentObj.contains("x") && currentObj.contains("y"))
+			// Continue the normal process for other keys
+			auto it = currentObj.find(keySegment);
+			if (it != currentObj.end())
 			{
-				gameObj.x = currentObj["x"].get<float>();
-				gameObj.y = currentObj["y"].get<float>();
+				// Key is found, move deeper down into the nested JSON objects
+				currentObj = *it;
+			}
+			else
+			{
+				// Key not found, return early
+				std::cout << "Key '" << keySegment << "' not found" << std::endl;
+				return;
 			}
 		}
+	}
 	
-	}
+	// this handles the reading of different types of objects
+	// example will be a matrix3x3 object and a vector2D object can all
+	// be read by calling this function
+	ReadSpecificObject(gameObj, currentObj);
+}
 
-	template <typename T>
-	void JSONSerializer::WriteObject(T& gameObj, std::string const& parentKey)
-	{
-		// string buffer that contains the sequence of characters of parentKey
-		std::istringstream keyStream(parentKey);
+template <typename T>
+void JSONSerializer::WriteObject(T& gameObj, std::string const& parentKey)
+{
+	// string buffer that contains the sequence of characters of parentKey
+	std::istringstream keyStream(parentKey);
 		
-		// holds each different key from the keyStream
-		std::string keySegment;
-		nlohmann::json* currentObj = &jsonObj;
+	// holds each different key from the keyStream
+	std::string keySegment;
+	nlohmann::json* currentObj = &jsonObj;
 
-		// this read each of the key in parentKey one by one
-		while (std::getline(keyStream, keySegment, '.'))
-		{
-			currentObj = &((*currentObj)[keySegment]);
-		}
-
-		(*currentObj)["x"] = gameObj.x;
-		(*currentObj)["y"] = gameObj.y;
+	// this read each of the key in parentKey one by one
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		currentObj = &((*currentObj)[keySegment]);
 	}
+
+	(*currentObj)["x"] = gameObj.x;
+	(*currentObj)["y"] = gameObj.y;
 }
