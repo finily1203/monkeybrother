@@ -1,3 +1,21 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Ian Loi (ian.loi)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  vector2D.cpp
+@brief  :  vector2D.cpp handles vector2D operations like additions, subtractions of two 2D vectors,
+           calculating the normalized vector, distance between two 2D vectors, etc.
+
+*Ian Loi (ian.loi) : 
+        - Create functions of the vector2D class that will handle different operations of a 2D
+          vector
+
+File Contributions: Ian Loi (100%)
+
+*//*_________________________________________________________________________________________________-*/
+
+
 #include "vector2D.h"
 #include <cmath>
 
@@ -103,6 +121,6 @@ namespace myMath
     // finding cross product magnitude of two vectors
     float CrossProductMagnitudeVector2D(Vector2D const& vectorOne, Vector2D const& vectorTwo)
     {
-        return ((vectorOne.GetX() * vectorTwo.GetX()) - (vectorOne.GetY() * vectorTwo.GetY()));
+        return (vectorOne.GetX() * vectorTwo.GetY()) - (vectorOne.GetY() * vectorTwo.GetX());
     }
 }

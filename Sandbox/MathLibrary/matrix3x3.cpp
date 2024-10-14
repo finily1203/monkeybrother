@@ -1,3 +1,21 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Ian Loi (ian.loi)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  matrix3x3.cpp
+@brief  :  matrix3x3.cpp handles matrix3x3 operations like additions, subtractions, etc.
+      
+*Ian Loi (ian.loi) : 
+        - Create functions of the matrix3x3 class that handles different operations of a 3 by 3
+          matrix like addition, subtraction between two matrixes, constructing a matrix3x3 class
+          object and calculating scaling matrix, rotation matrix, inverse matrix and many more.
+                 
+File Contributions: Ian Loi (100%)
+
+*//*_________________________________________________________________________________________________-*/
+
+
 #include "matrix3x3.h"
 #include <cmath>
 

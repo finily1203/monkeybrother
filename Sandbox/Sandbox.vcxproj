@@ -121,12 +121,14 @@
     <ClCompile Include="ECS\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
+    <ClCompile Include="MathLibrary\vector3D.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetsManager\AssetsManager.h" />
     <ClInclude Include="AudioSystem\AudioSystem.h" />
     <ClInclude Include="Components\AABBComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
@@ -150,6 +152,7 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
+    <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />

@@ -10,7 +10,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Create functions that open a JSON file for deserialization, save to JSON file 
 		  for serialization and all the operations of reading/writing of int, float and string.
 
-File Contributions: Ian Loin (100%)
+File Contributions: Ian Loi (100%)
 				 
 *//*__________________________________________________________________________________________________*/
 
