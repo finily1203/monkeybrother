@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="AudioSystem\AudioSystem.h" />
     <ClInclude Include="Components\AABBComponent.h" />
+    <ClInclude Include="Components\AnimationComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\MovementComponent.h" />

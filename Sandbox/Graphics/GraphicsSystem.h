@@ -50,12 +50,19 @@ public:
     GraphicsSystem();
     ~GraphicsSystem();
 
+    enum class DrawMode {
+        COLOR,
+        TEXTURE
+    };
 
     void initialise() override;
     void update() override;
     void Update(float deltaTime, GLboolean isAnimated);
     void Render(float deltaTime);
     void cleanup() override;
+
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
+    void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     Shader* GetShader() const{ return m_Shader.get(); }
     Shader* GetShader2() const{ return m_Shader2.get(); }

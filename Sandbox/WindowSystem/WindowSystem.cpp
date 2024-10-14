@@ -24,70 +24,70 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 //GraphicsSystem graphicsSystem;
 DebugSystem* DebugTool = new DebugSystem();
-GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
-Shader* shader = nullptr;
-Shader* shader2 = nullptr;
+//GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
+//Shader* shader = nullptr;
+//Shader* shader2 = nullptr;
 std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
-void WindowSystem::logicUpdate() {
-
-	if (GLFWFunctions::testMode == 1) {
-		// Rotation logic
-		if (GLFWFunctions::left_turn_flag) {
-			gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time * 2;
-		}
-		else if (GLFWFunctions::right_turn_flag) {
-			gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time * 2;
-		}
-		else {
-			gameObject.orientation.y = 0.0f;
-		}
-
-		// Scaling logic
-		if (GLFWFunctions::scale_up_flag) {
-			if (gameObject.scaling.x < 600.0f && gameObject.scaling.y < 600.0f) {
-				gameObject.scaling.x += 300.0f * GLFWFunctions::delta_time;
-				gameObject.scaling.y += 300.0f * GLFWFunctions::delta_time;
-			}
-			graphicsSystem.SetCurrentAction(2);
-		}
-		else if (GLFWFunctions::scale_down_flag) {
-			if (gameObject.scaling.x > 50.0f && gameObject.scaling.y > 50.0f) {
-				gameObject.scaling.x -= 300.f * GLFWFunctions::delta_time;
-				gameObject.scaling.y -= 300.0f * GLFWFunctions::delta_time;
-			}
-			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-		}
-
-		// Movement logic
-		bool isMoving = false;
-		if (GLFWFunctions::move_up_flag) {
-			gameObject.position.y += 100.0f * GLFWFunctions::delta_time;
-			isMoving = true;
-			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-		}
-		if (GLFWFunctions::move_down_flag) {
-			gameObject.position.y -= 100.0f * GLFWFunctions::delta_time;
-			isMoving = true;
-			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-		}
-		if (GLFWFunctions::move_left_flag) {
-			gameObject.position.x -= 100.0f * GLFWFunctions::delta_time;
-			isMoving = true;
-			graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
-		}
-		if (GLFWFunctions::move_right_flag) {
-			gameObject.position.x += 100.0f * GLFWFunctions::delta_time;
-			isMoving = true;
-			graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
-		}
-
-
-		if (!isMoving) {
-			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-		}
-	}
-}
+//void WindowSystem::logicUpdate() {
+//
+//	if (GLFWFunctions::testMode == 1) {
+//		// Rotation logic
+//		if (GLFWFunctions::left_turn_flag) {
+//			gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time * 2;
+//		}
+//		else if (GLFWFunctions::right_turn_flag) {
+//			gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time * 2;
+//		}
+//		else {
+//			gameObject.orientation.y = 0.0f;
+//		}
+//
+//		// Scaling logic
+//		if (GLFWFunctions::scale_up_flag) {
+//			if (gameObject.scaling.x < 600.0f && gameObject.scaling.y < 600.0f) {
+//				gameObject.scaling.x += 300.0f * GLFWFunctions::delta_time;
+//				gameObject.scaling.y += 300.0f * GLFWFunctions::delta_time;
+//			}
+//			graphicsSystem.SetCurrentAction(2);
+//		}
+//		else if (GLFWFunctions::scale_down_flag) {
+//			if (gameObject.scaling.x > 50.0f && gameObject.scaling.y > 50.0f) {
+//				gameObject.scaling.x -= 300.f * GLFWFunctions::delta_time;
+//				gameObject.scaling.y -= 300.0f * GLFWFunctions::delta_time;
+//			}
+//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
+//		}
+//
+//		// Movement logic
+//		bool isMoving = false;
+//		if (GLFWFunctions::move_up_flag) {
+//			gameObject.position.y += 100.0f * GLFWFunctions::delta_time;
+//			isMoving = true;
+//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
+//		}
+//		if (GLFWFunctions::move_down_flag) {
+//			gameObject.position.y -= 100.0f * GLFWFunctions::delta_time;
+//			isMoving = true;
+//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
+//		}
+//		if (GLFWFunctions::move_left_flag) {
+//			gameObject.position.x -= 100.0f * GLFWFunctions::delta_time;
+//			isMoving = true;
+//			graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
+//		}
+//		if (GLFWFunctions::move_right_flag) {
+//			gameObject.position.x += 100.0f * GLFWFunctions::delta_time;
+//			isMoving = true;
+//			graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
+//		}
+//
+//
+//		if (!isMoving) {
+//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
+//		}
+//	}
+//}
 
 
 void WindowSystem::initialise() {
@@ -127,16 +127,16 @@ void WindowSystem::initialise() {
 
 	DebugTool->Initialise();
 
-	gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
-	gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ 200.f, 0.0f });
-	background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
-	blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
-	gameObject.is_animated = GL_TRUE;
-	gameObject2.is_animated = GL_TRUE;
-	background.is_animated = GL_FALSE;
+	//gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
+	//gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ 200.f, 0.0f });
+	//background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
+	//blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
+	//gameObject.is_animated = GL_TRUE;
+	//gameObject2.is_animated = GL_TRUE;
+	//background.is_animated = GL_FALSE;
 
-	shader = graphicsSystem.GetShader();
-	shader2 = graphicsSystem.GetShader2();
+	//shader = graphicsSystem.GetShader();
+	//shader2 = graphicsSystem.GetShader2();
 }
 
 void WindowSystem::update() {
@@ -156,38 +156,38 @@ void WindowSystem::update() {
 
 	//keyboardInputUpdateFlag();
 
-	logicUpdate();
+	//logicUpdate();
 
 	DebugSystem::StartSystemTiming("Graphics");
 
-	graphicsSystem.Update(GLFWFunctions::delta_time, false);
-	graphicsSystem.Render(GLFWFunctions::delta_time);
+	//graphicsSystem.Update(GLFWFunctions::delta_time, false);
+	//graphicsSystem.Render(GLFWFunctions::delta_time);
 
-	background.update(GLFWFunctions::delta_time);
-	gameObject.update(GLFWFunctions::delta_time);
-	gameObject2.update(GLFWFunctions::delta_time);
-	blackBox.update(GLFWFunctions::delta_time);
+	//background.update(GLFWFunctions::delta_time);
+	//gameObject.update(GLFWFunctions::delta_time);
+	//gameObject2.update(GLFWFunctions::delta_time);
+	//blackBox.update(GLFWFunctions::delta_time);
 
-	//graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
+	////graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
 
-	if (GLFWFunctions::testMode == 1) {
-		// Draw non-animated object (background)
-		background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
+	//if (GLFWFunctions::testMode == 1) {
+	//	// Draw non-animated object (background)
+	//	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
 
-		// Update animated objects before drawing them
-		graphicsSystem.Update(GLFWFunctions::delta_time, true);
+	//	// Update animated objects before drawing them
+	//	graphicsSystem.Update(GLFWFunctions::delta_time, true);
 
-		// Draw game objects
-		gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-		gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
+	//	// Draw game objects
+	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
 
-		if (GLFWFunctions::debug_flag) {
-			// Draw debug lines if debug mode is on
-			graphicsSystem.drawDebugLines(gameObject);
-			graphicsSystem.drawDebugLines(gameObject2);
-		}
+	//	if (GLFWFunctions::debug_flag) {
+	//		// Draw debug lines if debug mode is on
+	//		graphicsSystem.drawDebugLines(gameObject);
+	//		graphicsSystem.drawDebugLines(gameObject2);
+	//	}
 
-	}
+	//}
 
 	DebugSystem::EndSystemTiming("Graphics");
 

@@ -629,7 +629,9 @@ CollisionSide CollisionSystemECS::circleRectCollision(float circleX, float circl
 void PhysicsSystemECS::update(float dt) {
     //let it be the first entity
     Entity playerEntity = ecsCoordinator.getFirstEntity();
-    Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
+    Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();   
+    //Entity playerEntity;
+    //Entity closestPlatformEntity;
 
     for (auto& entity : entities) {
         bool isPlayer = ecsCoordinator.hasComponent<MovementComponent>(entity);

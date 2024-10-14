@@ -102,9 +102,10 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
-	void test();
+	//void test();
 	void test2();
 	void test3();
+	void test4();
 	void initialiseSystemsAndComponents();
 
 private:

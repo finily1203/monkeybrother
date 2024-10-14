@@ -17,14 +17,17 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *//*___________________________________________________________________________-*/
 
 #include "ECSCoordinator.h"
+
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
 #include "AABBComponent.h"
 #include "MovementComponent.h"
 #include "ClosestPlatform.h"
+#include "GraphicsSystem.h"
+#include "AnimationComponent.h"
+
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
-#include "GraphicsSystem.h"
 
 #include <random>
 #include <glm/glm.hpp>
@@ -52,7 +55,7 @@ void ECSCoordinator::update() {
 			test3();
 		}
 		else if (GLFWFunctions::testMode == 1) {
-			test2();
+			test4();
 		}
 		GLFWFunctions::goNextMode = false;
 	}
@@ -301,150 +304,14 @@ void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdat
 		transform.scale = transUpdate.scale;
 	}
 
-	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
-	{
-		GraphicsComponent& graphics = getComponent<GraphicsComponent>(entity);
-		// assign the new data of the graphics component to the entity's graphics component
-		graphics.glObject.position = graphicsUpdate.glObject.position;
-		graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
-		graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
-	}
-}
-
-//First ever test to test the ECS system
-//Currently no longer in use as it is used for testing purposes
-void ECSCoordinator::test() {
-	std::cout << "testing ECS" << std::endl;
-	//create player entity
-	Entity player = createEntity();
-	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
-	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
-
-	//register components
-	std::cout << "REGISTER TEST" << std::endl;
-	registerComponent<Position>();
-	registerComponent<Size>();
-	registerComponent<velocity>();
-
-	auto playerSystem = registerSystem<PlayerSystem>();
-
-	addComponent(player, Position{ myMath::Vector2D(0, 0) });
-	addComponent(player, Size{ myMath::Vector2D(1, 1) });
-	addComponent(player, velocity{ 5 });
-	std::cout << std::endl;
-
-	//set system signature
-	std::cout << "SET SYSTEM SIG TEST" << std::endl;
-	ComponentSig playerSig;
-	std::cout << "Player signature: " << playerSig << std::endl;
-	playerSig.set(getComponentType<Position>(), true);
-	playerSig.set(getComponentType<Size>(), true);
-	playerSig.set(getComponentType<velocity>(), true);
-	setSystemSignature<PlayerSystem>(playerSig);
-	std::cout << std::endl;
-
-
-	playerSystem->update(GLFWFunctions::delta_time);
-
-	//get component
-	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
-	playerSig = entityManager->getSignature(player);
-	std::cout << "Player signature: " << playerSig << std::endl;
-
-	// Check if specific components are present
-	bool hasPosition = playerSig.test(getComponentType<Position>());
-	bool hasSize = playerSig.test(getComponentType<Size>());
-	bool hasVelocity = playerSig.test(getComponentType<velocity>());
-
-	// Retrieve components if they exist
-	if (hasPosition) {
-		Position playerPosition = getComponent<Position>(player);
-		std::cout << "Player position: " << playerPosition.pos.GetX() << ", " << playerPosition.pos.GetY() << std::endl;
-	}
-
-	if (hasSize) {
-		Size playerSize = getComponent<Size>(player);
-		std::cout << "Player size: " << playerSize.scale.GetX() << ", " << playerSize.scale.GetY() << std::endl;
-	}
-
-	if (hasVelocity) {
-		velocity playerVelocity = getComponent<velocity>(player);
-		std::cout << "Player velocity: " << playerVelocity.speed << std::endl;
-	}
-	std::cout << std::endl;
-
-	//remove component
-	std::cout << "REMOVE COMPONENT TEST" << std::endl;
-	removeComponent<Position>(player);
-	removeComponent<Size>(player);
-	removeComponent<velocity>(player);
-	playerSig = entityManager->getSignature(player);
-	std::cout << "Player signature: " << playerSig << std::endl << std::endl;
-
-	//remove entity
-	std::cout << "REMOVE ENTITY TEST" << std::endl;
-	destroyEntity(player);
-	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
-	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
-
-	std::cout << std::endl;
-
-	Entity loadedEntity = createEntity();
-	LoadEntityFromJSON(*this, loadedEntity, "./Serialization/player.json");
-	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
-	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
-
-	playerSig.set(getComponentType<Position>(), true);
-	playerSig.set(getComponentType<Size>(), true);
-	playerSig.set(getComponentType<velocity>(), true);
-	setSystemSignature<PlayerSystem>(playerSig);
-	std::cout << std::endl;
-
-	playerSystem->update(GLFWFunctions::delta_time);
-
-	std::cout << "RETRIEVE COMPONENT TEST" << std::endl;
-	playerSig = entityManager->getSignature(loadedEntity);
-	std::cout << "Player signature: " << playerSig << std::endl;
-
-	if (entityManager->getSignature(loadedEntity).test(getComponentType<Position>()))
-	{
-		Position loadedPos = getComponent<Position>(loadedEntity);
-		std::cout << "Loaded Position from JSON: " << loadedPos.pos.GetX() << ", " << loadedPos.pos.GetY() << std::endl;
-	}
-
-	if (entityManager->getSignature(loadedEntity).test(getComponentType<Size>()))
-	{
-		Size loadedSize = getComponent<Size>(loadedEntity);
-		std::cout << "Loaded Size from JSON: " << loadedSize.scale.GetX() << ", " << loadedSize.scale.GetY() << std::endl;
-	}
-
-	if (entityManager->getSignature(loadedEntity).test(getComponentType<velocity>()))
-	{
-		velocity loadedVel = getComponent<velocity>(loadedEntity);
-		std::cout << "Loaded Velocity from JSON: " << loadedVel.speed << std::endl;
-	}
-
-	std::cout << std::endl;
-
-	float x = 12.533f, y = -63.1567f;
-	//UpdateEntityPosition(loadedEntity, x, y);
-
-	SaveEntityToJSON(*this, loadedEntity, "./Serialization/player.json");
-
-	// remove component
-	std::cout << "REMOVE COMPONENT TEST" << std::endl;
-	removeComponent<Position>(loadedEntity);
-	removeComponent<Size>(loadedEntity);
-	removeComponent<velocity>(loadedEntity);
-	playerSig = entityManager->getSignature(loadedEntity);
-	std::cout << "Player signature: " << playerSig << std::endl << std::endl;
-
-	// remove entity
-	std::cout << "REMOVE ENTITY TEST" << std::endl;
-	destroyEntity(loadedEntity);
-	std::cout << "Number of available entities " << entityManager->getAvailableEntCount() << std::endl;
-	std::cout << "Number of live entities " << entityManager->getLiveEntCount() << std::endl;
-	std::cout << std::endl;
+	//if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
+	//{
+	//	GraphicsComponent& graphics = getComponent<GraphicsComponent>(entity);
+	//	// assign the new data of the graphics component to the entity's graphics component
+	//	graphics.glObject.position = graphicsUpdate.glObject.position;
+	//	graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
+	//	graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
+	//}
 }
 
 //clones the entity
@@ -459,12 +326,12 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 		addComponent(newEntity, transform);
 	}
 
-	if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
-	{
-		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
-		graphics.glObject.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
-		addComponent(newEntity, graphics);
-	}
+	//if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
+	//{
+	//	GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
+	//	graphics.glObject.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
+	//	addComponent(newEntity, graphics);
+	//}
 
 	return newEntity;
 }
@@ -520,6 +387,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<AABBComponent>();
 	registerComponent<MovementComponent>();
 	registerComponent<ClosestPlatform>();
+	registerComponent<AnimationComponent>();
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -553,4 +421,16 @@ float ECSCoordinator::getRandomVal(float min = -100.0f, float max = 100.0f) {
 	std::mt19937 gen(rd()); 
 	std::uniform_real_distribution<float> dis(min, max); 
 	return dis(gen); 
+}
+
+//test new graphics System function
+void ECSCoordinator::test4() {
+	Entity entObjGraphics = createEntity();
+	addComponent(entObjGraphics, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(50.f, 50.0f), glm::vec2(0.0f, -150.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+
+	Entity entObjGraphics2 = createEntity();
+	addComponent(entObjGraphics2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+
+	Entity entObjGraphics3 = createEntity();
+	addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
 }

@@ -382,3 +382,64 @@ void GraphicsSystem::drawDebugLines(const GLObject& obj) {
 
     glEnd();
 }
+
+glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri) {
+    glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
+
+    Translating =
+    {
+        1,      0 ,       0,
+        0,      1 ,       0,
+        objPos.x,   objPos.y , 1
+    };
+    Scaling =
+    {
+        objScale.x  ,0          ,0,
+        0           ,objScale.y    ,0,
+        0           ,0             ,1
+    };
+
+    objOri.x += static_cast<GLfloat>(objOri.y * deltaTime * 100.0f);
+
+    Rotating =
+    {
+         glm::cos(glm::radians(objOri.x)), glm::sin(glm::radians(objOri.x)), 0,
+        -glm::sin(glm::radians(objOri.x)), glm::cos(glm::radians(objOri.x)), 0,
+         0, 0, 1
+    };
+
+    // TODO:: change the NDC matrix to be calculated based on the window size
+    NDC =
+    {
+        2.0f / 1600.0f,  0,              0,
+        0,               2.0f / 900.0f,  0,
+        0,               0,              1 };
+
+    mdl_xform = Translating * (Rotating * Scaling);
+    mdl_to_ndc_xform = NDC * mdl_xform;
+    return mdl_to_ndc_xform;
+}
+
+void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {
+    // load shader program in use by this object
+    if (mode == DrawMode::COLOR)
+        m_Shader->Bind();
+    else
+        m_Shader2->Bind();
+    // bind VAO of this object
+    glBindVertexArray(m_VAO);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
+    if (uniformLoc != -1) {
+        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(xform));
+    }
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+    // unbind VAO
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    // unbind shader program
+    m_Shader2->Unbind();
+}

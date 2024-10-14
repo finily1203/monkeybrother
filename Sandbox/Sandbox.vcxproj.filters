@@ -56,6 +56,7 @@
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
+    <ClInclude Include="Components\AnimationComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

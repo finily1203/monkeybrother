@@ -215,7 +215,7 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
 
     static double prevTime = glfwGetTime();
     double currTime = glfwGetTime();
-    GLFWFunctions::delta_time = currTime - prevTime;
+    GLFWFunctions::delta_time = static_cast<float>(currTime) - static_cast<float>(prevTime);
     prevTime = currTime;
 
     static double frameCount = 0;

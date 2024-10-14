@@ -30,6 +30,6 @@ public:
 	void update() override;
 	void cleanup() override;
 
-	void logicUpdate();
+	//void logicUpdate();
 	
 };
