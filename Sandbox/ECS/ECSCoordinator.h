@@ -87,7 +87,11 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
-	// load the data from JSON file and save to the entity's data
+	std::string GetExecutablePath();
+	std::string GetWindowConfigJSONPath();
+	std::string GetPlayerJSONPath();
+	std::string GetEnemyJSONPath();
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);

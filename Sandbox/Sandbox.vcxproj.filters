@@ -26,6 +26,7 @@
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
+    <ClCompile Include="MathLibrary\vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECS\ComponentBase.h" />
@@ -56,6 +57,8 @@
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
+    <ClInclude Include="AssetsManager\AssetsManager.h" />
+    <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
   </ItemGroup>
   <ItemGroup>
