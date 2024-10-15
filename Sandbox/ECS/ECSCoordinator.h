@@ -89,10 +89,9 @@ public:
 
 	std::string GetExecutablePath();
 	std::string GetWindowConfigJSONPath();
-	std::string GetPlayerJSONPath();
-	std::string GetEnemyJSONPath();
+	std::string GetEntitiesJSONPath();
 
-	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	// update the entity's data

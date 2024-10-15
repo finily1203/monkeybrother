@@ -49,18 +49,10 @@ std::string ECSCoordinator::GetWindowConfigJSONPath()
 	return jsonPath;
 }
 
-std::string ECSCoordinator::GetPlayerJSONPath()
+std::string ECSCoordinator::GetEntitiesJSONPath()
 {
 	std::string execPath = GetExecutablePath();
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\player.json";
-
-	return jsonPath;
-}
-
-std::string ECSCoordinator::GetEnemyJSONPath()
-{
-	std::string execPath = GetExecutablePath();
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\enemy.json";
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
 
 	return jsonPath;
 }
@@ -141,8 +133,8 @@ void ECSCoordinator::test2() {
 	std::cout << "testing ECS with graphics side" << std::endl << std::endl;
 
 	std::cout << "Set entity" << std::endl;
-	Entity entity = createEntity();
-	LoadEntityFromJSON(*this, entity, GetPlayerJSONPath());
+	//Entity entity = createEntity();
+	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
 	
 	// test codes for saving to JSON file
 	// can be uncommented for the testing of saving to JSON file
@@ -159,8 +151,8 @@ void ECSCoordinator::test2() {
 	//UpdateEntity(entity, transUpdate, graphicsUpdate);
 	//SaveEntityToJSON(*this, entity, GetPlayerJSONPath());
 
-	Entity entity2 = createEntity();
-	LoadEntityFromJSON(*this, entity2, GetEnemyJSONPath());
+	//Entity entity2 = createEntity();
+	//LoadEntityFromJSON(*this, entity2, GetEnemyJSONPath());
 }
 
 struct Position {
@@ -168,11 +160,11 @@ struct Position {
 
 	// serializing function for the first test on the ECS component so this function handles
 	// both reading and writing of the position component
-	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
+	void Serialize(BaseSerializer& serializer, SerializationMode mode)
 	{
 		float x, y;
 
-		if (mode == Serializer::SerializationMode::READ)
+		if (mode == SerializationMode::READ)
 		{
 			ReadObjectStream(serializer, x, "Player.position.pos.x");
 			ReadObjectStream(serializer, y, "Player.position.pos.y");
@@ -181,7 +173,7 @@ struct Position {
 			pos.SetY(y);
 		}
 
-		else if (mode == Serializer::SerializationMode::WRITE)
+		else if (mode == SerializationMode::WRITE)
 		{
 			float x = pos.GetX();
 			float y = pos.GetY();
@@ -197,11 +189,11 @@ struct Size {
 
 	// serializing function for the first test on the ECS component so this function handles
 	// both reading and writing of the size component
-	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
+	void Serialize(BaseSerializer& serializer, SerializationMode mode)
 	{
 		float x, y;
 
-		if (mode == Serializer::SerializationMode::READ)
+		if (mode == SerializationMode::READ)
 		{
 			ReadObjectStream(serializer, x, "Player.size.scale.x");
 			ReadObjectStream(serializer, y, "Player.size.scale.y");
@@ -210,7 +202,7 @@ struct Size {
 			scale.SetY(y);
 		}
 
-		else if (mode == Serializer::SerializationMode::WRITE)
+		else if (mode == SerializationMode::WRITE)
 		{
 			float x = scale.GetX();
 			float y = scale.GetY();
@@ -226,14 +218,14 @@ struct velocity {
 
 	// serializing function for the first test on the ECS component so this function handles
 	// both reading and writing of the velocity component
-	void Serialize(Serializer::BaseSerializer& serializer, Serializer::SerializationMode mode)
+	void Serialize(BaseSerializer& serializer, SerializationMode mode)
 	{
-		if (mode == Serializer::SerializationMode::READ)
+		if (mode == SerializationMode::READ)
 		{
 			ReadObjectStream(serializer, speed, "Player.velocity.speed");
 		}
 
-		else if (mode == Serializer::SerializationMode::WRITE)
+		else if (mode == SerializationMode::WRITE)
 		{
 			WriteObjectStream(serializer, speed, "Player.velocity.speed");
 		}
@@ -258,9 +250,9 @@ public:
 
 // this is the definition of the function that loads the data from JSON file to the entity
 // open the JSON file and initialize the entity data based on the values read
-void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
+void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
-	Serializer::JSONSerializer serializer;
+	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))
 	{
@@ -270,28 +262,32 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 	
 	// return the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
-	// finding the parent entity key of the JSON object
-	std::string parentEntity = jsonObj.begin().key();
 
-	TransformComponent transform{};
-	// read transform component from the JSON file
-	// read the position first
-	serializer.ReadObject(transform.position, parentEntity + ".transform.position");
-	// read the scale next
-	serializer.ReadObject(transform.scale, parentEntity + ".transform.scale");
-	// read the orientation last
-	serializer.ReadObject(transform.orientation, parentEntity + ".transform.orientation");
-	ecs.addComponent(entity, transform);
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
 
-	GraphicsComponent graphics{};
-	// read graphics component from the JSON file
-	// read the posution first
-	serializer.ReadObject(graphics.glObject.position, parentEntity + ".graphics.position");
-	// read the scale next
-	serializer.ReadObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
-	// read the orientation last
-	serializer.ReadObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
-	ecs.addComponent(entity, graphics);
+		std::string entityId = entityData["id"].get<std::string>();
+
+		serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+		serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+		serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+		serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+		serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+
+		ecs.addComponent(entityObj, transform);
+	}
+
+	//GraphicsComponent graphics{};
+	//// read graphics component from the JSON file
+	//// read the posution first
+	//serializer.ReadObject(graphics.glObject.position, parentEntity + ".graphics.position");
+	//// read the scale next
+	//serializer.ReadObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
+	//// read the orientation last
+	//serializer.ReadObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
+	//ecs.addComponent(entity, graphics);
 
 	//ecs.addComponent(entity, MovementComponent{ 10.f });
 }
@@ -299,7 +295,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std
 // this function will save the entity's data to the JSON file
 void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
 {
-	Serializer::JSONSerializer serializer;
+	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))
 	{
@@ -471,12 +467,16 @@ float ECSCoordinator::getRandomVal(float min = -100.0f, float max = 100.0f) {
 
 //test new graphics System function
 void ECSCoordinator::test4() {
-	Entity entObjGraphics = createEntity();
-	addComponent(entObjGraphics, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(50.f, 50.0f), glm::vec2(0.0f, -150.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+	//Entity entObjGraphics = createEntity();
+	////addComponent(entObjGraphics, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(50.f, 50.0f), glm::vec2(0.0f, -150.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+	//
+	//LoadEntityFromJSON(*this, entObjGraphics, GetPlayerJSONPath());
 
-	Entity entObjGraphics2 = createEntity();
-	addComponent(entObjGraphics2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+	//Entity entObjGraphics2 = createEntity();
+	//addComponent(entObjGraphics2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
 
-	Entity entObjGraphics3 = createEntity();
-	addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+	//Entity entObjGraphics3 = createEntity();
+	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+
+	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
 }
