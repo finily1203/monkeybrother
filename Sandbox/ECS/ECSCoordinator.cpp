@@ -10,7 +10,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   updating and the destruction of objects.
 							   70%
 		 Ian Loi (ian.loi): Defined the LoadEntityFromJSON, SaveEntityToJSON and 
-						    UpdateEntity functions that load data from JSON file to
+						    UpdateEntityData functions that load data from JSON file to
 							the entity, save data from entity to JSON file and update
 							entity data respectively.
 						    30%
@@ -32,26 +32,43 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <Windows.h>
 
 
+// this function retrieves the executable path based on your desktop
+// dynamic path retrieval
 std::string ECSCoordinator::GetExecutablePath()
 {
 	char buffer[MAX_PATH];
+
+	// this is a windows API function that will retrieve the fully
+	// qualified path of the executable file 
 	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+
+	// initialize the full executable path to fullPath
 	std::string fullPath(buffer);
 
+	// return the directory path by extracting a substring from the
+	// fullPath
 	return fullPath.substr(0, fullPath.find_last_of("\\/"));
 }
 
+// this function retrieves the windowsConfig JSON file
 std::string ECSCoordinator::GetWindowConfigJSONPath()
 {
+	// retrieves the executable path
 	std::string execPath = GetExecutablePath();
+	
+	// retrieves the windowsConfig JSON file path
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\windowConfig.json";
 
 	return jsonPath;
 }
 
+// this function retrieves the entites JSON file
 std::string ECSCoordinator::GetEntitiesJSONPath()
 {
+	// retrieves the executable path
 	std::string execPath = GetExecutablePath();
+
+	// retrieves the entities JSON file path
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
 
 	return jsonPath;
@@ -254,6 +271,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 {
 	JSONSerializer serializer;
 
+	// checks if JSON file could be opened
 	if (!serializer.Open(filename))
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
@@ -263,31 +281,33 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 	// return the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
+	// loop through the entities array in the JSON object and
+	// retrieve each data
 	for (const auto& entityData : jsonObj["entities"])
 	{
+		// create entities based on the number of entities in
+		// entities array of the JSON object
 		Entity entityObj = createEntity();
 		TransformComponent transform{};
 
+		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
 
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
 		serializer.ReadObject(transform.position, entityId, "entities.transform.position");
 		serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
 		serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
 		serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
 		serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 
+		// add the component with all of the data populated from
+		// the JSON object
 		ecs.addComponent(entityObj, transform);
-	}
 
-	//GraphicsComponent graphics{};
-	//// read graphics component from the JSON file
-	//// read the posution first
-	//serializer.ReadObject(graphics.glObject.position, parentEntity + ".graphics.position");
-	//// read the scale next
-	//serializer.ReadObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
-	//// read the orientation last
-	//serializer.ReadObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
-	//ecs.addComponent(entity, graphics);
+		// set the entityId for the current entity
+		ecs.entityManager->setEntityId(entityObj, entityId);
+	}
 
 	//ecs.addComponent(entity, MovementComponent{ 10.f });
 }
@@ -297,6 +317,7 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 {
 	JSONSerializer serializer;
 
+	// checks if JSON file could be opened
 	if (!serializer.Open(filename))
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
@@ -305,29 +326,35 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 
 	// returns the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
-	// finding the parent entity key of the JSON object
-	std::string parentEntity = jsonObj.begin().key();
 
-	// Get the current components of the entity
-	if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+	// loop through every entities in the array of the JSON object
+	for (const auto& entityData : jsonObj["entities"])
 	{
-		TransformComponent transform = getComponent<TransformComponent>(entity);
-		// write the transform component to the JSON file
-		serializer.WriteObject(transform.position, parentEntity + ".transform.position");
-		serializer.WriteObject(transform.scale, parentEntity + ".transform.scale");
-		serializer.WriteObject(transform.orientation, parentEntity + ".transform.orientation");
+		// getting the id of the data in the entities array of
+		// the JSON object
+		std::string entityId = entityData["id"].get<std::string>();
+
+		// this if statement is to change the particular entity data based on
+		// the entityId. This will not change all data but just one
+		if (ecs.entityManager->getEntityById(entityId) == entity)
+		{
+			// ensuring that entity has TransformComponent
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				// change the data in the JSON object based on the entity's
+				// data
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
 	}
 
-	if (ecs.entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
-	{
-		// write the graphics component to the JSON file
-		GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
-		serializer.WriteObject(graphics.glObject.position, parentEntity + ".graphics.position");
-		serializer.WriteObject(graphics.glObject.scaling, parentEntity + ".graphics.scale");
-		serializer.WriteObject(graphics.glObject.orientation, parentEntity + ".graphics.orientation");
-	}
-
-	// saving to JSON file failed execute this block
+	// checks if the JSON object is able to be saved to the JSON file
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
@@ -335,25 +362,15 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 }
 
 // this function handles the updating of the entity's data
-void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate)
+void ECSCoordinator::UpdateEntityData(Entity& entity)
 {
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent& transform = getComponent<TransformComponent>(entity);
 		// assign the new data of the transform component to the entity's transform component
-		transform.orientation = transUpdate.orientation;
-		transform.position = transUpdate.position;
-		transform.scale = transUpdate.scale;
+		transform.position.x = 50.f;
+		transform.scale.y = 20.f;
 	}
-
-	//if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
-	//{
-	//	GraphicsComponent& graphics = getComponent<GraphicsComponent>(entity);
-	//	// assign the new data of the graphics component to the entity's graphics component
-	//	graphics.glObject.position = graphicsUpdate.glObject.position;
-	//	graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
-	//	graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
-	//}
 }
 
 //clones the entity
@@ -479,4 +496,16 @@ void ECSCoordinator::test4() {
 	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
 
 	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
+
+	// This is the code for testing saving the entity data to the
+	// JSON file
+	//std::string id = "Player";
+	//Entity entity = entityManager->getEntityById(id);
+
+	//if (hasComponent<TransformComponent>(entity))
+	//{
+	//	UpdateEntityData(entity);
+
+	//	SaveEntityToJSON(*this, entity, GetEntitiesJSONPath());
+	//}
 }

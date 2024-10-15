@@ -32,11 +32,14 @@ public:
 	void ReadSpecificObject(glm::vec2&, nlohmann::json const&);
 	void ReadSpecificObject(glm::mat3&, nlohmann::json const&);
 
+	void WriteSpecificObject(glm::vec2 const&, nlohmann::json&);
+	void WriteSpecificObject(glm::mat3 const&, nlohmann::json&);
+
 	template <typename T>
 	void ReadObject(T&, std::string const&, std::string const&);
 
 	template <typename T>
-	void WriteObject(T&, std::string const&);
+	void WriteObject(T&, std::string const&, std::string const&);
 
 	virtual void ReadInt(int&, std::string const&);
 	virtual void ReadFloat(float&, std::string const&);
@@ -65,7 +68,7 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 
 	while (std::getline(keyStream, keySegment, '.'))
 	{
-		// Check if we're at the "entities" key and need to handle the array
+		// Check if we are at the "entities" key and need to handle the array
 		if (keySegment == "entities")
 		{
 			// boolean to check if entityId is in the JSON object
@@ -74,7 +77,8 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 			// loop through every entities in the array of the JSON object
 			for (const auto& entity : currentObj["entities"])
 			{
-				// checks for the different entities in the array
+				// checks for the different entities in the array based on
+				// the id of the entity
 				if (entity["id"] == entityId)
 				{
 					// set the current object to be the current entity
@@ -120,7 +124,7 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 }
 
 template <typename T>
-void JSONSerializer::WriteObject(T& gameObj, std::string const& parentKey)
+void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::string const& parentKey)
 {
 	// string buffer that contains the sequence of characters of parentKey
 	std::istringstream keyStream(parentKey);
@@ -129,12 +133,43 @@ void JSONSerializer::WriteObject(T& gameObj, std::string const& parentKey)
 	std::string keySegment;
 	nlohmann::json* currentObj = &jsonObj;
 
-	// this read each of the key in parentKey one by one
 	while (std::getline(keyStream, keySegment, '.'))
 	{
-		currentObj = &((*currentObj)[keySegment]);
+		// Check if we are at the "entities" key and need to handle the array
+		if (keySegment == "entities")
+		{
+			// boolean to check if entityId is in the JSON object
+			bool found = false;
+
+			// loop through every entities in the array of the JSON object
+			for (auto& entity : (*currentObj)["entities"])
+			{
+				// checks for the different entities in the array based on
+				// the id of the entity
+				if (entity["id"] == entityId)
+				{
+					// set the current object to be the address of 
+					// the current entity
+					currentObj = &entity;
+
+					// set to true since the entity Id is found in the JSON object
+					found = true;
+
+					// stop looking through the JSON object since we found the entity
+					break;
+				}
+			}
+		}
+
+		else
+		{
+			// Continue the normal process for other keys
+			currentObj = &((*currentObj)[keySegment]);
+		}
 	}
 
-	(*currentObj)["x"] = gameObj.x;
-	(*currentObj)["y"] = gameObj.y;
+	// this handles the writing of different types of objects
+	// example will be a matrix3x3 object and a vector2D object can all
+	// be written by calling this function
+	WriteSpecificObject(gameObj, *currentObj);
 }

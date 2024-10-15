@@ -2,21 +2,6 @@
   "entities": [
     {
       "id": "Player",
-      "type": "TransformComponent",
-      "graphics": {
-        "orientation": {
-          "x": 0.0,
-          "y": 0.0
-        },
-        "position": {
-          "x": -400.0,
-          "y": 0.0
-        },
-        "scale": {
-          "x": 50.0,
-          "y": 50.0
-        }
-      },
       "transform": {
         "orientation": {
           "x": 0.0,
@@ -44,21 +29,6 @@
     },
     {
       "id": "Object1",
-      "type": "TransformComponent",
-      "graphics": {
-        "orientation": {
-          "x": 0.0,
-          "y": 0.0
-        },
-        "position": {
-          "x": 300.0,
-          "y": 0.0
-        },
-        "scale": {
-          "x": 100.0,
-          "y": 100.0
-        }
-      },
       "transform": {
         "orientation": {
           "x": 0.0,
@@ -86,21 +56,6 @@
     },
     {
       "id": "Object2",
-      "type": "TransformComponent",
-      "graphics": {
-        "orientation": {
-          "x": 0.0,
-          "y": 0.0
-        },
-        "position": {
-          "x": -300.0,
-          "y": 0.0
-        },
-        "scale": {
-          "x": 100.0,
-          "y": 100.0
-        }
-      },
       "transform": {
         "orientation": {
           "x": 0.0,
