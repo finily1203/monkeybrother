@@ -33,15 +33,19 @@ public:
 	void cleanup() override;
 
 	//Function to add song into the songlist 
-	void addSong(const std::string& songPath);
+	//void addSong(const std::string& songPath);
 
 	//Function to play song at the given index
-	void playSong(int index);
+	//void playSong(int index);
+	void playSong(const std::string& songName);
 
 	//Getter for currentSongIndex
 	int getSongIndex();
 	//Setter for currentSongIndex
 	void setSongIndex(int index);
+
+	//get audioSystem
+	FMOD::System* getAudioSystem() const { return audioSystem; }
 
 private:
 	FMOD::System* audioSystem;

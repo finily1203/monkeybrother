@@ -26,7 +26,8 @@ double GLFWFunctions::fps = 0.0;
 float GLFWFunctions::delta_time = 0.0;
 float GLFWFunctions::volume = 0.5f;
 bool GLFWFunctions::audioPaused = false;
-bool GLFWFunctions::nextSong = false;
+bool GLFWFunctions::audioNext = false;
+int GLFWFunctions::audioNum = 0;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
 bool GLFWFunctions::cloneObject = false;
@@ -122,8 +123,9 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioPaused = false;
     }
 
-    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::nextSong == false) {
-        GLFWFunctions::nextSong = true;
+    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::audioNext == false) {
+        GLFWFunctions::audioNext = true;
+        GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }
 
     if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {

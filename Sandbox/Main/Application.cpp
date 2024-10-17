@@ -45,15 +45,11 @@ int main() {
 		engine->addSystem(&ecsCoordinator);
 
 		engine->initialiseSystem();
-		//ecsCoordinator.test();
-		//ecsCoordinator.test2();
 		ecsCoordinator.initialiseSystemsAndComponents();
 		ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			DebugSystem::StartLoop(); //Get time for start of gameloop
-
-
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);

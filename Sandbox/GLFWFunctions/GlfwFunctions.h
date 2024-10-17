@@ -46,7 +46,8 @@ struct GLFWFunctions {
 	static float delta_time;
 	static float volume;
 	static bool audioPaused;
-	static bool nextSong;
+	static bool audioNext;
+	static int audioNum;
 	static bool audioStopped;
 	static bool cloneObject;
 	static bool goNextMode;

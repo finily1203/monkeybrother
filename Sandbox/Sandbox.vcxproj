@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,7 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\Debug;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,6 +100,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetsManager\AssetsManager.cpp" />
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />

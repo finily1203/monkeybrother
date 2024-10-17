@@ -12,6 +12,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
                                100%
 *//*___________________________________________________________________________-*/
 
+#include "GlobalCoordinator.h"
 #include "AudioSystem.h"
 #include "GlfwFunctions.h"
 #include <iostream>
@@ -38,9 +39,10 @@ void AudioSystem::initialise() {
         return;
     }
 
-    addSong("../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav");
-    addSong("../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav");
-    playSong(0);
+
+    assetsManager.LoadAudio("background", "../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav", audioSystem);
+    assetsManager.LoadAudio("bubbles", "../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav", audioSystem);
+    playSong("background");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -55,7 +57,7 @@ void AudioSystem::update() {
 
         // If not playing, replay the sound unless stopAudio is true
         if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
-            playSong(getSongIndex());
+            playSong("background");
         }
 
 
@@ -92,12 +94,19 @@ void AudioSystem::update() {
             }
         }
 
-        if (GLFWFunctions::nextSong) {
-            int newIndex = (getSongIndex() + 1) % audioSongList.size();
-            playSong(newIndex);
-
-            GLFWFunctions::nextSong = false;
+        if (GLFWFunctions::audioNext) {
+            switch (GLFWFunctions::audioNum) {
+            case 0:
+                playSong("background");
+                break;
+            case 1:
+                playSong("bubbles");
+                break;
+            }
+            GLFWFunctions::audioNext = false;
         }
+
+
 
         result = audioChannel->setVolume(GLFWFunctions::volume);
         if (result != FMOD_OK) {
@@ -123,46 +132,18 @@ void AudioSystem::cleanup() {
     }
 }
 
-//Function to add song into the songlist 
-void AudioSystem::addSong(const std::string& songPath) {
-    FMOD::Sound* audioSong = nullptr;
-    FMOD_RESULT result = audioSystem->createSound(songPath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
-    if (result != FMOD_OK) {
-        std::cout << "FMOD error! (" << result << ") " << std::endl;
-        return;
-    }
-
-    audioSongList.push_back(audioSong);
-}
-
-
-//Function to play song at the given index
-void AudioSystem::playSong(int index) {
-    if (index >= 0 && index < audioSongList.size()) {
-        if (audioChannel) {
-            FMOD_RESULT result = audioChannel->stop();
-            if (result != FMOD_OK) {
-                std::cout << "FMOD stop error! (" << result << ") " << std::endl;
-            }
-            audioChannel = nullptr;
-        }
-        FMOD_RESULT result = audioSystem->playSound(audioSongList[index], nullptr, false, &audioChannel);
-        setSongIndex(index);
+void AudioSystem::playSong(const std::string& songName) {
+    FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
+    if (audioChannel) {
+	    FMOD_RESULT result = audioChannel->stop();
         if (result != FMOD_OK) {
-            std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
-        }
-    }
-    else {
-        std::cout << "Invalid index." << std::endl;
-    }
-}
+			std::cout << "FMOD stop error! (" << result << ") " << std::endl;
+		}
+		audioChannel = nullptr;
+	}
+	FMOD_RESULT result = audioSystem->playSound(audioSong, nullptr, false, &audioChannel);
+    if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+	}
 
-//Getter for currentSongIndex
-int AudioSystem::getSongIndex() {
-    return currSongIndex;
-}
-
-//Setter for currentSongIndex
-void AudioSystem::setSongIndex(int index) {
-    currSongIndex = index;
 }
