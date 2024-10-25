@@ -8,7 +8,7 @@
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
-    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="DebugSystem\Debug.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
@@ -25,9 +25,9 @@
     <ClCompile Include="EntityManager\ComponentManager.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
-    <ClCompile Include="Debug\GUIGameViewport.cpp" />
-    <ClCompile Include="Debug\GUIConsole.cpp" />
-    <ClCompile Include="Debug\Crashlog.cpp" />
+    <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
+    <ClCompile Include="DebugSystem\GUIConsole.cpp" />
+    <ClCompile Include="DebugSystem\Crashlog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityManager\ComponentBase.h" />
@@ -40,7 +40,7 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
-    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
@@ -54,9 +54,9 @@
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
-    <ClInclude Include="Debug\GUIGameViewport.h" />
-    <ClInclude Include="Debug\GUIConsole.h" />
-    <ClInclude Include="Debug\Crashlog.h" />
+    <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="DebugSystem\GUIConsole.h" />
+    <ClInclude Include="DebugSystem\Crashlog.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -71,7 +71,7 @@
     <None Include="Graphics\Basic1.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Debug\Assets\liberation-mono.ttf" />
+    <Font Include="DebugSystem\Assets\liberation-mono.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Graphics\Assets\demon_spritesheet.png" />
