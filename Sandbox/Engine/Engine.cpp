@@ -32,15 +32,63 @@ void Engine::initialiseSystem() {
 	}
 
 	ecsCoordinator.initialise();
+	
 }
 
 //Update all systems. Should be used after all systems are initialised
 void Engine::updateSystem() {
+	debugSystem.StartLoop();
 	ecsCoordinator.update();
 
 	for (auto& system : m_systems) {
+
+		//Start time record for perfomance viewer
+		switch (system->getSystem()) {
+		case SystemType::AudioSystemType:
+			debugSystem.StartSystemTiming("AudioSystem");
+			break;
+		case SystemType::WindowSystemType:
+			debugSystem.StartSystemTiming("WindowSystem");
+			break;
+		case SystemType::DebugSystemType:
+			debugSystem.StartSystemTiming("DebugSystem");
+			break;
+		case SystemType::ECSType:
+			debugSystem.StartSystemTiming("EntityComponentSystem");
+			break;
+		case SystemType::AssetsManagerType:
+			debugSystem.StartSystemTiming("AssetsManager");
+			break;
+		default:
+			break;
+		}
+		
 		system->update();
+		
+		//End time record for perfomance viewer
+		switch (system->getSystem()) {
+		case SystemType::AudioSystemType:
+			debugSystem.EndSystemTiming("AudioSystem");
+			break;
+		case SystemType::WindowSystemType:
+			debugSystem.EndSystemTiming("WindowSystem");
+			break;
+		case SystemType::DebugSystemType:
+			debugSystem.EndSystemTiming("DebugSystem");
+			break;
+		case SystemType::ECSType:
+			debugSystem.EndSystemTiming("EntityComponentSystem");
+			break;
+		case SystemType::AssetsManagerType:
+			debugSystem.EndSystemTiming("AssetsManager");
+			break;
+		default:
+			break;
+		}
+			
 	}
+	debugSystem.EndLoop();
+	debugSystem.UpdateSystemTimes();
 }
 
 //Clean up all systems. Should be used after all systems are updated
@@ -49,13 +97,14 @@ void Engine::cleanupSystem() {
 		if (system != nullptr) {
 			system->cleanup();
 			
-			if (system != &ecsCoordinator) {
+			if (system != &ecsCoordinator && system != &debugSystem) {
 				delete system;
 			}
 		}
 	}
 
 	ecsCoordinator.cleanup();
+	
 }
 
 Engine::~Engine() {}

@@ -14,6 +14,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "fmod.hpp"
 #include <vector>
 #include <string>
+#include "GlobalCoordinator.h"
 
 class AudioSystem : public GameSystems
 {
@@ -31,17 +32,22 @@ public:
 	
 	//Clears all the songs from the audioSystem and terminates the audioSystem
 	void cleanup() override;
+	SystemType getSystem() override; //For perfomance viewer
 
 	//Function to add song into the songlist 
-	void addSong(const std::string& songPath);
+	//void addSong(const std::string& songPath);
 
 	//Function to play song at the given index
-	void playSong(int index);
+	//void playSong(int index);
+	void playSong(const std::string& songName);
 
 	//Getter for currentSongIndex
 	int getSongIndex();
 	//Setter for currentSongIndex
 	void setSongIndex(int index);
+
+	//get audioSystem
+	FMOD::System* getAudioSystem() const { return audioSystem; }
 
 private:
 	FMOD::System* audioSystem;

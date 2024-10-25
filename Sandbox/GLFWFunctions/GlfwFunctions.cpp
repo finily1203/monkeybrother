@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *//*___________________________________________________________________________-*/
 
 #include "Debug.h"
+#include "Crashlog.h"
 #include "GlfwFunctions.h"
 #include <iostream>
 //#include <chrono>
@@ -25,10 +26,14 @@ GLFWwindow* GLFWFunctions::pWindow = nullptr;
 double GLFWFunctions::fps = 0.0;
 float GLFWFunctions::delta_time = 0.0;
 float GLFWFunctions::volume = 0.5f;
+float GLFWFunctions::zoomMouseCoordX = 0.0f;
+float GLFWFunctions::zoomMouseCoordY = 0.0f;
 bool GLFWFunctions::audioPaused = false;
-bool GLFWFunctions::nextSong = false;
+bool GLFWFunctions::audioNext = false;
+int GLFWFunctions::audioNum = 0;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
+bool GLFWFunctions::zoomViewport = false;
 bool GLFWFunctions::cloneObject = false;
 bool GLFWFunctions::goNextMode = false;
 
@@ -108,7 +113,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::debug_flag = false;
     }
 
-    if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == false) {
+    if (GLFW_MOUSE_BUTTON_LEFT == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == false) {
         GLFWFunctions::isAKeyPressed = true;
     }
     else if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == true) {
@@ -122,8 +127,9 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioPaused = false;
     }
 
-    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::nextSong == false) {
-        GLFWFunctions::nextSong = true;
+    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::audioNext == false) {
+        GLFWFunctions::audioNext = true;
+        GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }
 
     if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
@@ -194,12 +200,21 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 #endif
         break;
     }
+
+    if (GLFW_MOUSE_BUTTON_LEFT == button && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == true && GLFWFunctions::zoomViewport == false) {
+        GLFWFunctions::zoomViewport = true;
+    }
+    else if (GLFW_MOUSE_BUTTON_LEFT == button && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == true && GLFWFunctions::zoomViewport == true) {
+        GLFWFunctions::zoomViewport = false;
+    }
 }
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
+    zoomMouseCoordX = xpos;
+    zoomMouseCoordY = ypos;
 #endif
 }
 

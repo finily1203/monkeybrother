@@ -29,6 +29,53 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
 #include "GraphicsSystem.h"
+#include <Windows.h>
+
+#include "GlobalCoordinator.h"
+
+
+// this function retrieves the executable path based on your desktop
+// dynamic path retrieval
+std::string ECSCoordinator::GetExecutablePath()
+{
+	char buffer[MAX_PATH];
+
+	// this is a windows API function that will retrieve the fully
+	// qualified path of the executable file 
+	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+
+	// initialize the full executable path to fullPath
+	std::string fullPath(buffer);
+
+	// return the directory path by extracting a substring from the
+	// fullPath
+	return fullPath.substr(0, fullPath.find_last_of("\\/"));
+}
+
+// this function retrieves the windowsConfig JSON file
+std::string ECSCoordinator::GetWindowConfigJSONPath()
+{
+	// retrieves the executable path
+	std::string execPath = GetExecutablePath();
+	
+	// retrieves the windowsConfig JSON file path
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\windowConfig.json";
+
+	return jsonPath;
+}
+
+// this function retrieves the entites JSON file
+std::string ECSCoordinator::GetEntitiesJSONPath()
+{
+	// retrieves the executable path
+	std::string execPath = GetExecutablePath();
+
+	// retrieves the entities JSON file path
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
+
+	return jsonPath;
+}
+
 #include <random>
 #include <glm/glm.hpp>
 
@@ -67,6 +114,10 @@ void ECSCoordinator::cleanup() {
 	entityManager->cleanup();
 	componentManager->cleanup();
 	systemManager->cleanup();
+}
+
+SystemType ECSCoordinator::getSystem() {
+	return SystemType::ECSType;
 }
 
 //Returns the number of live entities
@@ -422,6 +473,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
 		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		graphicSystemSig.set(getComponentType<AnimationComponent>(), true);
 	}
 
 
@@ -468,16 +520,17 @@ void ECSCoordinator::test4() {
 
 	FallMessage fallMsg(entity);
 	fallEventSource.ProcessMessage(&fallMsg);
+	
+	// Iterate through the entities to find Object1 and Object2
+	for (auto entity : entityManager->getLiveEntities()) {
+		std::string entityId = this->entityManager->getEntityID(entity); // Assume you have a method to get the entity ID
 
-	// This is the code for testing saving the entity data to the
-	// JSON file
-	//std::string id = "Player";
-	//Entity entity = entityManager->getEntityById(id);
-
-	//if (hasComponent<TransformComponent>(entity))
-	//{
-	//	UpdateEntityData(entity);
-
-	//	SaveEntityToJSON(*this, entity, GetEntitiesJSONPath());
-	//}
+		/*if (entityId == "Object1" || entityId == "Object2") {
+			addComponent(entity, AnimationComponent{ true });
+		}*/
+		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
+	}
+	Entity platform1 = createEntity();
+	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
+	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
 }

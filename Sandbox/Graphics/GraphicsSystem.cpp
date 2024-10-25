@@ -31,6 +31,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <iostream>
+#include "GlobalCoordinator.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -59,6 +60,11 @@ GraphicsSystem::GraphicsSystem()
 
 GraphicsSystem::~GraphicsSystem() {
     cleanup();
+}
+
+//For perfomance viewer
+SystemType GraphicsSystem::getSystem() {
+    return GraphicsSystemType;
 }
 
 void GraphicsSystem::initialise() {
@@ -253,10 +259,6 @@ void GraphicsSystem::cleanup() {
     ReleaseResources();
 }
 
-//Shader* GraphicsSystem::GetShader() const {
-//    return m_Shader.get();
-//}
-
 void GraphicsSystem::ReleaseResources() {
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_UVBO);
@@ -422,7 +424,7 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, g
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {
     // load shader program in use by this object
-    if (mode == DrawMode::COLOR)
+    if (mode == DrawMode::TEXTURE)
         m_Shader->Bind();
     else
         m_Shader2->Bind();

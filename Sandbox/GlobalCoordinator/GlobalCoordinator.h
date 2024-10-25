@@ -13,6 +13,20 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #pragma once
 #include "ECSCoordinator.h"
 #include "GraphicsSystem.h"
+#include "Debug.h"
+#include "AssetsManager.h"
+
+enum SystemType { //For perfomance viewer
+	AudioSystemType,
+	WindowSystemType,
+	DebugSystemType,
+	GraphicsSystemType,
+	ECSType,
+	AssetsManagerType
+};
+
 
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
+extern DebugSystem debugSystem;
+extern AssetsManager assetsManager;

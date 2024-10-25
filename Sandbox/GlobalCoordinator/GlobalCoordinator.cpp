@@ -14,3 +14,5 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 ECSCoordinator ecsCoordinator;
 GraphicsSystem graphicsSystem;
+DebugSystem debugSystem;
+AssetsManager assetsManager;

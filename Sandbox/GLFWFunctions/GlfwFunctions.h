@@ -45,8 +45,11 @@ struct GLFWFunctions {
 	static double fps;
 	static float delta_time;
 	static float volume;
+	static float zoomMouseCoordX;
+	static float zoomMouseCoordY;
 	static bool audioPaused;
-	static bool nextSong;
+	static bool audioNext;
+	static int audioNum;
 	static bool audioStopped;
 	static bool cloneObject;
 	static bool goNextMode;
@@ -63,6 +66,7 @@ struct GLFWFunctions {
 	static GLboolean move_jump_flag;
 
 	static bool isGuiOpen;
+	static bool zoomViewport;
 
 	static int testMode;
 };

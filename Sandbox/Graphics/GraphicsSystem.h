@@ -31,6 +31,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
+#include <string>
 
 
 struct AABB {
@@ -60,6 +61,7 @@ public:
     void Update(float deltaTime, GLboolean isAnimated);
     void Render(float deltaTime);
     void cleanup() override;
+    SystemType getSystem() override; //For perfomance viewer
 
     glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
     void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);

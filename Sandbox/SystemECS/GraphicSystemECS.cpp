@@ -19,9 +19,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsComponent.h"
 #include "AABBComponent.h"
 #include "MovementComponent.h"
+#include "AnimationComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
+#include "GUIConsole.h"
 
 
 //Initialise currently does not do anything
@@ -41,6 +43,11 @@ void GraphicSystemECS::update(float dt) {
 
 		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
 		Console::GetLog() << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
+
+		//check if entity has animation component
+		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+        Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
+
 		if (GLFWFunctions::testMode == 0) {
 			//If user presses clone button ("C"), clones "player object"
 			if (GLFWFunctions::cloneObject) {
@@ -112,17 +119,16 @@ void GraphicSystemECS::update(float dt) {
 				graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
 			}
 		}
-
-
 		
 		else if (GLFWFunctions::testMode == 1) {
-			//std::cout << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
-			//std::cout << "Entity: " << entity << " mdl_xform: " << std::endl;
-			//std::cout << transform.mdl_xform[0][0] << ", " << transform.mdl_xform[0][1] << ", " << transform.mdl_xform[0][2] << std::endl;
-			//std::cout <<  transform.mdl_xform[1][0] << ", " << transform.mdl_xform[1][1] << ", " << transform.mdl_xform[1][2] << std::endl;
-			//std::cout <<  transform.mdl_xform[2][0] << ", " << transform.mdl_xform[2][1] << ", " << transform.mdl_xform[2][2] << std::endl;
+			// It updates the object based on the animation component
+			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
+			// calculate the model transform matrix using update object function
 			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation);
-			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::COLOR, 0, transform.mdl_xform);
+			
+			// Draw the object
+			// TODO:: change getTexture to some enum or something
+			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, graphicsSystem.GetTexture(), transform.mdl_xform);
 		}
 
 	}
