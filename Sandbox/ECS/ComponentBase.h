@@ -1,3 +1,17 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ComponentBase.h
+@brief:  This header file declares the base class ComponentBase for the ECS system.
+		 This class is used to create a generic instance / Base form of a Component 
+		 Class. The handlers will ensure that the components are added, removed and
+		 retrieved from the entity.
+		 Joel Chu (c.weiyuan): Declared the base class ComponentBase and 
+							   ComponentHandler class.
+							   100%
+*//*___________________________________________________________________________-*/
 #pragma once
 #include "EntityManager.h"
 
@@ -27,6 +41,7 @@ template <typename T>
 class ComponentHandler : public ComponentBase
 {
 public:
+	//adds component to entity
 	void addComponentHandler(Entity entity, T component)
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
@@ -41,6 +56,7 @@ public:
 		nextComponentIndex++;
 	}
 
+	//removes component from entity
 	void removeComponentHandler(Entity entity)
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
@@ -54,10 +70,18 @@ public:
 		nextComponentIndex--;
 	}
 
+	//retrieves the specific component struct / class type from entity
 	T& getComponentHandler(Entity entity)
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
 		return componentArray[entityToIndexMap[entity]];
+	}
+
+	//Checks if the entity has the component
+	bool hasComponentHandler(Entity entity)
+	{
+		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
+		return entityToIndexMap.find(entity) != entityToIndexMap.end();
 	}
 
 	//follow base class

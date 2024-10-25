@@ -4,11 +4,11 @@
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
-    <ClCompile Include="EntityManager\EntityManager.cpp" />
+    <ClCompile Include="ECS\EntityManager.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
-    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="DebugSystem\Debug.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
@@ -20,30 +20,35 @@
     <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
-    <ClCompile Include="EntityManager\SystemManager.cpp" />
-    <ClCompile Include="EntityManager\ECSCoordinator.cpp" />
-    <ClCompile Include="EntityManager\ComponentManager.cpp" />
+    <ClCompile Include="ECS\SystemManager.cpp" />
+    <ClCompile Include="ECS\ECSCoordinator.cpp" />
+    <ClCompile Include="ECS\ComponentManager.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
+    <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
+    <ClCompile Include="MathLibrary\vector3D.cpp" />
+    <ClCompile Include="AssetsManager\AssetsManager.cpp" />
+    <ClCompile Include="DebugSystem\Crashlog.cpp" />
+    <ClCompile Include="DebugSystem\GUIConsole.cpp" />
+    <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
-    <ClInclude Include="EntityManager\ComponentManager.h" />
-    <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="ECS\ComponentManager.h" />
+    <ClInclude Include="ECS\EntityManager.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
-    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
-    <ClInclude Include="EntityManager\SystemManager.h" />
-    <ClInclude Include="EntityManager\ECSCoordinator.h" />
-    <ClInclude Include="EntityManager\ECSDefinitions.h" />
+    <ClInclude Include="ECS\SystemManager.h" />
+    <ClInclude Include="ECS\ECSCoordinator.h" />
+    <ClInclude Include="ECS\ECSDefinitions.h" />
     <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="AudioSystem\AudioSystem.h" />
@@ -51,6 +56,17 @@
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
+    <ClInclude Include="Components\AABBComponent.h" />
+    <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
+    <ClInclude Include="Components\MovementComponent.h" />
+    <ClInclude Include="Components\ClosestPlatform.h" />
+    <ClInclude Include="AssetsManager\AssetsManager.h" />
+    <ClInclude Include="MathLibrary\vector3D.h" />
+    <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="DebugSystem\Crashlog.h" />
+    <ClInclude Include="DebugSystem\GUIConsole.h" />
+    <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="EntityManager\ComponentBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -65,7 +81,7 @@
     <None Include="Graphics\Basic1.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Debug\Assets\liberation-mono.ttf" />
+    <Font Include="DebugSystem\Assets\liberation-mono.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Graphics\Assets\demon_spritesheet.png" />

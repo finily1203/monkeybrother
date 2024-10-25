@@ -1,3 +1,16 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   SystemManager.h
+@brief:  This header file declares the functions the SystemManager class for the 
+		 ECS system. The SystemManager class is used to manage all the systems 
+		 within the ECS.
+		 Joel Chu (c.weiyuan): Declared the functions in SystemManager class
+							   and some function templates.
+							   100%
+*//*___________________________________________________________________________-*/
 #pragma once
 #include "EntityManager.h"
 #include "GLFWFunctions.h"

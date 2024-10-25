@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  AnimationData.h
+@brief  :  This file contains the declaration of the AnimationData class, which
+           is responsible for managing the animation data of a game object.
+*
+* Javier Chua (javierjunliang.chua) :
+*       - Implemented the AnimationData class, which is responsible for managing the
+		  animation data of a game object.
+*
+* File Contributions: Javier Chua (100%)
+*
+/*_ _ _ _ ________________________________________________________________________________-\*/
 #pragma once
 
 #include <vector>
@@ -5,6 +21,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+
 
 class AnimationData {
 public:

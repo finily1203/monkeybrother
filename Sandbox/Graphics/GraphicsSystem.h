@@ -1,3 +1,27 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GraphicsSystem.h
+@brief  :  This file contains the declaration of the GraphicsSystem class, which 
+           is responsible for rendering the game objects.
+
+* Liu YaoTing (yaoting.liu) :
+* 	    - Further helped to implement the basic structure of the GraphicsSystem class that inherits from GameSystems.
+*       - Added the basic structure of the GLObject struct that is used to store the 
+          orientation, scaling, position, color, model transformation, and model-to-NDC transformation 
+		  of the game objects. ( For Milestione 1 test only)
+*
+* Javier Chua (javierjunliang.chua) :
+*       - Implemented the the basic structure of the GraphicsSystem class that inherits from GameSystems,
+*         such as the constructor, destructor, initialise, update, and cleanup functions,
+*         as well as the data members.
+*
+* File Contributions: Liu YaoTing (50%), Javier Chua (50%)
+*
+/*_ _ _ _ ________________________________________________________________________________-\*/
+
 #pragma once
 
 #include <GL/glew.h>
@@ -7,6 +31,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
+#include <string>
 
 
 struct AABB {
@@ -26,12 +51,20 @@ public:
     GraphicsSystem();
     ~GraphicsSystem();
 
+    enum class DrawMode {
+        COLOR,
+        TEXTURE
+    };
 
     void initialise() override;
     void update() override;
     void Update(float deltaTime, GLboolean isAnimated);
     void Render(float deltaTime);
     void cleanup() override;
+    SystemType getSystem() override; //For perfomance viewer
+
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
+    void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     Shader* GetShader() const{ return m_Shader.get(); }
     Shader* GetShader2() const{ return m_Shader2.get(); }
