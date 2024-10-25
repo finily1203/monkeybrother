@@ -94,6 +94,24 @@ unsigned int EntityManager::getAvailableEntCount() {
 	return availableEnt.size();
 }
 
+// Retrieve the entity object based on the entity Id
+Entity EntityManager::getEntityById(std::string const& id)
+{
+	for (const auto& pair : entityIds)
+	{
+		if (pair.second == id)
+		{
+			return pair.first;
+		}
+	}
+}
+
+// Set the entity Id based on the entity object
+void EntityManager::setEntityId(Entity entity, std::string const& id)
+{
+	entityIds[entity] = id;
+}
+
 //Cleanup the entity manager by resetting the available entities and live entity count
 void EntityManager::cleanup() {
 	availableEnt = std::queue<Entity>();

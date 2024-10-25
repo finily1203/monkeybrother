@@ -94,6 +94,29 @@ void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const&
 	}
 }
 
+void JSONSerializer::WriteSpecificObject(glm::vec2 const& object, nlohmann::json& jsonObj)
+{
+	jsonObj["x"] = object.x;
+	jsonObj["y"] = object.y;
+}
+
+void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json& jsonObj)
+{
+	jsonObj = nlohmann::json::array();
+
+	for (int i{}; i < 3; ++i)
+	{
+		nlohmann::json row = nlohmann::json::array();
+
+		for (int j{}; j < 3; ++j)
+		{
+			row.push_back(object[i][j]);
+		}
+
+		jsonObj.push_back(row);
+	}
+}
+
 void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
