@@ -28,6 +28,9 @@
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
     <ClCompile Include="AssetsManager\AssetsManager.cpp" />
+    <ClCompile Include="Graphics\FontSystem.h" />
+    <ClCompile Include="Graphics\FontSystem.cpp" />
+    <ClCompile Include="SystemECS\FontSystemECS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECS\ComponentBase.h" />
@@ -61,6 +64,8 @@
     <ClInclude Include="AssetsManager\AssetsManager.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="Components\FontComponent.h" />
+    <ClInclude Include="SystemECS\FontSystemECS.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

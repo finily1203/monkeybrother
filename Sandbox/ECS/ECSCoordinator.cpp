@@ -25,9 +25,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ClosestPlatform.h"
 #include "GraphicsSystem.h"
 #include "AnimationComponent.h"
-
+#include "FontComponent.h"
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
+#include "FontSystemECS.h"
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
@@ -335,7 +336,7 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 }
 
 // this function handles the updating of the entity's data
-void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate)
+void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
 {
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
@@ -344,7 +345,7 @@ void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdat
 		transform.orientation = transUpdate.orientation;
 		transform.position = transUpdate.position;
 		transform.scale = transUpdate.scale;
-	}
+	} 
 
 	//if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
 	//{
@@ -354,6 +355,14 @@ void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdat
 	//	graphics.glObject.scaling = graphicsUpdate.glObject.scaling;
 	//	graphics.glObject.orientation = graphicsUpdate.glObject.orientation;
 	//}
+	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+	{
+		FontComponent& font = getComponent<FontComponent>(entity);
+		font.text = fontUpdate.text; 
+		font.position = fontUpdate.position; 
+		font.scale = fontUpdate.scale; 
+		font.color = fontUpdate.color; 
+	}
 }
 
 //clones the entity
@@ -418,6 +427,20 @@ void ECSCoordinator::test3() {
 	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
 	addComponent(player, MovementComponent{ .02f });
 
+	// Create Text Entity
+	std::cout << "Create Text Entity" << std::endl;
+	Entity textEntity = createEntity();
+	addComponent(textEntity, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
+
+	// Initialize FontComponent
+	FontComponent fontComp{};
+	fontComp.text = "Hello World!";  // Text to display
+	fontComp.position = glm::vec2(200.0f, 500.0f);  
+	fontComp.scale = 100.0f;  // Scale of the text
+	fontComp.color = glm::vec3(1.0f, 1.0f, 1.0f); // White color
+
+	addComponent(textEntity, fontComp);  
+
 }
 
 
@@ -430,6 +453,8 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<MovementComponent>();
 	registerComponent<ClosestPlatform>();
 	registerComponent<AnimationComponent>();
+	registerComponent<FontComponent>();
+
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -454,6 +479,21 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 
 	graphicSystem->initialise();
+
+	int fontSize = 24; 
+	auto fontSystem = std::make_shared<FontSystem>();
+	auto fontSystemECS = std::make_shared<FontSystemECS>(fontSystem, fontSize);
+
+	registerSystem<FontSystemECS>();
+	{
+		ComponentSig fontSystemSig;
+		fontSystemSig.set(getComponentType<TransformComponent>(), true);
+		fontSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		fontSystemSig.set(getComponentType<FontComponent>(), true);  
+	}
+
+	fontSystemECS->initialise();
+
 }
 
 

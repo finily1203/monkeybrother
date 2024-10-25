@@ -31,7 +31,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Systems.h"
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
-
+#include "FontComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -95,7 +95,8 @@ public:
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	// update the entity's data
-	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&);
+	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
+
 
 	//System Manager Functions
 	//Register the system

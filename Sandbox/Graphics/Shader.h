@@ -49,7 +49,7 @@ public:
     bool IsCompiled() const { return m_IsCompiled; }
 
     void SetUniform1i(const std::string& name, int value);
-
+    void SetUniform3f(const std::string& name, float v0, float v1, float v2);
     static ShaderProgramSource ParseShader(const std::string& filepath);
 
     GLint GetUniformLocation(const std::string& name);

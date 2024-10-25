@@ -16,6 +16,7 @@ File Contributions: Joel Chu (50%)
 #include "Engine.h"
 #include "ECSCoordinator.h"
 #include "AudioSystem.h"
+#include "FontSystem.h"
 #include "GlobalCoordinator.h"
 
 #define _CRTDBG_MAP_ALLOC
@@ -40,9 +41,12 @@ int main() {
 		engine->addSystem(windowSystem);
 
 		AudioSystem* audioSystem = new AudioSystem();
+		FontSystem* fontSystem = new FontSystem();
 		engine->addSystem(audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
+
+		engine->addSystem(fontSystem);
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
