@@ -14,6 +14,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "fmod.hpp"
 #include <vector>
 #include <string>
+#include "GlobalCoordinator.h"
 
 class AudioSystem : public GameSystems
 {
@@ -31,6 +32,7 @@ public:
 	
 	//Clears all the songs from the audioSystem and terminates the audioSystem
 	void cleanup() override;
+	SystemType getSystem() override; //For perfomance viewer
 
 	//Function to add song into the songlist 
 	//void addSong(const std::string& songPath);

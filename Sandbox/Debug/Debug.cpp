@@ -19,7 +19,11 @@ File Contributions: Lew Zong Han Owen (100%)
 
 /*_______________________________________________________________________________________________________________*/
 #include "Debug.h"
+#include "GUIGameViewport.h"
+#include "GUIConsole.h"
 #include "GlfwFunctions.h"
+#include "Crashlog.h"
+#include "GlobalCoordinator.h"
 
 //Variables for DebugSystem
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
@@ -30,29 +34,13 @@ std::vector<const char*> DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
 int DebugSystem::systemCount = 0;
 
-//Variables for CrashLog
-std::ofstream CrashLog::logFile;
-
-//Variables for GameViewWindow
-int GameViewWindow::viewportHeight = 0;
-int GameViewWindow::viewportWidth = 0;
-GLuint GameViewWindow::viewportTexture = 0;
-
-//Variables for Console
-std::vector<std::string> Console::items;
-bool Console::autoScroll = true;
-bool Console::autoDelete = true;
-float Console::lastScrollY = 0.0f;
-Console* Console::instance = nullptr;
-std::ostringstream Console::currentLog;
-
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 
 //Destructor for DebugSystem class
 DebugSystem::~DebugSystem() {}
 
-void DebugSystem::Initialise() {
+void DebugSystem::initialise() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext(); 
 	io = &ImGui::GetIO(); 
@@ -69,10 +57,10 @@ void DebugSystem::Initialise() {
 	style.SeparatorTextBorderSize = 3.0f;
 	style.TabBorderSize = 3.0f;
 
-
-	ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
-
-	ImGui_ImplOpenGL3_Init("#version 130"); 
+	if (io->BackendPlatformUserData == nullptr) {
+		ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
+		ImGui_ImplOpenGL3_Init("#version 130");
+	}
 
 	GameViewWindow::Initialise();
 
@@ -80,7 +68,7 @@ void DebugSystem::Initialise() {
 
 }
 
-void DebugSystem::Update() {
+void DebugSystem::update() {
 	if (GLFWFunctions::isGuiOpen) { //F1 key to open imgui GUI
 		//std::cout << "GUI Open" << std::endl;
 		ImGui_ImplOpenGL3_NewFrame();
@@ -114,6 +102,7 @@ void DebugSystem::Update() {
 			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
 			ImGui::SeparatorText("Performance Viewer");
+			ImGui::Text("Number of Systems: %d", systemCount);
 
 			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
 				
@@ -224,10 +213,14 @@ void DebugSystem::Update() {
 	}
 }
 	
-void DebugSystem::Cleanup() {
+void DebugSystem::cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+}
+
+SystemType DebugSystem::getSystem() {
+	return DebugSystemType;
 }
 
 //Capture start game loop time
@@ -284,264 +277,6 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
 		&& ImGui::GetIO().KeyMap[key] != -1; 
-}
-
-void CrashLog::Initialise() {
-	logFile.open("crash-log.txt", std::ios::out | std::ios::trunc); //Create crash log file
-	if (logFile.is_open()) {
-		//Log start of crash logging
-		logFile << "[" << GetCurrentTimestamp() << "] " << "Log started" << std::endl;
-		logFile.flush();
-	}
-	else {
-		std::cerr << "Failed to open crash-log.txt" << std::endl;
-	}
-}
-
-void CrashLog::Cleanup() {
-	if (logFile.is_open()) {
-		LogDebugMessage("Log end");
-		logFile.close();
-	}
-}
-
-//Function to log crash messages to crash-log file based on custom exception
-void CrashLog::LogDebugMessage(const std::string& message, const char* file, int line) {
-	if(logFile.is_open()) {
-		if (file && line) { //Log exceptions with file and line location
-			logFile << "[" << GetCurrentTimestamp() << "] " << message << " at " << file << " line " << line << std::endl;
-			logFile.flush();
-		}
-		else logFile << "[" << GetCurrentTimestamp() << "] " << message << std::endl;
-	}
-}
-
-//Log time and date of crash log messages
-std::string CrashLog::GetCurrentTimestamp() {
-	std::time_t now = std::time(nullptr); //Capture PC date and time
-	std::tm timeinfo;
-	localtime_s(&timeinfo, &now);
-	std::ostringstream oss;
-	oss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
-	return oss.str();
-}
-
-//Handle standard c++ critical signals
-void CrashLog::SignalHandler(int signum) {
-	switch (signum) {
-	case SIGSEGV:
-		CrashLog::LogDebugMessage("Signal: SIGSEV (Segmentation Fault)");
-		CrashLog::LogDebugMessage("Program accessed memory it shouldn't (e.g. dereferencing a null pointer)");
-		CrashLog::LogDebugMessage("Log end");
-		break;
-	case SIGABRT:
-		CrashLog::LogDebugMessage("Signal: SIGABRT (Abort())");
-		CrashLog::LogDebugMessage("Program detected a serious error and called abort()");
-		CrashLog::LogDebugMessage("Log end");
-		break;
-	case SIGFPE:
-		CrashLog::LogDebugMessage("Signal: SIGFPE (Floating-point exception)");
-		CrashLog::LogDebugMessage("Program detected mathematical error (e.g. division by zero)");
-		CrashLog::LogDebugMessage("Log end");
-		break;
-	case SIGILL:
-		CrashLog::LogDebugMessage("SIGILL (Illegal instruction)");
-		CrashLog::LogDebugMessage("Program tried to execute an invalid machine instruction");
-		CrashLog::LogDebugMessage("Log end");
-		break;
-	default:
-		CrashLog::LogDebugMessage("Unknown signal: " + std::to_string(signum));
-	}
-	std::exit(signum);
-}
-
-//Checks program for standard c++ critical signals
-void CrashLog::SignalChecks() {
-	std::signal(SIGSEGV, SignalHandler); //Segmentation signal
-	std::signal(SIGABRT, SignalHandler); //Abort signal
-	std::signal(SIGFPE, SignalHandler);  //Floating-point signal
-	std::signal(SIGILL, SignalHandler);  //Illegal signal
-}
-
-
-void GameViewWindow::Initialise() {
-	viewportWidth = 1600;
-	viewportHeight = 900;
-	viewportTexture = 0;
-}
-
-void GameViewWindow::Update() {
-	SetupViewportTexture();
-
-	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-	CaptureMainWindow();
-
-	ImVec2 windowSize = GetLargestSizeForViewport(); 
-
-	ImVec2 renderPos = GetCenteredPosForViewport(windowSize);
-
-	ImGui::SetCursorPos(renderPos);
-	ImTextureID textureID = (ImTextureID)(intptr_t)viewportTexture;
-	ImGui::Image(textureID, windowSize, ImVec2(0, 1), ImVec2(1, 0));
-
-	ImGui::End();
-}
-
-void GameViewWindow::Cleanup() {
-	if (viewportTexture != 0) {
-		glDeleteTextures(1, &viewportTexture);
-		viewportTexture = 0;
-	}
-}
-//Set up Opengl texture to store game scene
-void GameViewWindow::SetupViewportTexture() {
-	if (viewportTexture != 0) {
-		glDeleteTextures(1, &viewportTexture);
-	}
-
-	glGenTextures(1, &viewportTexture);
-
-	glBindTexture(GL_TEXTURE_2D, viewportTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewportWidth, viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-//Capture rendered game scene
-void GameViewWindow::CaptureMainWindow() {
-	glBindTexture(GL_TEXTURE_2D, viewportTexture);
-
-	// Store the current read buffer
-	GLint previousBuffer;
-	glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
-
-	// Set the read buffer to the back buffer
-	glReadBuffer(GL_BACK);
-
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, viewportWidth, viewportHeight, 0);
-
-	// Restore the previous read buffer
-	glReadBuffer(previousBuffer);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-//Function scale real time game scene to the size of the game viewport window
-ImVec2 GameViewWindow::GetLargestSizeForViewport()
-{
-	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	windowSize.x -= ImGui::GetScrollX();
-	windowSize.y -= ImGui::GetScrollY();
-
-	float aspectWidth = windowSize.x;
-	float aspectHeight = (aspectWidth / (16.0f / 9.0f));
-	if (aspectHeight > windowSize.y) {
-		aspectHeight = windowSize.y;
-		aspectWidth = aspectHeight * (16.0f / 9.0f);
-	}
-
-	return ImVec2(aspectWidth, aspectHeight);
-}
-
-//Function to translate the real time game scene to the center of the game viewport window
-ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
-{
-	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	windowSize.x -= ImGui::GetScrollX();
-	windowSize.y -= ImGui::GetScrollY();
-
-	float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
-	float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
-
-	return ImVec2(viewportX + ImGui::GetCursorPosX(), viewportY + ImGui::GetCursorPosY());
-}
-
-Console& Console::GetLog() {
-	if (instance == nullptr) {
-		instance = new Console();
-	}
-	return *instance;
-}
-
-void Console::Update(const char* title) {
-	GetLog().DrawImpl(title);
-}
-
-void Console::DrawImpl(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin(title)) {
-		ImGui::End();
-		return;
-	}
-
-	// Options menu
-	if (ImGui::BeginPopup("Options")) {
-		ImGui::Checkbox("Auto-scroll", &autoScroll);
-		ImGui::Checkbox("Auto Delete", &autoDelete);
-		ImGui::EndPopup();
-	}
-
-	// Main window
-	if (ImGui::Button("Options"))
-		ImGui::OpenPopup("Options");
-	ImGui::SameLine();
-	bool clear = ImGui::Button("Clear");
-	ImGui::SameLine();
-	bool copy = ImGui::Button("Copy");
-	ImGui::Separator();
-
-	// Reserve enough left-over height for 1 separator + 1 input text
-	const float heightReserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -heightReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
-
-	if (clear)
-		items.clear();
-	if (copy)
-		ImGui::LogToClipboard();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-	for (const auto& item : items)
-		ImGui::TextUnformatted(item.c_str()); //Render log messages
-	ImGui::PopStyleVar();
-
-	// Auto-scroll logic
-	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-		autoScroll = true;
-	if (ImGui::GetScrollY() < lastScrollY)
-		autoScroll = false;
-	lastScrollY = ImGui::GetScrollY();
-
-	if (autoScroll && ImGui::GetScrollY() < ImGui::GetScrollMaxY())
-		ImGui::SetScrollHereY(1.0f);
-
-	ImGui::EndChild();
-	ImGui::Separator();
-
-	// Command-line
-	static char inputBuffer[256] = "";
-	//When enter key is pressed
-	if (ImGui::InputText("Input", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-		if (inputBuffer[0]) {
-			*this << "> " << inputBuffer << std::endl;
-			// Parse and execute the command
-			*this << "Command executed: " << inputBuffer << std::endl;
-		}
-		inputBuffer[0] = 0; // Clear the input buffer
-	}
-
-	ImGui::SameLine();
-	//When submit button is clicked
-	if (ImGui::Button("Submit")) {
-		if (inputBuffer[0]) {
-			*this << "> " << inputBuffer << std::endl;
-			
-			*this << "Command executed: " << inputBuffer << std::endl;
-			inputBuffer[0] = 0; // Clear the input buffer
-		}
-	}
-
-	ImGui::End();
 }
 
 

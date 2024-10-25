@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *//*___________________________________________________________________________-*/
 
 #include "Debug.h"
+#include "Crashlog.h"
 #include "GlfwFunctions.h"
 #include <iostream>
 //#include <chrono>
