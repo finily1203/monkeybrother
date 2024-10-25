@@ -71,6 +71,9 @@ std::string ECSCoordinator::GetEntitiesJSONPath()
 	// retrieves the entities JSON file path
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
 
+	return jsonPath;
+}
+
 #include <random>
 #include <glm/glm.hpp>
 
