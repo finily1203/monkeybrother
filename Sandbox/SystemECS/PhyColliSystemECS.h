@@ -33,6 +33,25 @@ public:
         glm::vec2 max;
     };
 
+    struct OBB {
+        glm::vec2 center;      // Center position
+        glm::vec2 halfExtents; // Half-width and half-height
+        float rotation;        // Rotation in radians
+        glm::vec2 axes[2];     // Local axes (normalized)
+    };
+
+    OBB createOBBFromEntity(Entity entity);
+
+    // Project point onto axis
+    float projectPoint(const glm::vec2& point, const glm::vec2& axis);
+    // Get projection interval of OBB onto axis
+    void projectOBB(const OBB& obb, const glm::vec2& axis, float& min, float& max);
+
+    // Get OBB vertices
+    void getOBBVertices(const OBB& obb, glm::vec2 vertices[4]);
+    // Circle vs OBB collision detection using SAT
+    bool checkCircleOBBCollision(const glm::vec2& circleCenter, float radius, const OBB& obb, glm::vec2& normal, float& penetration);
+
     // AABB Collision detection
     bool CollisionIntersection_RectRect(const AABB& platform,
         const glm::vec2& platformVel,
@@ -73,6 +92,8 @@ public:
 
     void ApplyGravity(Entity entity, float dt);
     Entity FindClosestPlatform(Entity player);
+
+    void HandleCircleOBBCollision(Entity player, Entity platform);
 
     // Handling slope collision for the player
     void HandleSlopeCollision(Entity closestPlatform, Entity player);
