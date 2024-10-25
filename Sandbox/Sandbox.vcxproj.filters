@@ -27,6 +27,9 @@
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
+    <ClCompile Include="MessageSystem\observer.cpp" />
+    <ClCompile Include="MessageSystem\observable.cpp" />
+    <ClCompile Include="FilePaths\filePath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECS\ComponentBase.h" />
@@ -60,6 +63,11 @@
     <ClInclude Include="AssetsManager\AssetsManager.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="MessageSystem\baseMessageSystem.h" />
+    <ClInclude Include="MessageSystem\fallMessage.h" />
+    <ClInclude Include="MessageSystem\observer.h" />
+    <ClInclude Include="MessageSystem\observable.h" />
+    <ClInclude Include="FilePaths\filePath.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
