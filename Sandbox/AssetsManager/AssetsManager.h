@@ -15,6 +15,7 @@ public:
 	void initialise() override;
 	void update() override;
 	void cleanup() override;
+	SystemType getSystem() override;
 
 	//For loading textures
 	void LoadTexture(const std::string& name, const std::string& filePath);

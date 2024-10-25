@@ -21,7 +21,8 @@ enum SystemType { //For perfomance viewer
 	WindowSystemType,
 	DebugSystemType,
 	GraphicsSystemType,
-	ECSType
+	ECSType,
+	AssetsManagerType
 };
 
 

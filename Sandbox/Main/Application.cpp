@@ -51,7 +51,7 @@ int main() {
 		ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			DebugSystem::StartLoop(); //Get time for start of gameloop
+			//DebugSystem::StartLoop(); //Get time for start of gameloop
 
 			//If user presses clone button ("C"), clone first object
 			if (GLFWFunctions::cloneObject) {
@@ -83,7 +83,7 @@ int main() {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
 		CrashLog::LogDebugMessage("Unknown exception caught");
 		CrashLog::LogDebugMessage("End Log");
-	//_CrtDumpMemoryLeaks();
-
+		//_CrtDumpMemoryLeaks();
+	}
 	return 0;
 }

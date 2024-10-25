@@ -56,6 +56,9 @@ void Engine::updateSystem() {
 		case SystemType::ECSType:
 			debugSystem.StartSystemTiming("EntityComponentSystem");
 			break;
+		case SystemType::AssetsManagerType:
+			debugSystem.StartSystemTiming("AssetsManager");
+			break;
 		default:
 			break;
 		}
@@ -75,6 +78,9 @@ void Engine::updateSystem() {
 			break;
 		case SystemType::ECSType:
 			debugSystem.EndSystemTiming("EntityComponentSystem");
+			break;
+		case SystemType::AssetsManagerType:
+			debugSystem.EndSystemTiming("AssetsManager");
 			break;
 		default:
 			break;

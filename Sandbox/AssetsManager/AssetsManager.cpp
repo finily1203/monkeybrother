@@ -23,6 +23,11 @@ void AssetsManager::cleanup()
 {
 }
 
+SystemType AssetsManager::getSystem()
+{
+	return SystemType::AssetsManagerType;
+}
+
 void AssetsManager::LoadTexture(const std::string& texName, const std::string& texPath) {
     if (m_Textures.find(texName) != m_Textures.end()) {
 		std::cerr << "Texture already loaded!" << std::endl;

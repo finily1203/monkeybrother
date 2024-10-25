@@ -31,6 +31,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
+#include "GlobalCoordinator.h"
+
 
 // this function retrieves the executable path based on your desktop
 // dynamic path retrieval
@@ -112,6 +114,10 @@ void ECSCoordinator::cleanup() {
 	entityManager->cleanup();
 	componentManager->cleanup();
 	systemManager->cleanup();
+}
+
+SystemType ECSCoordinator::getSystem() {
+	return SystemType::ECSType;
 }
 
 //Returns the number of live entities

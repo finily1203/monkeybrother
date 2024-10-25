@@ -23,6 +23,10 @@ AudioSystem::~AudioSystem() {
     cleanup();
 }
 
+SystemType AudioSystem::getSystem() {
+	return SystemType::AudioSystemType;
+}
+
 //Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
     FMOD_RESULT result;
