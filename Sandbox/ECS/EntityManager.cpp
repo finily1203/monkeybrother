@@ -111,3 +111,8 @@ std::vector<Entity> EntityManager::getLiveEntities() {
 	}
 	return liveEntities;
 }
+
+//Retrieve the entity ID
+std::string EntityManager::getEntityID(Entity entity) {
+	return std::to_string(entity);
+}

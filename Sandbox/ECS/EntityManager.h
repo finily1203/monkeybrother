@@ -34,6 +34,7 @@ public:
 	ComponentSig getSignature(Entity entity);
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
+	std::string getEntityID(Entity entity);
 
 	std::vector<Entity> getLiveEntities();
 

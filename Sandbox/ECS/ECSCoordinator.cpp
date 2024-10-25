@@ -450,6 +450,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
 		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		graphicSystemSig.set(getComponentType<AnimationComponent>(), true);
 	}
 
 
@@ -477,6 +478,19 @@ void ECSCoordinator::test4() {
 
 	//Entity entObjGraphics3 = createEntity();
 	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
-
+	
+	// Load entities from JSON file
 	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
+	// Iterate through the entities to find Object1 and Object2
+	for (auto entity : entityManager->getLiveEntities()) {
+		std::string entityId = this->entityManager->getEntityID(entity); // Assume you have a method to get the entity ID
+
+		/*if (entityId == "Object1" || entityId == "Object2") {
+			addComponent(entity, AnimationComponent{ true });
+		}*/
+		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
+	}
+	Entity platform1 = createEntity();
+	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
+	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
 }
