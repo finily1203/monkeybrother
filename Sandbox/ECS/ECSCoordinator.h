@@ -51,6 +51,7 @@ public:
 	void initialise() override;
 	void update() override;
 	void cleanup() override;
+	SystemType getSystem() override;
 
 	//Entity Manager Functions
 	Entity createEntity();
@@ -95,7 +96,7 @@ public:
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	// update the entity's data
-	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&);
+	void UpdateEntityData(Entity& entity);
 
 	//System Manager Functions
 	//Register the system

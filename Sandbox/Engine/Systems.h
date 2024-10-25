@@ -10,8 +10,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #pragma once
-
 //Systems used for the game
+
+//Forward declaration for perfomance viewer to avoid circular dependencies
+enum SystemType; 
+
 class GameSystems
 {
 public:
@@ -19,5 +22,6 @@ public:
 	virtual void initialise() = 0;
 	virtual void update() = 0;
 	virtual void cleanup() = 0;
+	virtual SystemType getSystem() = 0; //For perfomance viewer
 	virtual ~GameSystems() = default;
 };

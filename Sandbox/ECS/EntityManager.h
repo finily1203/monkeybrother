@@ -38,11 +38,15 @@ public:
 
 	std::vector<Entity> getLiveEntities();
 
+	Entity getEntityById(std::string const& id);
+	void setEntityId(Entity entity, std::string const& id);
+
 	void cleanup();
 
 private:
 	//thinking of the ID as a last in first out kind of thing
 	std::queue<Entity> availableEnt; //use queue to add and remove entities
 	std::array<ComponentSig, MAX_ENTITIES> entitySig; 
+	std::unordered_map<Entity, std::string> entityIds;
 	unsigned int liveEntCount = 0; 
 };

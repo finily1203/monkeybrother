@@ -8,7 +8,7 @@
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
-    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="DebugSystem\Debug.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
@@ -28,9 +28,11 @@
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
     <ClCompile Include="AssetsManager\AssetsManager.cpp" />
+    <ClCompile Include="DebugSystem\Crashlog.cpp" />
+    <ClCompile Include="DebugSystem\GUIConsole.cpp" />
+    <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ECS\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
@@ -40,7 +42,7 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
-    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
@@ -61,6 +63,10 @@
     <ClInclude Include="AssetsManager\AssetsManager.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="DebugSystem\Crashlog.h" />
+    <ClInclude Include="DebugSystem\GUIConsole.h" />
+    <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="EntityManager\ComponentBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -75,7 +81,7 @@
     <None Include="Graphics\Basic1.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Debug\Assets\liberation-mono.ttf" />
+    <Font Include="DebugSystem\Assets\liberation-mono.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Graphics\Assets\demon_spritesheet.png" />

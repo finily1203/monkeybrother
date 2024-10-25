@@ -11,12 +11,12 @@ File Contributions: Joel Chu (50%)
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include <iostream>
 #include "WindowSystem.h"
-#include "Debug.h"
 #include "GlfwFunctions.h"
 #include "Engine.h"
 #include "ECSCoordinator.h"
 #include "AudioSystem.h"
 #include "GlobalCoordinator.h"
+#include "Crashlog.h"
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -44,18 +44,23 @@ int main() {
 
 		engine->addSystem(&ecsCoordinator);
 
+		engine->addSystem(&debugSystem);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 		ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			DebugSystem::StartLoop(); //Get time for start of gameloop
+			//DebugSystem::StartLoop(); //Get time for start of gameloop
+
+			//If user presses clone button ("C"), clone first object
+			if (GLFWFunctions::cloneObject) {
+				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
+				GLFWFunctions::cloneObject = false;
+			}
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);
-
-			DebugSystem::EndLoop(); //Get time for end of gameloop
-			DebugSystem::UpdateSystemTimes(); //Get all systems' gameloop time data
 		}
 
 
@@ -78,10 +83,7 @@ int main() {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
 		CrashLog::LogDebugMessage("Unknown exception caught");
 		CrashLog::LogDebugMessage("End Log");
+		//_CrtDumpMemoryLeaks();
 	}
-	
-
-	//_CrtDumpMemoryLeaks();
-
 	return 0;
 }

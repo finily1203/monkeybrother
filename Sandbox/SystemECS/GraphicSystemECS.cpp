@@ -23,6 +23,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
+#include "GUIConsole.h"
 
 
 //Initialise currently does not do anything
