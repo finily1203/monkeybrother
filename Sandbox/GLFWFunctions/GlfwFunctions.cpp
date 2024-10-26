@@ -1,3 +1,19 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan), Yaoting (yaoting.liu)
+@team:   MonkeHood
+@course: CSD2401
+@file:   GLFWFunctions.cpp
+@brief:  This source file includes the functions to hand GLFW events and callbacks.
+		 These functions includes the creation of the window appliction, event
+         calling and setting of FPS and delta time to be used by the game engine.
+         Joel Chu (c.weiyuan): Defined functions to create window, call events and
+                               handle FPS and delta time.
+                               80%
+         Yaoting (yaoting.liu): Added in variables for movement flags and debug flag.
+							   20%
+*//*___________________________________________________________________________-*/
+
 #include "Debug.h"
 #include "Crashlog.h"
 #include "GlfwFunctions.h"
@@ -15,12 +31,14 @@ float GLFWFunctions::volume = 0.5f;
 float GLFWFunctions::zoomMouseCoordX = 0.0f;
 float GLFWFunctions::zoomMouseCoordY = 0.0f;
 bool GLFWFunctions::audioPaused = false;
-bool GLFWFunctions::nextSong = false;
+bool GLFWFunctions::audioNext = false;
+int GLFWFunctions::audioNum = 0;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
 bool GLFWFunctions::zoomViewport = false;
 bool GLFWFunctions::isAtMaxZoom = false;
 bool GLFWFunctions::cloneObject = false;
+bool GLFWFunctions::goNextMode = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -31,8 +49,11 @@ GLboolean GLFWFunctions::move_down_flag = false;
 GLboolean GLFWFunctions::move_left_flag = false;
 GLboolean GLFWFunctions::move_right_flag = false;
 GLboolean GLFWFunctions::debug_flag = false;
+GLboolean GLFWFunctions::move_jump_flag = false;
 
+int GLFWFunctions::testMode = 0;
 
+// Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
     /* Initialize the library */
@@ -58,6 +79,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     return true;
 }
 
+//Handle window to check for events
 void GLFWFunctions::callEvents() {
 
     glfwSetKeyCallback(GLFWFunctions::pWindow, GLFWFunctions::keyboardEvent);
@@ -67,6 +89,7 @@ void GLFWFunctions::callEvents() {
     glfwSetScrollCallback(GLFWFunctions::pWindow, GLFWFunctions::scrollEvent);
 }
 
+//Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (GLFW_PRESS == action) {
 #ifdef _DEBUG
@@ -107,8 +130,9 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioPaused = false;
     }
 
-    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::nextSong == false) {
-        GLFWFunctions::nextSong = true;
+    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::audioNext == false) {
+        GLFWFunctions::audioNext = true;
+        GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }
 
     if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
@@ -122,7 +146,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         volume = std::max(0.1f, volume - 0.1f);
         std::cout << "Volume: " << volume << std::endl;
     }
-    
+
     if (GLFW_KEY_PERIOD == key && GLFW_PRESS == action) {
         volume = std::min(1.f, volume + 0.1f);
         std::cout << "Volume: " << volume << std::endl;
@@ -130,6 +154,11 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     if (GLFW_KEY_C == key && GLFW_PRESS == action && GLFWFunctions::cloneObject == false) {
         GLFWFunctions::cloneObject = true;
+    }
+
+    if (GLFW_KEY_M == key && GLFW_PRESS == action) {
+        GLFWFunctions::testMode = (GLFWFunctions::testMode + 1) % 2;
+        GLFWFunctions::goNextMode = true;
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
@@ -140,6 +169,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     GLFWFunctions::move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
     GLFWFunctions::move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
     GLFWFunctions::move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
+    GLFWFunctions::move_jump_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_SPACE) != 0;
 
 
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
@@ -147,6 +177,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
 }
 
+//Handle mouse button events
 void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
@@ -188,6 +219,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
     }
 }
 
+//Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
@@ -196,6 +228,7 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 #endif
 }
 
+//Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
@@ -228,11 +261,12 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
     }
 }
 
+//Caluclate the FPS and delta_time to be used
 void GLFWFunctions::getFps(double fpsCalculateInt) {
 
     static double prevTime = glfwGetTime();
     double currTime = glfwGetTime();
-    GLFWFunctions::delta_time = currTime - prevTime;
+    GLFWFunctions::delta_time = static_cast<float>(currTime) - static_cast<float>(prevTime);
     prevTime = currTime;
 
     static double frameCount = 0;
@@ -246,9 +280,10 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
         GLFWFunctions::fps = frameCount / elapsedTime;
         if (GLFWFunctions::fps > 60) {
             fps = 60.0;
-        } else {
-			fps = GLFWFunctions::fps;
-		}
+        }
+        else {
+            fps = GLFWFunctions::fps;
+        }
 
         startTime = currTime;
         frameCount = 0.0;
@@ -256,6 +291,7 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
 
 }
 
+//terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
 }

@@ -22,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <map>
 #include <iostream>
 
+
 class AnimationData {
 public:
     AnimationData(int totalFrames, float frameDuration, int columns, int rows);

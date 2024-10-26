@@ -1,3 +1,21 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan), Ian Loi (ian.loi)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ECSCoordinator.h
+@brief:  This header file includes the class ECSCoordinator that handles all the ECS
+		 parts of ECS and ensure that they are all able to communicate with each other.
+		 Function templates can be found here instead of the source file.
+		 Joel Chu (c.weiyuan): Declared the ECSCoordinator class that links the ECS
+							   parts together. Declared most of the functions here
+							   as well.
+							   90%
+		Ian Loi (ian.loi): Declared the LoadEntityFromJSON, SaveEntityToJSON and 
+						   UpdateEntity functions that load, save and update data for
+						   entities.
+						   10%
+*//*___________________________________________________________________________-*/
 #pragma once
 #include <GL/glew.h>  // Include GLEW before OpenGL
 
@@ -41,34 +59,58 @@ public:
 	void destroyEntity(Entity entity);
 	
 	//Component Manager Functions
+	//Register the component
 	template <typename T>
 	void registerComponent();
+	//Add components to entity
 	template <typename T>
 	void addComponent(Entity entity, T component);
+	//Remove components from entity
 	template <typename T>
 	void removeComponent(Entity entity);
+	//Get components from entity
 	template <typename T>
 	T& getComponent(Entity entity);
+	//Get component type
 	template <typename T>
 	ComponentType getComponentType();
 
-	//Clone Entity Function
+	//Helper Functions to ECSCoordinator
+	//Clones the entity
 	Entity cloneEntity(Entity entity);
+	//Get number of live entities
 	unsigned int getEntityNum();
+	//Returns the first entity created
 	Entity getFirstEntity();
+	//Checks if entity has component
+	template <typename T>
+	bool hasComponent(Entity entity);
+	//Helper function to get random value
+	float getRandomVal(float min, float max);
 
-	void LoadEntityFromJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	std::string GetExecutablePath();
+	std::string GetWindowConfigJSONPath();
+	std::string GetEntitiesJSONPath();
+
+	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&);
+	// update the entity's data
+	void UpdateEntityData(Entity& entity);
 
 	//System Manager Functions
+	//Register the system
 	template <typename T>
 	std::shared_ptr<T> registerSystem();
+	//Set the system signature
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
-	void test();
+	//void test();
 	void test2();
+	void test3();
+	void test4();
+	void initialiseSystemsAndComponents();
 
 private:
 	std::unique_ptr<EntityManager> entityManager;
@@ -78,12 +120,15 @@ private:
 	Entity firstEntity;
 };
 
+//Register component by calling Component Manager Function
 template <typename T>
 void ECSCoordinator::registerComponent()
 {
 	componentManager->registerComponentHandler<T>();
 }
 
+//Add component to entity by calling Component Manager Function
+//as well as updating the entity signature on the entity manager
 template <typename T>
 void ECSCoordinator::addComponent(Entity entity, T component)
 {
@@ -98,6 +143,9 @@ void ECSCoordinator::addComponent(Entity entity, T component)
 	systemManager->entitySigChange(entity, signature);
 }
 
+
+//Remove component from entity by calling Component Manager Function
+//as well as updating the entity signature on the entity manager
 template <typename T>
 void ECSCoordinator::removeComponent(Entity entity)
 {
@@ -112,6 +160,7 @@ void ECSCoordinator::removeComponent(Entity entity)
 	systemManager->entitySigChange(entity, signature);
 }
 
+//Get component from entity by calling Component Manager Function
 template <typename T>
 T& ECSCoordinator::getComponent(Entity entity)
 {
@@ -120,21 +169,30 @@ T& ECSCoordinator::getComponent(Entity entity)
 	return componentManager->getComponent<T>(entity);
 }
 
+//Get component type by calling Component Manager Function
 template <typename T>
 ComponentType ECSCoordinator::getComponentType()
 {
 	return componentManager->getComponentType<T>();
 }
 
+//Register system by calling System Manager Function
 template <typename T>
 std::shared_ptr<T> ECSCoordinator::registerSystem()
 {
 	return systemManager->registerSystem<T>();
 }
 
+//Set system signature by calling System Manager Function
 template <typename T>
 void ECSCoordinator::setSystemSignature(ComponentSig signature)
 {
 	systemManager->setSystemSignature<T>(signature);
 }
 
+//Check if entity has component by calling Component Manager Function
+template <typename T>
+bool ECSCoordinator::hasComponent(Entity entity)
+{
+	return componentManager->hasComponent<T>(entity);
+}

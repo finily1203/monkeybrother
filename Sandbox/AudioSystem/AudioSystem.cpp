@@ -1,13 +1,33 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   AudioSystem.cpp
+@brief:  This source file includes all the implementation of the AudioSystem class.
+         AudioSystem class is a child class of GameSystems, which is responsible for
+         the audio system of the game. It uses FMOD library to handle audio files.
+         Joel Chu (c.weiyuan): Implemented all of the functions that belongs to
+                               the AudioSystem class.
+                               100%
+*//*___________________________________________________________________________-*/
+
+#include "GlobalCoordinator.h"
 #include "AudioSystem.h"
 #include "GlfwFunctions.h"
 #include <iostream>
 
-
+//Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : audioSystem(nullptr), audioSongList(), audioChannel(nullptr), currSongIndex(0) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
 
+SystemType AudioSystem::getSystem() {
+	return SystemType::AudioSystemType;
+}
+
+//Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
     FMOD_RESULT result;
 
@@ -23,11 +43,14 @@ void AudioSystem::initialise() {
         return;
     }
 
-    addSong("../assets/audio/Mood_Lofi.wav");
-    addSong("../assets/audio/All_My_Fellas.wav");
-    playSong(0);
+
+    assetsManager.LoadAudio("background", "../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav", audioSystem);
+    assetsManager.LoadAudio("bubbles", "../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav", audioSystem);
+    playSong("background");
 }
 
+//Update function for AudioSystem class to handle pausing, playing of song
+//setting volume and to update the song being played
 void AudioSystem::update() {
     bool bIsPlaying = false;
     if (audioChannel) {
@@ -38,7 +61,7 @@ void AudioSystem::update() {
 
         // If not playing, replay the sound unless stopAudio is true
         if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
-            playSong(getSongIndex());
+            playSong("background");
         }
 
 
@@ -75,23 +98,29 @@ void AudioSystem::update() {
             }
         }
 
-        if (GLFWFunctions::nextSong) {
-            int newIndex = (getSongIndex() + 1) % audioSongList.size();
-            playSong(newIndex);
-
-            GLFWFunctions::nextSong = false;
+        if (GLFWFunctions::audioNext) {
+            switch (GLFWFunctions::audioNum) {
+            case 0:
+                playSong("background");
+                break;
+            case 1:
+                playSong("bubbles");
+                break;
+            }
+            GLFWFunctions::audioNext = false;
         }
+
+
 
         result = audioChannel->setVolume(GLFWFunctions::volume);
         if (result != FMOD_OK) {
             std::cout << "FMOD setVolume error! (" << result << ")" << std::endl;
         }
     }
-
-    // Step 4: Update the FMOD system
     audioSystem->update();
 }
 
+//Clears all the songs from the audioSystem and terminates the audioSystem
 void AudioSystem::cleanup() {
     for (auto song : audioSongList) {
         if (song) {
@@ -107,46 +136,18 @@ void AudioSystem::cleanup() {
     }
 }
 
-//For perfomance viewer
-SystemType AudioSystem::getSystem() {
-    return AudioSystemType;
-}
-
-void AudioSystem::addSong(const std::string& songPath) {
-	FMOD::Sound* audioSong = nullptr;
-	FMOD_RESULT result = audioSystem->createSound(songPath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
-    if (result != FMOD_OK) {
-		std::cout << "FMOD error! (" << result << ") " << std::endl;
-		return;
-	}
-
-	audioSongList.push_back(audioSong);
-}
-
-void AudioSystem::playSong(int index) {
-    if (index >= 0 && index < audioSongList.size()) {
-        if (audioChannel) {
-            FMOD_RESULT result = audioChannel->stop();
-            if (result != FMOD_OK) {
-				std::cout << "FMOD stop error! (" << result << ") " << std::endl;
-			}
-            audioChannel = nullptr;
-        }
-        FMOD_RESULT result = audioSystem->playSound(audioSongList[index], nullptr, false, &audioChannel);
-        setSongIndex(index);
+void AudioSystem::playSong(const std::string& songName) {
+    FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
+    if (audioChannel) {
+	    FMOD_RESULT result = audioChannel->stop();
         if (result != FMOD_OK) {
-			std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+			std::cout << "FMOD stop error! (" << result << ") " << std::endl;
 		}
+		audioChannel = nullptr;
 	}
-    else {
-		std::cout << "Invalid index." << std::endl;
+	FMOD_RESULT result = audioSystem->playSound(audioSong, nullptr, false, &audioChannel);
+    if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
 	}
-}
 
-int AudioSystem::getSongIndex() {
-    return currSongIndex;
-}
-
-void AudioSystem::setSongIndex(int index) {
-	currSongIndex = index;
 }
