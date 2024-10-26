@@ -128,6 +128,8 @@
     <ClCompile Include="ECS\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
+    <ClCompile Include="Systems\Physics\Collision\Collision.cpp" />
+    <ClCompile Include="Systems\Physics\System\Physics.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
     <ClCompile Include="MessageSystem\observable.cpp" />
     <ClCompile Include="MessageSystem\observer.cpp" />
@@ -166,6 +168,8 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
+    <ClInclude Include="Systems\Physics\Collision\Collision.h" />
+    <ClInclude Include="Systems\Physics\System\Physics.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="MessageSystem\baseMessageSystem.h" />
     <ClInclude Include="MessageSystem\message.h" />
