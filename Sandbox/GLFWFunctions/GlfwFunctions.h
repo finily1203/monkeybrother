@@ -26,6 +26,7 @@ struct GLFWFunctions {
 	static float volume;
 	static float zoomMouseCoordX;
 	static float zoomMouseCoordY;
+	static bool isAtMaxZoom;
 	static bool audioPaused;
 	static bool nextSong;
 	static bool audioStopped;
