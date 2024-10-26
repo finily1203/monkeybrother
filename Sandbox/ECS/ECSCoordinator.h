@@ -43,7 +43,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "../MessageSystem/baseMessageSystem.h"
 #include "../MessageSystem/observable.h"
 #include "../MessageSystem/observer.h"
-#include "../MessageSystem/fallMessage.h"
+#include "../MessageSystem/message.h"
 #include "../FilePaths/filePath.h"
 
 

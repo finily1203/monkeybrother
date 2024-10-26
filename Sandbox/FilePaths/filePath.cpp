@@ -42,3 +42,15 @@ std::string FilePathManager::GetEntitiesJSONPath()
 
     return jsonPath;
 }
+
+// this function retrieves the audio assets JSON file
+std::string FilePathManager::GetAudioAssetsJSONPath()
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the audio assets JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\audioAssets.json";
+
+    return jsonPath;
+}

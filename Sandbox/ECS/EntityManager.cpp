@@ -114,18 +114,14 @@ void EntityManager::setEntityId(Entity entity, std::string const& id)
 	entityIds[entity] = id;
 }
 
-// retrieve the entity Id from the JSON file
-std::string EntityManager::getIdFromJSON(nlohmann::json const& jsonObj, Entity entity)
+// retrieve the entity Id
+std::string EntityManager::getEntityId(Entity entity)
 {
-	// looping through the JSON
-	for (const auto& entityData : jsonObj["entities"])
+	for (const auto& pair : entityIds)
 	{
-		// retrieving the id of the first entity in the JSON
-		std::string entityId = entityData["id"].get<std::string>();
-
-		if (getEntityById(entityId) == entity)
+		if (pair.first == entity)
 		{
-			return entityId;
+			return pair.second;
 		}
 	}
 
@@ -148,9 +144,4 @@ std::vector<Entity> EntityManager::getLiveEntities() {
 		}
 	}
 	return liveEntities;
-}
-
-//Retrieve the entity ID
-std::string EntityManager::getEntityID(Entity entity) {
-	return std::to_string(entity);
 }

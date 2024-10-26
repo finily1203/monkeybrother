@@ -43,9 +43,8 @@ void AudioSystem::initialise() {
         return;
     }
 
+    loadAudioAssets();
 
-    assetsManager.LoadAudio("background", "../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav", audioSystem);
-    assetsManager.LoadAudio("bubbles", "../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav", audioSystem);
     playSong("background");
 }
 
@@ -150,4 +149,26 @@ void AudioSystem::playSong(const std::string& songName) {
 		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
 	}
 
+}
+
+void AudioSystem::loadAudioAssets() const
+{
+    std::string jsonFilePath = FilePathManager::GetAudioAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& audioAsset : jsonObj["audioAssets"])
+    {
+        std::string audioName = audioAsset["audioName"].get<std::string>();
+        std::string relativePath = audioAsset["filePath"].get<std::string>();
+
+        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadAudio(audioName, audioFilePath, audioSystem);
+    }
 }

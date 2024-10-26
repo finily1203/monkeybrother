@@ -476,10 +476,19 @@ void ECSCoordinator::test4() {
 
 	FallMessage fallMsg(entity);
 	fallEventSource.ProcessMessage(&fallMsg);
+
+	// This is the code for testing saving the entity data to the
+	// JSON file
+	//if (hasComponent<TransformComponent>(entity))
+	//{
+	//	UpdateEntityData(entity);
+
+	//	SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
+	//}
 	
 	// Iterate through the entities to find Object1 and Object2
 	for (auto entity : entityManager->getLiveEntities()) {
-		std::string entityId = this->entityManager->getEntityID(entity); // Assume you have a method to get the entity ID
+		std::string entityId = this->entityManager->getEntityId(entity); // Assume you have a method to get the entity ID
 
 		/*if (entityId == "Object1" || entityId == "Object2") {
 			addComponent(entity, AnimationComponent{ true });

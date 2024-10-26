@@ -22,7 +22,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include <set>
 #include "ECSDefinitions.h"
-#include "../Nlohmann/json.hpp"
 
 class EntityManager
 {
@@ -35,13 +34,12 @@ public:
 	ComponentSig getSignature(Entity entity);
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
-	std::string getEntityID(Entity entity);
 
 	std::vector<Entity> getLiveEntities();
 
 	Entity getEntityById(std::string const& id);
 	void setEntityId(Entity entity, std::string const& id);
-	std::string getIdFromJSON(nlohmann::json const& jsonObj, Entity entity);
+	std::string getEntityId(Entity entity);
 
 	void cleanup();
 

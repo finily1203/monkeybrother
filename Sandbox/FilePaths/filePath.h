@@ -11,4 +11,5 @@ public:
 	static std::string GetExecutablePath();
 	static std::string GetWindowConfigJSONPath();
 	static std::string GetEntitiesJSONPath();
+	static std::string GetAudioAssetsJSONPath();
 };

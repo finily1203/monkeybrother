@@ -168,7 +168,7 @@
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="MessageSystem\baseMessageSystem.h" />
-    <ClInclude Include="MessageSystem\fallMessage.h" />
+    <ClInclude Include="MessageSystem\message.h" />
     <ClInclude Include="MessageSystem\observable.h" />
     <ClInclude Include="MessageSystem\observer.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
