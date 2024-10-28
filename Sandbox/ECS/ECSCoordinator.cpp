@@ -32,6 +32,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
+#include "GlobalCoordinator.h"
+
 
 std::string ECSCoordinator::GetExecutablePath()
 {
@@ -390,6 +392,7 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 //Test 3 tests for the creation of platforms and works with the physics and collision system
 void ECSCoordinator::test3() {
 	std::cout << "Create Platforms" << std::endl;
+
 	Entity platform1 = createEntity();
 	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.0f), glm::vec2(0.0f, -150.f) });
 	GraphicsComponent gfxComp1{};
@@ -410,8 +413,6 @@ void ECSCoordinator::test3() {
 	addComponent(platform3, TransformComponent{ glm::vec2(315.f, 0.f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.f) });
 	GraphicsComponent gfxComp3{};
 	gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.0f));
-	addComponent(platform3, gfxComp3);
-	//addComponent(platform3, AABBComponent{ -350.0f, -650.f, -175.f, -225.f });
 	glm::vec2 platformPos = gfxComp3.glObject.position;
 	glm::vec2 platformScl = gfxComp3.glObject.scaling;
 	addComponent(platform3, AABBComponent{ platformPos.x - platformScl.x / 2, platformPos.x + platformScl.x / 2,
@@ -430,17 +431,23 @@ void ECSCoordinator::test3() {
 	// Create Text Entity
 	std::cout << "Create Text Entity" << std::endl;
 	Entity textEntity = createEntity();
-	addComponent(textEntity, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
+	addComponent(textEntity, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.0f, 0.0f) });
 
 	// Initialize FontComponent
 	FontComponent fontComp{};
-	fontComp.text = "Hello World!";  // Text to display
-	fontComp.position = glm::vec2(200.0f, 500.0f);  
-	fontComp.scale = 100.0f;  // Scale of the text
-	fontComp.color = glm::vec3(1.0f, 1.0f, 1.0f); // White color
+	fontComp.text = "Hello Woooooooooooooooooooooooooooooooooooooooooorld!This is a longgggg text to ensure that wrap text implementation is correct";  // Text to display
 
-	addComponent(textEntity, fontComp);  
+	float screenWidth = 1600.0f;
+	float screenHeight = 900.0f;
 
+	float textScale = 1.0f;
+	glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
+	fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2);
+
+	fontComp.scale = textScale;  // Scale of the text
+	fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
+
+	addComponent(textEntity, fontComp);
 }
 
 
@@ -480,9 +487,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 	graphicSystem->initialise();
 
-	int fontSize = 24; 
-	auto fontSystem = std::make_shared<FontSystem>();
-	auto fontSystemECS = std::make_shared<FontSystemECS>(fontSystem, fontSize);
+	auto fontSystemECS = std::make_shared<FontSystemECS>();
 
 	registerSystem<FontSystemECS>();
 	{

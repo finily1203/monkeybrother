@@ -25,7 +25,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <string>
 #include <sstream>
 #include <fstream>
-
+#include <glm/gtc/type_ptr.hpp>
 ShaderProgramSource Shader::ParseShader(const std::string& filepath) {
     std::ifstream stream(filepath);
     if (!stream.is_open()) {
@@ -83,7 +83,7 @@ Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
     }
 
     m_IsCompiled = true;
-
+    m_IsInitialized = true;
     glDetachShader(m_ShaderID, vertexShader);
     glDetachShader(m_ShaderID, fragmentShader);
     glDeleteShader(vertexShader);
@@ -141,4 +141,11 @@ GLint Shader::GetUniformLocation(const std::string& name) {
         std::cerr << "Warning: Uniform '" << name << "' not found!" << std::endl;
     }
     return location;
+}
+
+bool Shader::isInitialized() const {
+    return m_IsInitialized; // Return the initialization status
+}
+void Shader::SetUniformMatrix4f(const std::string& name, const glm::mat4& matrix) {
+    glUniformMatrix4fv(glGetUniformLocation(m_ShaderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

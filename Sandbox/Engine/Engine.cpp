@@ -49,7 +49,7 @@ void Engine::cleanupSystem() {
 		if (system != nullptr) {
 			system->cleanup();
 			
-			if (system != &ecsCoordinator) {
+			if (system != &ecsCoordinator && system != &fontSystem) {
 				delete system;
 			}
 		}

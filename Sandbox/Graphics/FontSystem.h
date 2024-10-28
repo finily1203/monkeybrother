@@ -23,15 +23,17 @@ public:
     void update() override;     // Update the FontSystem (if necessary)
     void initialise() override; // Initialize the FontSystem
     void cleanup() override;    // Clean up resources
-    void draw(const std::string& text, float x, float y, float scale, glm::vec3 color); // Draw text
-
+    void draw(const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth);
+    bool isInitialized = false;
 private:
-    void renderText(Shader* shader,const std::string& text, float x, float y, float scale, glm::vec3 color); // Render text
-
+    void renderWrappedText(const std::unique_ptr<Shader>& shader, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth);
+    std::vector<std::string> wrapText(const std::string& text, float maxWidth, float scale);
+    float measureTextWidth(const std::string& text, float scale);
+    glm::mat4 projectionMatrix;
     std::map<char, Character> Characters; // Map of characters
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object
     std::unique_ptr<Shader> textShader;         // Shader for rendering text
-    bool isInitialized = false;
+  
 };
 
 #endif // FONTSYSTEM_H

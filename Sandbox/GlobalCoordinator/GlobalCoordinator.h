@@ -14,7 +14,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ECSCoordinator.h"
 #include "GraphicsSystem.h"
 #include "AssetsManager.h"
+#include "FontSystem.h"
 
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
 extern AssetsManager assetsManager;
+extern FontSystem fontSystem;

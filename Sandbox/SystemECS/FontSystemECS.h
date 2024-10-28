@@ -8,7 +8,7 @@
 
 class FontSystemECS : public System {
 public:
-    FontSystemECS() = default;
+    FontSystemECS();
     FontSystemECS(std::shared_ptr<FontSystem> fontSys, int fontSize);
 
     void initialise() override;
@@ -17,4 +17,5 @@ public:
 
 private:
     std::shared_ptr<FontSystem> fontSystem;
+    int fontSize;
 };
