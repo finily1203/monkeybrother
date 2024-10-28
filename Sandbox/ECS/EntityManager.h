@@ -34,12 +34,12 @@ public:
 	ComponentSig getSignature(Entity entity);
 	unsigned int getLiveEntCount();
 	unsigned int getAvailableEntCount();
-	std::string getEntityID(Entity entity);
 
 	std::vector<Entity> getLiveEntities();
 
 	Entity getEntityById(std::string const& id);
 	void setEntityId(Entity entity, std::string const& id);
+	std::string getEntityId(Entity entity);
 
 	void cleanup();
 

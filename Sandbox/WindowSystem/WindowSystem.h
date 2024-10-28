@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Systems.h"
 #include <Shader.h>
 #include "../Nlohmann/json.hpp"
+#include "../FilePaths/filePath.h"
 #include <fstream>
 
 //create class for windows application

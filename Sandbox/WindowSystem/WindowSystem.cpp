@@ -92,8 +92,7 @@ std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
 void WindowSystem::initialise() {
 	nlohmann::json windowConfigJSON;
-	ECSCoordinator ecs;
-	std::ifstream windowConfigFile(ecs.GetWindowConfigJSONPath());
+	std::ifstream windowConfigFile(FilePathManager::GetWindowConfigJSONPath());
 
 	if (!windowConfigFile.is_open())
 	{

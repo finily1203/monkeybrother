@@ -40,6 +40,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "matrix3x3.h"
 #include "../Serialization/jsonSerialization.h"
 #include "../Serialization/serialization.h"
+#include "../MessageSystem/baseMessageSystem.h"
+#include "../MessageSystem/observable.h"
+#include "../MessageSystem/observer.h"
+#include "../MessageSystem/message.h"
+#include "../FilePaths/filePath.h"
 
 
 class ECSCoordinator : public GameSystems
@@ -87,10 +92,6 @@ public:
 	bool hasComponent(Entity entity);
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
-
-	std::string GetExecutablePath();
-	std::string GetWindowConfigJSONPath();
-	std::string GetEntitiesJSONPath();
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file

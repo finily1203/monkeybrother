@@ -46,6 +46,8 @@ public:
 	//Setter for currentSongIndex
 	void setSongIndex(int index);
 
+	void loadAudioAssets() const;
+
 	//get audioSystem
 	FMOD::System* getAudioSystem() const { return audioSystem; }
 
