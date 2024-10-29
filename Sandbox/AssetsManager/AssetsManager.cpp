@@ -28,6 +28,7 @@ SystemType AssetsManager::getSystem()
 	return SystemType::AssetsManagerType;
 }
 
+//-----------------------------TEXTURE ASSETS----------------------------------//
 void AssetsManager::LoadTexture(const std::string& texName, const std::string& texPath) {
     if (m_Textures.find(texName) != m_Textures.end()) {
 		std::cerr << "Texture already loaded!" << std::endl;
@@ -97,14 +98,14 @@ void AssetsManager::ClearTextures() {
 	std::cout << "All textures cleared!" << std::endl;
 }
 
-//For loading shaders
-void AssetsManager::LoadShader(const std::string& name, const std::string& verPath, const std::string& fragPath) {
+//-----------------------------SHADER ASSETS----------------------------------//
+void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
     if (m_Shaders.find(name) != m_Shaders.end()) {
         std::cerr << "Shader already loaded!" << std::endl;
         return;
     }
 
-    ShaderProgramSource source = Shader::ParseShader(fragPath);
+    ShaderProgramSource source = Shader::ParseShader(filePath);
     auto shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
     if (!shader->IsCompiled()) {
 		std::cerr << "Shader compilation failed." << std::endl;
@@ -144,6 +145,8 @@ void AssetsManager::ClearShaders() {
 	std::cout << "All shaders cleared!" << std::endl;
 }
 
+
+//-----------------------------AUDIO ASSETS----------------------------------//
 void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* audioSystem) {
     FMOD::Sound* audioSong = nullptr;
     FMOD_RESULT result = audioSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);

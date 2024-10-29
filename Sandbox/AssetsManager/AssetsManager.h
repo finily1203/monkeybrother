@@ -26,7 +26,7 @@ public:
 	
 
 	//For loading shaders
-	void LoadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+	void LoadShader(const std::string& name, const std::string& filePath);
 	Shader* GetShader(const std::string& name) const;
 	void UnloadShader(const std::string& name);
 	void ClearShaders();

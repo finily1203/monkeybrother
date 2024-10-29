@@ -41,10 +41,15 @@ public:
 	//void playSong(int index);
 	void playSong(const std::string& songName);
 
+	//Function to play sound effect
+	void playSoundEffect(const std::string& soundEffectName);
+
 	//Getter for currentSongIndex
 	int getSongIndex();
 	//Setter for currentSongIndex
 	void setSongIndex(int index);
+
+	void loadAudioAssets() const;
 
 	//get audioSystem
 	FMOD::System* getAudioSystem() const { return audioSystem; }

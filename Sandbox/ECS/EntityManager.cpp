@@ -46,6 +46,7 @@ void EntityManager::destroyEntity(Entity entity) {
 
 	entitySig[entity].reset(); //destroy entity from entitySig
 	availableEnt.push(entity); //push back the number to availableEnt
+
 	liveEntCount--; //decrement the live entity count
 }
 
@@ -91,7 +92,7 @@ unsigned int EntityManager::getLiveEntCount() {
 
 //Retrieve the number of available entities
 unsigned int EntityManager::getAvailableEntCount() {
-	return availableEnt.size();
+	return static_cast<unsigned int>(availableEnt.size());
 }
 
 // Retrieve the entity object based on the entity Id
@@ -104,12 +105,34 @@ Entity EntityManager::getEntityById(std::string const& id)
 			return pair.first;
 		}
 	}
+
+	return 0;
 }
 
 // Set the entity Id based on the entity object
 void EntityManager::setEntityId(Entity entity, std::string const& id)
 {
 	entityIds[entity] = id;
+}
+
+// retrieve the entity Id
+std::string EntityManager::getEntityId(Entity entity)
+{
+	for (const auto& pair : entityIds)
+	{
+		if (pair.first == entity)
+		{
+			return pair.second;
+		}
+	}
+
+	return "";
+}
+
+// Retrieve the entity map
+std::unordered_map<Entity, std::string> EntityManager::getEntityMap() const
+{
+	return entityIds;
 }
 
 //Cleanup the entity manager by resetting the available entities and live entity count
@@ -128,9 +151,4 @@ std::vector<Entity> EntityManager::getLiveEntities() {
 		}
 	}
 	return liveEntities;
-}
-
-//Retrieve the entity ID
-std::string EntityManager::getEntityID(Entity entity) {
-	return std::to_string(entity);
 }

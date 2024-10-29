@@ -43,9 +43,8 @@ void AudioSystem::initialise() {
         return;
     }
 
+    loadAudioAssets();
 
-    assetsManager.LoadAudio("background", "../assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav", audioSystem);
-    assetsManager.LoadAudio("bubbles", "../assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav", audioSystem);
     playSong("background");
 }
 
@@ -110,13 +109,27 @@ void AudioSystem::update() {
             GLFWFunctions::audioNext = false;
         }
 
-
-
         result = audioChannel->setVolume(GLFWFunctions::volume);
         if (result != FMOD_OK) {
             std::cout << "FMOD setVolume error! (" << result << ")" << std::endl;
         }
     }
+
+    if (GLFWFunctions::bumpAudio) {
+		playSoundEffect("bump");
+		GLFWFunctions::bumpAudio = false;
+    }
+
+    if (GLFWFunctions::slideAudio) {
+        playSoundEffect("slide");
+        GLFWFunctions::slideAudio = false;
+    }
+
+    if (GLFWFunctions::bubblePopping) {
+        playSoundEffect("bubblePopping");
+        GLFWFunctions::bubblePopping = false;
+    }
+
     audioSystem->update();
 }
 
@@ -150,4 +163,38 @@ void AudioSystem::playSong(const std::string& songName) {
 		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
 	}
 
+}
+
+
+void AudioSystem::playSoundEffect(const std::string& soundName)
+{
+	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
+	FMOD::Channel* audioChannel = nullptr;
+	FMOD_RESULT result = audioSystem->playSound(audioSound, nullptr, false, &audioChannel);
+	if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+	}
+}
+
+
+void AudioSystem::loadAudioAssets() const
+{
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& audioAsset : jsonObj["audioAssets"])
+    {
+        std::string audioName = audioAsset["audioName"].get<std::string>();
+        std::string relativePath = audioAsset["filePath"].get<std::string>();
+
+        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadAudio(audioName, audioFilePath, audioSystem);
+    }
 }

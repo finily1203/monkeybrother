@@ -32,50 +32,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <Windows.h>
 
 #include "GlobalCoordinator.h"
-
-
-// this function retrieves the executable path based on your desktop
-// dynamic path retrieval
-std::string ECSCoordinator::GetExecutablePath()
-{
-	char buffer[MAX_PATH];
-
-	// this is a windows API function that will retrieve the fully
-	// qualified path of the executable file 
-	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
-
-	// initialize the full executable path to fullPath
-	std::string fullPath(buffer);
-
-	// return the directory path by extracting a substring from the
-	// fullPath
-	return fullPath.substr(0, fullPath.find_last_of("\\/"));
-}
-
-// this function retrieves the windowsConfig JSON file
-std::string ECSCoordinator::GetWindowConfigJSONPath()
-{
-	// retrieves the executable path
-	std::string execPath = GetExecutablePath();
-	
-	// retrieves the windowsConfig JSON file path
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\windowConfig.json";
-
-	return jsonPath;
-}
-
-// this function retrieves the entites JSON file
-std::string ECSCoordinator::GetEntitiesJSONPath()
-{
-	// retrieves the executable path
-	std::string execPath = GetExecutablePath();
-
-	// retrieves the entities JSON file path
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
-
-	return jsonPath;
-}
-
 #include <random>
 #include <glm/glm.hpp>
 
@@ -98,6 +54,7 @@ void ECSCoordinator::update() {
 		for (Entity entity : entityManager->getLiveEntities()) {
 			destroyEntity(entity);
 		}
+		//std::cout << getEntityNum() << std::endl;
 		if (GLFWFunctions::testMode == 0) {
 			test3();
 		}
@@ -148,6 +105,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 	entityManager->destroyEntity(entity);
 	componentManager->entityRemoved(entity);
 	systemManager->entityRemoved(entity);
+
 }
 
 
@@ -157,7 +115,7 @@ void ECSCoordinator::test2() {
 
 	std::cout << "Set entity" << std::endl;
 	//Entity entity = createEntity();
-	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
+	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	
 	// test codes for saving to JSON file
 	// can be uncommented for the testing of saving to JSON file
@@ -440,7 +398,6 @@ void ECSCoordinator::test3() {
 	addComponent(player, gfxComp4);
 	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
 	addComponent(player, MovementComponent{ .02f });
-
 }
 
 
@@ -478,6 +435,8 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 
 	graphicSystem->initialise();
+
+	test3();
 }
 
 
@@ -501,12 +460,24 @@ void ECSCoordinator::test4() {
 
 	//Entity entObjGraphics3 = createEntity();
 	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
+
+	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+
+	//std::string id = "Player";
+	//Entity entity = entityManager->getEntityById(id);
+
+	// This is the code for testing saving the entity data to the
+	// JSON file
+	//if (hasComponent<TransformComponent>(entity))
+	//{
+	//	UpdateEntityData(entity);
+
+	//	SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
+	//}
 	
-	// Load entities from JSON file
-	LoadEntityFromJSON(*this, GetEntitiesJSONPath());
 	// Iterate through the entities to find Object1 and Object2
 	for (auto entity : entityManager->getLiveEntities()) {
-		std::string entityId = this->entityManager->getEntityID(entity); // Assume you have a method to get the entity ID
+		std::string entityId = this->entityManager->getEntityId(entity); // Assume you have a method to get the entity ID
 
 		/*if (entityId == "Object1" || entityId == "Object2") {
 			addComponent(entity, AnimationComponent{ true });

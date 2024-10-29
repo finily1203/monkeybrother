@@ -27,6 +27,9 @@
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
+    <ClCompile Include="MessageSystem\observer.cpp" />
+    <ClCompile Include="MessageSystem\observable.cpp" />
+    <ClCompile Include="FilePaths\filePath.cpp" />
     <ClCompile Include="AssetsManager\AssetsManager.cpp" />
     <ClCompile Include="DebugSystem\Crashlog.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
@@ -65,6 +68,11 @@
     <ClInclude Include="AssetsManager\AssetsManager.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="MessageSystem\baseMessageSystem.h" />
+    <ClInclude Include="MessageSystem\message.h" />
+    <ClInclude Include="MessageSystem\observer.h" />
+    <ClInclude Include="MessageSystem\observable.h" />
+    <ClInclude Include="FilePaths\filePath.h" />
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />

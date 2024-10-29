@@ -49,6 +49,7 @@ public:
 		assert(entityToIndexMap.find(entity) == entityToIndexMap.end() && "Component already exists in the entity");
 
 		//add component to array
+		std::cout << nextComponentIndex << std::endl;
 		size_t newIndex = nextComponentIndex;
 		entityToIndexMap[entity] = newIndex;
 		indexToEntityMap[newIndex] = entity;
@@ -67,7 +68,9 @@ public:
 		componentArray[removedIndex] = T{};
 		entityToIndexMap.erase(entity);
 		indexToEntityMap.erase(removedIndex);
-		nextComponentIndex--;
+		if (nextComponentIndex != 0) {
+			nextComponentIndex--;
+		}
 	}
 
 	//retrieves the specific component struct / class type from entity

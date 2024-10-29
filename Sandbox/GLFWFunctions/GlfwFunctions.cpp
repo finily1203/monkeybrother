@@ -39,6 +39,10 @@ bool GLFWFunctions::zoomViewport = false;
 bool GLFWFunctions::isAtMaxZoom = false;
 bool GLFWFunctions::cloneObject = false;
 bool GLFWFunctions::goNextMode = false;
+bool GLFWFunctions::bumpAudio = false;
+bool GLFWFunctions::hasBumped = false;
+bool GLFWFunctions::slideAudio = false;
+bool GLFWFunctions::bubblePopping = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -159,6 +163,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (GLFW_KEY_M == key && GLFW_PRESS == action) {
         GLFWFunctions::testMode = (GLFWFunctions::testMode + 1) % 2;
         GLFWFunctions::goNextMode = true;
+    }
+
+    if (GLFW_KEY_0 == key && GLFW_PRESS == action) {
+        bubblePopping = true;
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;

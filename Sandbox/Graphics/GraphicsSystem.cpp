@@ -73,19 +73,22 @@ void GraphicsSystem::initialise() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    ShaderProgramSource source = Shader::ParseShader("./Graphics/Basic.shader");
-    m_Shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
-    if (!m_Shader->IsCompiled()) {
-        std::cerr << "Shader compilation failed." << std::endl;
-        return;
-    }
+    //ShaderProgramSource source = Shader::ParseShader("./Graphics/Basic.shader");
+    //m_Shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
+    //if (!m_Shader->IsCompiled()) {
+    //    std::cerr << "Shader compilation failed." << std::endl;
+    //    return;
+    //}
 
-    ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
-    m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
-    if (!m_Shader2->IsCompiled()) {
-        std::cerr << "Shader compilation failed." << std::endl;
-        return;
-    }
+    //ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
+    //m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
+    //if (!m_Shader2->IsCompiled()) {
+    //    std::cerr << "Shader compilation failed." << std::endl;
+    //    return;
+    //}
+
+    loadShaderAssets();
+    loadTextureAssets();
 
     // Load texture 1
     int width, height, nrChannels;
@@ -213,13 +216,16 @@ void GraphicsSystem::initialise() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // get the location of the uniform variable in the shader
-    m_Shader2->Bind();
+    //m_Shader2->Bind();
+    assetsManager.GetShader("shader2")->Bind();
 
-    int location = m_Shader2->GetUniformLocation("u_Color");
+    //int location = m_Shader2->GetUniformLocation("u_Color");
+    int location = assetsManager.GetShader("shader2")->GetUniformLocation("u_Color");
     ASSERT(location != -1);
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
-    m_Shader2->Unbind();
+    //m_Shader2->Unbind();
+    assetsManager.GetShader("shader2")->Unbind();
 }
 
 void GraphicsSystem::update() {}
@@ -425,14 +431,17 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, g
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {
     // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
-        m_Shader->Bind();
+        //m_Shader->Bind();
+        assetsManager.GetShader("shader1")->Bind();
     else
-        m_Shader2->Bind();
+        //m_Shader2->Bind();
+        assetsManager.GetShader("shader2")->Bind();
     // bind VAO of this object
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
+    //GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
+    GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
         glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(xform));
     }
@@ -443,5 +452,48 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 x
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     // unbind shader program
-    m_Shader2->Unbind();
+    //m_Shader2->Unbind();
+    assetsManager.GetShader("shader2")->Unbind();
+}
+
+void GraphicsSystem::loadShaderAssets() const {
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& shaderAsset : jsonObj["shaderAssets"])
+    {
+        std::string shaderName = shaderAsset["id"].get<std::string>();
+        std::string relativePath = shaderAsset["filePath"].get<std::string>();
+
+        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadShader(shaderName, shaderFilePath);
+    }
+}
+
+void GraphicsSystem::loadTextureAssets() const {
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& textureAsset : jsonObj["textureAssets"])
+    {
+        std::string textureName = textureAsset["id"].get<std::string>();
+        std::string relativePath = textureAsset["filePath"].get<std::string>();
+
+        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadTexture(textureName, textureFilePath);
+    }
 }

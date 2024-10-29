@@ -112,6 +112,7 @@
     <ClCompile Include="ECS\ComponentManager.cpp" />
     <ClCompile Include="ECS\ECSCoordinator.cpp" />
     <ClCompile Include="ECS\SystemManager.cpp" />
+    <ClCompile Include="FilePaths\filePath.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
@@ -127,9 +128,9 @@
     <ClCompile Include="ECS\EntityManager.cpp" />
     <ClCompile Include="MathLibrary\matrix3x3.cpp" />
     <ClCompile Include="MathLibrary\vector2D.cpp" />
-    <ClCompile Include="Systems\Physics\Collision\Collision.cpp" />
-    <ClCompile Include="Systems\Physics\System\Physics.cpp" />
     <ClCompile Include="MathLibrary\vector3D.cpp" />
+    <ClCompile Include="MessageSystem\observable.cpp" />
+    <ClCompile Include="MessageSystem\observer.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="ECS\ECSCoordinator.h" />
     <ClInclude Include="ECS\ECSDefinitions.h" />
     <ClInclude Include="ECS\SystemManager.h" />
+    <ClInclude Include="FilePaths\filePath.h" />
     <ClInclude Include="GLFWFunctions\GlfwFunctions.h" />
     <ClInclude Include="ECS\ComponentManager.h" />
     <ClInclude Include="ECS\EntityManager.h" />
@@ -164,9 +166,11 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
-    <ClInclude Include="Systems\Physics\Collision\Collision.h" />
-    <ClInclude Include="Systems\Physics\System\Physics.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />
+    <ClInclude Include="MessageSystem\baseMessageSystem.h" />
+    <ClInclude Include="MessageSystem\message.h" />
+    <ClInclude Include="MessageSystem\observable.h" />
+    <ClInclude Include="MessageSystem\observer.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />

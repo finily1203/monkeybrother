@@ -40,6 +40,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "matrix3x3.h"
 #include "../Serialization/jsonSerialization.h"
 #include "../Serialization/serialization.h"
+#include "../MessageSystem/baseMessageSystem.h"
+#include "../MessageSystem/observable.h"
+#include "../MessageSystem/observer.h"
+#include "../MessageSystem/message.h"
+#include "../FilePaths/filePath.h"
 
 
 class ECSCoordinator : public GameSystems
