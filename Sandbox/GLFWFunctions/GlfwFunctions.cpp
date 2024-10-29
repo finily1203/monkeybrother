@@ -204,19 +204,19 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         break;
     }
 
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
+    //double mouseX, mouseY;
+    //glfwGetCursorPos(window, &mouseX, &mouseY);
 
-    // Check if mouse is inside viewport using the static method
-    if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
-        GLFW_MOUSE_BUTTON_LEFT == button &&
-        GLFW_PRESS == action &&
-        GLFWFunctions::isGuiOpen) {
+    //// Check if mouse is inside viewport using the static method
+    //if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
+    //    GLFW_MOUSE_BUTTON_LEFT == button &&
+    //    GLFW_PRESS == action &&
+    //    GLFWFunctions::isGuiOpen) {
 
-        GLFWFunctions::zoomMouseCoordX = mouseX;
-        GLFWFunctions::zoomMouseCoordY = mouseY;
-        GLFWFunctions::zoomViewport = !GLFWFunctions::zoomViewport;
-    }
+    //    GLFWFunctions::zoomMouseCoordX = mouseX;
+    //    GLFWFunctions::zoomMouseCoordY = mouseY;
+    //    GLFWFunctions::zoomViewport = !GLFWFunctions::zoomViewport;
+    //}
 }
 
 //Handle cursor position events

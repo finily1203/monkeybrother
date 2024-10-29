@@ -24,10 +24,13 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GlfwFunctions.h"
 #include "Crashlog.h"
 #include "GlobalCoordinator.h"
+#include "SystemManager.h"
+#include "ECSCoordinator.h" 
 
-static float widthSlide = 5.0f;
+static float widthSlide = 0.f;
 static float heightSlide = 5.0f;
 static float sizeSlide = 5.0f;
+int objCount = 0;
 
 //Variables for DebugSystem
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
@@ -37,6 +40,11 @@ double DebugSystem::lastUpdateTime = 0.0;
 std::vector<const char*> DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
 int DebugSystem::systemCount = 0;
+
+float DebugSystem::objSizeXMax = 5000.0f;
+float DebugSystem::objSizeXMin = 100.0f;
+float DebugSystem::objSizeYMax = 5000.0f;
+float DebugSystem::objSizeYMin = 100.0f;
 
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
@@ -151,98 +159,93 @@ void DebugSystem::update() {
 			ImGui::NewLine();
 		}
 		if (ImGui::CollapsingHeader("Object Creation")) {
-			const char* platformWidthLabel = "Test1";
-			const char* platformHeightLabel = "Test2";
-			const char* playerSizeLabel = "Size";
-			ImGui::SeparatorText("Object");
 
-			// Get available width
-			float availWidth = ImGui::GetContentRegionAvail().x;
-
-			// Calculate the minimum width for the label
 			ImGui::AlignTextToFramePadding();
-			float labelWidth = ImGui::CalcTextSize(platformHeightLabel).x + ImGui::GetStyle().ItemInnerSpacing.x;
+			static int numEntitiesToCreate = 1;  // Default to 1
+			static char numBuffer[8] = "1";
 
-			//float prevWidth = widthSlide;
+			ImGui::Text("Number of Objects: %d", objCount);
 
-			// Set the width for the slider, ensuring it doesn't go below a minimum value
-			float sliderWidth = std::max(10.0f, 150.f);
-			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(platformWidthLabel, &widthSlide, 0.0f, 10.0f, "%.1f");
-			//if (prevWidth < widthSlide) {
-			//	// This code runs ONLY while the user is actively dragging the slider
-			//	// It will stop when they release the mouse button
-			//	GLFWFunctions::scale_up_flag = true;
-			//}
-			//if (ImGui::IsItemDeactivatedAfterEdit()) {
-			//	// Runs once when the user releases the slider
-			//	GLFWFunctions::scale_up_flag = false;
-			//}
-			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(platformHeightLabel, &heightSlide, 0.0f, 10.0f, "%.1f");
+			objCount = 0;
 
-			ImGui::NewLine();
-			ImGui::Button("Scale up");
-			if (ImGui::IsItemActive()) {
-				GLFWFunctions::scale_up_flag = true;
-			}
-			else {
-				GLFWFunctions::scale_up_flag = false;
-			}
+			ImGui::SetNextItemWidth(100);  // Set width of input field
+			ImGui::InputText("##count", numBuffer, IM_ARRAYSIZE(numBuffer), ImGuiInputTextFlags_CharsDecimal);
+
+			numEntitiesToCreate = std::max(1, atoi(numBuffer));
 
 			ImGui::SameLine();
 
-			ImGui::Button("Scale down");
-			if (ImGui::IsItemActive()) {
-				GLFWFunctions::scale_down_flag = true;
-			}
-			else {
-				GLFWFunctions::scale_down_flag = false;
-			}
+			if (ImGui::Button("Create")) {
+				for (int i = 0; i < numEntitiesToCreate; i++) {
+					Entity newEntity = ecsCoordinator.createEntity();
+					TransformComponent transform{};
+					transform.position = glm::vec2(
+						ecsCoordinator.getRandomVal(-800.f, 800.f),
+						ecsCoordinator.getRandomVal(-450.f, 450.f)
+					);
+					transform.scale = glm::vec2(100.0f, 100.0f);
+					ecsCoordinator.addComponent(newEntity,transform);
+					
 
-			ImGui::Button("Rotate clockwise");
-			if (ImGui::IsItemActive()) {
-				GLFWFunctions::right_turn_flag = true;
+				}
 			}
-			else {
-				GLFWFunctions::right_turn_flag = false;
-			}
-
-			ImGui::SameLine();
-
-			ImGui::Button("Rotate anti-clockwise");
-			if (ImGui::IsItemActive()) {
-				GLFWFunctions::left_turn_flag = true;
-			}
-			else {
-				GLFWFunctions::left_turn_flag = false;
-			}
-
-			ImGui::SeparatorText("Player Object");
-			ImGui::SetNextItemWidth(sliderWidth);
-			ImGui::SliderFloat(playerSizeLabel, &sizeSlide, 0.0f, 10.0f, "%.1f");
 
 			ImGui::NewLine();
-			bool createPlayer = ImGui::Button("Create Object");
-			if (createPlayer)
-			{
-				GLFWFunctions::cloneObject = true;
+
+			ImGui::SeparatorText("Object Attributes");
+			
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				objCount++;
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				auto signature = ecsCoordinator.getEntityID(entity);
+
+				float posXSlide = transform.position.x;
+				float posYSlide = transform.position.y;
+
+				ImGui::PushID(entity);
+
+				widthSlide = transform.scale.x;
+				heightSlide = transform.scale.y;
+
+				ImGui::Text("Signature: %s", signature.c_str());
+
+				ImGui::SetNextItemWidth(200);
+				ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
+				if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+					transform.position.x = posXSlide;
+				}
+				ImGui::SetNextItemWidth(200);
+				ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
+				if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+					transform.position.y = posYSlide;
+				}
+
+				ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
+				if (ImGui::IsItemActivated) {
+					transform.scale.x = widthSlide;
+				}
+				ImGui::SliderFloat("Height", &heightSlide, objSizeYMin, objSizeYMax, "%.1f");
+				if (ImGui::IsItemActivated) {
+					transform.scale.y = heightSlide;
+				}
+
+				if (ImGui::Button("Remove")) {
+					ecsCoordinator.destroyEntity(entity);
+				}
+
+				ImGui::PopID();
+				ImGui::Separator();
+
+				Console::GetLog() << signature << " || " << transform.position.x << " || " << transform.position.y
+					<< std::endl;
 			}
-			/*ImGui::SameLine();
-			bool destroyPlayer = ImGui::Button("Destroy Object");
-			if (destroyPlayer && GLFWFunctions::cloneObject == true)
-			{
-				GLFWFunctions::cloneObject = false;
-			}*/
 			
 		}
 		ImGui::End();
 
 		ImGuiWindowFlags viewportWindowFlags =
 			ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoScrollWithMouse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoCollapse;
+			ImGuiWindowFlags_NoScrollWithMouse;
 
 		ImGui::Begin("Game Viewport", nullptr, viewportWindowFlags);
 		GameViewWindow::Update(); //Game viewport system

@@ -92,6 +92,9 @@ public:
 	std::string GetWindowConfigJSONPath();
 	std::string GetEntitiesJSONPath();
 
+	std::vector<Entity> getAllLiveEntities();
+	std::string getEntityID(Entity entity);
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);

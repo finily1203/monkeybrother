@@ -35,8 +35,6 @@ void GameViewWindow::Update() {
 
 	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
 		ImGuiWindowFlags_NoScrollWithMouse |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	viewportPos = ImGui::GetWindowPos();

@@ -387,7 +387,7 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent transform = getComponent<TransformComponent>(entity);
-		transform.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
+		transform.position = glm::vec2(getRandomVal(-800.f, 800.f), getRandomVal(-450.f, 450.f));
 		addComponent(newEntity, transform);
 	}
 
@@ -516,4 +516,12 @@ void ECSCoordinator::test4() {
 	Entity platform1 = createEntity();
 	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
 	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
+}
+
+std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
+	return entityManager->getLiveEntities();
+}
+
+std::string ECSCoordinator::getEntityID(Entity entity) {
+	return entityManager->getEntityID(entity);
 }
