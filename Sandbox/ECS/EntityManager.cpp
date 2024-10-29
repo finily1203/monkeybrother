@@ -129,6 +129,12 @@ std::string EntityManager::getEntityId(Entity entity)
 	return "";
 }
 
+// Retrieve the entity map
+std::unordered_map<Entity, std::string> EntityManager::getEntityMap() const
+{
+	return entityIds;
+}
+
 //Cleanup the entity manager by resetting the available entities and live entity count
 void EntityManager::cleanup() {
 	availableEnt = std::queue<Entity>();

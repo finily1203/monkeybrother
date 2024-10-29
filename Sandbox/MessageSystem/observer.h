@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include "baseMessageSystem.h"
 
@@ -8,12 +8,12 @@
 class Observer
 {
 private:
-	std::map<MessageId, MESSAGE_HANDLER> msgHandlers;
+	std::unordered_map<MessageId, MESSAGE_HANDLER> msgHandlers;
 	std::string id;
 
 public:
 	Observer() : id("No_Id") {}
-	Observer(std::string const& msgId) : id(msgId) {}
+	explicit Observer(std::string const& obsId) : id(obsId) {}
 	~Observer() {}
 
 	void AttachHandler(MessageId id, MESSAGE_HANDLER msgHandler);

@@ -1,0 +1,36 @@
+{
+  "audioAssets": [
+    {
+      "audioName": "background",
+      "filePath": "assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav"
+    },
+    {
+      "audioName": "bubbles",
+      "filePath": "assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav"
+    }
+  ],
+  "textureAssets": [
+    {
+      "id": "texture1",
+      "filePath": "Graphics/Assets/player.png"
+    },
+    {
+      "id": "texture2",
+      "filePath": "Graphics/Assets/image.png"
+    },
+    {
+      "id": "texture3",
+      "filePath": "Graphics/Assets/image1.jpg"
+    }
+  ],
+  "shaderAssets": [
+    {
+      "id": "shader1",
+      "filePath": "Graphics/Basic.shader"
+    },
+    {
+      "id": "shader2",
+      "filePath": "Graphics/Basic1.shader"
+    }
+  ]
+}

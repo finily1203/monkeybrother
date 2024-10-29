@@ -463,22 +463,8 @@ void ECSCoordinator::test4() {
 
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 
-	Observable fallEventSource("FallEventSource");
-	Observer fallObserver("FallObserver");
-
-	fallObserver.AttachHandler(MessageId::FALL, [](BaseMessage* msg) {
-		FallMessage* fallMsg = static_cast<FallMessage*>(msg);
-		Entity fallingEntity = fallMsg->GetPlayer();
-		std::cout << "Observer: Entity " << fallMsg->GetId() << " is falling" << std::endl;
-	});
-
-	fallEventSource.Register(MessageId::FALL, &fallObserver);
-
-	std::string id = "Player";
-	Entity entity = entityManager->getEntityById(id);
-
-	FallMessage fallMsg(entity);
-	fallEventSource.ProcessMessage(&fallMsg);
+	//std::string id = "Player";
+	//Entity entity = entityManager->getEntityById(id);
 
 	// This is the code for testing saving the entity data to the
 	// JSON file

@@ -1,10 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <functional>
 
-enum MessageId
+enum class MessageId
 {
 	NIL = 0,
-	FALL
+	FALL,
+	JUMP,
+	COLLISION
 };
 
 class BaseMessage
@@ -14,10 +18,12 @@ private:
 
 public:
 	BaseMessage() : msgId(MessageId::NIL) {}
-	virtual ~BaseMessage() {}
+	virtual ~BaseMessage() = default;
 
 	BaseMessage(MessageId id) : msgId(id) {}
 	inline MessageId GetId() const noexcept { return msgId; }
+	virtual void Process() const = 0;
 };
 
-typedef void(*MESSAGE_HANDLER)(BaseMessage*);
+typedef std::shared_ptr<BaseMessage> messagePtr;
+typedef void (*MESSAGE_HANDLER)(messagePtr);

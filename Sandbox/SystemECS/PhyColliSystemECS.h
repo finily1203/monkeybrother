@@ -99,6 +99,9 @@ private:
     float jumpForce;
     float friction;
     bool alrJumped;
+    bool isFalling;
+    Observable eventSource;
+    std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
 };

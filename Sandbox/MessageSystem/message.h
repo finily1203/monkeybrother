@@ -14,4 +14,25 @@ public:
 	~FallMessage() {}
 
 	inline Entity GetPlayer() const noexcept { return playerEntity; }
+	void Process() const override
+	{
+		std::cout << "Processing fall message for entity: " << playerEntity << std::endl;
+	}
+};
+
+
+class JumpMessage : public BaseMessage
+{
+private:
+	Entity playerEntity;
+
+public:
+	JumpMessage(Entity& player) : BaseMessage(MessageId::JUMP), playerEntity(player) {}
+	~JumpMessage() {}
+
+	inline Entity GetPlayer() const noexcept { return playerEntity; }
+	void Process() const override
+	{
+		std::cout << "Processing jump message for entity: " << playerEntity << std::endl;
+	}
 };

@@ -41,6 +41,8 @@ public:
 	void setEntityId(Entity entity, std::string const& id);
 	std::string getEntityId(Entity entity);
 
+	std::unordered_map<Entity, std::string> getEntityMap() const;
+
 	void cleanup();
 
 private:

@@ -44,13 +44,22 @@ std::string FilePathManager::GetEntitiesJSONPath()
 }
 
 // this function retrieves the audio assets JSON file
-std::string FilePathManager::GetAudioAssetsJSONPath()
+std::string FilePathManager::GetAssetsJSONPath()
 {
     // retrieves the executable path
     std::string execPath = GetExecutablePath();
 
     // retrieves the audio assets JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\audioAssets.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\assets.json";
 
     return jsonPath;
+}
+
+// this function retrieves the font file for IMGUI
+std::string FilePathManager::GetIMGUIFontPath()
+{
+    std::string execPath = GetExecutablePath();
+    std::string fontFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\DebugSystem\\Assets\\liberation-mono.ttf";
+
+    return fontFilePath;
 }
