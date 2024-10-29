@@ -7,30 +7,42 @@
     {
       "audioName": "bubbles",
       "filePath": "assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav"
+    },
+    {
+      "audioName": "bump",
+      "filePath": "assets/audio/bump.wav"
+    },
+    {
+      "audioName": "bubblePopping",
+      "filePath": "assets/audio/bubblePop.wav"
+    },
+    {
+      "audioName": "slide",
+      "filePath": "assets/audio/slide.wav"
     }
   ],
   "textureAssets": [
     {
       "id": "texture1",
-      "filePath": "Graphics/Assets/player.png"
+      "filePath": "assets/textures/player.png"
     },
     {
       "id": "texture2",
-      "filePath": "Graphics/Assets/image.png"
+      "filePath": "assets/textures/image.png"
     },
     {
       "id": "texture3",
-      "filePath": "Graphics/Assets/image1.jpg"
+      "filePath": "assets/textures/image1.jpg"
     }
   ],
   "shaderAssets": [
     {
       "id": "shader1",
-      "filePath": "Graphics/Basic.shader"
+      "filePath": "assets/shaders/Basic.shader"
     },
     {
       "id": "shader2",
-      "filePath": "Graphics/Basic1.shader"
+      "filePath": "assets/shaders/Basic1.shader"
     }
   ]
 }

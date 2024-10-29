@@ -33,8 +33,8 @@ void GraphicSystemECS::initialise() {}
 //uses functions from GraphicsSystem class to update, draw
 //and render objects.
 void GraphicSystemECS::update(float dt) {
-	Shader* shader = graphicsSystem.GetShader();
-	Shader* shader2 = graphicsSystem.GetShader2();
+	Shader* shader = assetsManager.GetShader("shader1");
+	Shader* shader2 = assetsManager.GetShader("shader2");
 
 	for (auto entity : entities) {
 		//check if entity has transform component

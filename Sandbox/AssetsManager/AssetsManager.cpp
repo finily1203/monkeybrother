@@ -99,13 +99,13 @@ void AssetsManager::ClearTextures() {
 }
 
 //-----------------------------SHADER ASSETS----------------------------------//
-void AssetsManager::LoadShader(const std::string& name, const std::string& verPath, const std::string& fragPath) {
+void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
     if (m_Shaders.find(name) != m_Shaders.end()) {
         std::cerr << "Shader already loaded!" << std::endl;
         return;
     }
 
-    ShaderProgramSource source = Shader::ParseShader(fragPath);
+    ShaderProgramSource source = Shader::ParseShader(filePath);
     auto shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
     if (!shader->IsCompiled()) {
 		std::cerr << "Shader compilation failed." << std::endl;

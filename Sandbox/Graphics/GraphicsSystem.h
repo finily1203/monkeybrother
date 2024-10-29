@@ -66,13 +66,16 @@ public:
     glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
     void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
-    Shader* GetShader() const{ return m_Shader.get(); }
-    Shader* GetShader2() const{ return m_Shader2.get(); }
+    //Shader* GetShader() const{ return m_Shader.get(); }
+    //Shader* GetShader2() const{ return m_Shader2.get(); }
     GLuint GetTexture() const { return m_Texture; }
     GLuint GetTexture2() const { return m_Texture2; }
     GLuint GetTexture3() const { return m_Texture3; }
     GLuint GetVAO() const { return m_VAO; }
     void SetCurrentAction(int actionRow);
+
+    void loadShaderAssets() const;
+    void loadTextureAssets() const;
 
     struct GLViewport {
         GLint x, y;
