@@ -35,9 +35,9 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
 		return;
 	}
 
-    int width, height, nrChannels;
+    //int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(texPath.c_str(), &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load(texPath.c_str(), &m_textureWidth, &m_textureHeight, &nrChannels, 0);
 
     if (data) {
         GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
@@ -46,7 +46,7 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
         GLuint texID;
         glGenTextures(1, &texID);
         glBindTexture(GL_TEXTURE_2D, texID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, m_textureWidth, m_textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         // Set texture parameters to prevent bleeding
@@ -98,14 +98,25 @@ void AssetsManager::ClearTextures() {
 	std::cout << "All textures cleared!" << std::endl;
 }
 
+int AssetsManager::texWidthGet() {
+    return m_textureWidth;
+}
+int AssetsManager::texHeightGet() {
+    return m_textureHeight;
+}
+
+int AssetsManager::nrChannelsGet() {
+	return nrChannels;
+}
+
 //-----------------------------SHADER ASSETS----------------------------------//
-void AssetsManager::LoadShader(const std::string& name, const std::string& verPath, const std::string& fragPath) {
+void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
     if (m_Shaders.find(name) != m_Shaders.end()) {
         std::cerr << "Shader already loaded!" << std::endl;
         return;
     }
 
-    ShaderProgramSource source = Shader::ParseShader(fragPath);
+    ShaderProgramSource source = Shader::ParseShader(filePath);
     auto shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
     if (!shader->IsCompiled()) {
 		std::cerr << "Shader compilation failed." << std::endl;
@@ -187,3 +198,4 @@ void AssetsManager::ClearAudio() {
 	m_Audio.clear();
 	std::cout << "All audio cleared!" << std::endl;
 }
+

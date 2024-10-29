@@ -23,10 +23,12 @@ public:
 	void UnloadTexture(const std::string& name);
 	void ClearTextures();
 
-	
+	int texWidthGet();
+	int texHeightGet();
+	int nrChannelsGet();
 
 	//For loading shaders
-	void LoadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+	void LoadShader(const std::string& name, const std::string& filePath);
 	Shader* GetShader(const std::string& name) const;
 	void UnloadShader(const std::string& name);
 	void ClearShaders();
@@ -42,6 +44,8 @@ private:
 	std::map<std::string, GLuint> m_Textures;
 	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
 	std::map<std::string, FMOD::Sound*> m_Audio;
+
+	int m_textureWidth, m_textureHeight, nrChannels;
 };
 
 //#include <unordered_map>
