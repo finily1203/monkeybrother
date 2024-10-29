@@ -7,6 +7,18 @@
     {
       "audioName": "bubbles",
       "filePath": "assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav"
+    },
+    {
+      "audioName": "bump",
+      "filePath": "assets/audio/bump.wav"
+    },
+    {
+      "audioName": "slide",
+      "filePath": "assets/audio/slide.wav"
+    },
+    {
+      "audioName": "bubblePopping",
+      "filePath": "assets/audio/bubblePop.wav"
     }
   ]
 }

@@ -109,13 +109,27 @@ void AudioSystem::update() {
             GLFWFunctions::audioNext = false;
         }
 
-
-
         result = audioChannel->setVolume(GLFWFunctions::volume);
         if (result != FMOD_OK) {
             std::cout << "FMOD setVolume error! (" << result << ")" << std::endl;
         }
     }
+
+    if (GLFWFunctions::bumpAudio) {
+		playSoundEffect("bump");
+		GLFWFunctions::bumpAudio = false;
+    }
+
+    if (GLFWFunctions::slideAudio) {
+        playSoundEffect("slide");
+        GLFWFunctions::slideAudio = false;
+    }
+
+    if (GLFWFunctions::bubblePopping) {
+        playSoundEffect("bubblePopping");
+        GLFWFunctions::bubblePopping = false;
+    }
+
     audioSystem->update();
 }
 
@@ -150,6 +164,18 @@ void AudioSystem::playSong(const std::string& songName) {
 	}
 
 }
+
+
+void AudioSystem::playSoundEffect(const std::string& soundName)
+{
+	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
+	FMOD::Channel* audioChannel = nullptr;
+	FMOD_RESULT result = audioSystem->playSound(audioSound, nullptr, false, &audioChannel);
+	if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+	}
+}
+
 
 void AudioSystem::loadAudioAssets() const
 {

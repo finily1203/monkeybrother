@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "Debug.h"
 #include "AssetsManager.h"
+#include "AudioSystem.h"
 
 enum SystemType { //For perfomance viewer
 	AudioSystemType,
@@ -30,3 +31,4 @@ extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
 extern DebugSystem debugSystem;
 extern AssetsManager assetsManager;
+//extern AudioSystem audioSystem;

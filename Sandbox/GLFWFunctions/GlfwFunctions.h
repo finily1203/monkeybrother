@@ -54,6 +54,10 @@ struct GLFWFunctions {
 	static bool audioStopped;
 	static bool cloneObject;
 	static bool goNextMode;
+	static bool bumpAudio;
+	static bool hasBumped;
+	static bool slideAudio;
+	static bool bubblePopping;
 
 	static GLboolean left_turn_flag;
 	static GLboolean right_turn_flag;
