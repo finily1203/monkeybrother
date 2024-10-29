@@ -1,23 +1,34 @@
 #include "observable.h"
 
-void Observable::Register(MessageId id, Observer* observer)
+void Observable::Register(MessageId id, std::shared_ptr<Observer> observer)
 {
-    msgsMap.insert(messagesMap::value_type(id, observer));
+    messagesMap.insert({ id, observer });
 }
 
-void Observable::ProcessMessage(BaseMessage* message)
+void Observable::Unregister(MessageId id, std::shared_ptr<Observer> observer)
 {
-    std::cout << "\nOBSERVABLE: " << id << " is sending its messages..." << std::endl;
-    auto range = msgsMap.equal_range(message->GetId());
+    auto range = messagesMap.equal_range(id);
+    for (auto it = range.first; it != range.second; ++it)
+    {
+        if (it->second == observer)
+        {
+            messagesMap.erase(it);
+            break;
+        }
+    }
+}
+
+void Observable::ProcessMessage(messagePtr message)
+{
+    auto range = messagesMap.equal_range(message->GetId());
 
     for (auto it = range.first; it != range.second; ++it)
     {
-        Observer* observer = it->second;
+        auto observer = it->second;
         auto handler = observer->GetHandler(message->GetId());
 
         if (handler)
         {
-            std::cout << "Message processed by Observer: " << observer->GetId() << std::endl;
             handler(message);
         }
     }

@@ -25,7 +25,27 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
-PhysicsSystemECS::PhysicsSystemECS() : velocity{ 0, 0 }, gravity{ -0.5f }, jumpForce{ .4f }, friction{ 0.1f }, alrJumped{ false } {}
+PhysicsSystemECS::PhysicsSystemECS() : velocity{ 0, 0 }, gravity{ -0.5f }, jumpForce{ .4f }, friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("EventSource"), eventObserver(std::make_shared<Observer>("EventObserver")) 
+{
+    eventObserver->AttachHandler(MessageId::FALL, [](messagePtr msg) {
+        auto fallMsg = std::dynamic_pointer_cast<FallMessage>(msg);
+        if (fallMsg)
+        {
+            std::cout << "Observer: Entity " << fallMsg->GetPlayer() << " is falling" << std::endl;
+        }
+    });
+
+    eventObserver->AttachHandler(MessageId::JUMP, [](messagePtr msg) {
+        auto jumpMsg = std::dynamic_pointer_cast<JumpMessage>(msg);
+        if (jumpMsg)
+        {
+            std::cout << "Observer: Entity " << jumpMsg->GetPlayer() << " is jumping" << std::endl;
+        }
+    });
+
+    eventSource.Register(MessageId::FALL, eventObserver);
+    eventSource.Register(MessageId::JUMP, eventObserver);
+}
 
 
 void PhysicsSystemECS::initialise() {}
@@ -639,6 +659,30 @@ void PhysicsSystemECS::update(float dt) {
             playerEntity = entity;
             break;
         }
+    }
+
+    if (GetVelocity().y < 0 && !isFalling)
+    {
+        isFalling = true;
+        auto fallMsg = std::make_shared<FallMessage>(playerEntity);
+        eventSource.ProcessMessage(fallMsg);
+    }
+
+    if (GetVelocity().y >= 0 && isFalling)
+    {
+        isFalling = false;
+    }
+
+    if (GetVelocity().y > 0 && !alrJumped)
+    {
+        alrJumped = true;
+        auto jumpMsg = std::make_shared<JumpMessage>(playerEntity);
+        eventSource.ProcessMessage(jumpMsg);
+    }
+
+    if (GetVelocity().y <= 0 && alrJumped)
+    {
+        alrJumped = false;
     }
 
     closestPlatformEntity = FindClosestPlatform(playerEntity);

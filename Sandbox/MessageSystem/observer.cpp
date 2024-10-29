@@ -2,7 +2,7 @@
 
 void Observer::AttachHandler(MessageId id, MESSAGE_HANDLER handler)
 {
-    msgHandlers.insert(std::pair<MessageId, MESSAGE_HANDLER>(id, handler));
+    msgHandlers[id] = handler;
 }
 
 MESSAGE_HANDLER Observer::GetHandler(MessageId id) const

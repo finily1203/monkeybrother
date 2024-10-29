@@ -2,22 +2,23 @@
 
 #include "observer.h"
 #include "baseMessageSystem.h"
+#include "EntityManager.h"
 #include <iostream>
 
 
 class Observable
 {
 private:
-	typedef std::multimap<MessageId, Observer*> messagesMap;
-	messagesMap msgsMap;
+	std::unordered_map<MessageId, std::shared_ptr<Observer>> messagesMap;
 	std::string id;
 
 public:
 	Observable() : id("No_Id") {}
-	Observable(std::string const& msgId) : id(msgId) {}
+	Observable(std::string const& obsId) : id(obsId) {}
 	~Observable() {}
 
-	void Register(MessageId id, Observer* observer);
-	void ProcessMessage(BaseMessage* message);
+	void Register(MessageId id, std::shared_ptr<Observer> observer);
+	void Unregister(MessageId id, std::shared_ptr<Observer> observer);
+	void ProcessMessage(messagePtr message);
 	std::string GetId() const noexcept;
 };

@@ -153,7 +153,7 @@ void AudioSystem::playSong(const std::string& songName) {
 
 void AudioSystem::loadAudioAssets() const
 {
-    std::string jsonFilePath = FilePathManager::GetAudioAssetsJSONPath();
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
     std::ifstream file(jsonFilePath);
     nlohmann::json jsonObj;
 
