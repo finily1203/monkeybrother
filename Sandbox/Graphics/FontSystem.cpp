@@ -82,8 +82,8 @@ void FontSystem::initialise() {
 
 
 
-void FontSystem::loadFont(unsigned int fontSize) {
-    std::string fontPath = "Graphics/Assets/Antonio.ttf"; 
+void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
+    //std::string fontPath = "Graphics/Assets/Antonio.ttf"; 
 
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {

@@ -19,7 +19,7 @@ public:
     FontSystem();              // Constructor
     ~FontSystem();             // Destructor
 
-    void loadFont(unsigned int fontSize); // Load a font
+    void loadFont(const std::string& fontPath, unsigned int fontSize); // Load a font
     void update() override;     // Update the FontSystem (if necessary)
     void initialise() override; // Initialize the FontSystem
     void cleanup() override;    // Clean up resources

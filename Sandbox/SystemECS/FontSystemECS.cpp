@@ -12,6 +12,17 @@ FontSystemECS::FontSystemECS(std::shared_ptr<FontSystem> fontSys, int fontSize)
     initialise();
 }
 
+void FontSystemECS::loadAdditionalFont(const std::string& fontPath, int fontSize) {
+    if (!fontSystem) {
+        std::cerr << "ERROR: FontSystem pointer is null." << std::endl;
+        return;
+    }
+    std::cout << "Loading additional font from: " << fontPath << " with size " << fontSize << std::endl;
+    fontSystem->loadFont(fontPath, fontSize); // Assuming this method allows for different font paths
+    // Here you would need to modify FontSystem to accept different font paths
+}
+
+
 void FontSystemECS::initialise() {
     if (!fontSystem) {
         std::cerr << "ERROR: FontSystem pointer is null." << std::endl;
@@ -23,7 +34,7 @@ void FontSystemECS::initialise() {
         fontSystem->initialise();
         if (fontSystem->isInitialized) {
             std::cout << "Loading font in FontSystemECS with size " << fontSize << std::endl;
-            fontSystem->loadFont(fontSize);
+            //fontSystem->loadFont(fontSize);
         }
         else {
             std::cerr << "FontSystem initialization failed. Cannot load font." << std::endl;
@@ -40,12 +51,13 @@ void FontSystemECS::update(float dt) {
         return;
     }
 
+    const float maxWidth = 650.0f;
+
     for (auto entity : entities) {
         if (ecsCoordinator.hasComponent<FontComponent>(entity)) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
-            float maxWidth = 650.0f;
+            fontSystem->loadFont(fontComp.fontPath, fontSize); // Load the specific font for this entity if needed
             fontSystem->draw(fontComp.text, fontComp.position.x, fontComp.position.y, fontComp.scale, fontComp.color, maxWidth);
-
         }
     }
 }

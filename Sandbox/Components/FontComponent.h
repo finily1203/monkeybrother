@@ -5,10 +5,11 @@
 #include <glm/glm.hpp>
 
 struct FontComponent {
-    std::string text;    
-    glm::vec2 position;  
-    float scale;         
-    glm::vec3 color;     
+    std::string text;
+    glm::vec2 position;
+    float scale;
+    glm::vec3 color;
+    std::string fontPath; // New field to specify font path
 };
 
 #endif 
