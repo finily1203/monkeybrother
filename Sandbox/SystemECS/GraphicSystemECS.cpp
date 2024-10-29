@@ -128,7 +128,7 @@ void GraphicSystemECS::update(float dt) {
 			
 			// Draw the object
 			// TODO:: change getTexture to some enum or something
-			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, graphicsSystem.GetTexture(), transform.mdl_xform);
+			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
 		}
 
 	}

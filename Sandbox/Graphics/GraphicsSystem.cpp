@@ -89,74 +89,80 @@ void GraphicsSystem::initialise() {
 
     loadShaderAssets();
     loadTextureAssets();
+    std::cout << assetsManager.texWidthGet() << std::endl;
+    std::cout << assetsManager.texHeightGet() << std::endl;
+    std::cout << assetsManager.nrChannelsGet() << std::endl;
 
-    // Load texture 1
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
+    int width = assetsManager.texWidthGet();
+    int height = assetsManager.texHeightGet();
 
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //// Load texture 1
+    //int width, height, nrChannels;
+    //stbi_set_flip_vertically_on_load(true);
+    //unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
 
-        // Load texture into OpenGL
-        glGenTextures(1, &m_Texture);
-        glBindTexture(GL_TEXTURE_2D, m_Texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
 
-        // Set texture parameters to prevent bleeding
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use nearest filtering
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
+    //    // Load texture into OpenGL
+    //    glGenTextures(1, &m_Texture);
+    //    glBindTexture(GL_TEXTURE_2D, m_Texture);
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
 
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //    // Set texture parameters to prevent bleeding
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use nearest filtering
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
 
-    // Loat texture 2
-    glGenTextures(1, &m_Texture2);
-    glBindTexture(GL_TEXTURE_2D, m_Texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
 
-    // Load texture 3
-    glGenTextures(1, &m_Texture3);
-    glBindTexture(GL_TEXTURE_2D, m_Texture3);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //// Loat texture 2
+    //glGenTextures(1, &m_Texture2);
+    //glBindTexture(GL_TEXTURE_2D, m_Texture2);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
+
+    //// Load texture 3
+    //glGenTextures(1, &m_Texture3);
+    //glBindTexture(GL_TEXTURE_2D, m_Texture3);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
 
 
 
