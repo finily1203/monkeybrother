@@ -25,6 +25,10 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "Crashlog.h"
 #include "GlobalCoordinator.h"
 
+static float widthSlide = 5.0f;
+static float heightSlide = 5.0f;
+static float sizeSlide = 5.0f;
+
 //Variables for DebugSystem
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
 double DebugSystem::loopStartTime = 0.0;
@@ -147,14 +151,11 @@ void DebugSystem::update() {
 			ImGui::NewLine();
 		}
 		if (ImGui::CollapsingHeader("Object Creation")) {
-			const char* platformWidthLabel = "Width";
-			const char* platformHeightLabel = "Height";
+			const char* platformWidthLabel = "Test1";
+			const char* platformHeightLabel = "Test2";
 			const char* playerSizeLabel = "Size";
-			ImGui::SeparatorText("Platform Object");
+			ImGui::SeparatorText("Object");
 
-			static float widthSlide = 5.0f;
-			static float heightSlide = 5.0f;
-			static float sizeSlide = 5.0f;
 			// Get available width
 			float availWidth = ImGui::GetContentRegionAvail().x;
 
@@ -162,19 +163,59 @@ void DebugSystem::update() {
 			ImGui::AlignTextToFramePadding();
 			float labelWidth = ImGui::CalcTextSize(platformHeightLabel).x + ImGui::GetStyle().ItemInnerSpacing.x;
 
+			//float prevWidth = widthSlide;
+
 			// Set the width for the slider, ensuring it doesn't go below a minimum value
 			float sliderWidth = std::max(10.0f, 150.f);
 			ImGui::SetNextItemWidth(sliderWidth);
 			ImGui::SliderFloat(platformWidthLabel, &widthSlide, 0.0f, 10.0f, "%.1f");
+			//if (prevWidth < widthSlide) {
+			//	// This code runs ONLY while the user is actively dragging the slider
+			//	// It will stop when they release the mouse button
+			//	GLFWFunctions::scale_up_flag = true;
+			//}
+			//if (ImGui::IsItemDeactivatedAfterEdit()) {
+			//	// Runs once when the user releases the slider
+			//	GLFWFunctions::scale_up_flag = false;
+			//}
 			ImGui::SetNextItemWidth(sliderWidth);
 			ImGui::SliderFloat(platformHeightLabel, &heightSlide, 0.0f, 10.0f, "%.1f");
 
 			ImGui::NewLine();
-			bool createPlatform = ImGui::Button("Create Platform");
-			if (createPlatform)
-			{
-				ImGui::SameLine();
-				ImGui::Text("Platform created");
+			ImGui::Button("Scale up");
+			if (ImGui::IsItemActive()) {
+				GLFWFunctions::scale_up_flag = true;
+			}
+			else {
+				GLFWFunctions::scale_up_flag = false;
+			}
+
+			ImGui::SameLine();
+
+			ImGui::Button("Scale down");
+			if (ImGui::IsItemActive()) {
+				GLFWFunctions::scale_down_flag = true;
+			}
+			else {
+				GLFWFunctions::scale_down_flag = false;
+			}
+
+			ImGui::Button("Rotate clockwise");
+			if (ImGui::IsItemActive()) {
+				GLFWFunctions::right_turn_flag = true;
+			}
+			else {
+				GLFWFunctions::right_turn_flag = false;
+			}
+
+			ImGui::SameLine();
+
+			ImGui::Button("Rotate anti-clockwise");
+			if (ImGui::IsItemActive()) {
+				GLFWFunctions::left_turn_flag = true;
+			}
+			else {
+				GLFWFunctions::left_turn_flag = false;
 			}
 
 			ImGui::SeparatorText("Player Object");
@@ -182,16 +223,28 @@ void DebugSystem::update() {
 			ImGui::SliderFloat(playerSizeLabel, &sizeSlide, 0.0f, 10.0f, "%.1f");
 
 			ImGui::NewLine();
-			bool createPlayer = ImGui::Button("Create PLayer");
+			bool createPlayer = ImGui::Button("Create Object");
 			if (createPlayer)
 			{
-				ImGui::SameLine();
-				ImGui::Text("Player created");
+				GLFWFunctions::cloneObject = true;
 			}
+			/*ImGui::SameLine();
+			bool destroyPlayer = ImGui::Button("Destroy Object");
+			if (destroyPlayer && GLFWFunctions::cloneObject == true)
+			{
+				GLFWFunctions::cloneObject = false;
+			}*/
+			
 		}
 		ImGui::End();
 
-		ImGui::Begin("Game Viewport");
+		ImGuiWindowFlags viewportWindowFlags =
+			ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoCollapse;
+
+		ImGui::Begin("Game Viewport", nullptr, viewportWindowFlags);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
 

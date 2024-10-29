@@ -19,6 +19,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include <unordered_set>
+#include "AudioSystem.h"
+
 
 #define M_PI   3.14159265358979323846264338327950288f
 
@@ -166,6 +168,11 @@ void PhysicsSystemECS::HandleAABBCollision(Entity player, Entity closestPlatform
     float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.x * (M_PI / 180.f);
     if (slopeAngle == 0) {
         if (collisionSystem.CollisionIntersection_RectRect(platformAABB, { 0, 0 }, playerAABB, GetVelocity(), firstTimeOfCollision)) {
+            if (GLFWFunctions::hasBumped == false) {
+                GLFWFunctions::bumpAudio = true;
+                GLFWFunctions::hasBumped = true;
+            }
+
             float overlapX = std::min(playerAABB.max.x - platformAABB.min.x, platformAABB.max.x - playerAABB.min.x);
             float overlapY = std::min(playerAABB.max.y - platformAABB.min.y, platformAABB.max.y - playerAABB.min.y);
             glm::vec2 playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
@@ -215,11 +222,14 @@ void PhysicsSystemECS::HandleAABBCollision(Entity player, Entity closestPlatform
         }
         else {
             SetVelocity({ GetVelocity().x, GetVelocity().y });
+            GLFWFunctions::hasBumped = false;
         }
     }
     else {
         if (collisionSystem.AABBSlopeCollision(closestPlatform, player, GetVelocity())) {
             HandleSlopeCollision(closestPlatform, player);
+
+            GLFWFunctions::slideAudio = true;
         }
     }
 

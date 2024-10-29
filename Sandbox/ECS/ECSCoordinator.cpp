@@ -54,6 +54,7 @@ void ECSCoordinator::update() {
 		for (Entity entity : entityManager->getLiveEntities()) {
 			destroyEntity(entity);
 		}
+		//std::cout << getEntityNum() << std::endl;
 		if (GLFWFunctions::testMode == 0) {
 			test3();
 		}
@@ -104,6 +105,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 	entityManager->destroyEntity(entity);
 	componentManager->entityRemoved(entity);
 	systemManager->entityRemoved(entity);
+
 }
 
 
@@ -396,7 +398,6 @@ void ECSCoordinator::test3() {
 	addComponent(player, gfxComp4);
 	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
 	addComponent(player, MovementComponent{ .02f });
-
 }
 
 
@@ -434,6 +435,8 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 
 	graphicSystem->initialise();
+
+	test3();
 }
 
 

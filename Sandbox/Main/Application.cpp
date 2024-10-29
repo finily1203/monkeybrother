@@ -48,7 +48,7 @@ int main() {
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
-		ecsCoordinator.test3();
+		//ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			//DebugSystem::StartLoop(); //Get time for start of gameloop

@@ -46,6 +46,7 @@ void EntityManager::destroyEntity(Entity entity) {
 
 	entitySig[entity].reset(); //destroy entity from entitySig
 	availableEnt.push(entity); //push back the number to availableEnt
+
 	liveEntCount--; //decrement the live entity count
 }
 
