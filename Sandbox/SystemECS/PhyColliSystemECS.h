@@ -100,7 +100,7 @@ private:
     float friction;
     bool alrJumped;
     bool isFalling;
-    Observable eventSource;
+    PlayerEventPublisher eventSource;
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;

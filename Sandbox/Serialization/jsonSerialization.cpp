@@ -27,7 +27,7 @@ bool JSONSerializer::Open(std::string const& filename)
 	if (fileStream.is_open())
 	{
 		// read the contents of the JSON file into the JSON object
-		fileStream >> jsonObj;
+		fileStream >> jsonObject;
 			
 		// close the JSON file
 		fileStream.close();
@@ -49,7 +49,7 @@ bool JSONSerializer::Save(std::string const& filename)
 	if (outputFile.is_open())
 	{
 		// write the contents of the JSON object to the output JSON file
-		outputFile << jsonObj.dump(4);
+		outputFile << jsonObject.dump(4);
 
 		// close the output JSON file
 		outputFile.close();
@@ -65,7 +65,7 @@ bool JSONSerializer::Save(std::string const& filename)
 bool JSONSerializer::IsGood()
 {
 	// returns true if the JSON object is not empty
-	return !jsonObj.empty();
+	return !jsonObject.empty();
 }
 
 void JSONSerializer::ReadSpecificObject(glm::vec2& object, nlohmann::json const& jsonObj)
@@ -126,7 +126,7 @@ void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// currentObj is initialized to the root JSON object
-	nlohmann::json currentObj = jsonObj;
+	nlohmann::json currentObj = jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -162,7 +162,7 @@ void JSONSerializer::ReadFloat(float& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// currentObj is initialized to the root JSON object
-	nlohmann::json currentObj = jsonObj;
+	nlohmann::json currentObj = jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -195,7 +195,7 @@ void JSONSerializer::ReadString(std::string& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// currentObj is initialized to the root JSON object
-	nlohmann::json currentObj = jsonObj;
+	nlohmann::json currentObj = jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -228,7 +228,7 @@ void JSONSerializer::WriteInt(int& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// pointer to the root of the JSON object
-	nlohmann::json* currentObj = &jsonObj;
+	nlohmann::json* currentObj = &jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -251,7 +251,7 @@ void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// pointer to the root of the JSON object
-	nlohmann::json* currentObj = &jsonObj;
+	nlohmann::json* currentObj = &jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -273,7 +273,7 @@ void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey)
 	std::string keySegment;
 
 	// pointer to the root of the JSON object
-	nlohmann::json* currentObj = &jsonObj;
+	nlohmann::json* currentObj = &jsonObject;
 
 	// this will read each of the character in keyStream and assign these
 	// characters to keySegment with '.' as the delimitter
@@ -288,5 +288,5 @@ void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey)
 
 nlohmann::json JSONSerializer::GetJSONObject() const
 {
-	return jsonObj;
+	return jsonObject;
 }

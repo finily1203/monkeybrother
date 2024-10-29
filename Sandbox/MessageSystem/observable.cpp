@@ -1,24 +1,21 @@
 #include "observable.h"
 
-void Observable::Register(MessageId id, std::shared_ptr<Observer> observer)
+void PlayerEventPublisher::Register(MessageId msgId, std::shared_ptr<Observer> observer)
 {
-    messagesMap.insert({ id, observer });
+    messagesMap.insert({ msgId, observer });
 }
 
-void Observable::Unregister(MessageId id, std::shared_ptr<Observer> observer)
+void PlayerEventPublisher::Unregister(MessageId msgId, std::shared_ptr<Observer> observer)
 {
-    auto range = messagesMap.equal_range(id);
-    for (auto it = range.first; it != range.second; ++it)
+    auto it = messagesMap.find(msgId);
+    if (it != messagesMap.end() && it->second == observer)
     {
-        if (it->second == observer)
-        {
-            messagesMap.erase(it);
-            break;
-        }
+        messagesMap.erase(it);
+        observer->UnregisterHandler(msgId);
     }
 }
 
-void Observable::ProcessMessage(messagePtr message)
+void PlayerEventPublisher::ProcessMessage(messagePtr message)
 {
     auto range = messagesMap.equal_range(message->GetId());
 
@@ -34,7 +31,41 @@ void Observable::ProcessMessage(messagePtr message)
     }
 }
 
-std::string Observable::GetId() const noexcept
+std::string PlayerEventPublisher::GetId() const noexcept
 {
     return id;
+}
+
+void PlayerEventPublisher::NotifyFall(Entity player)
+{
+    auto fallMsg = std::make_shared<FallMessage>(player);
+    ProcessMessage(fallMsg);
+}
+
+void PlayerEventPublisher::NotifyJump(Entity player)
+{
+    auto jmpMsg = std::make_shared<JumpMessage>(player);
+    ProcessMessage(jmpMsg);
+}
+
+
+PlayerActionListener::PlayerActionListener()
+{
+    AttachHandler(MessageId::FALL, [](messagePtr msg) {
+        auto fallMsg = std::dynamic_pointer_cast<FallMessage>(msg);
+        if (fallMsg)
+        {
+            fallMsg->Process();
+            std::cout << "Entity " << fallMsg->GetPlayer() << " Player is falling" << std::endl;
+        }
+    });
+
+    AttachHandler(MessageId::JUMP, [](messagePtr msg) {
+        auto jmpMsg = std::dynamic_pointer_cast<JumpMessage>(msg);
+        if (jmpMsg)
+        {
+            jmpMsg->Process();
+            std::cout << "Entity " << jmpMsg->GetPlayer() << " Player is jumping" << std::endl;
+        }
+    });
 }

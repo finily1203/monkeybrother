@@ -36,3 +36,21 @@ public:
 		std::cout << "Processing jump message for entity: " << playerEntity << std::endl;
 	}
 };
+
+class CollisionMessage : public BaseMessage
+{
+private:
+	Entity playerEntity;
+	Entity platformEntity;
+
+public:
+	CollisionMessage(Entity& player, Entity platform) : BaseMessage(MessageId::COLLISION), playerEntity(player), platformEntity(platform) {}
+	~CollisionMessage() {}
+
+	inline Entity GetPlayer() const noexcept { return playerEntity; }
+	inline Entity GetPlatform() const noexcept { return platformEntity; }
+	void Process() const override
+	{
+		std::cout << "Processing collision message for entity " << playerEntity << std::endl;
+	}
+};

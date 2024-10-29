@@ -1,15 +1,20 @@
 #include "observer.h"
 
-void Observer::AttachHandler(MessageId id, MESSAGE_HANDLER handler)
+void Observer::AttachHandler(MessageId msgId, MESSAGE_HANDLER handler)
 {
-    msgHandlers[id] = handler;
+    msgHandlers[msgId] = handler;
 }
 
-MESSAGE_HANDLER Observer::GetHandler(MessageId id) const
+MESSAGE_HANDLER Observer::GetHandler(MessageId msgId) const
 {
-    auto it = msgHandlers.find(id);
+    auto it = msgHandlers.find(msgId);
 
     return (it != msgHandlers.end()) ? it->second : nullptr;
+}
+
+void Observer::UnregisterHandler(MessageId msgId)
+{
+    msgHandlers.erase(msgId);
 }
 
 std::string Observer::GetId() const noexcept
