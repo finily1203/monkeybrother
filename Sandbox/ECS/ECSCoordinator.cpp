@@ -435,7 +435,7 @@ void ECSCoordinator::test3() {
 
 	FontComponent fontComp{};
 	fontComp.fontPath = "Graphics/Assets/Antonio.ttf";
-	fontComp.text = "Hello Woooooooooooooooooooooooooooooooooooooooooorld! This is a longgggg text to ensure that wrap text implementation is correct";
+	fontComp.text = "Hello World!";
 
 	float screenWidth = 1600.0f;
 	float screenHeight = 900.0f;
@@ -461,7 +461,7 @@ void ECSCoordinator::test3() {
 	glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
 
 	// Position the second text entity above the first one
-	fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); // 10 units of space between them
+	fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
 	fontComp2.scale = textScale2;
 	fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
 

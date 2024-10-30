@@ -9,7 +9,7 @@ struct FontComponent {
     glm::vec2 position;
     float scale;
     glm::vec3 color;
-    std::string fontPath; // New field to specify font path
+    std::string fontPath; 
 };
 
 #endif 

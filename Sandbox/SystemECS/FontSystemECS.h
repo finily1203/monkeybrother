@@ -14,7 +14,7 @@ public:
     void initialise() override;
     void update(float dt) override;
     void cleanup() override;
-    void loadAdditionalFont(const std::string& fontPath, int fontSize);
+   
 private:
     std::shared_ptr<FontSystem> fontSystem;
     int fontSize;
