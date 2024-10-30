@@ -494,5 +494,5 @@ std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
 }
 
 std::string ECSCoordinator::getEntityID(Entity entity) {
-	return entityManager->getEntityID(entity);
+	return entityManager->getEntityId(entity);
 }
