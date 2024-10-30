@@ -16,7 +16,8 @@ public:
 	explicit Observer(std::string const& obsId) : id(obsId) {}
 	~Observer() {}
 
-	void AttachHandler(MessageId id, MESSAGE_HANDLER msgHandler);
-	MESSAGE_HANDLER GetHandler(MessageId id) const;
+	void AttachHandler(MessageId msgId, MESSAGE_HANDLER msgHandler);
+	MESSAGE_HANDLER GetHandler(MessageId msgId) const;
+	void UnregisterHandler(MessageId msgId);
 	std::string GetId() const noexcept;
 };

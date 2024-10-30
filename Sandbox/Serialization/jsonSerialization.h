@@ -52,7 +52,7 @@ public:
 	nlohmann::json GetJSONObject() const;
 
 private:
-	nlohmann::json jsonObj;
+	nlohmann::json jsonObject;
 	std::ifstream fileStream;
 };
 
@@ -64,7 +64,7 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 
 	// holds each different key from the keyStream
 	std::string keySegment;
-	nlohmann::json currentObj = jsonObj;
+	nlohmann::json currentObj = jsonObject;
 
 	while (std::getline(keyStream, keySegment, '.'))
 	{
@@ -131,7 +131,7 @@ void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::s
 		
 	// holds each different key from the keyStream
 	std::string keySegment;
-	nlohmann::json* currentObj = &jsonObj;
+	nlohmann::json* currentObj = &jsonObject;
 
 	while (std::getline(keyStream, keySegment, '.'))
 	{
