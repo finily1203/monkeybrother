@@ -172,7 +172,7 @@ void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::st
             float w = ch.Size.x * scale; // Scale width
             float h = ch.Size.y * scale; // Scale height
 
-            // Prepare vertex data for the character
+           
             float vertices[6][4] = {
                 { xpos,     ypos + h,   0.0f, 0.0f },
                 { xpos,     ypos,       0.0f, 1.0f },
