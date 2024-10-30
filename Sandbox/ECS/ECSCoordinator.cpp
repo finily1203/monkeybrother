@@ -25,6 +25,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ClosestPlatform.h"
 #include "GraphicsSystem.h"
 #include "AnimationComponent.h"
+#include "EnemyComponent.h"
 
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
@@ -56,7 +57,7 @@ void ECSCoordinator::update() {
 		}
 		//std::cout << getEntityNum() << std::endl;
 		if (GLFWFunctions::testMode == 0) {
-			test3();
+			test5();
 		}
 		else if (GLFWFunctions::testMode == 1) {
 			test4();
@@ -332,8 +333,8 @@ void ECSCoordinator::UpdateEntityData(Entity& entity)
 	{
 		TransformComponent& transform = getComponent<TransformComponent>(entity);
 		// assign the new data of the transform component to the entity's transform component
-		transform.position.x = 50.f;
-		transform.scale.y = 20.f;
+		transform.position.SetX(50.f);
+		transform.scale.SetY(20.f);
 	}
 }
 
@@ -345,7 +346,8 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent transform = getComponent<TransformComponent>(entity);
-		transform.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
+		//transform.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
+		transform.position += myMath::Vector2D(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
 		addComponent(newEntity, transform);
 	}
 
@@ -361,55 +363,137 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 
 //Test 3 tests for the creation of platforms and works with the physics and collision system
 void ECSCoordinator::test3() {
+	//std::cout << "Create Platforms" << std::endl;
+	//Entity platform1 = createEntity();
+	//addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.0f), glm::vec2(0.0f, -150.f) });
+	//GraphicsComponent gfxComp1{};
+	//gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(0.0f, -150.0f));
+	//addComponent(platform1, gfxComp1);
+	//addComponent(platform1, AABBComponent{ -250.f, 250.f,-125.f, -175.f });
+	//addComponent(platform1, ClosestPlatform{ false });
+
+	//Entity platform2 = createEntity();
+	//addComponent(platform2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.f) });
+	//GraphicsComponent gfxComp2{};
+	//gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.0f));
+	//addComponent(platform2, gfxComp2);
+	//addComponent(platform2, AABBComponent{ 150.0f, 650.f, 225.f, 175.f });
+	//addComponent(platform2, ClosestPlatform{ false });
+
+	//Entity platform3 = createEntity();
+	//addComponent(platform3, TransformComponent{ glm::vec2(315.f, 0.f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.f) });
+	//GraphicsComponent gfxComp3{};
+	//gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.0f));
+	//addComponent(platform3, gfxComp3);
+	////addComponent(platform3, AABBComponent{ -350.0f, -650.f, -175.f, -225.f });
+	//glm::vec2 platformPos = gfxComp3.glObject.position;
+	//glm::vec2 platformScl = gfxComp3.glObject.scaling;
+	//addComponent(platform3, AABBComponent{ platformPos.x - platformScl.x / 2, platformPos.x + platformScl.x / 2,
+	//									   platformPos.y + platformScl.y / 2, platformPos.y - platformScl.y / 2 });
+	//addComponent(platform3, ClosestPlatform{ false });
+
+	//std::cout << "Create Player" << std::endl;
+	//Entity player = createEntity();
+	//addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
+	//GraphicsComponent gfxComp4{};
+	//gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f));
+	//addComponent(player, gfxComp4);
+	//addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	//addComponent(player, MovementComponent{ .02f });
+}
+
+//Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
+void ECSCoordinator::test5() {
+	myMath::Vector2D ori = { 0.f, 0.f };
+	myMath::Vector2D scl = { 0.f, 0.f };
+	myMath::Vector2D pos = { 0.f, 0.f };
+	float left = pos.GetX() - scl.GetX() / 2.f; float right  = pos.GetX() + scl.GetX() / 2.f;
+	float top  = pos.GetY() + scl.GetY() / 2.f; float bottom = pos.GetY() - scl.GetY() / 2.f;
+	bool isClosest = false;
+
+	std::cout << "Create Background" << std::endl;
+	Entity background = createEntity();
+	ori = { 0.f, 0.f };
+	scl = { 1600.f, 900.f };
+	pos = { 0.f, 0.f };
+	addComponent(background, TransformComponent{ ori, scl, pos });
+
 	std::cout << "Create Platforms" << std::endl;
-	Entity platform1 = createEntity();
-	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.0f), glm::vec2(0.0f, -150.f) });
-	GraphicsComponent gfxComp1{};
-	gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(0.0f, -150.0f));
-	addComponent(platform1, gfxComp1);
-	addComponent(platform1, AABBComponent{ -250.f, 250.f,-125.f, -175.f });
-	addComponent(platform1, ClosestPlatform{ false });
+	Entity flatPlatform = createEntity();
+	ori = { 0.f, 0.f };
+	scl = { 500.f, 50.f };
+	pos = { 0.f, -150.f };
+	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
+	top	 = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
+	isClosest = false;
 
-	Entity platform2 = createEntity();
-	addComponent(platform2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.f) });
-	GraphicsComponent gfxComp2{};
-	gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.0f));
-	addComponent(platform2, gfxComp2);
-	addComponent(platform2, AABBComponent{ 150.0f, 650.f, 225.f, 175.f });
-	addComponent(platform2, ClosestPlatform{ false });
+	addComponent(flatPlatform, TransformComponent{ ori, scl, pos });
+	addComponent(flatPlatform, AABBComponent { left, right, top, bottom });
+	addComponent(flatPlatform, ClosestPlatform { isClosest });
 
-	Entity platform3 = createEntity();
-	addComponent(platform3, TransformComponent{ glm::vec2(315.f, 0.f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.f) });
-	GraphicsComponent gfxComp3{};
-	gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.0f));
-	addComponent(platform3, gfxComp3);
-	//addComponent(platform3, AABBComponent{ -350.0f, -650.f, -175.f, -225.f });
-	glm::vec2 platformPos = gfxComp3.glObject.position;
-	glm::vec2 platformScl = gfxComp3.glObject.scaling;
-	addComponent(platform3, AABBComponent{ platformPos.x - platformScl.x / 2, platformPos.x + platformScl.x / 2,
-										   platformPos.y + platformScl.y / 2, platformPos.y - platformScl.y / 2 });
-	addComponent(platform3, ClosestPlatform{ false });
+	ori = { 315.f, 0.f };
+	scl = { 300.f, 50.f };
+	pos = { -500.f, -200.f };
+	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
+	top  = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
+	isClosest = false;
+
+	Entity tiltedPlatform = createEntity();
+	addComponent(tiltedPlatform, TransformComponent { ori, scl, pos });
+	addComponent(tiltedPlatform, AABBComponent{ left, right, top, bottom });
+	addComponent(tiltedPlatform, ClosestPlatform{ isClosest });
+
+	ori = { 0.f, 0.f };
+	scl = { 100.f, 100.f };
+	pos = { 0.f, 300.f };
+	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
+	top  = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
 
 	std::cout << "Create Player" << std::endl;
 	Entity player = createEntity();
-	addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
-	GraphicsComponent gfxComp4{};
-	gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f));
-	addComponent(player, gfxComp4);
-	addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
+	addComponent(player, TransformComponent{ ori, scl, pos });
+	addComponent(player, AABBComponent{ left, right, top, bottom });
 	addComponent(player, MovementComponent{ .02f });
+	addComponent(player, AnimationComponent{ true });
+
+	ori = { 0.f, 0.f };
+	scl = { 100.f, 100.f };
+	pos = { 300.f, 200.f };
+	left = pos.GetX() - scl.GetX() / 2.f; right = pos.GetX() + scl.GetX() / 2.f;
+	top = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
+
+	Entity enemy = createEntity();
+	addComponent(enemy, TransformComponent{ ori, scl, pos });
+	addComponent(enemy, AABBComponent{ left, right, top, bottom });
+	addComponent(enemy, MovementComponent{ 50.f });
+	addComponent(enemy, EnemyComponent{ true });
+
 }
+
+ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
+	return entityManager->getSignature(entity);
+}
+
+//AABBComponent ECSCoordinator::calculateAABB(myMath::Vector2D pos, myMath::Vector2D scl) {
+//	float left	 = pos.GetX() - scl.GetX() / 2;
+//	float right	 = pos.GetX() + scl.GetX() / 2;
+//	float top	 = pos.GetY() + scl.GetY() / 2;
+//	float bottom = pos.GetY() - scl.GetY() / 2;
+//	AABBComponent aabb{ left, right, top, bottom };
+//	return aabb;
+//}
 
 
 //Initialises all required components and systems for the ECS system
 void ECSCoordinator::initialiseSystemsAndComponents() {
 	std::cout << "Register Everything" << std::endl;
-	registerComponent<GraphicsComponent>();
+	//registerComponent<GraphicsComponent>();
 	registerComponent<TransformComponent>();
 	registerComponent<AABBComponent>();
 	registerComponent<MovementComponent>();
 	registerComponent<ClosestPlatform>();
 	registerComponent<AnimationComponent>();
+	registerComponent<EnemyComponent>();
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -419,7 +503,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
 		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
 		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
-		physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		//physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
 	}
 
 	physicsSystem->initialise();
@@ -429,14 +513,15 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	{
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
-		graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		//graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
 		graphicSystemSig.set(getComponentType<AnimationComponent>(), true);
+		graphicSystemSig.set(getComponentType<EnemyComponent>(), false);
 	}
 
 
 	graphicSystem->initialise();
 
-	test3();
+	test5();
 }
 
 
@@ -463,19 +548,19 @@ void ECSCoordinator::test4() {
 
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 
-	//std::string id = "Player";
-	//Entity entity = entityManager->getEntityById(id);
+	std::string id = "Player";
+	Entity entity = entityManager->getEntityById(id);
 
-	// This is the code for testing saving the entity data to the
-	// JSON file
-	//if (hasComponent<TransformComponent>(entity))
-	//{
-	//	UpdateEntityData(entity);
+	//This is the code for testing saving the entity data to the
+	//JSON file
+	if (hasComponent<TransformComponent>(entity))
+	{
+		UpdateEntityData(entity);
 
-	//	SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
-	//}
+		SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
+	}
 	
-	// Iterate through the entities to find Object1 and Object2
+	//Iterate through the entities to find Object1 and Object2
 	for (auto entity : entityManager->getLiveEntities()) {
 		std::string entityId = this->entityManager->getEntityId(entity); // Assume you have a method to get the entity ID
 
@@ -485,6 +570,6 @@ void ECSCoordinator::test4() {
 		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
 	}
 	Entity platform1 = createEntity();
-	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
-	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
+	addComponent(platform1, TransformComponent{ myMath::Vector2D(0.f, 0.f), myMath::Vector2D(1000.0f, 50.0f), myMath::Vector2D(0.0f, -150.f) });
+	//std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;
 }

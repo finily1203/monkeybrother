@@ -107,10 +107,13 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
+	ComponentSig getEntitySignature(Entity entity);
+
 	//void test();
 	void test2();
 	void test3();
 	void test4();
+	void test5();
 	void initialiseSystemsAndComponents();
 
 private:

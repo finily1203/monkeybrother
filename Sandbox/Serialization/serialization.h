@@ -20,6 +20,7 @@ File Contributions: Ian Loi (100%)
 #include <glm/glm.hpp>
 #include <string>
 #include <iostream>
+#include "vector2D.h"
 
 
 enum class SerializationMode

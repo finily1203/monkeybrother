@@ -11,6 +11,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *//*    _________________________________________________________________-*/
 #pragma once
 #include "ECSCoordinator.h"
+#include "vector2D.h"
 
 enum CollisionSide {
     NONE,
@@ -29,29 +30,29 @@ public:
 
     struct AABB
     {
-        glm::vec2 min;
-        glm::vec2 max;
+        myMath::Vector2D min;
+        myMath::Vector2D max;
     };
 
     // AABB Collision detection
     bool CollisionIntersection_RectRect(const AABB& platform,
-        const glm::vec2& platformVel,
+        const myMath::Vector2D& platformVel,
         const AABB& player,
-        const glm::vec2& playerVel,
+        const myMath::Vector2D& playerVel,
         float& firstTimeOfCollision);
 
     // AABB slope collision detection
-    bool AABBSlopeCollision(Entity platform, Entity player, glm::vec2 velocity);
+    bool AABBSlopeCollision(Entity platform, Entity player, myMath::Vector2D velocity);
 
     // Getters and Setters
-    glm::vec2 GetCollisionPoint() const { return collisionPoint; }
-    void SetCollisionPoint(glm::vec2 newCollisionPoint) { collisionPoint = newCollisionPoint; }
+    myMath::Vector2D GetCollisionPoint() const { return collisionPoint; }
+    void SetCollisionPoint(myMath::Vector2D newCollisionPoint) { collisionPoint = newCollisionPoint; }
 
     // PROTOTYPING: Circle vs Rectangle collision detection
     CollisionSide circleRectCollision(float circleX, float circleY, float circleRadius, Entity platform);
 
 private:
-    glm::vec2 collisionPoint;
+    myMath::Vector2D collisionPoint;
 
 };
 
@@ -65,10 +66,10 @@ public:
     void cleanup() override;
 
     // Getters and Setters
-    glm::vec2 GetVelocity() const { return velocity; }
+    myMath::Vector2D GetVelocity() const { return velocity; }
     bool GetAlrJumped() const { return alrJumped; }
 
-    void SetVelocity(glm::vec2 newVelocity) { velocity = newVelocity; }
+    void SetVelocity(myMath::Vector2D newVelocity) { velocity = newVelocity; }
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
     void ApplyGravity(Entity entity, float dt);
@@ -94,7 +95,7 @@ public:
 
 
 private:
-    glm::vec2 velocity;
+    myMath::Vector2D velocity;
     float gravity;
     float jumpForce;
     float friction;
