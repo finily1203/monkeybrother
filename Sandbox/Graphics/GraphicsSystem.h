@@ -68,9 +68,9 @@ public:
 
     //Shader* GetShader() const{ return m_Shader.get(); }
     //Shader* GetShader2() const{ return m_Shader2.get(); }
-    GLuint GetTexture() const { return m_Texture; }
-    GLuint GetTexture2() const { return m_Texture2; }
-    GLuint GetTexture3() const { return m_Texture3; }
+    //GLuint GetTexture() const { return m_Texture; }
+    //GLuint GetTexture2() const { return m_Texture2; }
+    //GLuint GetTexture3() const { return m_Texture3; }
     GLuint GetVAO() const { return m_VAO; }
     void SetCurrentAction(int actionRow);
 

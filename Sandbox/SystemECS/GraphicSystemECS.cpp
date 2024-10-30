@@ -112,7 +112,7 @@ void GraphicSystemECS::update(float dt) {
 			graphics.glObject.update(GLFWFunctions::delta_time);
 			if (GLFWFunctions::testMode == 0)
 			{
-				graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+				graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), assetsManager.GetTexture("texture1"));
 			}
 			else if (GLFWFunctions::testMode == 1)
 			{
