@@ -3,35 +3,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-
-// Vertex Shader source code as a string
-const char* vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
-out vec2 TexCoords;
-uniform mat4 projection;
-
-void main() {
-    gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
-    TexCoords = vertex.zw;
-}
-)";
-
-// Fragment Shader source code as a string
-const char* fragmentShaderSource = R"(
-#version 330 core
-in vec2 TexCoords;
-out vec4 color;
-
-uniform sampler2D text;
-uniform vec3 textColor;
-
-void main() {
-    vec4 texColor = texture(text, TexCoords);
-    color = vec4(textColor, texColor.r);
-}
-)";
-
 FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatrix(1.0f) {
     if (isInitialized) return;
 }
@@ -43,11 +14,19 @@ FontSystem::~FontSystem() {
 }
 
 
+
 void FontSystem::initialise() {
     if (isInitialized) return;
     std::cout << "FontSystem initialized" << std::endl;
 
-    textShader = std::make_unique<Shader>(vertexShaderSource, fragmentShaderSource);
+    ShaderProgramSource source = Shader::ParseShader("./Graphics/font.shader");
+
+    if (source.VertexSource.empty() || source.FragmentSource.empty()) {
+        std::cerr << "ERROR: Shader file is empty or could not be loaded!" << std::endl;
+        return;
+    }
+
+    textShader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
     if (!textShader || !textShader->isInitialized()) {
         std::cerr << "ERROR: Failed to create shader!" << std::endl;
         return;
@@ -99,7 +78,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     FT_Set_Pixel_Sizes(face, 0, fontSize);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     bool fontLoaded = true;
-    std::map<char, Character> tempCharacters; // Temporary map for this font
+    std::map<char, Character> tempCharacters;
 
     for (unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
@@ -129,7 +108,6 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
         tempCharacters.insert(std::pair<char, Character>(c, character));
     }
 
-    // Store this font's characters in the Fonts map
     if (fontLoaded) {
         Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
     }
@@ -149,81 +127,147 @@ void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::st
         return;
     }
 
-    // Check if the font is loaded
     auto it = Fonts.find(fontPath);
     if (it == Fonts.end()) {
         std::cerr << "ERROR: Font not loaded: " << fontPath << std::endl;
         return;
     }
 
-    const std::map<char, Character>& characters = it->second; // Use the specific font's character map
+    const std::map<char, Character>& characters = it->second;
 
-    textShader->Bind();
-    textShader->SetUniform3f("textColor", color.r, color.g, color.b);
+    shader->Bind();
+    shader->SetUniform3f("textColor", color.r, color.g, color.b);
 
-    float xpos = x; 
-    float lineHeight = 0.0f; 
+    float xpos = x;
+    float ypos = y;
+    float lineHeight = 0.0f;
 
-    // Render each character in the text
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+   
+    const float lineSpacing = 1.5f; 
+
+    std::string word; 
     for (char c : text) {
-        if (characters.find(c) != characters.end()) {
-            Character ch = characters.at(c);
-            float ypos = y - (ch.Size.y - ch.Bearing.y) * scale; 
-            float w = ch.Size.x * scale; // Scale width
-            float h = ch.Size.y * scale; // Scale height
+        if (c == ' ') { 
+            if (!word.empty()) {
+               
+                float wordWidth = 0.0f;
+                for (char wc : word) {
+                    if (characters.find(wc) != characters.end()) {
+                        wordWidth += (characters.at(wc).Advance >> 6) * scale; // Advance width
+                    }
+                }
 
-           
-            float vertices[6][4] = {
-                { xpos,     ypos + h,   0.0f, 0.0f },
-                { xpos,     ypos,       0.0f, 1.0f },
-                { xpos + w, ypos,       1.0f, 1.0f },
+             
+                if (xpos + wordWidth > x + maxWidth) {
+                    xpos = x; 
+                    ypos -= (characters.at(word[0]).Size.y * scale) * lineSpacing; 
+                }
 
-                { xpos,     ypos + h,   0.0f, 0.0f },
-                { xpos + w, ypos,       1.0f, 1.0f },
-                { xpos + w, ypos + h,   1.0f, 0.0f }
-            };
+                // Render the word
+                for (char wc : word) {
+                    if (characters.find(wc) != characters.end()) {
+                        Character ch = characters.at(wc);
+                        float h = ch.Size.y * scale;
 
-            // Render the character
-            glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+                        float yposAdjusted = ypos - (ch.Size.y - ch.Bearing.y) * scale;
+                        float w = ch.Size.x * scale;
 
-            // Move to the right for the next character
-            xpos += (ch.Advance >> 6) * scale;
+                        float vertices[6][4] = {
+                            { xpos,     yposAdjusted + h,   0.0f, 0.0f },
+                            { xpos,     yposAdjusted,       0.0f, 1.0f },
+                            { xpos + w, yposAdjusted,       1.0f, 1.0f },
+
+                            { xpos,     yposAdjusted + h,   0.0f, 0.0f },
+                            { xpos + w, yposAdjusted,       1.0f, 1.0f },
+                            { xpos + w, yposAdjusted + h,   1.0f, 0.0f }
+                        };
+
+                        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+                        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+                        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+                        xpos += (ch.Advance >> 6) * scale; 
+                    }
+                }
+                word.clear(); // Clear the word after rendering
+            }
+            xpos += 25; // Add space between words
+            continue;
+        }
+
+        word += c; 
+    }
+
+    // Render the last word if there is one
+    if (!word.empty()) {
+        float wordWidth = 0.0f;
+        for (char wc : word) {
+            if (characters.find(wc) != characters.end()) {
+                wordWidth += (characters.at(wc).Advance >> 6) * scale; // Advance width
+            }
+        }
+
+        if (xpos + wordWidth > x + maxWidth) {
+            xpos = x; // Reset x position to the start of the line
+            ypos -= (characters.at(word[0]).Size.y * scale) * lineSpacing; 
+        }
+
+        for (char wc : word) {
+            if (characters.find(wc) != characters.end()) {
+                Character ch = characters.at(wc);
+                float h = ch.Size.y * scale;
+
+                float yposAdjusted = ypos - (ch.Size.y - ch.Bearing.y) * scale;
+                float w = ch.Size.x * scale;
+
+                float vertices[6][4] = {
+                    { xpos,     yposAdjusted + h,   0.0f, 0.0f },
+                    { xpos,     yposAdjusted,       0.0f, 1.0f },
+                    { xpos + w, yposAdjusted,       1.0f, 1.0f },
+
+                    { xpos,     yposAdjusted + h,   0.0f, 0.0f },
+                    { xpos + w, yposAdjusted,       1.0f, 1.0f },
+                    { xpos + w, yposAdjusted + h,   1.0f, 0.0f }
+                };
+
+                glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+
+                xpos += (ch.Advance >> 6) * scale; 
+            }
         }
     }
 
     glBindVertexArray(0);
-    textShader->Unbind();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    shader->Unbind();
 }
-
 
 void FontSystem::draw(const std::string& text, const std::string& fontPath, float x, float y, float scale, glm::vec3 color, float maxWidth) {
     renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
 }
-
 
 void FontSystem::cleanup() {
     if (!isInitialized) return;
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    textShader.reset(); // Free shader resources
+    textShader.reset(); 
 
     // Delete loaded fonts
     for (auto& pair : Fonts) {
         for (auto& character : pair.second) {
-            glDeleteTextures(1, &character.second.TextureID); // Delete character textures
+            glDeleteTextures(1, &character.second.TextureID); 
         }
     }
     Fonts.clear();
     isInitialized = false;
     std::cout << "FontSystem cleaned up." << std::endl;
 }
-
 
 void FontSystem::update() {
 }

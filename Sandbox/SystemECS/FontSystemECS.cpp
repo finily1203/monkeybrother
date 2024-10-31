@@ -42,7 +42,7 @@ void FontSystemECS::update(float dt) {
         return;
     }
 
-    const float maxWidth = 150.0f;
+    const float maxWidth = 450.0f;
 
     for (auto entity : entities) {
         if (ecsCoordinator.hasComponent<FontComponent>(entity)) {

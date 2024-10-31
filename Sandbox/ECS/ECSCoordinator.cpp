@@ -442,7 +442,7 @@ void ECSCoordinator::test3() {
 
 	float textScale = 1.0f;
 	glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
-	fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2); // Centered
+	fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
 	fontComp.scale = textScale;
 	fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
 
@@ -455,12 +455,12 @@ void ECSCoordinator::test3() {
 
 	FontComponent fontComp2{};
 	fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
-	fontComp2.text = "Hello this is another text with SS Journey.ttf";
+	fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
 
 	float textScale2 = 1.0f;
 	glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
 
-	// Position the second text entity above the first one
+	
 	fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
 	fontComp2.scale = textScale2;
 	fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
