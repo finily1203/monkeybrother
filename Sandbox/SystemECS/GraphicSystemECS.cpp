@@ -67,17 +67,17 @@ void GraphicSystemECS::update(float dt) {
 
 				if (GLFWFunctions::left_turn_flag) {
 					//transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
-					transform.orientation.SetY(1800 * GLFWFunctions::delta_time);
+					transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
 					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 				else if (GLFWFunctions::right_turn_flag) {
 					//transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
-					transform.orientation.SetY(-1800.0f * GLFWFunctions::delta_time);
+					transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
 					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 				else {
 					//transform.orientation.y = 0.0f;
-					transform.orientation.SetY(0.0f);
+					//transform.orientation.SetY(0.0f);
 					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 
@@ -134,6 +134,7 @@ void GraphicSystemECS::update(float dt) {
 
 			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
 			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation);
+			
 
 			auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
