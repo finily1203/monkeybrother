@@ -96,6 +96,22 @@ void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const&
 	}
 }
 
+void JSONSerializer::ReadSpecificObject(float& object, nlohmann::json const& jsonObj)
+{
+	if (jsonObj.is_number_float())
+	{
+		object = jsonObj.get<float>();
+	}
+}
+
+void JSONSerializer::ReadSpecificObject(bool& object, nlohmann::json const& jsonObj)
+{
+	if (jsonObj.is_boolean())
+	{
+		object = jsonObj.get<bool>();
+	}
+}
+
 void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohmann::json& jsonObj)
 {
 	//jsonObj["x"] = object.x;
@@ -119,6 +135,16 @@ void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json
 
 		jsonObj.push_back(row);
 	}
+}
+
+void JSONSerializer::WriteSpecificObject(float const& object, nlohmann::json& jsonObj)
+{
+	jsonObj = object;
+}
+
+void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jsonObj)
+{
+	jsonObj = object;
 }
 
 void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)

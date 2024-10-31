@@ -270,11 +270,52 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		// the JSON object
 		ecs.addComponent(entityObj, transform);
 
+		if (entityData.contains("aabb"))
+		{
+			AABBComponent aabb{};
+			serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
+			serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
+			serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
+			serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
+
+			ecs.addComponent(entityObj, aabb);
+		}
+
+		if (entityData.contains("closestPlatform"))
+		{
+			ClosestPlatform closestPlatform{};
+			serializer.ReadObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
+
+			ecs.addComponent(entityObj, closestPlatform);
+		}
+
+		if (entityData.contains("movement"))
+		{
+			MovementComponent movement{};
+			serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
+
+			ecs.addComponent(entityObj, movement);
+		}
+
+		if (entityData.contains("animation"))
+		{
+			AnimationComponent animation{};
+			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
+
+			ecs.addComponent(entityObj, animation);
+		}
+
+		if (entityData.contains("enemy"))
+		{
+			EnemyComponent enemy{};
+			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+
+			ecs.addComponent(entityObj, enemy);
+		}
+
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
-
-	//ecs.addComponent(entity, MovementComponent{ 10.f });
 }
 
 // this function will save the entity's data to the JSON file
@@ -316,6 +357,44 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<AABBComponent>()))
+			{
+				AABBComponent aabb = getComponent<AABBComponent>(entity);
+
+				serializer.WriteObject(aabb.left, entityId, "entities.aabb.left");
+				serializer.WriteObject(aabb.right, entityId, "entities.aabb.right");
+				serializer.WriteObject(aabb.top, entityId, "entities.aabb.top");
+				serializer.WriteObject(aabb.bottom, entityId, "entities.aabb.bottom");
+			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<ClosestPlatform>()))
+			{
+				ClosestPlatform closestPlatform = getComponent<ClosestPlatform>(entity);
+
+				serializer.WriteObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
+			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<MovementComponent>()))
+			{
+				MovementComponent movement = getComponent<MovementComponent>(entity);
+
+				serializer.WriteObject(movement.speed, entityId, "entities.movement.speed");
+			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<AnimationComponent>()))
+			{
+				AnimationComponent animation = getComponent<AnimationComponent>(entity);
+
+				serializer.WriteObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
+			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<EnemyComponent>()))
+			{
+				EnemyComponent enemy = getComponent<EnemyComponent>(entity);
+
+				serializer.WriteObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+			}
 		}
 	}
 
@@ -323,18 +402,6 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
-	}
-}
-
-// this function handles the updating of the entity's data
-void ECSCoordinator::UpdateEntityData(Entity& entity)
-{
-	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
-	{
-		TransformComponent& transform = getComponent<TransformComponent>(entity);
-		// assign the new data of the transform component to the entity's transform component
-		transform.position.SetX(50.f);
-		transform.scale.SetY(20.f);
 	}
 }
 
@@ -404,70 +471,27 @@ void ECSCoordinator::test3() {
 
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
-	myMath::Vector2D ori = { 0.f, 0.f };
-	myMath::Vector2D scl = { 0.f, 0.f };
-	myMath::Vector2D pos = { 0.f, 0.f };
-	float left = pos.GetX() - scl.GetX() / 2.f; float right  = pos.GetX() + scl.GetX() / 2.f;
-	float top  = pos.GetY() + scl.GetY() / 2.f; float bottom = pos.GetY() - scl.GetY() / 2.f;
-	bool isClosest = false;
+	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 
-	std::cout << "Create Background" << std::endl;
-	Entity background = createEntity();
-	ori = { 0.f, 0.f };
-	scl = { 1600.f, 900.f };
-	pos = { 0.f, 0.f };
-	addComponent(background, TransformComponent{ ori, scl, pos });
+	//std::string entityId = "player";
+	//Entity entity = entityManager->getEntityById(entityId);
 
-	std::cout << "Create Platforms" << std::endl;
-	Entity flatPlatform = createEntity();
-	ori = { 0.f, 0.f };
-	scl = { 500.f, 50.f };
-	pos = { 0.f, -150.f };
-	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
-	top	 = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
-	isClosest = false;
+	//if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+	//{
+	//	TransformComponent& transform = getComponent<TransformComponent>(entity);
+	//	// assign the new data of the transform component to the entity's transform component
+	//	transform.position.SetX(120.f);
+	//	transform.scale.SetY(45.f);
+	//}
 
-	addComponent(flatPlatform, TransformComponent{ ori, scl, pos });
-	addComponent(flatPlatform, AABBComponent { left, right, top, bottom });
-	addComponent(flatPlatform, ClosestPlatform { isClosest });
+	//if (entityManager->getSignature(entity).test(getComponentType<MovementComponent>()))
+	//{
+	//	MovementComponent& movement = getComponent<MovementComponent>(entity);
 
-	ori = { 315.f, 0.f };
-	scl = { 300.f, 50.f };
-	pos = { -500.f, -200.f };
-	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
-	top  = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
-	isClosest = false;
+	//	movement.speed = 0.1f;
+	//}
 
-	Entity tiltedPlatform = createEntity();
-	addComponent(tiltedPlatform, TransformComponent { ori, scl, pos });
-	addComponent(tiltedPlatform, AABBComponent{ left, right, top, bottom });
-	addComponent(tiltedPlatform, ClosestPlatform{ isClosest });
-
-	ori = { 0.f, 0.f };
-	scl = { 100.f, 100.f };
-	pos = { 0.f, 300.f };
-	left = pos.GetX() - scl.GetX() / 2.f; right  = pos.GetX() + scl.GetX() / 2.f;
-	top  = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
-
-	std::cout << "Create Player" << std::endl;
-	Entity player = createEntity();
-	addComponent(player, TransformComponent{ ori, scl, pos });
-	addComponent(player, AABBComponent{ left, right, top, bottom });
-	addComponent(player, MovementComponent{ .02f });
-	addComponent(player, AnimationComponent{ true });
-
-	ori = { 0.f, 0.f };
-	scl = { 100.f, 100.f };
-	pos = { 300.f, 200.f };
-	left = pos.GetX() - scl.GetX() / 2.f; right = pos.GetX() + scl.GetX() / 2.f;
-	top = pos.GetY() + scl.GetY() / 2.f; bottom = pos.GetY() - scl.GetY() / 2.f;
-
-	Entity enemy = createEntity();
-	addComponent(enemy, TransformComponent{ ori, scl, pos });
-	addComponent(enemy, AABBComponent{ left, right, top, bottom });
-	addComponent(enemy, MovementComponent{ 50.f });
-	addComponent(enemy, EnemyComponent{ true });
-
+	//SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
 }
 
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
@@ -547,18 +571,6 @@ void ECSCoordinator::test4() {
 	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
 
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-
-	std::string id = "Player";
-	Entity entity = entityManager->getEntityById(id);
-
-	//This is the code for testing saving the entity data to the
-	//JSON file
-	if (hasComponent<TransformComponent>(entity))
-	{
-		UpdateEntityData(entity);
-
-		SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
-	}
 	
 	//Iterate through the entities to find Object1 and Object2
 	for (auto entity : entityManager->getLiveEntities()) {
