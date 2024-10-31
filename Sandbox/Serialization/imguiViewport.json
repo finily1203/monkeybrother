@@ -1,0 +1,26 @@
+{
+  "GUIViewport": {
+    "viewportWidth": 1600,
+    "viewportHeight": 900,
+    "lastViewportSize": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "lastAspectSize": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "lastRenderPos": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "viewportPos": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "viewportTexture": 0,
+    "zoomLevel": 1.0,
+    "minZoom": 1.0,
+    "maxZoom": 5.0
+  }
+}

@@ -46,11 +46,17 @@ public:
 	void WriteObject(T&, std::string const&, std::string const&);
 
 	virtual void ReadInt(int&, std::string const&);
+	virtual void ReadUnsignedInt(unsigned int&, std::string const&);
+	virtual void ReadUnsignedLongLong(unsigned long long&, std::string const&);
 	virtual void ReadFloat(float&, std::string const&);
+	virtual void ReadDouble(double&, std::string const&);
 	virtual void ReadString(std::string&, std::string const&);
 
 	virtual void WriteInt(int&, std::string const&);
+	virtual void WriteUnsignedInt(unsigned int&, std::string const&);
+	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&);
 	virtual void WriteFloat(float&, std::string const&);
+	virtual void WriteDouble(double&, std::string const&);
 	virtual void WriteString(std::string&, std::string const&);
 
 	nlohmann::json GetJSONObject() const;

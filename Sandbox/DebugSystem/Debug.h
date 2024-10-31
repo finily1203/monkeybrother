@@ -39,6 +39,7 @@ class DebugSystem : public GameSystems {
 public:
 
 	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
+	//ImVec4 clear_color;
 	DebugSystem();
 	~DebugSystem();
 
@@ -58,6 +59,8 @@ public:
 	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
 	void UpdateSystemTimes(); //Update all system loop time
+
+	void LoadDebugConfigFromJSON(std::string const& filename);
 
 private:
 	ImGuiIO* io;

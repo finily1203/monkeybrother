@@ -1,0 +1,22 @@
+{
+  "Debug": {
+    "clearColor": {
+      "r": 0.45,
+      "g": 0.45,
+      "b": 0.45,
+      "a": 1.0
+    },
+    "widthSlide": 5.0,
+    "heightSlide": 5.0,
+    "sizeSlide": 5.0,
+    "objCount": 0,
+    "loopStartTime": 0.0,
+    "totalLoopTime": 0.0,
+    "lastUpdateTime": 0.0,
+    "systemCount": 0,
+    "objSizeXMax": 5000.0,
+    "objSizeXMin": 100.0,
+    "objSizeYMax": 5000.0,
+    "objSizeYMin": 100.0
+  }
+}
