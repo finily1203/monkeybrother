@@ -48,8 +48,6 @@ float DebugSystem::objSizeXMin = 100.0f;
 float DebugSystem::objSizeYMax = 5000.0f;
 float DebugSystem::objSizeYMin = 100.0f;
 
-int saveCount = 1;
-
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 
@@ -346,12 +344,24 @@ void DebugSystem::update() {
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
 					ImGui::SetNextItemWidth(200);
 					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
-					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
-						transform.position.SetX(posXSlide);
 
+					if (posXSlide != lastPosX)
+					{
+						saveFilePending = true;
+						lastPosX = posXSlide;
+					}
+
+					if (saveFilePending && ImGui::IsItemDeactivatedAfterEdit())
+					{
 						std::string saveFile = GenerateSaveJSONFile(saveCount);
 						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+
+						saveCount++;
+						saveFilePending = false;
 						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+					}
+					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+						transform.position.SetX(posXSlide);
 					}
 					ImGui::SetNextItemWidth(200);
 					ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
@@ -532,6 +542,10 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	// ???? object size x max, object size x min ????
 	// ???? object size y max, object size y min ????
+
+	serializer.ReadInt(saveCount, "Debug.saveCount");
+	serializer.ReadBool(saveFilePending, "Debug.saveFilePending");
+	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
 }
 
 void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
@@ -565,6 +579,10 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	// ???? object size x max, object size x min ????
 	// ???? object size y max, object size y min ????
+
+	serializer.WriteInt(saveCount, "Debug.saveCount");
+	serializer.WriteBool(saveFilePending, "Debug.saveFilePending");
+	serializer.WriteFloat(lastPosX, "Debug.lastPosX");
 }
 
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
@@ -595,8 +613,6 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 		std::cout << "Error: could not create file " << jsonPath << std::endl;
 		return "";
 	}
-
-	saveNumber++;
 
 	return jsonPath;
 }

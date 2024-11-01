@@ -93,6 +93,10 @@ private:
 	static float objSizeXMin;
 	static float objSizeYMax;
 	static float objSizeYMin;
+
+	int saveCount;
+	bool saveFilePending;
+	float lastPosX;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map
