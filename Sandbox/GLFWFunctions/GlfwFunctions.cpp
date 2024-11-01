@@ -30,6 +30,8 @@ float GLFWFunctions::delta_time = 0.0;
 float GLFWFunctions::volume = 0.5f;
 float GLFWFunctions::zoomMouseCoordX = 0.0f;
 float GLFWFunctions::zoomMouseCoordY = 0.0f;
+float GLFWFunctions::objMoveMouseCoordX = 0.0f;
+float GLFWFunctions::objMoveMouseCoordY = 0.0f;
 bool GLFWFunctions::audioPaused = false;
 bool GLFWFunctions::audioNext = false;
 int GLFWFunctions::audioNum = 0;
@@ -211,28 +213,12 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 #endif
         break;
     }
-
-    //double mouseX, mouseY;
-    //glfwGetCursorPos(window, &mouseX, &mouseY);
-
-    //// Check if mouse is inside viewport using the static method
-    //if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
-    //    GLFW_MOUSE_BUTTON_LEFT == button &&
-    //    GLFW_PRESS == action &&
-    //    GLFWFunctions::isGuiOpen) {
-
-    //    GLFWFunctions::zoomMouseCoordX = mouseX;
-    //    GLFWFunctions::zoomMouseCoordY = mouseY;
-    //    GLFWFunctions::zoomViewport = !GLFWFunctions::zoomViewport;
-    //}
 }
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
-    /*zoomMouseCoordX = xpos;
-    zoomMouseCoordY = ypos;*/
 #endif
 }
 
@@ -241,32 +227,6 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
-
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-
-    if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
-        GLFWFunctions::isGuiOpen) {
-        float zoomDelta = yoffset * 0.1f;
-        float newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
-
-        //// Check for max zoom condition
-        //if (GameViewWindow::zoomLevel >= GameViewWindow::MAX_ZOOM && zoomDelta > 0) {
-        //    isAtMaxZoom = true;
-        //    return;
-        //}
-        //isAtMaxZoom = false; // Reset the flag when not at max zoom
-
-        // Update coordinates and zoom level
-        GLFWFunctions::zoomMouseCoordX = mouseX;
-        GLFWFunctions::zoomMouseCoordY = mouseY;
-
-        GameViewWindow::zoomLevel = std::min(GameViewWindow::MAX_ZOOM,
-            std::max(GameViewWindow::MIN_ZOOM,
-                newZoomLevel));
-
-        GLFWFunctions::zoomViewport = (GameViewWindow::zoomLevel != 1.0f);
-    }
 }
 
 //Caluclate the FPS and delta_time to be used

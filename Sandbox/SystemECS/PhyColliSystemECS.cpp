@@ -704,3 +704,7 @@ void PhysicsSystemECS::update(float dt) {
     ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;
 
 }
+
+std::string PhysicsSystemECS::getSystemECS() {
+    return "PhysicsColliSystemECS";
+}

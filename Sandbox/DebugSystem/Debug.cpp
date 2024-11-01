@@ -35,7 +35,9 @@ int objCount = 0;
 //Variables for DebugSystem
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
 double DebugSystem::loopStartTime = 0.0;
+double DebugSystem::loopStartTimeECS = 0.0;
 double DebugSystem::totalLoopTime = 0.0;
+double DebugSystem::totalLoopTimeECS = 0.0;
 double DebugSystem::lastUpdateTime = 0.0;
 std::vector<const char*> DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
@@ -96,7 +98,7 @@ void DebugSystem::update() {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	
+
 		ImGui::Begin("DockSpace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking);
 		ImGui::PopStyleVar(3);
 		ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
@@ -105,34 +107,105 @@ void DebugSystem::update() {
 		ImGui::End();
 
 		ImGui::Begin("Debug");
-		if (ImGui::CollapsingHeader("Performance Data")) { //Create collapsing header for perfomance data
-			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
-				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
+		//if (ImGui::CollapsingHeader("Performance Data")) { //Create collapsing header for perfomance data
+			//static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
+				//ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 
-			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table 
+			//ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table 
 
-			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
+		//	ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
-			ImGui::SeparatorText("Performance Viewer");
-			ImGui::Text("Number of Systems: %d", systemCount);
+		//	ImGui::SeparatorText("Performance Viewer");
+		//	ImGui::Text("Number of Systems: %d", systemCount);
 
-			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
-				
-				ImGui::TableSetupColumn("Systems");
-				ImGui::TableSetupColumn("Game Loop %"); 
-				ImGui::TableHeadersRow();
+		//	if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
 
-				for (int i{}; i < systemCount && i < systemGameLoopPercent.size(); i++) {
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					ImGui::Text(systems[i]); //Display system's name
-					ImGui::TableNextColumn();
-					ImGui::Text("%.2f%%", systemGameLoopPercent[i]); //Display system's game loop percentage
+		//		ImGui::TableSetupColumn("Systems");
+		//		ImGui::TableSetupColumn("Game Loop %");
+		//		ImGui::TableHeadersRow();
+
+		//		for (int i{}; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+
+		//			ImGui::TableNextRow();
+		//			ImGui::TableNextColumn();
+		//			ImGui::Text(systems[i]); //Display system's name
+		//			ImGui::TableNextColumn();
+		//			ImGui::Text("%.2f%%", systemGameLoopPercent[i]); //Display system's game loop percentage
+		//		}
+
+		//		ImGui::EndTable();
+		//	}
+		//}
+			if (ImGui::CollapsingHeader("Performance Data")) {
+				static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
+					ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
+
+				ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table
+
+				ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
+
+				ImGui::SeparatorText("Performance Viewer");
+				ImGui::Text("Number of Systems: %d", systemCount);
+
+				if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+					ImGui::TableSetupColumn("Systems");
+					ImGui::TableSetupColumn("Game Loop %");
+					ImGui::TableHeadersRow();
+
+					// Track combined ECS percentage
+					float ecsTotal = 0.0f;
+					bool foundECS = false;
+
+					// First pass - show non-ECS systems and calculate ECS total
+					for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+						const char* systemName = systems[i];
+
+						// Check if this is an ECS system
+						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+							if (strcmp(systemName, "EntityComponentSystem")) {
+								ecsTotal = systemGameLoopPercent[i];
+							}
+							foundECS = true;
+							continue; // Skip individual ECS systems
+						}
+
+						// Show non-ECS systems normally
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+						ImGui::Text(systemName);
+						ImGui::TableNextColumn();
+						ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+					}
+
+					// Show combined ECS entry if we found any ECS systems
+					if (foundECS) {
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+
+						// Create a tree node for ECS Systems
+						if (ImGui::TreeNode("ECS Systems")) {
+							// Calculate column width for the system names
+							float textBaseWidth = ImGui::CalcTextSize("PhysicsColliSystemECS: ").x;
+
+							// Show individual ECS systems as children with aligned percentages
+							for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+								const char* systemName = systems[i];
+								if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+									ImGui::Text("%s:", systemName);
+									ImGui::SameLine(textBaseWidth);
+									ImGui::Text("%7.2f%%", systemGameLoopPercent[i]); // Right-aligned percentage
+								}
+							}
+							ImGui::TreePop();
+						}
+
+						ImGui::TableNextColumn();
+						ImGui::Text("%.2f%%", ecsTotal); // Right-aligned with fixed width
+					}
+
+					ImGui::EndTable();
 				}
-
-				ImGui::EndTable();
 			}
-		}
 
 		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
 			ImGui::SeparatorText("Mouse Coordinates");
@@ -158,44 +231,134 @@ void DebugSystem::update() {
 			}
 			ImGui::NewLine();
 		}
+
+		if (ImGui::CollapsingHeader("Game Viewport Controls")) {
+			if (ImGui::Button("Reset Perspective")) {
+				GameViewWindow::setAccumulatedDragDistance(0, 0);
+				GameViewWindow::zoomLevel = 1.f;
+			}
+
+			static bool isZooming = false;
+			static bool isPanning = false;
+
+			if (ImGui::Button("Zoom")) {
+				isZooming = !isZooming;
+			}
+			if (isZooming) {
+				GameViewWindow::setClickedZoom(true);
+				ImGui::SameLine();
+				ImGui::Text("Zooming");  // Only show text when zooming is active
+			}
+			else {
+				GameViewWindow::setClickedZoom(false);
+				ImGui::SameLine();
+				ImGui::Text("Not Zooming");
+			}
+
+			if (ImGui::Button("Pan")) {
+				isPanning = !isPanning;
+			}
+			if (isPanning) {
+				GameViewWindow::setClickedScreenPan(true);
+				ImGui::SameLine();
+				ImGui::Text("Panning");  // Only show text when zooming is active
+			}
+			else {
+				GameViewWindow::setClickedScreenPan(false);
+				ImGui::SameLine();
+				ImGui::Text("Not Panning");
+			}
+		}
+
 		if (ImGui::CollapsingHeader("Object Creation")) {
 
 			ImGui::AlignTextToFramePadding();
 			static int numEntitiesToCreate = 1;  // Default to 1
 			static char numBuffer[8] = "1";
+			static char sigBuffer[8] = "";
+			static char xCoordinatesBuffer[8] = "0";
+			static char yCoordinatesBuffer[8] = "0";
+			static double xCoordinates = 0.0;
+			static double yCoordinates = 0.0;
+			//static char signatureBuffer[8] = "";
 
-			ImGui::Text("Number of Objects: %d", objCount);
+			ImGui::Text("Total no. of objects: %d", objCount);
 
 			objCount = 0;
 
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				objCount++;
+			}
+
+			//ImGui::SetNextItemWidth(100);  // Set width of input field
+			//ImGui::InputText("##signature", signatureBuffer, IM_ARRAYSIZE(signatureBuffer));
+			//ImGui::SameLine();
+			//ImGui::Text("Signature");
+
+			ImGui::SetNextItemWidth(100);  // Set width of input field
+			ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
+			ImGui::SameLine();
+			ImGui::Text("Signature");
+
 			ImGui::SetNextItemWidth(100);  // Set width of input field
 			ImGui::InputText("##count", numBuffer, IM_ARRAYSIZE(numBuffer), ImGuiInputTextFlags_CharsDecimal);
+			ImGui::SameLine();
+			ImGui::Text("Objects to be created");
 
 			numEntitiesToCreate = std::max(1, atoi(numBuffer));
 
+			ImGui::SetNextItemWidth(100);
+			ImGui::InputText("##X Pos", xCoordinatesBuffer, IM_ARRAYSIZE(xCoordinatesBuffer));
+
 			ImGui::SameLine();
+			ImGui::Text(",");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(100);
+			ImGui::InputText("##Y Pos", yCoordinatesBuffer, IM_ARRAYSIZE(yCoordinatesBuffer));
+
+			ImGui::SameLine();
+			ImGui::Text("Coordinates");
+
+			xCoordinates = std::max(-800.0, atof(xCoordinatesBuffer));
+			yCoordinates = std::max(-450.0, atof(yCoordinatesBuffer));
+
 
 			if (ImGui::Button("Create")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 					Entity newEntity = ecsCoordinator.createEntity();
+					std::string entityID = sigBuffer;
 					TransformComponent transform{};
 					transform.position = glm::vec2(
-						ecsCoordinator.getRandomVal(-800.f, 800.f),
-						ecsCoordinator.getRandomVal(-450.f, 450.f)
+						xCoordinates, yCoordinates
 					);
 					transform.scale = glm::vec2(100.0f, 100.0f);
-					ecsCoordinator.addComponent(newEntity,transform);
+					ecsCoordinator.addComponent(newEntity, transform);
+					ecsCoordinator.setEntityID(newEntity, entityID);
 					
+
 
 				}
 			}
 
-			ImGui::NewLine();
+			ImGui::SameLine();
 
-			ImGui::SeparatorText("Object Attributes");
-			
+			if (ImGui::Button("Random")) {
+				for (int i = 0; i < numEntitiesToCreate; i++) {
+					Entity newEntity = ecsCoordinator.createEntity();
+					TransformComponent transform{};
+					transform.position = glm::vec2(
+						glm::vec2(ecsCoordinator.getRandomVal(-800.f, 800.f),
+							ecsCoordinator.getRandomVal(-450.f, 450.f))
+					);
+					transform.scale = glm::vec2(100.0f, 100.0f);
+					ecsCoordinator.addComponent(newEntity, transform);
+				}
+			}
+
+			ImGui::NewLine();
+		}
+		if (ImGui::CollapsingHeader("Hierachy List")) {
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-				objCount++;
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				auto signature = ecsCoordinator.getEntityID(entity);
 
@@ -207,41 +370,60 @@ void DebugSystem::update() {
 				widthSlide = transform.scale.x;
 				heightSlide = transform.scale.y;
 
-				ImGui::Text("Signature: %s", signature.c_str());
+				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
+					ImGui::SetNextItemWidth(200);
+					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
+					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+						transform.position.x = posXSlide;
+					}
+					ImGui::SetNextItemWidth(200);
+					ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
+					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+						transform.position.y = posYSlide;
+					}
 
-				ImGui::SetNextItemWidth(200);
-				ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
-				if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
-					transform.position.x = posXSlide;
-				}
-				ImGui::SetNextItemWidth(200);
-				ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
-				if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
-					transform.position.y = posYSlide;
+					ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
+					if (ImGui::IsItemActivated) {
+						transform.scale.x = widthSlide;
+					}
+					ImGui::SliderFloat("Height", &heightSlide, objSizeYMin, objSizeYMax, "%.1f");
+					if (ImGui::IsItemActivated) {
+						transform.scale.y = heightSlide;
+					}
+
+					if (ImGui::Button("Remove")) {
+						ecsCoordinator.destroyEntity(entity);
+					}
+					ImGui::TreePop();
 				}
 
-				ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
-				if (ImGui::IsItemActivated) {
-					transform.scale.x = widthSlide;
-				}
-				ImGui::SliderFloat("Height", &heightSlide, objSizeYMin, objSizeYMax, "%.1f");
-				if (ImGui::IsItemActivated) {
-					transform.scale.y = heightSlide;
-				}
 
-				if (ImGui::Button("Remove")) {
-					ecsCoordinator.destroyEntity(entity);
-				}
+				ImVec2 viewportPos = GameViewWindow::getViewportPos();
+				ImVec2 TESTEST = ImGui::GetCursorPos();
+				ImVec2 Mouse = ImGui::GetMousePos();
+				float localMouseX = Mouse.x - viewportPos.x;
+				float localMouseY = Mouse.y - viewportPos.y;
+
+				/*if (MouseX == transform.position.x &&
+					MouseY == transform.position.y &&
+					ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+					transform.position.x = MouseX;
+					transform.position.y = MouseY;
+				}*/
 
 				ImGui::PopID();
 				ImGui::Separator();
 
+				Console::GetLog() << TESTEST.x << " Baby" << std::endl;
+
 				Console::GetLog() << signature << " || " << transform.position.x << " || " << transform.position.y
 					<< std::endl;
 			}
-			
+
 		}
+
 		ImGui::End();
+		Console::GetLog() << GLFWFunctions::objMoveMouseCoordX << std::endl;
 
 		ImGuiWindowFlags viewportWindowFlags =
 			ImGuiWindowFlags_NoScrollbar |
@@ -287,10 +469,19 @@ void DebugSystem::StartLoop() {
 	systemTimes.clear();
 }
 
+void DebugSystem::StartLoopECS() {
+	loopStartTimeECS = glfwGetTime(); //Capture start game loop time
+}
+
 //Capture total game loop time
 void DebugSystem::EndLoop() {
 
 	totalLoopTime = GLFWFunctions::delta_time; 
+}
+
+void DebugSystem::EndLoopECS() {
+
+	totalLoopTimeECS = GLFWFunctions::delta_time;
 }
 
 //Capture system's start time loop

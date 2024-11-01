@@ -30,5 +30,7 @@ public:
 	//and render objects.
 	void update(float dt) override;
 
+	std::string getSystemECS() override;
+
 private:
 };

@@ -64,6 +64,8 @@ public:
     void update(float dt) override;
     void cleanup() override;
 
+    std::string getSystemECS() override;
+
     // Getters and Setters
     glm::vec2 GetVelocity() const { return velocity; }
     bool GetAlrJumped() const { return alrJumped; }

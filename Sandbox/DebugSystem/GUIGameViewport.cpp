@@ -17,10 +17,15 @@ ImVec2 GameViewWindow::lastRenderPos = { 0,0 };
 ImVec2 GameViewWindow::viewportPos = { 0, 0 };
 GLuint GameViewWindow::viewportTexture = 0;
 bool zoomTestFlag = false;
+bool GameViewWindow::clickedZoom = false;
+bool GameViewWindow::clickedScreenPan = false;
 
 float GameViewWindow::zoomLevel = 1.f; 
 const float GameViewWindow::MIN_ZOOM = 1.f;  // minimum zoom constant
 const float GameViewWindow::MAX_ZOOM = 5.f;  //  maximum zoom constant
+bool insideViewport = false;
+float GameViewWindow::accumulatedDragDistanceX = 0.0f;
+float GameViewWindow::accumulatedDragDistanceY = 0.0f;
 
 void GameViewWindow::Initialise() {
 	viewportWidth = 1600;
@@ -30,7 +35,6 @@ void GameViewWindow::Initialise() {
 
 void GameViewWindow::Update() {
 	SetupViewportTexture();
-
 	//ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
@@ -38,6 +42,24 @@ void GameViewWindow::Update() {
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	viewportPos = ImGui::GetWindowPos();
+	ImVec2 textMouse = ImGui::GetMousePos();
+	ImVec2 testTest = ImGui::GetContentRegionAvail();
+	Console::GetLog() << textMouse.x - viewportPos.x << "," << viewportPos.x << "," << testTest.x
+		<< std::endl;
+	Console::GetLog() << lastViewportSize.x << ","
+		<< std::endl;
+	if (GameViewWindow::IsPointInViewport(textMouse.x, textMouse.y))
+		insideViewport = true;
+	else
+		insideViewport = false;
+	ImGuiIO& io = ImGui::GetIO();
+	float scrollY = io.MouseWheel;
+	float zoomDelta = scrollY * 0.1f;
+	float newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
+	if(insideViewport && clickedZoom)
+	zoomLevel = std::min(GameViewWindow::MAX_ZOOM,
+		std::max(GameViewWindow::MIN_ZOOM,
+		    newZoomLevel));
 
 	Console::GetLog() << "zoomLevel " << GameViewWindow::zoomLevel << " MAX_ZOOM " << GameViewWindow::MAX_ZOOM
 		<< std::endl;
@@ -93,63 +115,71 @@ void GameViewWindow::CaptureMainWindow() {
 	UpdateViewportSize();
 }
 
+static float aspectWidth = 0;
+static float aspectHeight = 0;
+
 //Function scale real time game scene to the size of the game viewport window
 ImVec2 GameViewWindow::GetLargestSizeForViewport()
 {
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	/*windowSize.x -= ImGui::GetScrollX();
-	windowSize.y -= ImGui::GetScrollY();*/
-
-	float aspectWidth;
-	float aspectHeight;
 
 	aspectWidth = windowSize.x;
 	aspectHeight = (aspectWidth / (16.0f / 9.0f));
 
-	if (GLFWFunctions::zoomViewport) {
+	static float scaledWidth = aspectWidth;
+	static float scaledHeight = aspectHeight;
+
+	
 		// Use zoomLevel instead of fixed 3.0f multiplier
-		aspectWidth *= zoomLevel;
-		aspectHeight *= zoomLevel;
+	scaledWidth = aspectWidth * zoomLevel;
+	scaledHeight = aspectHeight * zoomLevel;
+	
 
-	}
+	return ImVec2(scaledWidth, scaledHeight);
 
-	/*if (aspectHeight > windowSize.y) {
-		aspectHeight = windowSize.y;
-		aspectWidth = aspectHeight * (16.0f / 9.0f);
-	}*/
-
-	return ImVec2(aspectWidth, aspectHeight);
 }
+
+static bool isDragging = false;
+static float initialMouseX = 0.0f;
+static float initialMouseY = 0.0f;
+static float dragDistanceX = 0;
+static float dragDistanceY = 0;
 
 //Function to translate the real time game scene to the center of the game viewport window
 ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 {
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	ImVec2 viewportPos = ImGui::GetCursorScreenPos();
 	float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
 	float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
 
-	if (GLFWFunctions::zoomViewport && !GLFWFunctions::isAtMaxZoom) {
-		// Only apply offset if we're not at max zoom
-		float localMouseX = GLFWFunctions::zoomMouseCoordX - viewportPos.x;
-		float localMouseY = GLFWFunctions::zoomMouseCoordY - viewportPos.y;
+	if (clickedScreenPan && insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+		ImVec2 Mouse = ImGui::GetMousePos();
+		if (!isDragging) {
+			isDragging = true;
+			initialMouseX = Mouse.x;
+			initialMouseY = Mouse.y;
+		}
+		float currentDragDistanceX = initialMouseX - Mouse.x;
+		accumulatedDragDistanceX += (currentDragDistanceX - dragDistanceX);  // Add the new drag delta
+		dragDistanceX = currentDragDistanceX;
 
-		float offsetX = (localMouseX - windowSize.x / 2.0f) * (zoomLevel - 1.0f);
-		float offsetY = (localMouseY - windowSize.y / 2.0f) * (zoomLevel - 1.0f);
-
-		viewportX -= offsetX;
-		viewportY -= offsetY;
+		float currentDragDistanceY = initialMouseY - Mouse.y;
+		accumulatedDragDistanceY += (currentDragDistanceY - dragDistanceY);  // Add the new drag delta
+		dragDistanceY = currentDragDistanceY;
+	}
+	else {
+		isDragging = false;
+		dragDistanceX = 0.0f;  // Reset current drag distance when not dragging
+		dragDistanceY = 0.0f;
 	}
 
+	viewportX -= accumulatedDragDistanceX;  // Apply the accumulated offset
+	viewportY -= accumulatedDragDistanceY;
 	return ImVec2(viewportX, viewportY);
 
 }
 
 bool GameViewWindow::IsPointInViewport(double x, double y) {
-
-	ImVec2 sceneStart = ImVec2(viewportPos.x + lastRenderPos.x, viewportPos.y + lastRenderPos.y);
-	ImVec2 sceneEnd = ImVec2(sceneStart.x + lastAspectSize.x, sceneStart.y + lastAspectSize.y);
-
-	return (x >= sceneStart.x && x <= sceneEnd.x &&
-		y >= sceneStart.y && y <= sceneEnd.y);
+	return (x - viewportPos.x <= lastViewportSize.x && x - viewportPos.x >= 0 
+		&& y - viewportPos.y <= lastViewportSize.y && y - viewportPos.y >= 0);
 }

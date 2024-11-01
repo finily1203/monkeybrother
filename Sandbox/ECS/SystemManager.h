@@ -33,6 +33,7 @@ public:
 	virtual void initialise() = 0;
 	virtual void update(float dt) = 0;
 	virtual void cleanup() = 0;
+	virtual std::string getSystemECS() = 0;
 };
 
 class SystemManager

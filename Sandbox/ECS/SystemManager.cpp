@@ -9,7 +9,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 Joel Chu (c.weiyuan): Defined the functions in SystemManager class
 							   100%
 *//*___________________________________________________________________________-*/
+#include <GL/glew.h>  // GLEW must come first
+#include <GL/gl.h>    // Then regular OpenGL
+#include <GLFW/glfw3.h>  // Then GLFW
 #include "SystemManager.h"
+#include "GlobalCoordinator.h"
 
 void SystemManager::entityRemoved(Entity entity) {
 	//erase entity from all systems
@@ -39,7 +43,22 @@ void SystemManager::entitySigChange(Entity entity, ComponentSig entitySig) {
 void SystemManager::update() {
 	for (auto const& pair : Systems) {
 		auto const& system = pair.second;
+		if (system->getSystemECS() == "PhysicsColliSystemECS") {
+			debugSystem.StartSystemTiming("PhysicsColliSystemECS");
+		}
+		if (system->getSystemECS() == "GraphicsSystemECS") {
+			debugSystem.StartSystemTiming("GraphicsSystemECS");
+		}
+		
 		system->update(GLFWFunctions::delta_time);
+
+		if (system->getSystemECS() == "PhysicsColliSystemECS") {
+			debugSystem.EndSystemTiming("PhysicsColliSystemECS");
+		}
+		if (system->getSystemECS() == "GraphicsSystemECS") {
+			debugSystem.EndSystemTiming("GraphicsSystemECS");
+		}
+		
 	}
 }
 

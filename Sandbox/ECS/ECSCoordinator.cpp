@@ -47,9 +47,9 @@ void ECSCoordinator::initialise() {
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
+	debugSystem.StartLoopECS();
 	systemManager->update();
-	
-
+	debugSystem.EndLoopECS();
 	if (GLFWFunctions::goNextMode) {
 		for (Entity entity : entityManager->getLiveEntities()) {
 			destroyEntity(entity);
@@ -495,4 +495,8 @@ std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
 
 std::string ECSCoordinator::getEntityID(Entity entity) {
 	return entityManager->getEntityId(entity);
+}
+
+void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
+	entityManager->setEntityId(entity, ID);
 }

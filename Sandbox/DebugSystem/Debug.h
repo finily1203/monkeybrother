@@ -55,11 +55,15 @@ public:
 
 	void StartLoop(); //Start record game loop time
 
+	void StartLoopECS(); //Start record game loop time
+
 	void StartSystemTiming(const char* systemName); //Start record system loop time
 
 	void EndSystemTiming(const char* systemName); //End record system loop time
 
 	void EndLoop();  //End record game loop time
+
+	void EndLoopECS(); //Start record game loop time
 
 	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
@@ -70,7 +74,9 @@ private:
 	ImFont* font;
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
+	static double loopStartTimeECS;
 	static double totalLoopTime;
+	static double totalLoopTimeECS;
 	static double lastUpdateTime;
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;

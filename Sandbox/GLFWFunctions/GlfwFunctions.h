@@ -47,6 +47,8 @@ struct GLFWFunctions {
 	static float volume;
 	static float zoomMouseCoordX;
 	static float zoomMouseCoordY;
+	static float objMoveMouseCoordX;
+	static float objMoveMouseCoordY;
 	static bool isAtMaxZoom;
 	static bool audioPaused;
 	static bool audioNext;
