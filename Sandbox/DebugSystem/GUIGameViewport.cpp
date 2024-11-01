@@ -216,14 +216,14 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 	serializer.WriteInt(viewportWidth, "GUIViewport.viewportWidth");
 	serializer.WriteInt(viewportHeight, "GUIViewport.viewportHeight");
 
-	serializer.WriteFloat(lastViewportSize.x, "GUIViewport.lastViewportSize.x");
-	serializer.WriteFloat(lastViewportSize.y, "GUIViewport.lastViewportSize.y");
+	//serializer.WriteFloat(lastViewportSize.x, "GUIViewport.lastViewportSize.x");
+	//serializer.WriteFloat(lastViewportSize.y, "GUIViewport.lastViewportSize.y");
 
-	serializer.WriteFloat(lastAspectSize.x, "GUIViewport.lastAspectSize.x");
-	serializer.WriteFloat(lastAspectSize.y, "GUIViewport.lastAspectSize.y");
+	//serializer.WriteFloat(lastAspectSize.x, "GUIViewport.lastAspectSize.x");
+	//serializer.WriteFloat(lastAspectSize.y, "GUIViewport.lastAspectSize.y");
 
-	serializer.WriteFloat(lastRenderPos.x, "GUIViewport.lastRenderPos.x");
-	serializer.WriteFloat(lastRenderPos.y, "GUIViewport.lastRenderPos.y");
+	//serializer.WriteFloat(lastRenderPos.x, "GUIViewport.lastRenderPos.x");
+	//serializer.WriteFloat(lastRenderPos.y, "GUIViewport.lastRenderPos.y");
 
 	serializer.WriteFloat(viewportPos.x, "GUIViewport.viewportPos.x");
 	serializer.WriteFloat(viewportPos.y, "GUIViewport.viewportPos.y");

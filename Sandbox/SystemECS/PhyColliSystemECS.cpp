@@ -16,6 +16,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "MovementComponent.h"
 #include "ClosestPlatform.h"
 #include "GraphicsComponent.h"
+#include "RigidBodyComponent.h"
+
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include <unordered_set>
@@ -963,7 +965,7 @@ void PhysicsSystemECS::update(float dt) {
     Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
 
     for (auto& entity : entities) {
-        bool isPlayer = ecsCoordinator.hasComponent<MovementComponent>(entity);
+        bool isPlayer = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
         if (isPlayer) {
             playerEntity = entity;
             break;
@@ -1008,6 +1010,8 @@ void PhysicsSystemECS::update(float dt) {
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
     //HandleAABBCollision(playerEntity, closestPlatformEntity);
     HandlePlayerInput(playerEntity);
+
+    std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).speed << std::endl;
 
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;    

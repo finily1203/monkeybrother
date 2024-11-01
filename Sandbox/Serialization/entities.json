@@ -227,8 +227,22 @@
         "top": 350.0,
         "bottom": 250.0
       },
-      "movement": {
-        "speed": 0.2
+      "rigidBody": {
+        "speed": 0.2,
+        "mass": 1.0,
+        "gravityScale": 1.0,
+        "velocity": {
+           "x": 0.0,
+           "y": 0.0
+        },
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "x": 0.0,
+          "y": 0.0
+        }
       },
       "animation": {
         "isAnimated": true

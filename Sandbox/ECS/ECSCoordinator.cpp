@@ -26,6 +26,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
+#include "RigidBodyComponent.h"
 
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
@@ -236,6 +237,19 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, enemy);
 		}
 
+		if (entityData.contains("rigidBody"))
+		{
+			RigidBodyComponent rigidBody{};
+			serializer.ReadObject(rigidBody.speed, entityId, "entities.rigidBody.speed");
+			serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
+			serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
+			serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
+			serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
+			serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
+
+			ecs.addComponent(entityObj, rigidBody);
+		}
+
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
@@ -441,6 +455,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<ClosestPlatform>();
 	registerComponent<AnimationComponent>();
 	registerComponent<EnemyComponent>();
+	registerComponent<RigidBodyComponent>();
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -450,7 +465,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
 		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
 		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
-		//physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		physicsSystemSig.set(getComponentType<RigidBodyComponent>(), true);
 	}
 
 	physicsSystem->initialise();
@@ -460,7 +475,6 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	{
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
-		//graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
 		graphicSystemSig.set(getComponentType<AnimationComponent>(), true);
 		graphicSystemSig.set(getComponentType<EnemyComponent>(), false);
 	}
