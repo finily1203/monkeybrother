@@ -423,10 +423,6 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
          0, 0, 1
     };
 
-    std::cout << "Rotating : " << Rotating[0][0] << " " << Rotating[0][1] << " " << Rotating[0][2] << std::endl;
-    std::cout << "Rotating : " << Rotating[1][0] << " " << Rotating[1][1] << " " << Rotating[1][2] << std::endl;
-    std::cout << "Rotating : " << Rotating[2][0] << " " << Rotating[2][1] << " " << Rotating[2][2] << std::endl;
-
     // TODO:: change the NDC matrix to be calculated based on the window size
     NDC =
     {
@@ -436,7 +432,8 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
 
     mdl_xform = Translating * (Rotating * Scaling);
     mdl_to_ndc_xform = NDC * mdl_xform;
-    return mdl_to_ndc_xform;
+    myMath::Matrix3x3 new_mdl_to_ndc = myMath::Matrix3x3::ConvertToMatrix3x3(mdl_to_ndc_xform);
+    return new_mdl_to_ndc;
 }
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
