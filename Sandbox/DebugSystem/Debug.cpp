@@ -346,11 +346,13 @@ void DebugSystem::update() {
 					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
 					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
 						transform.position.SetX(posXSlide);
+						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 					ImGui::SetNextItemWidth(200);
 					ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
 					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
 						transform.position.SetY(posYSlide);
+						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 
 					ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
