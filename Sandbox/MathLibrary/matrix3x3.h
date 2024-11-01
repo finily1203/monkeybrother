@@ -33,7 +33,6 @@ namespace myMath
             float, float, float,
             float, float, float);
         Matrix3x3(Matrix3x3 const&);
-        Matrix3x3(glm::mat3 const&);
 
         float GetMatrixValue(int, int) const;
         void SetMatrixValue(int, int, float);
@@ -44,6 +43,8 @@ namespace myMath
         Matrix3x3& operator+=(Matrix3x3 const&);
         Matrix3x3& operator-=(Matrix3x3 const&);
         Matrix3x3& operator*=(Matrix3x3 const&);
+
+        static glm::mat3 ConvertToGLMMat3(Matrix3x3 const&);
 
     private:
         float matrix[3][3];
