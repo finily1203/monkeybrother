@@ -9,7 +9,6 @@ FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatri
 
 // Destructor
 FontSystem::~FontSystem() {
-    // std::cout << "clear font system" << std::endl;
     cleanup();
 }
 

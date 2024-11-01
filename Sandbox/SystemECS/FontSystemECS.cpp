@@ -61,7 +61,7 @@ void FontSystemECS::update(float dt) {
 void FontSystemECS::cleanup() {
     if (fontSystem) {
         fontSystem->cleanup();
-        fontSystem.reset(); // Reset the shared pointer
+        fontSystem.reset();
     }
     entities.clear(); 
     std::cout << "FontSystemECS cleaned up successfully." << std::endl;

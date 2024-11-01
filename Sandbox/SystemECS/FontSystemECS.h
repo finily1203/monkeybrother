@@ -13,7 +13,8 @@ public:
 
     void initialise() override;
     void update(float dt) override;
-    void cleanup() override;
+    void cleanup() override
+        ;
    
 private:
     std::shared_ptr<FontSystem> fontSystem;
