@@ -19,6 +19,7 @@ File Contributions: Ian Loi (100%)
 *//*_________________________________________________________________________________________________-*/
 
 #include "vector2D.h"
+#include <glm/glm.hpp>
 
 
 namespace myMath
@@ -32,6 +33,7 @@ namespace myMath
             float, float, float,
             float, float, float);
         Matrix3x3(Matrix3x3 const&);
+        Matrix3x3(glm::mat3 const&);
 
         float GetMatrixValue(int, int) const;
         void SetMatrixValue(int, int, float);

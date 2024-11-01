@@ -64,6 +64,17 @@ namespace myMath
         }
     }
 
+    Matrix3x3::Matrix3x3(glm::mat3 const& rhs)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                matrix[i][j] = rhs[i][j];
+            }
+        }
+    }
+
     float Matrix3x3::GetMatrixValue(int row, int col) const
     {
         return matrix[row][col];
