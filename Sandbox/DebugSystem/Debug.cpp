@@ -107,105 +107,77 @@ void DebugSystem::update() {
 		ImGui::End();
 
 		ImGui::Begin("Debug");
-		//if (ImGui::CollapsingHeader("Performance Data")) { //Create collapsing header for perfomance data
-			//static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
-				//ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
+	
+		if (ImGui::CollapsingHeader("Performance Data")) {
+			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
+				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 
-			//ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table 
+			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table
 
-		//	ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
+			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
-		//	ImGui::SeparatorText("Performance Viewer");
-		//	ImGui::Text("Number of Systems: %d", systemCount);
+			ImGui::SeparatorText("Performance Viewer");
+			ImGui::Text("Number of Systems: %d", systemCount);
 
-		//	if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+				ImGui::TableSetupColumn("Systems");
+				ImGui::TableSetupColumn("Game Loop %");
+				ImGui::TableHeadersRow();
 
-		//		ImGui::TableSetupColumn("Systems");
-		//		ImGui::TableSetupColumn("Game Loop %");
-		//		ImGui::TableHeadersRow();
+				// Track combined ECS percentage
+				float ecsTotal = 0.0f;
+				bool foundECS = false;
 
-		//		for (int i{}; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+				// First pass - show non-ECS systems and calculate ECS total
+				for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+					const char* systemName = systems[i];
 
-		//			ImGui::TableNextRow();
-		//			ImGui::TableNextColumn();
-		//			ImGui::Text(systems[i]); //Display system's name
-		//			ImGui::TableNextColumn();
-		//			ImGui::Text("%.2f%%", systemGameLoopPercent[i]); //Display system's game loop percentage
-		//		}
-
-		//		ImGui::EndTable();
-		//	}
-		//}
-			if (ImGui::CollapsingHeader("Performance Data")) {
-				static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
-					ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
-
-				ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table
-
-				ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
-
-				ImGui::SeparatorText("Performance Viewer");
-				ImGui::Text("Number of Systems: %d", systemCount);
-
-				if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
-					ImGui::TableSetupColumn("Systems");
-					ImGui::TableSetupColumn("Game Loop %");
-					ImGui::TableHeadersRow();
-
-					// Track combined ECS percentage
-					float ecsTotal = 0.0f;
-					bool foundECS = false;
-
-					// First pass - show non-ECS systems and calculate ECS total
-					for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
-						const char* systemName = systems[i];
-
-						// Check if this is an ECS system
-						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
-							if (strcmp(systemName, "EntityComponentSystem")) {
-								ecsTotal = systemGameLoopPercent[i];
-							}
-							foundECS = true;
-							continue; // Skip individual ECS systems
+					// Check if this is an ECS system
+					if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+						if (strcmp(systemName, "EntityComponentSystem")) {
+							ecsTotal = systemGameLoopPercent[i];
 						}
-
-						// Show non-ECS systems normally
-						ImGui::TableNextRow();
-						ImGui::TableNextColumn();
-						ImGui::Text(systemName);
-						ImGui::TableNextColumn();
-						ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+						foundECS = true;
+						continue; // Skip individual ECS systems
 					}
 
-					// Show combined ECS entry if we found any ECS systems
-					if (foundECS) {
-						ImGui::TableNextRow();
-						ImGui::TableNextColumn();
-
-						// Create a tree node for ECS Systems
-						if (ImGui::TreeNode("ECS Systems")) {
-							// Calculate column width for the system names
-							float textBaseWidth = ImGui::CalcTextSize("PhysicsColliSystemECS: ").x;
-
-							// Show individual ECS systems as children with aligned percentages
-							for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
-								const char* systemName = systems[i];
-								if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
-									ImGui::Text("%s:", systemName);
-									ImGui::SameLine(textBaseWidth);
-									ImGui::Text("%7.2f%%", systemGameLoopPercent[i]); // Right-aligned percentage
-								}
-							}
-							ImGui::TreePop();
-						}
-
-						ImGui::TableNextColumn();
-						ImGui::Text("%.2f%%", ecsTotal); // Right-aligned with fixed width
-					}
-
-					ImGui::EndTable();
+					// Show non-ECS systems normally
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					ImGui::Text(systemName);
+					ImGui::TableNextColumn();
+					ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
 				}
+
+				// Show combined ECS entry if we found any ECS systems
+				if (foundECS) {
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+
+					// Create a tree node for ECS Systems
+					if (ImGui::TreeNode("ECS Systems")) {
+						// Calculate column width for the system names
+						float textBaseWidth = ImGui::CalcTextSize("PhysicsColliSystemECS: ").x;
+
+						// Show individual ECS systems as children with aligned percentages
+						for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
+							const char* systemName = systems[i];
+							if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+								ImGui::Text("%s:", systemName);
+								ImGui::SameLine(textBaseWidth);
+								ImGui::Text("%7.2f%%", systemGameLoopPercent[i]); // Right-aligned percentage
+							}
+						}
+						ImGui::TreePop();
+					}
+
+					ImGui::TableNextColumn();
+					ImGui::Text("%.2f%%", ecsTotal); // Right-aligned with fixed width
+				}
+
+				ImGui::EndTable();
 			}
+		}
 
 		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
 			ImGui::SeparatorText("Mouse Coordinates");
