@@ -94,3 +94,23 @@ void Console::DrawImpl(const char* title) {
 
 	ImGui::End();
 }
+
+void Console::LoadConsoleConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+	
+	// checks if the JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+	
+	// retrieve the JSON object from the JSON file
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object, assign every read
+	// data to every elements that needs to be initialized
+	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
+	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
+}

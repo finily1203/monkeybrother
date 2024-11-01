@@ -146,6 +146,21 @@ namespace myMath
         return *this;
     }
 
+    glm::mat3 Matrix3x3::ConvertToGLMMat3(Matrix3x3 const& rhs)
+    {
+        glm::mat3 glmMatrix{};
+
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                glmMatrix[i][j] = rhs.matrix[i][j];
+            }
+        }
+
+        return glmMatrix;
+    }
+
     Matrix3x3 operator+(Matrix3x3 const& lhs, Matrix3x3 const& rhs)
     {
         Matrix3x3 result;

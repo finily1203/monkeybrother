@@ -518,6 +518,43 @@ void DebugSystem::UpdateSystemTimes() {
 	}
 }
 
+void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	// checks if the JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	// retrieve the JSON object from the JSON file
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object, assign every read
+	// data to every elements that needs to be initialized
+	serializer.ReadFloat(clear_color.x, "Debug.clearColor.r");
+	serializer.ReadFloat(clear_color.y, "Debug.clearColor.g");
+	serializer.ReadFloat(clear_color.z, "Debug.clearColor.b");
+	serializer.ReadFloat(clear_color.w, "Debug.clearColor.a");
+
+	serializer.ReadFloat(widthSlide, "Debug.widthSlide");
+	serializer.ReadFloat(heightSlide, "Debug.heightSlide");
+	serializer.ReadFloat(sizeSlide, "Debug.sizeSlide");
+
+	// ???? object count ????
+
+	serializer.ReadDouble(loopStartTime, "Debug.loopStartTime");
+	serializer.ReadDouble(totalLoopTime, "Debug.totalLoopTime");
+	serializer.ReadDouble(lastUpdateTime, "Debug.lastUpdateTime");
+
+	serializer.ReadInt(systemCount, "Debug.systemCount");
+
+	// ???? object size x max, object size x min ????
+	// ???? object size y max, object size y min ????
+}
+
 //Check if legacy key is mapped in ImGui key map
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)

@@ -8,29 +8,31 @@ float Clamp(float value, float min, float max) {
 }
 
 //Variables for GameViewWindow
-int GameViewWindow::viewportHeight = 0;
-int GameViewWindow::viewportWidth = 0;
-ImVec2 GameViewWindow::lastViewportSize = { 0,0 };
-ImVec2 GameViewWindow::lastAspectSize = { 0,0 };
-ImVec2 GameViewWindow::lastRenderPos = { 0,0 };
+int GameViewWindow::viewportHeight;
+int GameViewWindow::viewportWidth;
+ImVec2 GameViewWindow::lastViewportSize;
+ImVec2 GameViewWindow::lastAspectSize;
+ImVec2 GameViewWindow::lastRenderPos;
 //ImVec2 GameViewWindow::windowSize = { 0,0 };
-ImVec2 GameViewWindow::viewportPos = { 0, 0 };
-GLuint GameViewWindow::viewportTexture = 0;
+ImVec2 GameViewWindow::viewportPos;
+GLuint GameViewWindow::viewportTexture;
 bool zoomTestFlag = false;
 bool GameViewWindow::clickedZoom = false;
 bool GameViewWindow::clickedScreenPan = false;
 
-float GameViewWindow::zoomLevel = 1.f; 
-const float GameViewWindow::MIN_ZOOM = 1.f;  // minimum zoom constant
-const float GameViewWindow::MAX_ZOOM = 5.f;  //  maximum zoom constant
 bool insideViewport = false;
 float GameViewWindow::accumulatedDragDistanceX = 0.0f;
 float GameViewWindow::accumulatedDragDistanceY = 0.0f;
+float GameViewWindow::zoomLevel; 
+float GameViewWindow::MIN_ZOOM;  // minimum zoom constant
+float GameViewWindow::MAX_ZOOM;  //  maximum zoom constant
 
 void GameViewWindow::Initialise() {
-	viewportWidth = 1600;
-	viewportHeight = 900;
-	viewportTexture = 0;
+	//viewportWidth = 1600;
+	//viewportHeight = 900;
+	//viewportTexture = 0;
+
+	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 }
 
 void GameViewWindow::Update() {
@@ -182,4 +184,53 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 bool GameViewWindow::IsPointInViewport(double x, double y) {
 	return (x - viewportPos.x <= lastViewportSize.x && x - viewportPos.x >= 0 
 		&& y - viewportPos.y <= lastViewportSize.y && y - viewportPos.y >= 0);
+}
+
+// load the IMGUI viewport configuration values from JSON file
+void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	// checks if JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	// return the entire JSON object from the file
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object and assign all the read data to
+	// data elements of GameViewWindow class that needs to be initialized
+	// this is for viewport width and height
+	serializer.ReadInt(viewportWidth, "GUIViewport.viewportWidth");
+	serializer.ReadInt(viewportHeight, "GUIViewport.viewportHeight");
+
+	// this is for the size of the viewport
+	serializer.ReadFloat(lastViewportSize.x, "GUIViewport.lastViewportSize.x");
+	serializer.ReadFloat(lastViewportSize.y, "GUIViewport.lastViewportSize.y");
+
+	// this is for previous aspect size
+	serializer.ReadFloat(lastAspectSize.x, "GUIViewport.lastAspectSize.x");
+	serializer.ReadFloat(lastAspectSize.y, "GUIViewport.lastAspectSize.y");
+
+	// this is for previous rendered position
+	serializer.ReadFloat(lastRenderPos.x, "GUIViewport.lastRenderPos.x");
+	serializer.ReadFloat(lastRenderPos.y, "GUIViewport.lastRenderPos.y");
+
+	// this is for viewport position
+	serializer.ReadFloat(viewportPos.x, "GUIViewport.viewportPos.x");
+	serializer.ReadFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+
+	// this is for viewport texture
+	serializer.ReadUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+
+	// this is for zoom level
+	serializer.ReadFloat(zoomLevel, "GUIViewport.zoomLevel");
+
+	// this is for the minimum and maximum zoom
+	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
+	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+
 }

@@ -2,6 +2,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "../Serialization/jsonSerialization.h"
+#include "../FilePaths/filePath.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
@@ -11,8 +13,8 @@ class GameViewWindow {
 public:
 
 	static float zoomLevel;
-	static const float MIN_ZOOM;  // minimum zoom constant
-	static const float MAX_ZOOM;  // maximum zoom constant
+	static float MIN_ZOOM;  // minimum zoom constant
+	static float MAX_ZOOM;  // maximum zoom constant
 
 	static void Initialise();
 
@@ -21,6 +23,9 @@ public:
 	static bool IsPointInViewport(double x, double y);
 
 	static ImVec2 getViewportPos() { return viewportPos; }
+	static void LoadViewportConfigFromJSON(std::string const& filename);
+
+private:
 
 	static void setAccumulatedDragDistance(float valueX, float valueY) {
 		accumulatedDragDistanceX = valueX;
