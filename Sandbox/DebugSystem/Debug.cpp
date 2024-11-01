@@ -48,6 +48,8 @@ float DebugSystem::objSizeXMin = 100.0f;
 float DebugSystem::objSizeYMax = 5000.0f;
 float DebugSystem::objSizeYMin = 100.0f;
 
+int saveCount = 1;
+
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 
@@ -346,6 +348,9 @@ void DebugSystem::update() {
 					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
 					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
 						transform.position.SetX(posXSlide);
+
+						std::string saveFile = GenerateSaveJSONFile(saveCount);
+						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
 						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 					ImGui::SetNextItemWidth(200);
@@ -560,6 +565,40 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	// ???? object size x max, object size x min ????
 	// ???? object size y max, object size y min ????
+}
+
+std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
+{
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
+
+	nlohmann::json entitiesJSON;
+
+	std::ifstream entitiesJSONFile(FilePathManager::GetEntitiesJSONPath());
+
+	if (entitiesJSONFile.is_open())
+	{
+		entitiesJSONFile >> entitiesJSON;
+		entitiesJSONFile.close();
+	}
+
+	std::ofstream outFile(jsonPath);
+
+	if (outFile.is_open())
+	{
+		outFile << entitiesJSON.dump(2);
+		outFile.close();
+	}
+
+	else
+	{
+		std::cout << "Error: could not create file " << jsonPath << std::endl;
+		return "";
+	}
+
+	saveNumber++;
+
+	return jsonPath;
 }
 
 //Check if legacy key is mapped in ImGui key map

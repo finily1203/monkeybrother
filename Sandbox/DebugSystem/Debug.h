@@ -74,6 +74,8 @@ public:
 
 	void SaveDebugConfigFromJSON(std::string const& filename);
 
+	std::string GenerateSaveJSONFile(int& saveNumber);
+
 private:
 	ImGuiIO* io;
 	ImFont* font;

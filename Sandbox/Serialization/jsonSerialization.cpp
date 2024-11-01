@@ -49,7 +49,7 @@ bool JSONSerializer::Save(std::string const& filename)
 	if (outputFile.is_open())
 	{
 		// write the contents of the JSON object to the output JSON file
-		outputFile << jsonObject.dump(4);
+		outputFile << jsonObject.dump(2);
 
 		// close the output JSON file
 		outputFile.close();
