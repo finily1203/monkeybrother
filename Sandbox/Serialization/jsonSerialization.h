@@ -30,12 +30,12 @@ public:
 	virtual bool IsGood();
 
 	void ReadSpecificObject(myMath::Vector2D&, nlohmann::json const&);
-	void ReadSpecificObject(glm::mat3&, nlohmann::json const&);
+	void ReadSpecificObject(myMath::Matrix3x3&, nlohmann::json const&);
 	void ReadSpecificObject(float&, nlohmann::json const&);
 	void ReadSpecificObject(bool&, nlohmann::json const&);
 
 	void WriteSpecificObject(myMath::Vector2D const&, nlohmann::json&);
-	void WriteSpecificObject(glm::mat3 const&, nlohmann::json&);
+	void WriteSpecificObject(myMath::Matrix3x3 const&, nlohmann::json&);
 	void WriteSpecificObject(float const&, nlohmann::json&);
 	void WriteSpecificObject(bool const&, nlohmann::json&);
 

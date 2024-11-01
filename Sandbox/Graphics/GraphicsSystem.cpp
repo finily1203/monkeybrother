@@ -397,7 +397,7 @@ void GraphicsSystem::drawDebugLines(const GLObject& obj) {
     glEnd();
 }
 
-glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
@@ -439,7 +439,7 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D ob
     return mdl_to_ndc_xform;
 }
 
-void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {
+void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
     // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
         //m_Shader->Bind();
@@ -450,11 +450,13 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 x
     // bind VAO of this object
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glm::mat3 mdl_xform(1.0f);
+    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
     //GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
-        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(xform));
+        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
     }
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);

@@ -12,6 +12,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #pragma once
 #include <glm/glm.hpp>
 #include "vector2D.h"
+#include "matrix3x3.h"
 
 //ori, scl, pos, mdl_xform, mdl_ndc_xform
 struct TransformComponent
@@ -19,6 +20,8 @@ struct TransformComponent
 	myMath::Vector2D orientation;
 	myMath::Vector2D scale;
 	myMath::Vector2D position;
-	glm::mat3 mdl_xform;
-	glm::mat3 mdl_to_ndc_xform;
+	//glm::mat3 mdl_xform;
+	//glm::mat3 mdl_to_ndc_xform;
+	myMath::Matrix3x3 mdl_xform;
+	myMath::Matrix3x3 mdl_to_ndc_xform;
 };

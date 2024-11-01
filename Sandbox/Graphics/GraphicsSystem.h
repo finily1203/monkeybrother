@@ -33,6 +33,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Systems.h"
 #include <string>
 #include "vector2D.h"
+#include "matrix3x3.h"
 
 
 struct AABB {
@@ -64,8 +65,8 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    glm::mat3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri);
-    void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
+    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri);
+    void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }
     //Shader* GetShader2() const{ return m_Shader2.get(); }

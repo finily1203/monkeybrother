@@ -21,6 +21,7 @@ File Contributions: Ian Loi (100%)
 #include <string>
 #include <iostream>
 #include "vector2D.h"
+#include "matrix3x3.h"
 
 
 class BaseSerializer

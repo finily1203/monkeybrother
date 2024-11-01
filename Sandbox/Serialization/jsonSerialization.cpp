@@ -79,7 +79,7 @@ void JSONSerializer::ReadSpecificObject(myMath::Vector2D& object, nlohmann::json
 	}
 }
 
-void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const& jsonObj)
+void JSONSerializer::ReadSpecificObject(myMath::Matrix3x3& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_array() && jsonObj.size() == 3)
 	{
@@ -89,7 +89,9 @@ void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const&
 			{
 				for (int j{}; j < 3; ++j)
 				{
-					object[i][j] = jsonObj[i][j].get<float>();
+					//object[i][j] = jsonObj[i][j].get<float>();
+					float value = jsonObj[i][j].get<float>();
+					object.SetMatrixValue(i, j, value);
 				}
 			}
 		}
@@ -120,7 +122,7 @@ void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohman
 	jsonObj["y"] = object.GetY();
 }
 
-void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json& jsonObj)
+void JSONSerializer::WriteSpecificObject(myMath::Matrix3x3 const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = nlohmann::json::array();
 
@@ -130,7 +132,8 @@ void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json
 
 		for (int j{}; j < 3; ++j)
 		{
-			row.push_back(object[i][j]);
+			float value = object.GetMatrixValue(i, j);
+			row.push_back(value);
 		}
 
 		jsonObj.push_back(row);
