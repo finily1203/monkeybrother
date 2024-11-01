@@ -32,6 +32,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
 #include <string>
+#include "vector2D.h"
 
 
 struct AABB {
@@ -63,7 +64,7 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri);
     void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }

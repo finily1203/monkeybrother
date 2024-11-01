@@ -96,8 +96,6 @@ public:
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	// update the entity's data
-	void UpdateEntityData(Entity& entity);
 
 	//System Manager Functions
 	//Register the system
@@ -107,10 +105,13 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
+	ComponentSig getEntitySignature(Entity entity);
+
 	//void test();
 	void test2();
 	void test3();
 	void test4();
+	void test5();
 	void initialiseSystemsAndComponents();
 
 private:
