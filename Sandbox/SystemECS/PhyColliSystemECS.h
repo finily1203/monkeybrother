@@ -87,6 +87,8 @@ public:
     void update(float dt) override;
     void cleanup() override;
 
+    std::string getSystemECS() override;
+
     // Getters and Setters
     myMath::Vector2D GetVelocity() const { return velocity; }
     bool GetAlrJumped() const { return alrJumped; }

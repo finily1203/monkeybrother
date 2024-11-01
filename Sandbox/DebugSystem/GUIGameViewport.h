@@ -22,19 +22,58 @@ public:
 
 	static bool IsPointInViewport(double x, double y);
 
+	static ImVec2 getViewportPos() { return viewportPos; }
 	static void LoadViewportConfigFromJSON(std::string const& filename);
 	static void SaveViewportConfigToJSON(std::string const& filename);
 
-private:
+	static void setAccumulatedDragDistance(float valueX, float valueY) {
+		accumulatedMouseDragDist.x += valueX;
+		accumulatedMouseDragDist.y += valueY;
+	}
+	static void setInitialMousePos(float valueX, float valueY) {
+		initialMousePos.x = valueX;
+		initialMousePos.y = valueY;
+	}
 
+	static void setMouseDragDist(float valueX, float valueY) {
+		mouseDragDist.x = valueX;
+		mouseDragDist.y = valueY;
+	}
+
+	static ImVec2 getInitialMousePos() {
+		return accumulatedMouseDragDist;
+	}
+
+	static ImVec2 getAccumulatedDragDistance() {
+		return initialMousePos;
+	}
+
+	static ImVec2 getMouseDragDist() {
+		return mouseDragDist;
+	}
+
+
+	static void setClickedZoom(bool state) {
+		clickedZoom = state;
+	}
+
+	static void setClickedScreenPan(bool state) {
+		clickedScreenPan = state;
+	}
+
+private:
 	static int viewportWidth;
 	static int viewportHeight;
 	static ImVec2 viewportPos;
+	static ImVec2 windowSize;
 	static GLuint viewportTexture;
-	static ImVec2 lastViewportSize;
-	static ImVec2 lastAspectSize;
-	static ImVec2 lastRenderPos;
-	//static ImVec2 windowSize;
+	static ImVec2 accumulatedMouseDragDist;
+	static bool clickedZoom;
+	static bool clickedScreenPan;
+
+	static bool isDragging;
+	static ImVec2 initialMousePos;
+	static ImVec2 mouseDragDist;
 
 	static void SetupViewportTexture(); //Set up Opengl texture to store game scene
 
@@ -45,12 +84,5 @@ private:
 	static ImVec2 GetLargestSizeForViewport(); //Resize viewport dynamically while preserving aspect ratio
 
 	static ImVec2 GetCenteredPosForViewport(ImVec2 aspectSize); //Center viewport within available space
-
-	static void UpdateViewportSize() {
-		lastViewportSize = ImGui::GetContentRegionAvail();
-		lastAspectSize = GetLargestSizeForViewport();
-		lastRenderPos = GetCenteredPosForViewport(lastAspectSize);
-
-	}
 
 };

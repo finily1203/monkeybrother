@@ -34,6 +34,8 @@
     <ClCompile Include="DebugSystem\Crashlog.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
+    <ClCompile Include="Systems\Physics\Collision\Collision.cpp" />
+    <ClCompile Include="Systems\Physics\System\Physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />

@@ -35,7 +35,7 @@ File Contributions: Lew Zong Han Owen (100%)
 
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
-class DebugSystem : public GameSystems {
+class DebugSystem : public GameSystems/*, public System*/ {
 public:
 
 	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
@@ -43,18 +43,28 @@ public:
 	DebugSystem();
 	~DebugSystem();
 
-	void initialise() override;
-	void update() override;
-	void cleanup() override;
+	void GameSystems::initialise() override;
+	//void System::initialise() override;
+
+	//void System::update(float dt) override;
+	void GameSystems::update() override;
+
+	void GameSystems::cleanup() override;
+	//void System::cleanup() override;
+
 	SystemType getSystem() override;
 
 	void StartLoop(); //Start record game loop time
+
+	void StartLoopECS(); //Start record game loop time
 
 	void StartSystemTiming(const char* systemName); //Start record system loop time
 
 	void EndSystemTiming(const char* systemName); //End record system loop time
 
 	void EndLoop();  //End record game loop time
+
+	void EndLoopECS(); //Start record game loop time
 
 	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
@@ -69,11 +79,18 @@ private:
 	ImFont* font;
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
+	static double loopStartTimeECS;
 	static double totalLoopTime;
+	static double totalLoopTimeECS;
 	static double lastUpdateTime;
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
+
+	static float objSizeXMax;
+	static float objSizeXMin;
+	static float objSizeYMax;
+	static float objSizeYMin;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map

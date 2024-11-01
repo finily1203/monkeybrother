@@ -93,6 +93,14 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
+	std::string GetExecutablePath();
+	std::string GetWindowConfigJSONPath();
+	std::string GetEntitiesJSONPath();
+
+	std::vector<Entity> getAllLiveEntities();
+	std::string getEntityID(Entity entity);
+	void setEntityID(Entity entity, std::string ID);
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);

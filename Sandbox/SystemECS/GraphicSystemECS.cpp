@@ -174,3 +174,7 @@ void GraphicSystemECS::update(float dt) {
 
 //cleanup currently does not do anything
 void GraphicSystemECS::cleanup() {}
+
+std::string GraphicSystemECS::getSystemECS() {
+	return "GraphicsSystemECS";
+}
