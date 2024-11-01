@@ -10,6 +10,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #pragma once
+
 struct MovementComponent
 {
 	float speed;

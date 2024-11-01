@@ -61,6 +61,11 @@ struct GLFWFunctions {
 	static bool slideAudio;
 	static bool bubblePopping;
 
+	static bool enemyMoveLeft;
+	static bool enemyMoveRight;
+	static bool enemyMoveUp;
+	static bool enemyMoveDown;
+
 	static GLboolean left_turn_flag;
 	static GLboolean right_turn_flag;
 	static GLboolean scale_up_flag;

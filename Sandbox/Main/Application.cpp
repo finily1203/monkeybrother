@@ -43,6 +43,7 @@ int main() {
 		engine->addSystem(audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
+		//engine->addSystem(&graphicsSystem);
 
 		engine->addSystem(&debugSystem);
 

@@ -29,11 +29,15 @@ public:
 	virtual bool Save(std::string const&);
 	virtual bool IsGood();
 
-	void ReadSpecificObject(glm::vec2&, nlohmann::json const&);
+	void ReadSpecificObject(myMath::Vector2D&, nlohmann::json const&);
 	void ReadSpecificObject(glm::mat3&, nlohmann::json const&);
+	void ReadSpecificObject(float&, nlohmann::json const&);
+	void ReadSpecificObject(bool&, nlohmann::json const&);
 
-	void WriteSpecificObject(glm::vec2 const&, nlohmann::json&);
+	void WriteSpecificObject(myMath::Vector2D const&, nlohmann::json&);
 	void WriteSpecificObject(glm::mat3 const&, nlohmann::json&);
+	void WriteSpecificObject(float const&, nlohmann::json&);
+	void WriteSpecificObject(bool const&, nlohmann::json&);
 
 	template <typename T>
 	void ReadObject(T&, std::string const&, std::string const&);
@@ -52,7 +56,7 @@ public:
 	nlohmann::json GetJSONObject() const;
 
 private:
-	nlohmann::json jsonObj;
+	nlohmann::json jsonObject;
 	std::ifstream fileStream;
 };
 
@@ -64,7 +68,7 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 
 	// holds each different key from the keyStream
 	std::string keySegment;
-	nlohmann::json currentObj = jsonObj;
+	nlohmann::json currentObj = jsonObject;
 
 	while (std::getline(keyStream, keySegment, '.'))
 	{
@@ -131,7 +135,7 @@ void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::s
 		
 	// holds each different key from the keyStream
 	std::string keySegment;
-	nlohmann::json* currentObj = &jsonObj;
+	nlohmann::json* currentObj = &jsonObject;
 
 	while (std::getline(keyStream, keySegment, '.'))
 	{

@@ -89,74 +89,80 @@ void GraphicsSystem::initialise() {
 
     loadShaderAssets();
     loadTextureAssets();
+    std::cout << assetsManager.texWidthGet() << std::endl;
+    std::cout << assetsManager.texHeightGet() << std::endl;
+    std::cout << assetsManager.nrChannelsGet() << std::endl;
 
-    // Load texture 1
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
+    int width = assetsManager.texWidthGet();
+    int height = assetsManager.texHeightGet();
 
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //// Load texture 1
+    //int width, height, nrChannels;
+    //stbi_set_flip_vertically_on_load(true);
+    //unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
 
-        // Load texture into OpenGL
-        glGenTextures(1, &m_Texture);
-        glBindTexture(GL_TEXTURE_2D, m_Texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
 
-        // Set texture parameters to prevent bleeding
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use nearest filtering
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
+    //    // Load texture into OpenGL
+    //    glGenTextures(1, &m_Texture);
+    //    glBindTexture(GL_TEXTURE_2D, m_Texture);
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
 
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //    // Set texture parameters to prevent bleeding
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use nearest filtering
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
 
-    // Loat texture 2
-    glGenTextures(1, &m_Texture2);
-    glBindTexture(GL_TEXTURE_2D, m_Texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
 
-    // Load texture 3
-    glGenTextures(1, &m_Texture3);
-    glBindTexture(GL_TEXTURE_2D, m_Texture3);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Failed to load texture!" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
+    //// Loat texture 2
+    //glGenTextures(1, &m_Texture2);
+    //glBindTexture(GL_TEXTURE_2D, m_Texture2);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
+
+    //// Load texture 3
+    //glGenTextures(1, &m_Texture3);
+    //glBindTexture(GL_TEXTURE_2D, m_Texture3);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
+    //if (data) {
+    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
+    //    stbi_image_free(data);
+    //}
+    //else {
+    //    std::cerr << "Failed to load texture!" << std::endl;
+    //    stbi_image_free(data);
+    //    return;
+    //}
 
 
 
@@ -285,7 +291,7 @@ void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScali
 
 void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 };
-    GLfloat aspect_ratio = 1600 / 900;// TODO::change this to be calculated based on the window size
+    GLfloat aspect_ratio = 1600.f / 900.f;// TODO::change this to be calculated based on the window size
 
     Scaling =
     {
@@ -391,30 +397,35 @@ void GraphicsSystem::drawDebugLines(const GLObject& obj) {
     glEnd();
 }
 
-glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri) {
+glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
     {
         1,      0 ,       0,
         0,      1 ,       0,
-        objPos.x,   objPos.y , 1
+        objPos.GetX(),   objPos.GetY() , 1
     };
     Scaling =
     {
-        objScale.x  ,0          ,0,
-        0           ,objScale.y    ,0,
+        objScale.GetX()  ,0          ,0,
+        0           ,objScale.GetY()    ,0,
         0           ,0             ,1
     };
 
-    objOri.x += static_cast<GLfloat>(objOri.y * deltaTime * 100.0f);
+
+    objOri.SetX(objOri.GetX() + objOri.GetY());
 
     Rotating =
     {
-         glm::cos(glm::radians(objOri.x)), glm::sin(glm::radians(objOri.x)), 0,
-        -glm::sin(glm::radians(objOri.x)), glm::cos(glm::radians(objOri.x)), 0,
+         glm::cos(glm::radians(objOri.GetX())), glm::sin(glm::radians(objOri.GetX())), 0,
+        -glm::sin(glm::radians(objOri.GetX())), glm::cos(glm::radians(objOri.GetX())), 0,
          0, 0, 1
     };
+
+    std::cout << "Rotating : " << Rotating[0][0] << " " << Rotating[0][1] << " " << Rotating[0][2] << std::endl;
+    std::cout << "Rotating : " << Rotating[1][0] << " " << Rotating[1][1] << " " << Rotating[1][2] << std::endl;
+    std::cout << "Rotating : " << Rotating[2][0] << " " << Rotating[2][1] << " " << Rotating[2][2] << std::endl;
 
     // TODO:: change the NDC matrix to be calculated based on the window size
     NDC =
