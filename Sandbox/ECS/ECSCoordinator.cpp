@@ -582,8 +582,8 @@ void ECSCoordinator::test4() {
 		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
 	}
 	Entity platform1 = createEntity();
-	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
-	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
+	addComponent(platform1, TransformComponent{ myMath::Vector2D(0.f, 0.f), myMath::Vector2D(1000.0f, 50.0f), myMath::Vector2D(0.0f, -150.f) });
+	//std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
@@ -596,7 +596,4 @@ std::string ECSCoordinator::getEntityID(Entity entity) {
 
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
-}
-	addComponent(platform1, TransformComponent{ myMath::Vector2D(0.f, 0.f), myMath::Vector2D(1000.0f, 50.0f), myMath::Vector2D(0.0f, -150.f) });
-	//std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;
 }

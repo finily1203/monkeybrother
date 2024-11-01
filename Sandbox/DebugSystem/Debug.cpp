@@ -328,10 +328,9 @@ void DebugSystem::update() {
 					Entity newEntity = ecsCoordinator.createEntity();
 					std::string entityID = sigBuffer;
 					TransformComponent transform{};
-					transform.position = glm::vec2(
-						xCoordinates, yCoordinates
-					);
-					transform.scale = glm::vec2(100.0f, 100.0f);
+					transform.position.SetX(xCoordinates);
+					transform.position.SetY(yCoordinates);
+					transform.scale = myMath::Vector2D(100.0f, 100.0f);
 					ecsCoordinator.addComponent(newEntity, transform);
 					ecsCoordinator.setEntityID(newEntity, entityID);
 					
@@ -346,11 +345,11 @@ void DebugSystem::update() {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 					Entity newEntity = ecsCoordinator.createEntity();
 					TransformComponent transform{};
-					transform.position = glm::vec2(
-						glm::vec2(ecsCoordinator.getRandomVal(-800.f, 800.f),
+					transform.position = myMath::Vector2D(
+						myMath::Vector2D(ecsCoordinator.getRandomVal(-800.f, 800.f),
 							ecsCoordinator.getRandomVal(-450.f, 450.f))
 					);
-					transform.scale = glm::vec2(100.0f, 100.0f);
+					transform.scale = myMath::Vector2D(100.0f, 100.0f);
 					ecsCoordinator.addComponent(newEntity, transform);
 				}
 			}
@@ -362,33 +361,33 @@ void DebugSystem::update() {
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				auto signature = ecsCoordinator.getEntityID(entity);
 
-				float posXSlide = transform.position.x;
-				float posYSlide = transform.position.y;
+				float posXSlide = transform.position.GetX();
+				float posYSlide = transform.position.GetY();
 
 				ImGui::PushID(entity);
 
-				widthSlide = transform.scale.x;
-				heightSlide = transform.scale.y;
+				widthSlide = transform.scale.GetX();
+				heightSlide = transform.scale.GetY();
 
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
 					ImGui::SetNextItemWidth(200);
 					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
 					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
-						transform.position.x = posXSlide;
+						transform.position.SetX(posXSlide);
 					}
 					ImGui::SetNextItemWidth(200);
 					ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
 					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
-						transform.position.y = posYSlide;
+						transform.position.SetY(posYSlide);
 					}
 
 					ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
 					if (ImGui::IsItemActivated) {
-						transform.scale.x = widthSlide;
+						transform.scale.SetX(widthSlide);
 					}
 					ImGui::SliderFloat("Height", &heightSlide, objSizeYMin, objSizeYMax, "%.1f");
 					if (ImGui::IsItemActivated) {
-						transform.scale.y = heightSlide;
+						transform.scale.SetY(heightSlide);
 					}
 
 					if (ImGui::Button("Remove")) {
@@ -416,7 +415,7 @@ void DebugSystem::update() {
 
 				Console::GetLog() << TESTEST.x << " Baby" << std::endl;
 
-				Console::GetLog() << signature << " || " << transform.position.x << " || " << transform.position.y
+				Console::GetLog() << signature << " || " << transform.position.GetX() << " || " << transform.position.GetY()
 					<< std::endl;
 			}
 
