@@ -35,25 +35,25 @@ public:
     };
 
     struct OBB {
-        glm::vec2 center;      // Center position
-        glm::vec2 halfExtents; // Half-width and half-height
+        myMath::Vector2D center;      // Center position
+        myMath::Vector2D halfExtents; // Half-width and half-height
         float rotation;        // Rotation in radians
-        glm::vec2 axes[2];     // Local axes (normalized)
+        myMath::Vector2D axes[2];     // Local axes (normalized)
     };
 
     OBB createOBBFromEntity(Entity entity);
 
     // Project point onto axis
-    float projectPoint(const glm::vec2& point, const glm::vec2& axis);
+    float projectPoint(const myMath::Vector2D& point, const myMath::Vector2D& axis);
     // Get projection interval of OBB onto axis
-    void projectOBB(const OBB& obb, const glm::vec2& axis, float& min, float& max);
+    void projectOBB(const OBB& obb, const myMath::Vector2D& axis, float& min, float& max);
 
     // Get OBB vertices
-    void getOBBVertices(const OBB& obb, glm::vec2 vertices[4]);
+    void getOBBVertices(const OBB& obb, myMath::Vector2D vertices[4]);
     // Circle vs OBB collision detection using SAT
-    bool checkCircleOBBCollision(const glm::vec2& circleCenter, float radius, const OBB& obb, glm::vec2& normal, float& penetration);
+    bool checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration);
     //bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2);
-    bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, glm::vec2& normal, float& penetration);
+    bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, myMath::Vector2D& normal, float& penetration);
 
     // AABB Collision detection
     bool CollisionIntersection_RectRect(const AABB& platform,
@@ -63,7 +63,7 @@ public:
         float& firstTimeOfCollision);
 
     // AABB slope collision detection
-    //bool AABBSlopeCollision(Entity platform, Entity player, glm::vec2 velocity);
+    //bool AABBSlopeCollision(Entity platform, Entity player, myMath::Vector2D velocity);
 
     // Getters and Setters
     myMath::Vector2D GetCollisionPoint() const { return collisionPoint; }
