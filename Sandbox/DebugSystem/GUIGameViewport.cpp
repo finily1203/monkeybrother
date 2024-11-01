@@ -204,5 +204,39 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	// this is for the minimum and maximum zoom
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+}
 
+void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	serializer.WriteInt(viewportWidth, "GUIViewport.viewportWidth");
+	serializer.WriteInt(viewportHeight, "GUIViewport.viewportHeight");
+
+	serializer.WriteFloat(lastViewportSize.x, "GUIViewport.lastViewportSize.x");
+	serializer.WriteFloat(lastViewportSize.y, "GUIViewport.lastViewportSize.y");
+
+	serializer.WriteFloat(lastAspectSize.x, "GUIViewport.lastAspectSize.x");
+	serializer.WriteFloat(lastAspectSize.y, "GUIViewport.lastAspectSize.y");
+
+	serializer.WriteFloat(lastRenderPos.x, "GUIViewport.lastRenderPos.x");
+	serializer.WriteFloat(lastRenderPos.y, "GUIViewport.lastRenderPos.y");
+
+	serializer.WriteFloat(viewportPos.x, "GUIViewport.viewportPos.x");
+	serializer.WriteFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+
+	serializer.WriteUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+
+	serializer.WriteFloat(zoomLevel, "GUIViewport.zoomLevel");
+
+	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom");
+	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom");
 }

@@ -41,6 +41,7 @@ public:
 	}
 
 	void LoadConsoleConfigFromJSON(std::string const& filename);
+	void SaveConsoleConfigToJSON(std::string const& filename);
 
 private:
 	//static const size_t MAX_LOGS = 1000;

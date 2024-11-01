@@ -62,6 +62,8 @@ public:
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
+	void SaveDebugConfigFromJSON(std::string const& filename);
+
 private:
 	ImGuiIO* io;
 	ImFont* font;

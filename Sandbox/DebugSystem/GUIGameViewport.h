@@ -23,6 +23,7 @@ public:
 	static bool IsPointInViewport(double x, double y);
 
 	static void LoadViewportConfigFromJSON(std::string const& filename);
+	static void SaveViewportConfigToJSON(std::string const& filename);
 
 private:
 
