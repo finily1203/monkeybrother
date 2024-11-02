@@ -304,8 +304,22 @@
         "top": 250.0,
         "bottom": 150.0
       },
-      "movement": {
-        "speed": 50.0
+      "rigidBody": {
+        "speed": 50.0,
+        "mass": 1.0,
+        "gravityScale": 1.0,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "x": 0.0,
+          "y": 0.0
+        }
       },
       "enemy": {
         "isEnemy": true

@@ -129,6 +129,18 @@ std::string EntityManager::getEntityId(Entity entity)
 	return "";
 }
 
+Entity EntityManager::getEntityFromId(std::string const& id)
+{
+	Entity entity = 0;
+	for (const auto& pair : entityIds)
+	{
+		if (pair.second == id) {
+			return pair.first;
+		}
+	}
+	return entity;
+}
+
 // Retrieve the entity map
 std::unordered_map<Entity, std::string> EntityManager::getEntityMap() const
 {

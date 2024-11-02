@@ -29,9 +29,16 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "GraphicsSystem.h"
 #include "Systems.h"
+
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
-
+#include "AABBComponent.h"
+#include "MovementComponent.h"
+#include "ClosestPlatform.h"
+#include "GraphicsSystem.h"
+#include "AnimationComponent.h"
+#include "EnemyComponent.h"
+#include "RigidBodyComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -99,6 +106,7 @@ public:
 
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
+	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);

@@ -18,18 +18,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #include "ECSCoordinator.h"
 
-#include "TransformComponent.h"
-#include "GraphicsComponent.h"
-#include "AABBComponent.h"
-#include "MovementComponent.h"
-#include "ClosestPlatform.h"
-#include "GraphicsSystem.h"
-#include "AnimationComponent.h"
-#include "EnemyComponent.h"
-#include "RigidBodyComponent.h"
-
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
+#include "LogicSystemECS.h"
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
@@ -435,15 +426,6 @@ ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
 	return entityManager->getSignature(entity);
 }
 
-//AABBComponent ECSCoordinator::calculateAABB(myMath::Vector2D pos, myMath::Vector2D scl) {
-//	float left	 = pos.GetX() - scl.GetX() / 2;
-//	float right	 = pos.GetX() + scl.GetX() / 2;
-//	float top	 = pos.GetY() + scl.GetY() / 2;
-//	float bottom = pos.GetY() - scl.GetY() / 2;
-//	AABBComponent aabb{ left, right, top, bottom };
-//	return aabb;
-//}
-
 
 //Initialises all required components and systems for the ECS system
 void ECSCoordinator::initialiseSystemsAndComponents() {
@@ -456,6 +438,17 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<AnimationComponent>();
 	registerComponent<EnemyComponent>();
 	registerComponent<RigidBodyComponent>();
+
+	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
+
+	auto logicSystem = std::make_shared<LogicSystemECS>();
+	registerSystem<LogicSystemECS>();
+	{
+		ComponentSig logicSystemSig;
+		logicSystemSig.set(getComponentType<TransformComponent>(), true);
+	}
+
+	logicSystem->initialise();
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -481,6 +474,8 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 
 	graphicSystem->initialise();
+
+
 
 	test5();
 }
@@ -529,6 +524,10 @@ std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
 
 std::string ECSCoordinator::getEntityID(Entity entity) {
 	return entityManager->getEntityId(entity);
+}
+
+Entity ECSCoordinator::getEntityFromID(std::string ID) {
+	return entityManager->getEntityById(ID);
 }
 
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {

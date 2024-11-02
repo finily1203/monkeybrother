@@ -49,6 +49,9 @@ void SystemManager::update() {
 		if (system->getSystemECS() == "GraphicsSystemECS") {
 			debugSystem.StartSystemTiming("GraphicsSystemECS");
 		}
+		if (system->getSystemECS() == "LogicSystemECS") {
+			debugSystem.StartSystemTiming("LogicSystemECS");
+		}
 		
 		system->update(GLFWFunctions::delta_time);
 
@@ -57,6 +60,9 @@ void SystemManager::update() {
 		}
 		if (system->getSystemECS() == "GraphicsSystemECS") {
 			debugSystem.EndSystemTiming("GraphicsSystemECS");
+		}
+		if (system->getSystemECS() == "LogicSystemECS") {
+			debugSystem.StartSystemTiming("LogicSystemECS");
 		}
 		
 	}

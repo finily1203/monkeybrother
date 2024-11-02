@@ -294,8 +294,8 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 // Player input handling for movement (left: 'A', right: 'D')
 void PhysicsSystemECS::HandlePlayerInput(Entity player)
 {
-    float speed = ecsCoordinator.getComponent<MovementComponent>(player).speed;
-    float maxSpeed = ecsCoordinator.getComponent<MovementComponent>(player).speed * 8.f;
+    float speed = ecsCoordinator.getComponent<RigidBodyComponent>(player).speed;
+    float maxSpeed = ecsCoordinator.getComponent<RigidBodyComponent>(player).speed * 8.f;
     // Smooth acceleration for horizontal movement
     //float accel = speed * GLFWFunctions::delta_time;  // Adjust for smoothness
     //printf("speed: %f\n", speed);
@@ -323,6 +323,7 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player)
     else {
         SetVelocity({ 0, GetVelocity().GetY()});
     }
+
     //else {
     //    if (GetVelocity().x > 0)
     //        SetVelocity({ GetVelocity().x - speed, GetVelocity().y });  // Adjust friction for smooth deceleration
@@ -964,13 +965,7 @@ void PhysicsSystemECS::update(float dt) {
     Entity playerEntity = ecsCoordinator.getFirstEntity();
     Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
 
-    for (auto& entity : entities) {
-        bool isPlayer = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
-        if (isPlayer) {
-            playerEntity = entity;
-            break;
-        }
-    }
+    playerEntity = ecsCoordinator.getEntityFromID("player");
 
     //if (GetVelocity().y < 0 && !isFalling)
     if (GetVelocity().GetY() < 0 && !isFalling)
@@ -1010,8 +1005,6 @@ void PhysicsSystemECS::update(float dt) {
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
     //HandleAABBCollision(playerEntity, closestPlatformEntity);
     HandlePlayerInput(playerEntity);
-
-    std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).speed << std::endl;
 
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;    
