@@ -418,6 +418,23 @@ void DebugSystem::update() {
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f");
 					if (ImGui::IsItemActivated) {
+
+					if (posXSlide != lastPosX)
+					{
+						saveFilePending = true;
+						lastPosX = posXSlide;
+					}
+
+					if (saveFilePending && ImGui::IsItemDeactivatedAfterEdit())
+					{
+						std::string saveFile = GenerateSaveJSONFile(saveCount);
+						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+
+						saveCount++;
+						saveFilePending = false;
+						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+					}
+					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
 						transform.position.SetX(posXSlide);
 					}
 
@@ -425,6 +442,7 @@ void DebugSystem::update() {
 					ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f");
 					if (ImGui::IsItemActivated) {
 						transform.position.SetY(posYSlide);
+						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
@@ -448,6 +466,7 @@ void DebugSystem::update() {
 						ecsCoordinator.destroyEntity(entity);
 					}
 					ImGui::TreePop();
+					}
 				}
 
 
@@ -629,6 +648,82 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadDouble(lastUpdateTime, "Debug.lastUpdateTime");
 
 	serializer.ReadInt(systemCount, "Debug.systemCount");
+
+	// ???? object size x max, object size x min ????
+	// ???? object size y max, object size y min ????
+
+	serializer.ReadInt(saveCount, "Debug.saveCount");
+	serializer.ReadBool(saveFilePending, "Debug.saveFilePending");
+	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
+}
+
+void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	serializer.WriteFloat(clear_color.x, "Debug.clearColor.r");
+	serializer.WriteFloat(clear_color.y, "Debug.clearColor.g");
+	serializer.WriteFloat(clear_color.z, "Debug.clearColor.b");
+	serializer.WriteFloat(clear_color.w, "Debug.clearColor.a");
+
+	serializer.WriteFloat(widthSlide, "Debug.widthSlide");
+	serializer.WriteFloat(heightSlide, "Debug.heightSlide");
+	serializer.WriteFloat(sizeSlide, "Debug.sizeSlide");
+
+	// ???? object count ????
+
+	serializer.WriteDouble(loopStartTime, "Debug.loopStartTime");
+	serializer.WriteDouble(totalLoopTime, "Debug.totalLoopTime");
+	serializer.WriteDouble(lastUpdateTime, "Debug.lastUpdateTime");
+
+	serializer.WriteInt(systemCount, "Debug.systemCount");
+
+	// ???? object size x max, object size x min ????
+	// ???? object size y max, object size y min ????
+
+	serializer.WriteInt(saveCount, "Debug.saveCount");
+	serializer.WriteBool(saveFilePending, "Debug.saveFilePending");
+	serializer.WriteFloat(lastPosX, "Debug.lastPosX");
+}
+
+std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
+{
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
+
+	nlohmann::json entitiesJSON;
+
+	std::ifstream entitiesJSONFile(FilePathManager::GetEntitiesJSONPath());
+
+	if (entitiesJSONFile.is_open())
+	{
+		entitiesJSONFile >> entitiesJSON;
+		entitiesJSONFile.close();
+	}
+
+	std::ofstream outFile(jsonPath);
+
+	if (outFile.is_open())
+	{
+		outFile << entitiesJSON.dump(2);
+		outFile.close();
+	}
+
+	else
+	{
+		std::cout << "Error: could not create file " << jsonPath << std::endl;
+		return "";
+	}
+
+	return jsonPath;
 }
 
 //Check if legacy key is mapped in ImGui key map

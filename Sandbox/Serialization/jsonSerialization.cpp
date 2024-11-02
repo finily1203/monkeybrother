@@ -49,7 +49,7 @@ bool JSONSerializer::Save(std::string const& filename)
 	if (outputFile.is_open())
 	{
 		// write the contents of the JSON object to the output JSON file
-		outputFile << jsonObject.dump(4);
+		outputFile << jsonObject.dump(2);
 
 		// close the output JSON file
 		outputFile.close();
@@ -145,6 +145,42 @@ void JSONSerializer::WriteSpecificObject(float const& object, nlohmann::json& js
 void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
+}
+
+void JSONSerializer::ReadBool(bool& data, std::string const& jsonKey)
+{
+	// string buffer that contains the sequence of characters of jsonKey
+	std::istringstream keyStream(jsonKey);
+
+	// holds each different key from the keyStream
+	std::string keySegment;
+
+	// currentObj is initialized to the root JSON object
+	nlohmann::json currentObj = jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// the JSON object contains the key from the key stored in keySegment
+		// eg. my JSON object contains the key "position" the keySegment value
+		// is "position" so this is true and it will execute this if statement
+		if (currentObj.contains(keySegment))
+		{
+			// key exists, currentObj will now be pointing to nested JSON
+			// object based on the key
+			currentObj = currentObj[keySegment];
+		}
+
+		// the JSON object does not contain the key
+		else
+		{
+			return;
+		}
+	}
+
+	// initialize data with the value associated with the final key in currentObj
+	data = currentObj.get<bool>();
 }
 
 void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
@@ -373,6 +409,28 @@ void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const
 	{
 		data[i] = tempStr[i];
 	}
+}
+void JSONSerializer::WriteBool(bool& data, std::string const& jsonKey)
+{
+	// string buffer that contains the sequence of characters of jsonKey
+	std::istringstream keyStream(jsonKey);
+
+	// holds each different key from the keyStream
+	std::string keySegment;
+
+	// pointer to the root of the JSON object
+	nlohmann::json* currentObj = &jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// Update the current JSON object pointer to point to the next segment
+		currentObj = &((*currentObj)[keySegment]);
+	}
+
+	// assign the integer data to the current JSON object
+	*currentObj = data;
 }
 
 void JSONSerializer::WriteInt(int& data, std::string const& jsonKey)

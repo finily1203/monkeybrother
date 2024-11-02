@@ -20,6 +20,7 @@ public:
 
 	static ImVec2 getViewportPos() { return viewportPos; }
 	static void LoadViewportConfigFromJSON(std::string const& filename);
+	static void SaveViewportConfigToJSON(std::string const& filename);
 
 	static void setAccumulatedDragDistance(float valueX, float valueY) {
 		accumulatedMouseDragDist.x = valueX;

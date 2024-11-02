@@ -29,6 +29,7 @@ public:
 	virtual bool Open(std::string const&) = 0;
 	virtual bool Save(std::string const&) = 0;
 	virtual bool IsGood() = 0;
+	virtual void ReadBool(bool&, std::string const&) = 0;
 	virtual void ReadInt(int&, std::string const&) = 0;
 	virtual void ReadUnsignedInt(unsigned int&, std::string const&) = 0;
 	virtual void ReadUnsignedLongLong(unsigned long long&, std::string const&) = 0;
@@ -36,6 +37,7 @@ public:
 	virtual void ReadDouble(double&, std::string const&) = 0;
 	virtual void ReadString(std::string&, std::string const&) = 0;
 
+	virtual void WriteBool(bool&, std::string const&) = 0;
 	virtual void WriteInt(int&, std::string const&) = 0;
 	virtual void WriteUnsignedInt(unsigned int&, std::string const&) = 0;
 	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&) = 0;

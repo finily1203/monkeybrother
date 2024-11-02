@@ -5,13 +5,13 @@
       "transform": {
         "localTransform": [
           [
-            1.0,
+            2.0,
             0.0,
             0.0
           ],
           [
             0.0,
-            1.0,
+            2.0,
             0.0
           ],
           [
@@ -52,6 +52,15 @@
       }
     },
     {
+      "aabb": {
+        "bottom": -175.0,
+        "left": -250.0,
+        "right": 250.0,
+        "top": -125.0
+      },
+      "closestPlatform": {
+        "isClosest": false
+      },
       "id": "flatplatform",
       "transform": {
         "localTransform": [
@@ -100,18 +109,18 @@
           "x": 500.0,
           "y": 50.0
         }
-      },
-      "aabb": {
-        "left": -250.0,
-        "right": 250.0,
-        "top": -125.0,
-        "bottom": -175.0
-      },
-      "closestPlatform": {
-        "isClosest": false
       }
     },
     {
+      "aabb": {
+        "bottom": -225.0,
+        "left": -650.0,
+        "right": -350.0,
+        "top": -175.0
+      },
+      "closestPlatform": {
+        "isClosest": false
+      },
       "id": "tiltedplatform",
       "transform": {
         "localTransform": [
@@ -160,19 +169,22 @@
           "x": 300.0,
           "y": 50.0
         }
-      },
-      "aabb": {
-        "left": -650.0,
-        "right": -350.0,
-        "top": -175.0,
-        "bottom": -225.0
-      },
-      "closestPlatform": {
-        "isClosest": false
       }
     },
     {
+      "aabb": {
+        "bottom": 250.0,
+        "left": -50.0,
+        "right": 50.0,
+        "top": 350.0
+      },
+      "animation": {
+        "isAnimated": true
+      },
       "id": "player",
+      "movement": {
+        "speed": 0.2
+      },
       "transform": {
         "localTransform": [
           [
@@ -220,22 +232,22 @@
           "x": 100.0,
           "y": 100.0
         }
-      },
-      "aabb": {
-        "left": -50.0,
-        "right": 50.0,
-        "top": 350.0,
-        "bottom": 250.0
-      },
-      "movement": {
-        "speed": 0.2
-      },
-      "animation": {
-        "isAnimated": true
       }
     },
     {
+      "aabb": {
+        "bottom": 150.0,
+        "left": 250.0,
+        "right": 350.0,
+        "top": 250.0
+      },
+      "enemy": {
+        "isEnemy": true
+      },
       "id": "enemy",
+      "movement": {
+        "speed": 50.0
+      },
       "transform": {
         "localTransform": [
           [
@@ -283,18 +295,6 @@
           "x": 100.0,
           "y": 100.0
         }
-      },
-      "aabb": {
-        "left": 250.0,
-        "right": 350.0,
-        "top": 250.0,
-        "bottom": 150.0
-      },
-      "movement": {
-        "speed": 50.0
-      },
-      "enemy": {
-        "isEnemy": true
       }
     }
   ]

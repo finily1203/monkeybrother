@@ -114,3 +114,19 @@ void Console::LoadConsoleConfigFromJSON(std::string const& filename)
 	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
 	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
 }
+
+void Console::SaveConsoleConfigToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsobObj = serializer.GetJSONObject();
+
+	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
+	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY");
+}

@@ -44,6 +44,9 @@
     "objSizeXMax": 5000.0,
     "objSizeXMin": 10.0,
     "objSizeYMax": 5000.0,
-    "objSizeYMin": 10.0
+    "objSizeYMin": 10.0,
+    "saveCount": 1,
+    "saveFilePending": false,
+    "lastPosX": 0.0
   }
 }

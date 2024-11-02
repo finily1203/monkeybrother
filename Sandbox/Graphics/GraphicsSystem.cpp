@@ -423,9 +423,9 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D ob
          0, 0, 1
     };
 
-    std::cout << "Rotating : " << Rotating[0][0] << " " << Rotating[0][1] << " " << Rotating[0][2] << std::endl;
-    std::cout << "Rotating : " << Rotating[1][0] << " " << Rotating[1][1] << " " << Rotating[1][2] << std::endl;
-    std::cout << "Rotating : " << Rotating[2][0] << " " << Rotating[2][1] << " " << Rotating[2][2] << std::endl;
+    //std::cout << "Rotating : " << Rotating[0][0] << " " << Rotating[0][1] << " " << Rotating[0][2] << std::endl;
+    //std::cout << "Rotating : " << Rotating[1][0] << " " << Rotating[1][1] << " " << Rotating[1][2] << std::endl;
+    //std::cout << "Rotating : " << Rotating[2][0] << " " << Rotating[2][1] << " " << Rotating[2][2] << std::endl;
 
     // TODO:: change the NDC matrix to be calculated based on the window size
     NDC =
