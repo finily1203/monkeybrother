@@ -121,6 +121,7 @@ public:
 
 private:
     float friction;
+    float threshold;
     bool alrJumped;
     bool isFalling;
     PlayerEventPublisher eventSource;

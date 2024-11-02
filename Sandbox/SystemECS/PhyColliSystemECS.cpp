@@ -28,7 +28,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
-PhysicsSystemECS::PhysicsSystemECS() : friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>()) 
+PhysicsSystemECS::PhysicsSystemECS() : friction{ 0.1f }, threshold{ 0.01f }, alrJumped { false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>())
 {
     eventSource.Register(MessageId::FALL, eventObserver);
     eventSource.Register(MessageId::JUMP, eventObserver);
@@ -297,10 +297,10 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 //}
 
 void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& appliedForce) {
-    myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
     
-    force.SetX(force.GetX() + appliedForce.GetX());
-    force.SetY(force.GetY() + appliedForce.GetY());
+    accForce.SetX(accForce.GetX() + appliedForce.GetX());
+    accForce.SetY(accForce.GetY() + appliedForce.GetY());
 
 }
 
@@ -313,36 +313,37 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player)
 
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
-    myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
+    myMath::Vector2D force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
     float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
     float gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
 
     if (GLFWFunctions::move_left_flag) {
-        ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
+        ApplyForce(player, myMath::Vector2D(-force.GetX(), 0.f));
     }
     else if (GLFWFunctions::move_right_flag) {
-        ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
+        ApplyForce(player, myMath::Vector2D(force.GetX(), 0.f));
     }
     else {
 
         // Apply friction to gradually slow down
-        if (force.GetX() > 0) {
-            ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
+        if (accForce.GetX() > 0) {
+            ApplyForce(player, myMath::Vector2D(-force.GetX(), 0.f));
         }
-        else if (force.GetX() < 0) {
-            ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
+        else if (accForce.GetX() < 0) {
+            ApplyForce(player, myMath::Vector2D(force.GetX(), 0.f));
         }
 
-        if (std::abs(force.GetX()) < 0.01f) { // threshold
+        if (std::abs(accForce.GetX()) < threshold) { // threshold
             vel.SetX(0.f);
-            force.SetX(0.f);
+            accForce.SetX(0.f);
         }
 
     }
 
     float invMass = mass > 0.f ? 1.f / mass : 0.f;
-    acceleration = force * invMass;
+    acceleration = accForce * invMass;
 
     // Clamp speed without interfering with velocity
     if (vel.GetX() > maxSpeed) {
@@ -352,7 +353,7 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player)
 		acceleration.SetX(0);
 	}
 
-    std::cout << force.GetX() << std::endl;
+    std::cout << accForce.GetX() << std::endl;
     vel.SetX(vel.GetX() + acceleration.GetX() * GLFWFunctions::delta_time);
     vel.SetY(vel.GetY() + acceleration.GetY() * GLFWFunctions::delta_time);
     
