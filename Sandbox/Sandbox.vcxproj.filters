@@ -36,6 +36,7 @@
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
     <ClCompile Include="Systems\Physics\Collision\Collision.cpp" />
     <ClCompile Include="Systems\Physics\System\Physics.cpp" />
+    <ClCompile Include="Graphics\CameraSystem2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -78,6 +79,7 @@
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Components\EnemyComponent.h" />
+    <ClInclude Include="Graphics\CameraSystem2D.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

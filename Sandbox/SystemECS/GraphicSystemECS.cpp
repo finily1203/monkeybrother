@@ -26,10 +26,17 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "Debug.h"
 #include "GUIConsole.h"
+#include "vector"
 
-std::unique_ptr<EntityManager> entityManager;
+CameraSystem2D cameraSystem;
+std::vector<GraphicsSystem::GLViewport> vps;
+
 //Initialise currently does not do anything
-void GraphicSystemECS::initialise() { entityManager = std::make_unique<EntityManager>(); }
+void GraphicSystemECS::initialise() {
+	cameraSystem.initialise();
+	vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
+	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
+}
 
 //Update function to update the graphics system
 //uses functions from GraphicsSystem class to update, draw
@@ -37,6 +44,7 @@ void GraphicSystemECS::initialise() { entityManager = std::make_unique<EntityMan
 void GraphicSystemECS::update(float dt) {
 	Shader* shader = assetsManager.GetShader("shader1");
 	Shader* shader2 = assetsManager.GetShader("shader2");
+
 
 	for (auto entity : entities) {
 		//check if entity has transform component
@@ -159,15 +167,77 @@ void GraphicSystemECS::update(float dt) {
 		}
 		
 		else if (GLFWFunctions::testMode == 1) {
-			std::cout << "_______________________" << std::endl;
-			std::cout << "entities: " << ecsCoordinator.getEntityID(entity) << std::endl;
+			bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
+			if (hasMovement && GLFWFunctions::allow_camera_movement == true) {
+				if (GLFWFunctions::left_turn_flag) {
+					transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
+					graphics.glObject.orientation.y = transform.orientation.y;
+				}
+				else if (GLFWFunctions::right_turn_flag) {
+					transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
+					graphics.glObject.orientation.y = transform.orientation.y;
+				}
+				else {
+					transform.orientation.y = 0.0f;
+					graphics.glObject.orientation.y = transform.orientation.y;
+				}
+
+				// Scaling logic
+				if (GLFWFunctions::scale_up_flag) {
+					if (transform.scale.x < 5.0f && transform.scale.y < 5.0f) {
+						transform.scale.x += 1.78f * GLFWFunctions::delta_time;
+						transform.scale.y += 1.0f * GLFWFunctions::delta_time;
+						graphics.glObject.scaling = transform.scale;
+					}
+				}
+				else if (GLFWFunctions::scale_down_flag) {
+					if (transform.scale.x > 0.1f && transform.scale.y > 0.1f) {
+						transform.scale.x -= 1.78f * GLFWFunctions::delta_time;
+						transform.scale.y -= 1.0f * GLFWFunctions::delta_time;
+						graphics.glObject.scaling = transform.scale;
+					}
+				}
+
+				// Movement logic
+				if (GLFWFunctions::move_up_flag) {
+					transform.position.y += 1.0f * GLFWFunctions::delta_time;
+					graphics.glObject.position = transform.position;
+				}
+				if (GLFWFunctions::move_down_flag) {
+					transform.position.y -= 1.0f * GLFWFunctions::delta_time;
+					graphics.glObject.position = transform.position;
+				}
+				if (GLFWFunctions::move_left_flag) {
+					transform.position.x -= 1.0f * GLFWFunctions::delta_time;
+					graphics.glObject.position = transform.position;
+				}
+				if (GLFWFunctions::move_right_flag) {
+					transform.position.x += 1.0f * GLFWFunctions::delta_time;
+					graphics.glObject.position = transform.position;
+				}
+
+				graphics.glObject.position = transform.position;
+			}
+			// compute view matrix
+			if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
+				cameraSystem.update();
+			}
+			else if (ecsCoordinator.getEntityID(entity) == "Player") {
+				cameraSystem.lockToComponent(transform);
+				cameraSystem.update();
+			}
+			
 			// It updates the object based on the animation component
 			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
 			// calculate the model transform matrix using update object function
-			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation);
+			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation
+																, cameraSystem.getViewMatrix());
 			
 			// Draw the object
 			// TODO:: change getTexture to some enum or something
+			if (GLFWFunctions::debug_flag) {
+				graphicsSystem.drawDebugAABB(ecsCoordinator.getComponent<AABBComponent>(entity), cameraSystem.getViewMatrix());
+			}
 			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
 		}
 
