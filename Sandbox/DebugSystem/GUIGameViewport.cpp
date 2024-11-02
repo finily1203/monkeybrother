@@ -1,11 +1,6 @@
 #include "GUIGameViewport.h"
 #include "GlfwFunctions.h"
 #include "GUIConsole.h"
-float Clamp(float value, float min, float max) {
-	if (value < min) return min;
-	if (value > max) return max;
-	return value;
-}
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -13,19 +8,25 @@ int GameViewWindow::viewportWidth;
 ImVec2 GameViewWindow::viewportPos;
 GLuint GameViewWindow::viewportTexture;
 ImVec2 GameViewWindow::windowSize;
-bool zoomTestFlag = false;
-bool GameViewWindow::clickedZoom = false;
-bool GameViewWindow::clickedScreenPan = false;
 
 bool insideViewport = false;
-ImVec2 GameViewWindow::accumulatedMouseDragDist;
+bool zoomTestFlag = false;
+bool GameViewWindow::clickedZoom = false;
 float GameViewWindow::zoomLevel; 
 float GameViewWindow::MIN_ZOOM;  // minimum zoom constant
 float GameViewWindow::MAX_ZOOM;  //  maximum zoom constant
 
+bool GameViewWindow::clickedScreenPan = false;
 bool GameViewWindow::isDragging = false;
 ImVec2 GameViewWindow::initialMousePos;
 ImVec2 GameViewWindow::mouseDragDist;
+ImVec2 GameViewWindow::accumulatedMouseDragDist;
+ImVec2 GameViewWindow::currentMouseDragDist;
+
+float GameViewWindow::aspectRatioXScale;
+float GameViewWindow::aspectRatioYScale;
+float GameViewWindow::aspectRatioWidth;
+float GameViewWindow::aspectRatioHeight;
 
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
@@ -110,22 +111,18 @@ void GameViewWindow::CaptureMainWindow() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static float aspectWidth = 0;
-static float aspectHeight = 0;
-
 //Function scale real time game scene to the size of the game viewport window
 ImVec2 GameViewWindow::GetLargestSizeForViewport()
 {
-	aspectWidth = windowSize.x;
-	aspectHeight = (aspectWidth / (16.0f / 9.0f));
+	aspectRatioWidth = windowSize.x;
+	aspectRatioHeight = aspectRatioWidth / (aspectRatioXScale / aspectRatioYScale);
 
-	static float scaledWidth = aspectWidth;
-	static float scaledHeight = aspectHeight;
+	float scaledWidth = aspectRatioWidth;
+	float scaledHeight = aspectRatioHeight;
 
-	
-		// Use zoomLevel instead of fixed 3.0f multiplier
-	scaledWidth = aspectWidth * zoomLevel;
-	scaledHeight = aspectHeight * zoomLevel;
+	// Use zoomLevel instead of fixed 3.0f multiplier
+	scaledWidth = aspectRatioWidth * zoomLevel;
+	scaledHeight = aspectRatioHeight * zoomLevel;
 	
 
 	return ImVec2(scaledWidth, scaledHeight);
@@ -142,20 +139,21 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 		ImVec2 Mouse = ImGui::GetMousePos();
 		if (!isDragging) {
 			isDragging = true;
-			setInitialMousePos(Mouse.x, Mouse.y);
+			initialMousePos = Mouse;
 		}
-		ImVec2 currentDragDistance = { getInitialMousePos().x - Mouse.x ,getInitialMousePos().y - Mouse.y};
-
-		setAccumulatedDragDistance(currentDragDistance.x - getMouseDragDist().x, currentDragDistance.y - getMouseDragDist().y);
-		setMouseDragDist(currentDragDistance.x, currentDragDistance.y);
+		currentMouseDragDist = { initialMousePos.x - Mouse.x , initialMousePos.y - Mouse.y };
+		accumulatedMouseDragDist.x += (currentMouseDragDist.x - mouseDragDist.x);
+		accumulatedMouseDragDist.y += (currentMouseDragDist.y - mouseDragDist.y);
+		
+		mouseDragDist = currentMouseDragDist;
 	}
 	else {
 		isDragging = false;
-		setMouseDragDist(0.0f, 0.0f);
+		mouseDragDist = { 0.0f,0.0f };
 	}
 
-	viewportX -= getAccumulatedDragDistance().x;  // Apply the accumulated offset
-	viewportY -= getAccumulatedDragDistance().y;
+	viewportX -= accumulatedMouseDragDist.x;  // Apply the accumulated offset
+	viewportY -= accumulatedMouseDragDist.y;
 	return ImVec2(viewportX, viewportY);
 
 }
@@ -200,4 +198,18 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
 
+	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
+	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");
+
+	serializer.ReadFloat(initialMousePos.x, "GUIViewport.initialMousePos.x");
+	serializer.ReadFloat(initialMousePos.y, "GUIViewport.initialMousePos.y");
+
+	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
+	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
+
+	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
+	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
+
+	serializer.ReadFloat(aspectRatioXScale, "GUIViewport.aspectRatioXScale");
+	serializer.ReadFloat(aspectRatioYScale, "GUIViewport.aspectRatioYScale");
 }

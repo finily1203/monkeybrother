@@ -32,14 +32,15 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "../Serialization/jsonSerialization.h"
 
+#define MAXNAMELENGTH 15
+#define MAXBUFFERSIZE 8
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
 class DebugSystem : public GameSystems/*, public System*/ {
 public:
 
-	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
-	//ImVec4 clear_color;
 	DebugSystem();
 	~DebugSystem();
 
@@ -72,9 +73,50 @@ public:
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
+	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
+
 private:
 	ImGuiIO* io;
 	ImFont* font;
+	static float fontSize;
+	static float textBorderSize;
+	static ImVec4 clearColor;
+	static int numberOfColumn;
+
+	// Track combined ECS percentage
+	static float ecsTotal;
+	static bool foundECS;
+
+	static bool isZooming;
+	static bool isPanning;
+
+	static float defaultObjScaleX;
+	static float defaultObjScaleY;
+
+	static double coordinateMaxLimitsX;
+	static double coordinateMaxLimitsY;
+	static double coordinateMinLimitsX;
+	static double coordinateMinLimitsY;
+
+	static double orientationMaxLimit;
+	static double orientationMinLimit;
+
+	static int numEntitiesToCreate;
+	static char numBuffer[MAXBUFFERSIZE];
+	static char sigBuffer[MAXNAMELENGTH];
+	static char xCoordinatesBuffer[MAXBUFFERSIZE];
+	static char yCoordinatesBuffer[MAXBUFFERSIZE];
+	static char xOrientationBuffer[MAXBUFFERSIZE];
+	static char yOrientationBuffer[MAXBUFFERSIZE];
+	static double xCoordinates;
+	static double yCoordinates;
+	static double xOrientation;
+	static double yOrientation;
+
+	static int objAttributeSliderMaxLength;
+	static int objAttributeSliderMidLength;
+	static int objAttributeSliderMinLength;
+
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
 	static double loopStartTimeECS;
@@ -84,6 +126,10 @@ private:
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
+
+	static float objWidthSlide;
+	static float objHeightSlide;
+	static int objCount;
 
 	static float objSizeXMax;
 	static float objSizeXMin;

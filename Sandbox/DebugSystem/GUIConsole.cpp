@@ -4,7 +4,7 @@
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
-float Console::lastScrollY = 0.0f;
+float Console::lastScrollY;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
 

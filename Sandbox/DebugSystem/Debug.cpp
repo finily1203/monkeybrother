@@ -26,27 +26,67 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GlobalCoordinator.h"
 #include "SystemManager.h"
 #include "ECSCoordinator.h" 
-
-static float widthSlide = 0.f;
-static float heightSlide = 5.0f;
-static float sizeSlide = 5.0f;
-int objCount = 0;
+#include "EnemyComponent.h"
+#include "MovementComponent.h"
+#include "AABBComponent.h"
+#include "AnimationComponent.h"
+#include "ClosestPlatform.h"
 
 //Variables for DebugSystem
+float DebugSystem::fontSize;
+ImVec4 DebugSystem::clearColor;
+float DebugSystem::textBorderSize;
+int DebugSystem::numberOfColumn;
+float DebugSystem::ecsTotal;
+bool DebugSystem::foundECS = false;
+bool DebugSystem::isZooming = false;
+bool DebugSystem::isPanning = false;
+
+float DebugSystem::defaultObjScaleX;
+float DebugSystem::defaultObjScaleY;
+
+double DebugSystem::coordinateMaxLimitsX;
+double DebugSystem::coordinateMaxLimitsY;
+double DebugSystem::coordinateMinLimitsX;
+double DebugSystem::coordinateMinLimitsY;
+double DebugSystem::orientationMaxLimit;
+double DebugSystem::orientationMinLimit;
+	  
+int DebugSystem::numEntitiesToCreate;
+char DebugSystem::numBuffer[MAXBUFFERSIZE];
+char DebugSystem::sigBuffer[MAXNAMELENGTH];
+char DebugSystem::xCoordinatesBuffer[MAXBUFFERSIZE];
+char DebugSystem::yCoordinatesBuffer[MAXBUFFERSIZE];
+char DebugSystem::xOrientationBuffer[MAXBUFFERSIZE];
+char DebugSystem::yOrientationBuffer[MAXBUFFERSIZE];
+double DebugSystem::xCoordinates;
+double DebugSystem::yCoordinates;
+double DebugSystem::xOrientation;
+double DebugSystem::yOrientation;
+
+int DebugSystem::objAttributeSliderMaxLength;
+int DebugSystem::objAttributeSliderMidLength;
+int DebugSystem::objAttributeSliderMinLength;
+
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
-double DebugSystem::loopStartTime = 0.0;
-double DebugSystem::loopStartTimeECS = 0.0;
-double DebugSystem::totalLoopTime = 0.0;
-double DebugSystem::totalLoopTimeECS = 0.0;
-double DebugSystem::lastUpdateTime = 0.0;
+double DebugSystem::loopStartTime;
+double DebugSystem::loopStartTimeECS;
+double DebugSystem::totalLoopTime;
+double DebugSystem::totalLoopTimeECS;
+double DebugSystem::lastUpdateTime;
 std::vector<const char*> DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
 int DebugSystem::systemCount = 0;
 
-float DebugSystem::objSizeXMax = 5000.0f;
-float DebugSystem::objSizeXMin = 100.0f;
-float DebugSystem::objSizeYMax = 5000.0f;
-float DebugSystem::objSizeYMin = 100.0f;
+float DebugSystem::objWidthSlide;
+float DebugSystem::objHeightSlide;
+int DebugSystem::objCount;
+bool createEntity = false;
+
+float DebugSystem::objSizeXMax;
+float DebugSystem::objSizeXMin;
+float DebugSystem::objSizeYMax;
+float DebugSystem::objSizeYMin;
 
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
@@ -55,21 +95,22 @@ DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 DebugSystem::~DebugSystem() {}
 
 void DebugSystem::initialise() {
+	LoadDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext(); 
 	io = &ImGui::GetIO(); 
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multiple Viewport
-	font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), 20);  // Load text font file
+	font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), fontSize);  // Load text font file
 
 	ImGui::StyleColorsDark();  // Set theme as dark
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.Colors[ImGuiCol_Separator] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); // seperator's color     
-	style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f); // table's outer border's color
-	style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);  // table's inner border's color
-	style.SeparatorTextBorderSize = 3.0f;
-	style.TabBorderSize = 3.0f;
+	style.Colors[ImGuiCol_Separator] = clearColor; // seperator's color     
+	style.Colors[ImGuiCol_TableBorderStrong] = clearColor; // table's outer border's color
+	style.Colors[ImGuiCol_TableBorderLight] = clearColor;  // table's inner border's color
+	style.SeparatorTextBorderSize = textBorderSize;
+	style.TabBorderSize = textBorderSize;
 
 	if (io->BackendPlatformUserData == nullptr) {
 		ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
@@ -112,23 +153,19 @@ void DebugSystem::update() {
 			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 
-			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x * 5.5f); //To calculate the size of table
+			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x); //To calculate the size of table
 
 			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
 			ImGui::SeparatorText("Performance Viewer");
 			ImGui::Text("Number of Systems: %d", systemCount);
 
-			if (ImGui::BeginTable("Performance Data", 2, flags, outerSize)) {
+			if (ImGui::BeginTable("Performance Data", numberOfColumn, flags, outerSize)) {
 				ImGui::TableSetupColumn("Systems");
 				ImGui::TableSetupColumn("Game Loop %");
 				ImGui::TableHeadersRow();
 
-				// Track combined ECS percentage
-				float ecsTotal = 0.0f;
-				bool foundECS = false;
-
-				// First pass - show non-ECS systems and calculate ECS total
+				// show non-ECS systems and calculate ECS total
 				for (int i = 0; i < systemCount && i < systemGameLoopPercent.size(); i++) {
 					const char* systemName = systems[i];
 
@@ -165,7 +202,7 @@ void DebugSystem::update() {
 							if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 								ImGui::Text("%s:", systemName);
 								ImGui::SameLine(textBaseWidth);
-								ImGui::Text("%7.2f%%", systemGameLoopPercent[i]); // Right-aligned percentage
+								ImGui::Text("%9.2f%%", systemGameLoopPercent[i]); // Right-aligned percentage
 							}
 						}
 						ImGui::TreePop();
@@ -207,11 +244,8 @@ void DebugSystem::update() {
 		if (ImGui::CollapsingHeader("Game Viewport Controls")) {
 			if (ImGui::Button("Reset Perspective")) {
 				GameViewWindow::setAccumulatedDragDistance(0, 0);
-				GameViewWindow::zoomLevel = 1.f;
+				GameViewWindow::setZoomLevel(1.f);
 			}
-
-			static bool isZooming = false;
-			static bool isPanning = false;
 
 			if (ImGui::Button("Zoom")) {
 				isZooming = !isZooming;
@@ -245,14 +279,6 @@ void DebugSystem::update() {
 		if (ImGui::CollapsingHeader("Object Creation")) {
 
 			ImGui::AlignTextToFramePadding();
-			static int numEntitiesToCreate = 1;  // Default to 1
-			static char numBuffer[8] = "1";
-			static char sigBuffer[8] = "";
-			static char xCoordinatesBuffer[8] = "0";
-			static char yCoordinatesBuffer[8] = "0";
-			static double xCoordinates = 0.0;
-			static double yCoordinates = 0.0;
-			//static char signatureBuffer[8] = "";
 
 			ImGui::Text("Total no. of objects: %d", objCount);
 
@@ -262,52 +288,80 @@ void DebugSystem::update() {
 				objCount++;
 			}
 
-			//ImGui::SetNextItemWidth(100);  // Set width of input field
-			//ImGui::InputText("##signature", signatureBuffer, IM_ARRAYSIZE(signatureBuffer));
-			//ImGui::SameLine();
-			//ImGui::Text("Signature");
+			const char* items[] = { "Player", "Enemy", "Platform" };
+			static int current_item = 0; // Keeps track of selected item
 
-			ImGui::SetNextItemWidth(100);  // Set width of input field
+			// Create the combo box
+			ImGui::SetNextItemWidth(objAttributeSliderMidLength);
+			if (ImGui::BeginCombo("##dropdown", items[current_item])) {
+				for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+					const bool is_selected = (current_item == i);
+					if (ImGui::Selectable(items[i], is_selected)) {
+						current_item = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::SameLine();
+			ImGui::Text("Object type");
+
+			ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 			ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
 			ImGui::SameLine();
-			ImGui::Text("Signature");
+			ImGui::Text("Name");
 
-			ImGui::SetNextItemWidth(100);  // Set width of input field
+			ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 			ImGui::InputText("##count", numBuffer, IM_ARRAYSIZE(numBuffer), ImGuiInputTextFlags_CharsDecimal);
 			ImGui::SameLine();
 			ImGui::Text("Objects to be created");
 
 			numEntitiesToCreate = std::max(1, atoi(numBuffer));
 
-			ImGui::SetNextItemWidth(100);
+			ImGui::SetNextItemWidth(objAttributeSliderMinLength);
 			ImGui::InputText("##X Pos", xCoordinatesBuffer, IM_ARRAYSIZE(xCoordinatesBuffer));
 
 			ImGui::SameLine();
 			ImGui::Text(",");
+
 			ImGui::SameLine();
-			ImGui::SetNextItemWidth(100);
+			ImGui::SetNextItemWidth(objAttributeSliderMinLength);
 			ImGui::InputText("##Y Pos", yCoordinatesBuffer, IM_ARRAYSIZE(yCoordinatesBuffer));
 
 			ImGui::SameLine();
 			ImGui::Text("Coordinates");
 
-			xCoordinates = std::max(-800.0, atof(xCoordinatesBuffer));
-			yCoordinates = std::max(-450.0, atof(yCoordinatesBuffer));
+			xCoordinates = std::max(coordinateMinLimitsX, atof(xCoordinatesBuffer));
+			yCoordinates = std::max(coordinateMinLimitsY, atof(yCoordinatesBuffer));
 
+			JSONSerializer serializer;
+			if (!serializer.Open(FilePathManager::GetEntitiesJSONPath())) {
+				std::cout << "Error: could not open file " << FilePathManager::GetEntitiesJSONPath() << std::endl;
+				return;
+			}
+			Entity entityObj;
+			std::string entityId;
 
-			if (ImGui::Button("Create")) {
+			nlohmann::json jsonObj = serializer.GetJSONObject();
+
+			if (ImGui::Button("Create Entity")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
-					Entity newEntity = ecsCoordinator.createEntity();
-					std::string entityID = sigBuffer;
+					entityObj = ecsCoordinator.createEntity();
+
+					entityId = sigBuffer;
+
+					// Common components for all entities
 					TransformComponent transform{};
 					transform.position.SetX(xCoordinates);
 					transform.position.SetY(yCoordinates);
-					transform.scale = myMath::Vector2D(100.0f, 100.0f);
-					ecsCoordinator.addComponent(newEntity, transform);
-					ecsCoordinator.setEntityID(newEntity, entityID);
-					
+					transform.scale.SetX(defaultObjScaleX);
+					transform.scale.SetY(defaultObjScaleX);
+					/*serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+					serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");*/
+					ecsCoordinator.addComponent(entityObj, transform);
 
+					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId);
 
+					ecsCoordinator.setEntityID(entityObj, entityId);
 				}
 			}
 
@@ -315,16 +369,32 @@ void DebugSystem::update() {
 
 			if (ImGui::Button("Random")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
-					Entity newEntity = ecsCoordinator.createEntity();
+					entityObj = ecsCoordinator.createEntity();
+
+					entityId = sigBuffer;
+
+					// Common components for all entities
 					TransformComponent transform{};
-					transform.position = myMath::Vector2D(
-						myMath::Vector2D(ecsCoordinator.getRandomVal(-800.f, 800.f),
-							ecsCoordinator.getRandomVal(-450.f, 450.f))
-					);
-					transform.scale = myMath::Vector2D(100.0f, 100.0f);
-					ecsCoordinator.addComponent(newEntity, transform);
+					transform.position = myMath::Vector2D(ecsCoordinator.getRandomVal(coordinateMinLimitsX, coordinateMaxLimitsX),
+										ecsCoordinator.getRandomVal(coordinateMinLimitsY, coordinateMaxLimitsY));
+					transform.orientation.SetX(xOrientation);
+					transform.orientation.SetY(yOrientation);
+					transform.scale.SetX(defaultObjScaleX);
+					transform.scale.SetY(defaultObjScaleY);
+					ecsCoordinator.addComponent(entityObj, transform);
+
+					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId);
+
+					ecsCoordinator.setEntityID(entityObj, entityId);
 				}
 			}
+
+			if (ImGui::Button("Remove All Entity")) {
+				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+					ecsCoordinator.destroyEntity(entity);
+				}
+			}
+
 
 			ImGui::NewLine();
 		}
@@ -336,30 +406,42 @@ void DebugSystem::update() {
 				float posXSlide = transform.position.GetX();
 				float posYSlide = transform.position.GetY();
 
+				float orientationSlide = transform.orientation.GetX();
+
+				objWidthSlide = transform.scale.GetX();
+				objHeightSlide = transform.scale.GetY();
+
 				ImGui::PushID(entity);
 
-				widthSlide = transform.scale.GetX();
-				heightSlide = transform.scale.GetY();
-
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-					ImGui::SetNextItemWidth(200);
-					ImGui::InputFloat("X", &posXSlide, 1.f, 10.f);
-					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f");
+					if (ImGui::IsItemActivated) {
 						transform.position.SetX(posXSlide);
 					}
-					ImGui::SetNextItemWidth(200);
-					ImGui::InputFloat("Y", &posYSlide, 1.f, 10.f);
-					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f");
+					if (ImGui::IsItemActivated) {
 						transform.position.SetY(posYSlide);
 					}
 
-					ImGui::SliderFloat("Width", &widthSlide, objSizeXMin, objSizeXMax, "%.1f");
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f");
 					if (ImGui::IsItemActivated) {
-						transform.scale.SetX(widthSlide);
+						transform.orientation.SetX(orientationSlide);
 					}
-					ImGui::SliderFloat("Height", &heightSlide, objSizeYMin, objSizeYMax, "%.1f");
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					ImGui::SliderFloat("Width", &objWidthSlide, objSizeXMin, objSizeXMax, "%.1f");
 					if (ImGui::IsItemActivated) {
-						transform.scale.SetY(heightSlide);
+						transform.scale.SetX(objWidthSlide);
+					}
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					ImGui::SliderFloat("Height", &objHeightSlide, objSizeYMin, objSizeYMax, "%.1f");
+					if (ImGui::IsItemActivated) {
+						transform.scale.SetY(objHeightSlide);
 					}
 
 					if (ImGui::Button("Remove")) {
@@ -375,20 +457,8 @@ void DebugSystem::update() {
 				float localMouseX = Mouse.x - viewportPos.x;
 				float localMouseY = Mouse.y - viewportPos.y;
 
-				/*if (MouseX == transform.position.x &&
-					MouseY == transform.position.y &&
-					ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-					transform.position.x = MouseX;
-					transform.position.y = MouseY;
-				}*/
-
 				ImGui::PopID();
 				ImGui::Separator();
-
-				Console::GetLog() << TESTEST.x << " Baby" << std::endl;
-
-				Console::GetLog() << signature << " || " << transform.position.GetX() << " || " << transform.position.GetY()
-					<< std::endl;
 			}
 
 		}
@@ -506,25 +576,59 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	// read all of the data from the JSON object, assign every read
 	// data to every elements that needs to be initialized
-	serializer.ReadFloat(clear_color.x, "Debug.clearColor.r");
-	serializer.ReadFloat(clear_color.y, "Debug.clearColor.g");
-	serializer.ReadFloat(clear_color.z, "Debug.clearColor.b");
-	serializer.ReadFloat(clear_color.w, "Debug.clearColor.a");
+	serializer.ReadFloat(fontSize, "Debug.fontSize");
+	serializer.ReadFloat(textBorderSize, "Debug.textBorderSize");
+	serializer.ReadInt(numberOfColumn, "Debug.numberOfColumn");
+	serializer.ReadFloat(ecsTotal, "Debug.ecsTotal");
 
-	serializer.ReadFloat(widthSlide, "Debug.widthSlide");
-	serializer.ReadFloat(heightSlide, "Debug.heightSlide");
-	serializer.ReadFloat(sizeSlide, "Debug.sizeSlide");
+	serializer.ReadFloat(defaultObjScaleX, "Debug.defaultObjScaleX");
+	serializer.ReadFloat(defaultObjScaleY, "Debug.defaultObjScaleY");
 
-	// ???? object count ????
+	serializer.ReadDouble(coordinateMaxLimitsX, "Debug.coordinateMaxLimitsX");
+	serializer.ReadDouble(coordinateMaxLimitsY, "Debug.coordinateMaxLimitsY");
+	serializer.ReadDouble(coordinateMinLimitsX, "Debug.coordinateMinLimitsX");
+	serializer.ReadDouble(coordinateMinLimitsY, "Debug.coordinateMinLimitsY");
+	serializer.ReadDouble(orientationMaxLimit, "Debug.orientationMaxLimit");
+	serializer.ReadDouble(orientationMinLimit, "Debug.orientationMinLimit");
+	
+
+	serializer.ReadInt(numEntitiesToCreate, "Debug.numEntitiesToCreate");
+	serializer.ReadCharArray(numBuffer,MAXBUFFERSIZE, "Debug.numBuffer");
+	serializer.ReadCharArray(sigBuffer, MAXNAMELENGTH, "Debug.sigBuffer");
+	serializer.ReadCharArray(xCoordinatesBuffer, MAXBUFFERSIZE, "Debug.xCoordinatesBuffer");
+	serializer.ReadCharArray(yCoordinatesBuffer, MAXBUFFERSIZE, "Debug.yCoordinatesBuffer");
+	serializer.ReadCharArray(xOrientationBuffer, MAXBUFFERSIZE, "Debug.xOrientationBuffer");
+	serializer.ReadCharArray(yOrientationBuffer, MAXBUFFERSIZE, "Debug.yOrientationBuffer");
+	serializer.ReadDouble(xCoordinates, "Debug.xCoordinates");
+	serializer.ReadDouble(yCoordinates, "Debug.yCoordinates");
+	serializer.ReadDouble(xOrientation, "Debug.xOrientation");
+	serializer.ReadDouble(yOrientation, "Debug.yOrientation");
+
+	serializer.ReadFloat(clearColor.x, "Debug.clearColor.r");
+	serializer.ReadFloat(clearColor.y, "Debug.clearColor.g");
+	serializer.ReadFloat(clearColor.z, "Debug.clearColor.b");
+	serializer.ReadFloat(clearColor.w, "Debug.clearColor.a");
+
+	serializer.ReadFloat(objSizeXMax, "Debug.objSizeXMax");
+	serializer.ReadFloat(objSizeXMin, "Debug.objSizeXMin");
+	serializer.ReadFloat(objSizeYMax, "Debug.objSizeYMax");
+	serializer.ReadFloat(objSizeYMin, "Debug.objSizeYMin");
+
+	serializer.ReadFloat(objWidthSlide, "Debug.objWidthSlide");
+	serializer.ReadFloat(objHeightSlide, "Debug.objHeightSlide");
+	serializer.ReadInt(objAttributeSliderMaxLength, "Debug.objAttributeSliderMaxLength");
+	serializer.ReadInt(objAttributeSliderMidLength, "Debug.objAttributeSliderMidLength");
+	serializer.ReadInt(objAttributeSliderMinLength, "Debug.objAttributeSliderMinLength");
+
+	serializer.ReadInt(objCount, "Debug.objCount");
 
 	serializer.ReadDouble(loopStartTime, "Debug.loopStartTime");
+	serializer.ReadDouble(loopStartTimeECS, "Debug.loopStartTimeECS");
 	serializer.ReadDouble(totalLoopTime, "Debug.totalLoopTime");
+	serializer.ReadDouble(totalLoopTimeECS, "Debug.totalLoopTimeECS");
 	serializer.ReadDouble(lastUpdateTime, "Debug.lastUpdateTime");
 
 	serializer.ReadInt(systemCount, "Debug.systemCount");
-
-	// ???? object size x max, object size x min ????
-	// ???? object size y max, object size y min ????
 }
 
 //Check if legacy key is mapped in ImGui key map
@@ -534,5 +638,54 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 		&& ImGui::GetIO().KeyMap[key] != -1; 
 }
 
+
+void DebugSystem::ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
+	if (items[current_item] == "Enemy") {
+
+		EnemyComponent enemy{};
+		serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+		MovementComponent movement{};
+		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
+
+		ecsCoordinator.addComponent(entityObj, enemy);
+		ecsCoordinator.addComponent(entityObj, movement);
+
+	}
+	else if (items[current_item] == "Player") {
+
+		AABBComponent aabb{};
+		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
+		serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
+		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
+		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
+
+		MovementComponent movement{};
+		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
+
+		AnimationComponent animation{};
+		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
+
+		ecsCoordinator.addComponent(entityObj, aabb);
+		ecsCoordinator.addComponent(entityObj, movement);
+		ecsCoordinator.addComponent(entityObj, animation);
+
+	}
+	else if (items[current_item] == "Platform") {
+
+		AABBComponent aabb{};
+		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
+		serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
+		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
+		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
+
+		ClosestPlatform closestPlatform{};
+		serializer.ReadObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
+
+		ecsCoordinator.addComponent(entityObj, aabb);
+		ecsCoordinator.addComponent(entityObj, closestPlatform);
+		//serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+
+	}
+}
 
 

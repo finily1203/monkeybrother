@@ -51,6 +51,7 @@ public:
 	virtual void ReadFloat(float&, std::string const&);
 	virtual void ReadDouble(double&, std::string const&);
 	virtual void ReadString(std::string&, std::string const&);
+	virtual void ReadCharArray(char*, size_t, std::string const&);
 
 	virtual void WriteInt(int&, std::string const&);
 	virtual void WriteUnsignedInt(unsigned int&, std::string const&);

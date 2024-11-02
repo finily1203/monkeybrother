@@ -346,6 +346,35 @@ void JSONSerializer::ReadString(std::string& data, std::string const& jsonKey)
 	data = currentObj.get<std::string>();
 }
 
+void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const& jsonKey)
+{
+	std::istringstream keyStream(jsonKey);
+	std::string keySegment;
+	nlohmann::json currentObj = jsonObject;
+
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		if (currentObj.contains(keySegment))
+		{
+			currentObj = currentObj[keySegment];
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	// Get the string from JSON
+	std::string tempStr = currentObj.get<std::string>();
+
+	// Copy characters to the buffer, respecting the size limit
+	size_t length = std::min(tempStr.length(), maxSize);
+	for (size_t i = 0; i < length; i++)
+	{
+		data[i] = tempStr[i];
+	}
+}
+
 void JSONSerializer::WriteInt(int& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
