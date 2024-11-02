@@ -107,6 +107,10 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
+	std::vector<Entity> getAllLiveEntities();
+	std::string getEntityID(Entity entity);
+	void setEntityID(Entity entity, std::string ID);
+
 	//void test();
 	void test2();
 	void test3();

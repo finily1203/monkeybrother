@@ -51,6 +51,7 @@ struct GLFWFunctions {
 	static bool audioPaused;
 	static bool audioNext;
 	static int audioNum;
+	static int windowWidth, windowHeight;
 	static bool audioStopped;
 	static bool cloneObject;
 	static bool goNextMode;
@@ -69,6 +70,11 @@ struct GLFWFunctions {
 	static GLboolean move_right_flag;
 	static GLboolean debug_flag;
 	static GLboolean move_jump_flag;
+	static GLboolean allow_camera_movement;
+	static GLboolean camera_zoom_in_flag;
+	static GLboolean camera_zoom_out_flag;
+	static GLboolean camera_rotate_left_flag;
+	static GLboolean camera_rotate_right_flag;
 
 	static bool isGuiOpen;
 	static bool zoomViewport;

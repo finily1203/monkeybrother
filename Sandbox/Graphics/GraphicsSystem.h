@@ -32,18 +32,20 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
 #include <string>
+#include "GlfwFunctions.h"
+#include "AABBComponent.h"
 
 
-struct AABB {
-    glm::vec2 min; // Minimum corner (bottom-left)
-    glm::vec2 max; // Maximum corner (top-right)
-
-    // Constructor
-    AABB(const glm::vec2& position, const glm::vec2& scaling);
-
-    // Check for collision with another AABB
-    bool intersects(const AABB& other) const;
-};
+//struct AABB {
+//    glm::vec2 min; // Minimum corner (bottom-left)
+//    glm::vec2 max; // Maximum corner (top-right)
+//
+//    // Constructor
+//    AABB(const glm::vec2& position, const glm::vec2& scaling);
+//
+//    // Check for collision with another AABB
+//    bool intersects(const AABB& other) const;
+//};
 
 class GraphicsSystem : public GameSystems
 {
@@ -63,7 +65,7 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri);
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri, glm::mat3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }
@@ -98,7 +100,7 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
-    void drawDebugLines(const GLObject& obj);
+    void drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat);
 
 private:
     GLuint m_VAO;

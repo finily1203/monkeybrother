@@ -13,7 +13,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *//*___________________________________________________________________________-*/
 #pragma once
 #include "ECSCoordinator.h"
+#include "EntityManager.h"
 #include "GraphicsSystem.h"
+#include "CameraSystem2D.h"
 
 class GraphicSystemECS : public System
 {

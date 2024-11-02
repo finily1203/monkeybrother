@@ -34,6 +34,7 @@
     <ClCompile Include="DebugSystem\Crashlog.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
+    <ClCompile Include="Graphics\CameraSystem2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -75,6 +76,7 @@
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
+    <ClInclude Include="Graphics\CameraSystem2D.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

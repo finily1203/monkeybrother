@@ -476,15 +476,34 @@ void ECSCoordinator::test4() {
 	//}
 	
 	// Iterate through the entities to find Object1 and Object2
-	for (auto entity : entityManager->getLiveEntities()) {
-		std::string entityId = this->entityManager->getEntityId(entity); // Assume you have a method to get the entity ID
-
-		/*if (entityId == "Object1" || entityId == "Object2") {
-			addComponent(entity, AnimationComponent{ true });
-		}*/
-		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
-	}
+	
 	Entity platform1 = createEntity();
 	addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(1000.0f, 50.0f), glm::vec2(0.0f, -150.f) });
-	/*std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;*/
+
+	// add aabb component to the entity
+	for (auto entity : entityManager->getLiveEntities()) {
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+		float left = transform.position.x - transform.scale.x / 2;
+		float right = transform.position.x + transform.scale.x / 2;
+		float top = transform.position.y + transform.scale.y / 2;
+		float bottom = transform.position.y - transform.scale.y / 2;
+
+		addComponent(entity, AABBComponent{left, right, top, bottom});
+		if (entityManager->getEntityId(entity) == "Player") {
+			addComponent(entity, MovementComponent{.1f});
+		}
+	}
+}
+
+std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
+	return entityManager->getLiveEntities();
+}
+
+std::string ECSCoordinator::getEntityID(Entity entity) {
+	return entityManager->getEntityId(entity);
+}
+
+void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
+	entityManager->setEntityId(entity, ID);
 }
