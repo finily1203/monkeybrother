@@ -90,12 +90,11 @@ public:
     std::string getSystemECS() override;
 
     // Getters and Setters
-    myMath::Vector2D GetVelocity() const { return velocity; }
     bool GetAlrJumped() const { return alrJumped; }
 
-    void SetVelocity(myMath::Vector2D newVelocity) { velocity = newVelocity; }
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
+    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
     void ApplyGravity(Entity entity, float dt);
     Entity FindClosestPlatform(Entity player);
 
@@ -121,9 +120,6 @@ public:
 
 
 private:
-    myMath::Vector2D velocity;
-    float gravity;
-    float jumpForce;
     float friction;
     bool alrJumped;
     bool isFalling;

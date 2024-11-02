@@ -20,7 +20,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "MovementComponent.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
-
+#include "RigidBodyComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
