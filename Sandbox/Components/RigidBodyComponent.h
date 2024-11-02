@@ -10,5 +10,6 @@ struct RigidBodyComponent
 	myMath::Vector2D velocity;
 	myMath::Vector2D acceleration;
 	myMath::Vector2D force;
+	myMath::Vector2D accumulatedForce;
 
 };

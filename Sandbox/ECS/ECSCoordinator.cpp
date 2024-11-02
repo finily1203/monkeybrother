@@ -238,6 +238,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
 			serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
 			serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
+			serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
 
 			ecs.addComponent(entityObj, rigidBody);
 		}

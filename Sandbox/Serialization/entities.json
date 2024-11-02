@@ -233,14 +233,18 @@
         "jump": 0.8,
         "dampening": 0.9,
         "velocity": {
-           "x": 0.0,
-           "y": 0.0
+          "x": 0.0,
+          "y": 0.0
         },
         "acceleration": {
           "x": 0.0,
           "y": 0.0
         },
         "force": {
+          "x": 0.05,
+          "y": 0.0
+        },
+        "accumulatedForce": {
           "x": 0.0,
           "y": 0.0
         }
@@ -311,14 +315,18 @@
         "jump": 0.8,
         "dampening": 0.9,
         "velocity": {
-          "x": 50.0,
-          "y": 50.0
+          "x": 0.0,
+          "y": 0.0
         },
         "acceleration": {
           "x": 0.0,
           "y": 0.0
         },
         "force": {
+          "x": 0.05,
+          "y": 0.01
+        },
+        "accumulatedForce": {
           "x": 0.0,
           "y": 0.0
         }
