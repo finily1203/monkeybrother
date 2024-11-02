@@ -418,24 +418,24 @@ void DebugSystem::update() {
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f");
 					if (ImGui::IsItemActivated) {
-
-					if (posXSlide != lastPosX)
-					{
-						saveFilePending = true;
-						lastPosX = posXSlide;
-					}
-
-					if (saveFilePending && ImGui::IsItemDeactivatedAfterEdit())
-					{
-						std::string saveFile = GenerateSaveJSONFile(saveCount);
-						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
-
-						saveCount++;
-						saveFilePending = false;
-						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-					}
-					if (ImGui::IsItemActive || ImGui::IsItemDeactivatedAfterEdit()) {
 						transform.position.SetX(posXSlide);
+
+						//if (posXSlide != lastPosX)
+						//{
+						//	saveFilePending = true;
+						//	lastPosX = posXSlide;
+						//}
+
+						//if (saveFilePending && ImGui::IsItemDeactivatedAfterEdit())
+						//{
+						//	std::string saveFile = GenerateSaveJSONFile(saveCount);
+						//	ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+
+						//	saveCount++;
+						//	saveFilePending = false;
+						//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+						//}
+						
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
@@ -465,16 +465,13 @@ void DebugSystem::update() {
 					if (ImGui::Button("Remove")) {
 						ecsCoordinator.destroyEntity(entity);
 					}
+					/*if (ImGui::Button("Save")) {
+						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+					}*/
+
 					ImGui::TreePop();
-					}
+					
 				}
-
-
-				ImVec2 viewportPos = GameViewWindow::getViewportPos();
-				ImVec2 TESTEST = ImGui::GetCursorPos();
-				ImVec2 Mouse = ImGui::GetMousePos();
-				float localMouseX = Mouse.x - viewportPos.x;
-				float localMouseY = Mouse.y - viewportPos.y;
 
 				ImGui::PopID();
 				ImGui::Separator();
@@ -669,14 +666,13 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	serializer.WriteFloat(clear_color.x, "Debug.clearColor.r");
-	serializer.WriteFloat(clear_color.y, "Debug.clearColor.g");
-	serializer.WriteFloat(clear_color.z, "Debug.clearColor.b");
-	serializer.WriteFloat(clear_color.w, "Debug.clearColor.a");
+	serializer.WriteFloat(clearColor.x, "Debug.clearColor.r");
+	serializer.WriteFloat(clearColor.y, "Debug.clearColor.g");
+	serializer.WriteFloat(clearColor.z, "Debug.clearColor.b");
+	serializer.WriteFloat(clearColor.w, "Debug.clearColor.a");
 
-	serializer.WriteFloat(widthSlide, "Debug.widthSlide");
-	serializer.WriteFloat(heightSlide, "Debug.heightSlide");
-	serializer.WriteFloat(sizeSlide, "Debug.sizeSlide");
+	serializer.WriteFloat(objWidthSlide, "Debug.widthSlide");
+	serializer.WriteFloat(objWidthSlide, "Debug.heightSlide");
 
 	// ???? object count ????
 
