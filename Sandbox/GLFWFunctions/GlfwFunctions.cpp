@@ -35,8 +35,6 @@ float GLFWFunctions::objMoveMouseCoordY = 0.0f;
 bool GLFWFunctions::audioPaused = false;
 bool GLFWFunctions::audioNext = false;
 int GLFWFunctions::audioNum = 0;
-int GLFWFunctions::windowWidth = 0;
-int GLFWFunctions::windowHeight = 0;
 bool GLFWFunctions::audioStopped = false;
 bool GLFWFunctions::isGuiOpen = false;
 bool GLFWFunctions::zoomViewport = false;
@@ -63,11 +61,6 @@ GLboolean GLFWFunctions::move_left_flag = false;
 GLboolean GLFWFunctions::move_right_flag = false;
 GLboolean GLFWFunctions::debug_flag = false;
 GLboolean GLFWFunctions::move_jump_flag = false;
-GLboolean GLFWFunctions::allow_camera_movement = false;
-GLboolean GLFWFunctions::camera_zoom_in_flag = false;
-GLboolean GLFWFunctions::camera_zoom_out_flag = false;
-GLboolean GLFWFunctions::camera_rotate_left_flag = false;
-GLboolean GLFWFunctions::camera_rotate_right_flag = false;
 
 int GLFWFunctions::testMode = 0;
 
@@ -77,10 +70,6 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     /* Initialize the library */
     if (!glfwInit())
         return false;
-
-	// Set the window width and height
-	windowWidth = width;
-	windowHeight = height;
 
     /* Create a windowed mode window and its OpenGL context */
     GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
@@ -117,10 +106,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 #ifdef _DEBUG
         std::cout << "Key pressed" << std::endl;
 #endif
-		if (GLFW_KEY_F2 == key)
-		{
-            GLFWFunctions::allow_camera_movement = !GLFWFunctions::allow_camera_movement;
-		}
     }
     else if (GLFW_REPEAT == action) {
 #ifdef _DEBUG
@@ -228,10 +213,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     GLFWFunctions::move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
     GLFWFunctions::move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
     GLFWFunctions::move_jump_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_SPACE) != 0;
-	GLFWFunctions::camera_zoom_in_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_Z) != 0;
-	GLFWFunctions::camera_zoom_out_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_X) != 0;
-	GLFWFunctions::camera_rotate_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_Q) != 0;
-	GLFWFunctions::camera_rotate_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_E) != 0;
 
 
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {

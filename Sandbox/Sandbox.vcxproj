@@ -70,9 +70,6 @@
       <Command>
       </Command>
     </PostBuildEvent>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -96,9 +93,6 @@
       <Command>
       </Command>
     </PostBuildEvent>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\monkeybrother\monkeybrother.vcxproj">
@@ -121,7 +115,6 @@
     <ClCompile Include="FilePaths\filePath.cpp" />
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="Graphics\AnimationData.cpp" />
-    <ClCompile Include="Graphics\CameraSystem2D.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -169,7 +162,6 @@
     <ClInclude Include="ECS\EntityManager.h" />
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
-    <ClInclude Include="Graphics\CameraSystem2D.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />

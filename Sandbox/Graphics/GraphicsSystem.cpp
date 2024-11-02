@@ -346,10 +346,59 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
     shader->Unbind();
 }
 
+void GraphicsSystem::drawDebugLines(const GLObject& obj) {
 
+    glBegin(GL_LINES);
 
-glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri, glm::mat3 viewMat) {
-    glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
+    // Set color for debug lines
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
+
+    float spriteWidth = obj.scaling.x;  // Width of one sprite
+    float spriteHeight = obj.scaling.y; // Height of the sprite
+
+    float halfWidth = spriteWidth / 2;
+    float halfHeight = spriteHeight / 2;
+
+    glm::vec2 bottomLeft = glm::vec2(-halfWidth, -halfHeight);
+    glm::vec2 bottomRight = glm::vec2(halfWidth, -halfHeight);
+    glm::vec2 topRight = glm::vec2(halfWidth, halfHeight);
+    glm::vec2 topLeft = glm::vec2(-halfWidth, halfHeight);
+
+    glm::mat2 NDC = glm::mat2{
+        2.0f / 1600.0f,     0,
+        0,                  2.0f / 900.0f
+    };
+
+    // Translate each corner based on the object's position
+    glm::vec2 transformedBottomLeft = obj.position + bottomLeft;
+    glm::vec2 transformedBottomRight = obj.position + bottomRight;
+    glm::vec2 transformedTopRight = obj.position + topRight;
+    glm::vec2 transformedTopLeft = obj.position + topLeft;
+
+    // Convert to NDC space
+    transformedBottomLeft = NDC * transformedBottomLeft;
+    transformedBottomRight = NDC * transformedBottomRight;
+    transformedTopRight = NDC * transformedTopRight;
+    transformedTopLeft = NDC * transformedTopLeft;
+
+    // Draw the AABB lines
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y);  // Bottom left
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
+
+    glVertex2f(transformedBottomRight.x, transformedBottomRight.y); // Bottom right
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
+
+    glVertex2f(transformedTopRight.x, transformedTopRight.y); // Top right
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
+
+    glVertex2f(transformedTopLeft.x, transformedTopLeft.y); // Top left
+    glVertex2f(transformedBottomLeft.x, transformedBottomLeft.y); // Back to bottom left
+
+    glEnd();
+}
+
+glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri) {
+    glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
     {
@@ -374,65 +423,20 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, glm::vec2 objPos, g
          0, 0, 1
     };
 
-    projMat = glm::ortho(
-        -GLFWFunctions::windowWidth / 2.0f,  // left
-        GLFWFunctions::windowWidth / 2.0f,   // right
-        -GLFWFunctions::windowHeight / 2.0f, // bottom
-        GLFWFunctions::windowHeight / 2.0f   // top
-    );
+    //std::cout << "Rotating : " << Rotating[0][0] << " " << Rotating[0][1] << " " << Rotating[0][2] << std::endl;
+    //std::cout << "Rotating : " << Rotating[1][0] << " " << Rotating[1][1] << " " << Rotating[1][2] << std::endl;
+    //std::cout << "Rotating : " << Rotating[2][0] << " " << Rotating[2][1] << " " << Rotating[2][2] << std::endl;
+
+    // TODO:: change the NDC matrix to be calculated based on the window size
+    NDC =
+    {
+        2.0f / 1600.0f,  0,              0,
+        0,               2.0f / 900.0f,  0,
+        0,               0,              1 };
+
     mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform = projMat * viewMat * mdl_xform;
+    mdl_to_ndc_xform = NDC * mdl_xform;
     return mdl_to_ndc_xform;
-}
-
-void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
-
-    glBegin(GL_LINES);
-
-    // Set color for debug lines
-    glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
-
-    // Define the corners of the AABB in homogeneous coordinates
-    glm::vec4 bottomLeft(aabb.left, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 bottomRight(aabb.right, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 topRight(aabb.right, aabb.top, 0.0f, 1.0f);
-    glm::vec4 topLeft(aabb.left, aabb.top, 0.0f, 1.0f);
-
-    // Create the projection matrix
-    glm::mat4 projMat = glm::ortho(
-        -GLFWFunctions::windowWidth / 2.0f,  // left
-        GLFWFunctions::windowWidth / 2.0f,   // right
-        -GLFWFunctions::windowHeight / 2.0f, // bottom
-        GLFWFunctions::windowHeight / 2.0f   // top
-    );
-    glm::mat4 viewMat4 = {
-		viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
-		viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
-		0,             0,             viewMat[2][2], 0,
-		viewMat[2][0], viewMat[2][1], 1,             1
-    };
-
-    // Apply the projection matrix to each corner
-    bottomLeft = projMat * viewMat4 *bottomLeft;
-	bottomRight = projMat * viewMat4 * bottomRight;
-	topRight = projMat * viewMat4 * topRight;
-	topLeft = projMat * viewMat4 * topLeft;
-
-
-    // Draw the AABB lines using the transformed coordinates
-    glVertex2f(bottomLeft.x, bottomLeft.y);   // Bottom left
-    glVertex2f(bottomRight.x, bottomRight.y); // Bottom right
-
-    glVertex2f(bottomRight.x, bottomRight.y); // Bottom right
-    glVertex2f(topRight.x, topRight.y);       // Top right
-
-    glVertex2f(topRight.x, topRight.y);       // Top right
-    glVertex2f(topLeft.x, topLeft.y);         // Top left
-
-    glVertex2f(topLeft.x, topLeft.y);         // Top left
-    glVertex2f(bottomLeft.x, bottomLeft.y);   // Back to bottom left
-
-    glEnd();
 }
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {

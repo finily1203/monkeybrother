@@ -114,9 +114,6 @@ public:
 	void setSystemSignature(ComponentSig signature);
 
 	ComponentSig getEntitySignature(Entity entity);
-	std::vector<Entity> getAllLiveEntities();
-	std::string getEntityID(Entity entity);
-	void setEntityID(Entity entity, std::string ID);
 
 	//void test();
 	void test2();
