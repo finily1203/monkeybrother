@@ -96,6 +96,7 @@ public:
     void SetVelocity(myMath::Vector2D newVelocity) { velocity = newVelocity; }
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
+    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
     void ApplyGravity(Entity entity, float dt);
     Entity FindClosestPlatform(Entity player);
 

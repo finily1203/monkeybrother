@@ -3,9 +3,9 @@
 
 struct RigidBodyComponent
 {
-	float speed;
 	float mass;
 	float gravityScale;
+	float jump;
 	myMath::Vector2D velocity;
 	myMath::Vector2D acceleration;
 	myMath::Vector2D force;

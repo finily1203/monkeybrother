@@ -228,9 +228,9 @@
         "bottom": 250.0
       },
       "rigidBody": {
-        "speed": 0.2,
         "mass": 1.0,
-        "gravityScale": 1.0,
+        "gravityScale": -19.6,
+        "jump":  30.0,
         "velocity": {
            "x": 0.0,
            "y": 0.0

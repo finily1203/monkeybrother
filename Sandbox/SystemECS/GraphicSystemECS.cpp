@@ -21,7 +21,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "MovementComponent.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
-
+#include "RigidBodyComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
@@ -59,7 +59,7 @@ void GraphicSystemECS::update(float dt) {
 			}
 
 			//Taken from WindowSystem.cpp
-			bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
+			bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
 			bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 			//if (hasMovement && isEnemy) {
 			if (hasMovement && hasEnemy) {
