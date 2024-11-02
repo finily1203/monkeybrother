@@ -28,7 +28,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
-PhysicsSystemECS::PhysicsSystemECS() : velocity{ 0, 0 }, gravity{ -0.5f }, jumpForce{ 9.8f }, friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>()) 
+PhysicsSystemECS::PhysicsSystemECS() : friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>()) 
 {
     eventSource.Register(MessageId::FALL, eventObserver);
     eventSource.Register(MessageId::JUMP, eventObserver);
@@ -309,45 +309,58 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player)
 {
     //float speed = ecsCoordinator.getComponent<MovementComponent>(player).speed;
     //float maxSpeed = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity.GetX() * 8.f;
-    const float maxSpeed = 50.f;
-    //const float dragCoefficient = 5.0f;
+    const float maxSpeed = 0.6f;
 
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
     myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
     float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
-    myMath::Vector2D vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
+    myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
     float gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
 
-
     if (GLFWFunctions::move_left_flag) {
-        ApplyForce(player, myMath::Vector2D(-90.f, 0.f));
+        ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
     }
     else if (GLFWFunctions::move_right_flag) {
-        ApplyForce(player, myMath::Vector2D(90.f, 0.f));
+        ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
     }
-    //else {
-    //    //myMath::Vector2D drag = -vel * dragCoefficient;
-    //    //ApplyForce(player, myMath::Vector2D(drag.GetX(), 0.f));
-    //}
+    else {
+
+        // Apply friction to gradually slow down
+        if (force.GetX() > 0) {
+            ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
+        }
+        else if (force.GetX() < 0) {
+            ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
+        }
+
+        if (std::abs(force.GetX()) < 0.01f) { // threshold
+            vel.SetX(0.f);
+            force.SetX(0.f);
+        }
+
+    }
 
     float invMass = mass > 0.f ? 1.f / mass : 0.f;
     acceleration = force * invMass;
 
+    // Clamp speed without interfering with velocity
+    if (vel.GetX() > maxSpeed) {
+        acceleration.SetX(0);
+    }
+    else if (vel.GetX() < -maxSpeed) {
+		acceleration.SetX(0);
+	}
+
+    std::cout << force.GetX() << std::endl;
     vel.SetX(vel.GetX() + acceleration.GetX() * GLFWFunctions::delta_time);
     vel.SetY(vel.GetY() + acceleration.GetY() * GLFWFunctions::delta_time);
+    
+    // Dampening
+    vel.SetX(vel.GetX() * 0.9f);
 
-    //std::cout << force.GetX() << std::endl;
     playerPos.SetX(playerPos.GetX() + vel.GetX() * GLFWFunctions::delta_time);
     playerPos.SetY(playerPos.GetY() + vel.GetY() * GLFWFunctions::delta_time);
-    
-    // Clamp the velocity to maxSpeed
-    if (vel.GetX() > maxSpeed || vel.GetX() < -maxSpeed) {
-        myMath::NormalizeVector2D(vel, vel);
-        vel *= maxSpeed;
-    }
-
-    std::cout << vel.GetX() << std::endl;
 }
 
 //// PROTOTYPING: Handling Circle vs Rectangle side collision
@@ -577,7 +590,8 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     myMath::Vector2D plat = ecsCoordinator.getComponent<TransformComponent>(platform).position;
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-
+    myMath::Vector2D directionVector;
+    myMath::NormalizeVector2D(directionVector, vel);
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
 
@@ -588,7 +602,7 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
         //printf("playerPos: %f, %f \n", playerPos.x, playerPos.y);
 		//printf("platform: %f, %f \n", plat.x, plat.y);
         playerPos += normal * penetration;  // Adjust position to resolve penetration
-
+        //std::cout << directionVector.GetX() << ", " << directionVector.GetY() << std::endl;
         // change this so that when top of player is in collision instead of checking bottom of platform in collision (direction of player)
         //// Check if collision is from below
         //bool isBottomCollision = (normal.y < 0);
@@ -606,7 +620,9 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
         //printf("velocity: %f, %f\n", GetVelocity().x, GetVelocity().y);
         // Allow jumping
         if (GLFWFunctions::move_jump_flag) {
+            myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
             float jumping = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump;
+            
             vel.SetY(jumping);
         }
     }
@@ -992,28 +1008,30 @@ void PhysicsSystemECS::update(float dt) {
         }
     }
 
+    myMath::Vector2D velocity = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
+
     //if (GetVelocity().y < 0 && !isFalling)
-    if (GetVelocity().GetY() < 0 && !isFalling)
+    if (velocity.GetY() < 0 && !isFalling)
     {
         isFalling = true;
         eventSource.NotifyFall(playerEntity);
     }
 
     //if (GetVelocity().y >= 0 && isFalling)
-    if (GetVelocity().GetY() >= 0 && isFalling)
+    if (velocity.GetY() >= 0 && isFalling)
     {
         isFalling = false;
     }
 
     //if (GetVelocity().y > 0 && !alrJumped)
-    if (GetVelocity().GetY() > 0 && !alrJumped)
+    if (velocity.GetY() > 0 && !alrJumped)
     {
         alrJumped = true;
         eventSource.NotifyJump(playerEntity);
     }
 
     //if (GetVelocity().y <= 0 && alrJumped)
-    if (GetVelocity().GetY() <= 0 && alrJumped)
+    if (velocity.GetY() <= 0 && alrJumped)
     {
         alrJumped = false;
     }
@@ -1031,12 +1049,11 @@ void PhysicsSystemECS::update(float dt) {
     //HandleAABBCollision(playerEntity, closestPlatformEntity);
     HandlePlayerInput(playerEntity);
 
-    //std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).speed << std::endl;
 
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;    
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetX(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetX() + GetVelocity().GetX());
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + GetVelocity().GetY());
+    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetX(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetX() + velocity.GetX());
+    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
 
 }
 
