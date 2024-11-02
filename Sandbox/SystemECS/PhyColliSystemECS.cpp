@@ -307,60 +307,60 @@ void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& applied
 // Player input handling for movement (left: 'A', right: 'D')
 void PhysicsSystemECS::HandlePlayerInput(Entity player)
 {
-    //float speed = ecsCoordinator.getComponent<MovementComponent>(player).speed;
-    //float maxSpeed = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity.GetX() * 8.f;
-    const float maxSpeed = 0.6f;
+ //   //float speed = ecsCoordinator.getComponent<MovementComponent>(player).speed;
+ //   //float maxSpeed = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity.GetX() * 8.f;
+ //   const float maxSpeed = 0.6f;
 
-    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-    myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
-    myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
-    float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
-    myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
-    float gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
+ //   myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
+ //   myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
+ //   myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
+ //   float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
+ //   myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
+ //   float gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
 
-    if (GLFWFunctions::move_left_flag) {
-        ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
-    }
-    else if (GLFWFunctions::move_right_flag) {
-        ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
-    }
-    else {
+ //   if (GLFWFunctions::move_left_flag) {
+ //       ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
+ //   }
+ //   else if (GLFWFunctions::move_right_flag) {
+ //       ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
+ //   }
+ //   else {
 
-        // Apply friction to gradually slow down
-        if (force.GetX() > 0) {
-            ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
-        }
-        else if (force.GetX() < 0) {
-            ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
-        }
+ //       // Apply friction to gradually slow down
+ //       if (force.GetX() > 0) {
+ //           ApplyForce(player, myMath::Vector2D(-0.05f, 0.f));
+ //       }
+ //       else if (force.GetX() < 0) {
+ //           ApplyForce(player, myMath::Vector2D(0.05f, 0.f));
+ //       }
 
-        if (std::abs(force.GetX()) < 0.01f) { // threshold
-            vel.SetX(0.f);
-            force.SetX(0.f);
-        }
+ //       if (std::abs(force.GetX()) < 0.01f) { // threshold
+ //           vel.SetX(0.f);
+ //           force.SetX(0.f);
+ //       }
 
-    }
+ //   }
 
-    float invMass = mass > 0.f ? 1.f / mass : 0.f;
-    acceleration = force * invMass;
+ //   float invMass = mass > 0.f ? 1.f / mass : 0.f;
+ //   acceleration = force * invMass;
 
-    // Clamp speed without interfering with velocity
-    if (vel.GetX() > maxSpeed) {
-        acceleration.SetX(0);
-    }
-    else if (vel.GetX() < -maxSpeed) {
-		acceleration.SetX(0);
-	}
+ //   // Clamp speed without interfering with velocity
+ //   if (vel.GetX() > maxSpeed) {
+ //       acceleration.SetX(0);
+ //   }
+ //   else if (vel.GetX() < -maxSpeed) {
+	//	acceleration.SetX(0);
+	//}
 
-    std::cout << force.GetX() << std::endl;
-    vel.SetX(vel.GetX() + acceleration.GetX() * GLFWFunctions::delta_time);
-    vel.SetY(vel.GetY() + acceleration.GetY() * GLFWFunctions::delta_time);
-    
-    // Dampening
-    vel.SetX(vel.GetX() * 0.9f);
+ //   std::cout << force.GetX() << std::endl;
+ //   vel.SetX(vel.GetX() + acceleration.GetX() * GLFWFunctions::delta_time);
+ //   vel.SetY(vel.GetY() + acceleration.GetY() * GLFWFunctions::delta_time);
+ //   
+ //   // Dampening
+ //   vel.SetX(vel.GetX() * 0.9f);
 
-    playerPos.SetX(playerPos.GetX() + vel.GetX() * GLFWFunctions::delta_time);
-    playerPos.SetY(playerPos.GetY() + vel.GetY() * GLFWFunctions::delta_time);
+ //   playerPos.SetX(playerPos.GetX() + vel.GetX() * GLFWFunctions::delta_time);
+ //   playerPos.SetY(playerPos.GetY() + vel.GetY() * GLFWFunctions::delta_time);
 }
 
 //// PROTOTYPING: Handling Circle vs Rectangle side collision
@@ -985,9 +985,7 @@ bool CollisionSystemECS::CollisionIntersection_RectRect(const AABB& aabb1,
 //                std::cout << "B" << std::endl;
 //                return CollisionSide::BOTTOM;
 //            }
-//
-//        }
-//
+// 
 //    }
 //
 //    // If no collision was detected, return NONE
@@ -1029,6 +1027,7 @@ void PhysicsSystemECS::update(float dt) {
     {
         alrJumped = false;
     }
+    //HandlePlayerInput(playerEntity);
 
     closestPlatformEntity = FindClosestPlatform(playerEntity);
     //float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatformEntity).orientation.x;
@@ -1041,13 +1040,13 @@ void PhysicsSystemECS::update(float dt) {
     //HandleOBBCircleCollision(closestPlatformEntity, playerEntity);
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
     //HandleAABBCollision(playerEntity, closestPlatformEntity);
-    HandlePlayerInput(playerEntity);
+
 
 
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;    
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetX(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetX() + velocity.GetX());
-    ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
+    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetX(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetX() + velocity.GetX());
+    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
 
 }
 
