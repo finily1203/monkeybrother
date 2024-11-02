@@ -27,9 +27,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Debug.h"
 #include "GUIConsole.h"
 
-
+std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
-void GraphicSystemECS::initialise() {}
+void GraphicSystemECS::initialise() { entityManager = std::make_unique<EntityManager>(); }
 
 //Update function to update the graphics system
 //uses functions from GraphicsSystem class to update, draw
@@ -159,6 +159,8 @@ void GraphicSystemECS::update(float dt) {
 		}
 		
 		else if (GLFWFunctions::testMode == 1) {
+			std::cout << "_______________________" << std::endl;
+			std::cout << "entities: " << ecsCoordinator.getEntityID(entity) << std::endl;
 			// It updates the object based on the animation component
 			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
 			// calculate the model transform matrix using update object function
