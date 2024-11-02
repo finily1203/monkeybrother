@@ -16,4 +16,5 @@ ECSCoordinator ecsCoordinator;
 GraphicsSystem graphicsSystem;
 DebugSystem debugSystem;
 AssetsManager assetsManager;
-//AudioSystem audioSystem;
+FontSystem fontSystem;
+

@@ -47,6 +47,8 @@ int main() {
 
 		engine->addSystem(&debugSystem);
 
+		engine->addSystem(&fontSystem);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 		//ecsCoordinator.test3();

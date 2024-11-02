@@ -21,6 +21,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
 #include "LogicSystemECS.h"
+#include "FontSystemECS.h"
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
@@ -333,6 +334,26 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 		std::cout << "Error: could not save to file " << filename << std::endl;
 	}
 }
+// this function handles the updating of the entity's data
+void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
+{
+	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+	{
+		TransformComponent& transform = getComponent<TransformComponent>(entity);
+		// assign the new data of the transform component to the entity's transform component
+		transform.orientation = transUpdate.orientation;
+		transform.position = transUpdate.position;
+		transform.scale = transUpdate.scale;
+	}
+	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+	{
+		FontComponent& font = getComponent<FontComponent>(entity);
+		font.text = fontUpdate.text; 
+		font.position = fontUpdate.position; 
+		font.scale = fontUpdate.scale; 
+		font.color = fontUpdate.color; 
+	}
+}
 
 //clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
@@ -421,10 +442,47 @@ void ECSCoordinator::test5() {
 	//}
 
 	//SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
-}
 
-ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
-	return entityManager->getSignature(entity);
+
+	//create text entity
+	std::cout << "Create Text Entity 1" << std::endl;
+	Entity textEntity = createEntity();
+	addComponent(textEntity, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+
+	FontComponent fontComp{};
+	fontComp.fontPath = "Graphics/Assets/Antonio.ttf";
+	fontComp.text = "Hello World!";
+
+	float screenWidth = 1600.0f;
+	float screenHeight = 900.0f;
+
+	float textScale = 1.0f;
+	glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
+	fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
+	fontComp.scale = textScale;
+	fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
+
+	addComponent(textEntity, fontComp);
+
+	// Create another text entity
+	std::cout << "Create Text Entity 2" << std::endl;
+	Entity textEntity2 = createEntity();
+	addComponent(textEntity2, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+
+	FontComponent fontComp2{};
+	fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
+	fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
+
+	float textScale2 = 1.0f;
+	glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
+
+	
+	fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
+	fontComp2.scale = textScale2;
+	fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
+
+	addComponent(textEntity2, fontComp2);
+
 }
 
 
@@ -439,6 +497,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<AnimationComponent>();
 	registerComponent<EnemyComponent>();
 	registerComponent<RigidBodyComponent>();
+	registerComponent<FontComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 
@@ -476,7 +535,16 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 
 	graphicSystem->initialise();
 
+	auto fontSystemECS = std::make_shared<FontSystemECS>();
 
+	registerSystem<FontSystemECS>();
+	{
+		ComponentSig fontSystemSig;
+		fontSystemSig.set(getComponentType<TransformComponent>(), true);
+		fontSystemSig.set(getComponentType<FontComponent>(), true);  
+	}
+
+	fontSystemECS->initialise();
 
 	test5();
 }

@@ -35,6 +35,9 @@
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
+    <ClCompile Include="Graphics\FontSystem.h" />
+    <ClCompile Include="Graphics\FontSystem.cpp" />
+    <ClCompile Include="SystemECS\FontSystemECS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -79,6 +82,8 @@
     <ClInclude Include="Components\EnemyComponent.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="Components\RigidBodyComponent.h" />
+    <ClInclude Include="Components\FontComponent.h" />
+    <ClInclude Include="SystemECS\FontSystemECS.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -91,6 +96,7 @@
   <ItemGroup>
     <None Include="Graphics\Basic.shader" />
     <None Include="Graphics\Basic1.shader" />
+    <None Include="Graphics\font.shader" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="DebugSystem\Assets\liberation-mono.ttf" />
