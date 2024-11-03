@@ -35,18 +35,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "AABBComponent.h"
 
-
-//struct AABB {
-//    glm::vec2 min; // Minimum corner (bottom-left)
-//    glm::vec2 max; // Maximum corner (top-right)
-//
-//    // Constructor
-//    AABB(const glm::vec2& position, const glm::vec2& scaling);
-//
-//    // Check for collision with another AABB
-//    bool intersects(const AABB& other) const;
-//};
-
 class GraphicsSystem : public GameSystems
 {
 public:
