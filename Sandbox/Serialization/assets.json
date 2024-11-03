@@ -31,8 +31,16 @@
       "filePath": "assets/textures/image.png"
     },
     {
-      "id": "texture3",
-      "filePath": "assets/textures/image1.jpg"
+      "id": "mossball",
+      "filePath": "assets/textures/mossball_idle_body.png"
+    },
+    {
+      "id": "goldfish",
+      "filePath": "assets/textures/goldfish_move.png"
+    },
+    {
+      "id": "background",
+      "filePath": "assets/textures/L1_Flat_Background.jpg"
     }
   ],
   "shaderAssets": [

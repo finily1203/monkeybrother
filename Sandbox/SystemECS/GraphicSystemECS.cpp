@@ -30,7 +30,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 CameraSystem2D cameraSystem;
 std::vector<GraphicsSystem::GLViewport> vps;
 
-std::unique_ptr<EntityManager> entityManager;
+//std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
 void GraphicSystemECS::initialise() {
 	cameraSystem.initialise();
@@ -83,13 +83,16 @@ void GraphicSystemECS::update(float dt) {
 			if (hasMovement && hasEnemy) 
 			{
 				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture2"), transform.mdl_xform);
+				//graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
 			}
 			else if (hasMovement) 
 			{
 				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
+				//graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
 			}
 			else if (entitySig.test(0) && entitySig.count() == 1) {
 				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
+				//graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
 			}
 			else 
 			{
