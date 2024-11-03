@@ -668,28 +668,28 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	serializer.WriteFloat(clearColor.x, "Debug.clearColor.r");
-	serializer.WriteFloat(clearColor.y, "Debug.clearColor.g");
-	serializer.WriteFloat(clearColor.z, "Debug.clearColor.b");
-	serializer.WriteFloat(clearColor.w, "Debug.clearColor.a");
+	serializer.WriteFloat(clearColor.x, "Debug.clearColor.r", filename);
+	serializer.WriteFloat(clearColor.y, "Debug.clearColor.g", filename);
+	serializer.WriteFloat(clearColor.z, "Debug.clearColor.b", filename);
+	serializer.WriteFloat(clearColor.w, "Debug.clearColor.a", filename);
 
-	serializer.WriteFloat(objWidthSlide, "Debug.widthSlide");
-	serializer.WriteFloat(objWidthSlide, "Debug.heightSlide");
+	serializer.WriteFloat(objWidthSlide, "Debug.widthSlide", filename);
+	serializer.WriteFloat(objWidthSlide, "Debug.heightSlide", filename);
 
 	// ???? object count ????
 
-	serializer.WriteDouble(loopStartTime, "Debug.loopStartTime");
-	serializer.WriteDouble(totalLoopTime, "Debug.totalLoopTime");
-	serializer.WriteDouble(lastUpdateTime, "Debug.lastUpdateTime");
+	serializer.WriteDouble(loopStartTime, "Debug.loopStartTime", filename);
+	serializer.WriteDouble(totalLoopTime, "Debug.totalLoopTime", filename);
+	serializer.WriteDouble(lastUpdateTime, "Debug.lastUpdateTime", filename);
 
-	serializer.WriteInt(systemCount, "Debug.systemCount");
+	serializer.WriteInt(systemCount, "Debug.systemCount", filename);
 
 	// ???? object size x max, object size x min ????
 	// ???? object size y max, object size y min ????
 
-	serializer.WriteInt(saveCount, "Debug.saveCount");
-	serializer.WriteBool(saveFilePending, "Debug.saveFilePending");
-	serializer.WriteFloat(lastPosX, "Debug.lastPosX");
+	serializer.WriteInt(saveCount, "Debug.saveCount", filename);
+	serializer.WriteBool(saveFilePending, "Debug.saveFilePending", filename);
+	serializer.WriteFloat(lastPosX, "Debug.lastPosX", filename);
 }
 
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)

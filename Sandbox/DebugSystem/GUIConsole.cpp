@@ -127,6 +127,6 @@ void Console::SaveConsoleConfigToJSON(std::string const& filename)
 
 	nlohmann::json jsobObj = serializer.GetJSONObject();
 
-	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
-	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY");
+	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs", filename);
+	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY", filename);
 }

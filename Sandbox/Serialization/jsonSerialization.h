@@ -7,8 +7,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @file    :  jsonSerialization.h
 @brief   :  jsonSerialization.h contains the JSON Serialization class that inherits from the BaseSerializer class.
 
-*Ian Loi (ian.loi) : 
-		 - Create functions of ReadObject and WriteObject, ReadObject reads data from JSON file and assign 
+*Ian Loi (ian.loi) :
+		 - Create functions of ReadObject and WriteObject, ReadObject reads data from JSON file and assign
 		 to the particular entity's data, whereas WriteObject writes the entity's data to the JSON file.
 
 File Contributions: Ian Loi (100%)
@@ -54,13 +54,13 @@ public:
 	virtual void ReadString(std::string&, std::string const&);
 	virtual void ReadCharArray(char*, size_t, std::string const&);
 
-	virtual void WriteBool(bool&, std::string const&);
-	virtual void WriteInt(int&, std::string const&);
-	virtual void WriteUnsignedInt(unsigned int&, std::string const&);
-	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&);
-	virtual void WriteFloat(float&, std::string const&);
-	virtual void WriteDouble(double&, std::string const&);
-	virtual void WriteString(std::string&, std::string const&);
+	virtual void WriteBool(bool&, std::string const&, std::string const&);
+	virtual void WriteInt(int&, std::string const&, std::string const&);
+	virtual void WriteUnsignedInt(unsigned int&, std::string const&, std::string const&);
+	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&, std::string const&);
+	virtual void WriteFloat(float&, std::string const&, std::string const&);
+	virtual void WriteDouble(double&, std::string const&, std::string const&);
+	virtual void WriteString(std::string&, std::string const&, std::string const&);
 
 	nlohmann::json GetJSONObject() const;
 
@@ -96,12 +96,12 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 				{
 					// set the current object to be the current entity
 					currentObj = entity;
-					
+
 					// set to true since the entity Id is found in the JSON object
 					found = true;
 
 					// stop looking through the JSON object since we found the entity
-					break; 
+					break;
 				}
 			}
 
@@ -129,7 +129,7 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 			}
 		}
 	}
-	
+
 	// this handles the reading of different types of objects
 	// example will be a matrix3x3 object and a vector2D object can all
 	// be read by calling this function
@@ -141,7 +141,7 @@ void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::s
 {
 	// string buffer that contains the sequence of characters of parentKey
 	std::istringstream keyStream(parentKey);
-		
+
 	// holds each different key from the keyStream
 	std::string keySegment;
 	nlohmann::json* currentObj = &jsonObject;

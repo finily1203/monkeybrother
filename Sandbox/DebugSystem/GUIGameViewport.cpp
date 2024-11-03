@@ -226,16 +226,16 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	serializer.WriteInt(viewportWidth, "GUIViewport.viewportWidth");
-	serializer.WriteInt(viewportHeight, "GUIViewport.viewportHeight");
+	serializer.WriteInt(viewportWidth, "GUIViewport.viewportWidth", filename);
+	serializer.WriteInt(viewportHeight, "GUIViewport.viewportHeight", filename);
 
-	serializer.WriteFloat(viewportPos.x, "GUIViewport.viewportPos.x");
-	serializer.WriteFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+	serializer.WriteFloat(viewportPos.x, "GUIViewport.viewportPos.x", filename);
+	serializer.WriteFloat(viewportPos.y, "GUIViewport.viewportPos.y", filename);
 
-	serializer.WriteUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+	serializer.WriteUnsignedInt(viewportTexture, "GUIViewport.viewportTexture", filename);
 
-	serializer.WriteFloat(zoomLevel, "GUIViewport.zoomLevel");
+	serializer.WriteFloat(zoomLevel, "GUIViewport.zoomLevel", filename);
 
-	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom");
-	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom", filename);
+	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom", filename);
 }
