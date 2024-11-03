@@ -11,11 +11,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #pragma once
+#include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
 #include "AssetsManager.h"
 #include "AudioSystem.h"
+#include "CameraSystem2D.h"
 #include "FontSystem.h"
 
 enum SystemType { //For perfomance viewer
@@ -23,6 +25,7 @@ enum SystemType { //For perfomance viewer
 	WindowSystemType,
 	DebugSystemType,
 	GraphicsSystemType,
+	CameraType,
 	ECSType,
 	AssetsManagerType,
 	FontType,
@@ -31,5 +34,6 @@ enum SystemType { //For perfomance viewer
 extern AssetsManager assetsManager;
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
+//extern CameraSystem2D cameraSystem;
 extern DebugSystem debugSystem;
 extern FontSystem fontSystem;

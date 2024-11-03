@@ -19,7 +19,7 @@ File Contributions: Ian Loi (100%)
 #include "vector3D.h"
 #include <cmath>
 
-namespace MyMath
+namespace myMath
 {
     // constructors for vector3D class
     Vector3D::Vector3D() : x(0.f), y(0.f), z(0.f) {}

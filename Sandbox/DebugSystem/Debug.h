@@ -19,12 +19,14 @@ File Contributions: Lew Zong Han Owen (100%)
 
 /*_______________________________________________________________________________________________________________*/
 #pragma once
+#include "EngineDefinitions.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
+//#include <filesystem>
 #include "GlfwFunctions.h"
 
 #include "Systems.h"
@@ -32,14 +34,15 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "../Serialization/jsonSerialization.h"
 
+#define MAXNAMELENGTH 15
+#define MAXBUFFERSIZE 8
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
 class DebugSystem : public GameSystems/*, public System*/ {
 public:
 
-	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
-	//ImVec4 clear_color;
 	DebugSystem();
 	~DebugSystem();
 
@@ -72,11 +75,54 @@ public:
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
+	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
+	
 	void SaveDebugConfigFromJSON(std::string const& filename);
+
+	std::string GenerateSaveJSONFile(int& saveNumber);
 
 private:
 	ImGuiIO* io;
 	ImFont* font;
+	static float fontSize;
+	static float textBorderSize;
+	static ImVec4 clearColor;
+	static int numberOfColumn;
+
+	// Track combined ECS percentage
+	static float ecsTotal;
+	static bool foundECS;
+
+	static bool isZooming;
+	static bool isPanning;
+
+	static float defaultObjScaleX;
+	static float defaultObjScaleY;
+
+	static float coordinateMaxLimitsX;
+	static float coordinateMaxLimitsY;
+	static float coordinateMinLimitsX;
+	static float coordinateMinLimitsY;
+
+	static float orientationMaxLimit;
+	static float orientationMinLimit;
+
+	static int numEntitiesToCreate;
+	static char numBuffer[MAXBUFFERSIZE];
+	static char sigBuffer[MAXNAMELENGTH];
+	static char xCoordinatesBuffer[MAXBUFFERSIZE];
+	static char yCoordinatesBuffer[MAXBUFFERSIZE];
+	static char xOrientationBuffer[MAXBUFFERSIZE];
+	static char yOrientationBuffer[MAXBUFFERSIZE];
+	static float xCoordinates;
+	static float yCoordinates;
+	static float xOrientation;
+	static float yOrientation;
+
+	static float objAttributeSliderMaxLength;
+	static float objAttributeSliderMidLength;
+	static float objAttributeSliderMinLength;
+
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
 	static double loopStartTimeECS;
@@ -87,10 +133,17 @@ private:
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
 
+	static float objWidthSlide;
+	static float objHeightSlide;
+	static int objCount;
+
 	static float objSizeXMax;
 	static float objSizeXMin;
 	static float objSizeYMax;
 	static float objSizeYMin;
+
+	static int saveCount;
+	static float lastPosX;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map

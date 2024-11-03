@@ -17,6 +17,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 						   10%
 *//*___________________________________________________________________________-*/
 #pragma once
+#include "EngineDefinitions.h"
 #include <GL/glew.h>  // Include GLEW before OpenGL
 
 #include <GL/gl.h>    // OpenGL header (after GLEW)

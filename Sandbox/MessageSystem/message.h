@@ -3,6 +3,7 @@
 
 #include "baseMessageSystem.h"
 #include "ECSDefinitions.h"
+#include "GUIConsole.h"
 
 class FallMessage: public BaseMessage
 {
@@ -16,7 +17,7 @@ public:
 	inline Entity GetPlayer() const noexcept { return playerEntity; }
 	void Process() const override
 	{
-		std::cout << "Processing fall message for entity: " << playerEntity << std::endl;
+		Console::GetLog() << "Processing fall message for entity: " << playerEntity << std::endl;
 	}
 };
 
@@ -33,7 +34,7 @@ public:
 	inline Entity GetPlayer() const noexcept { return playerEntity; }
 	void Process() const override
 	{
-		std::cout << "Processing jump message for entity: " << playerEntity << std::endl;
+		Console::GetLog() << "Processing jump message for entity: " << playerEntity << std::endl;
 	}
 };
 
@@ -51,6 +52,6 @@ public:
 	inline Entity GetPlatform() const noexcept { return platformEntity; }
 	void Process() const override
 	{
-		std::cout << "Processing collision message for entity " << playerEntity << std::endl;
+		Console::GetLog() << "Processing collision message for entity " << playerEntity << std::endl;
 	}
 };

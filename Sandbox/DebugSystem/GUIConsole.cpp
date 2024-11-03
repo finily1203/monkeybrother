@@ -4,7 +4,7 @@
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
-float Console::lastScrollY = 0.0f;
+float Console::lastScrollY;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
 
@@ -127,6 +127,6 @@ void Console::SaveConsoleConfigToJSON(std::string const& filename)
 
 	nlohmann::json jsobObj = serializer.GetJSONObject();
 
-	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
-	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY");
+	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs", filename);
+	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY", filename);
 }
