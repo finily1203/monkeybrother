@@ -86,10 +86,10 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (!GLFWFunctions::pWindow)
     {
-        throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
-        //std::cerr << "Failed to create window" << std::endl;
         glfwTerminate();
         //return false;
+        throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
+        //std::cerr << "Failed to create window" << std::endl;
     }
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);

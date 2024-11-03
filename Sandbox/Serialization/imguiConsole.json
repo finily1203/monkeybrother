@@ -1,6 +1,6 @@
 {
   "GUIConsole": {
-    "maxLogs": 1000,
-    "lastScrollY": 0.0
+    "lastScrollY": 0.0,
+    "maxLogs": 1000
   }
 }

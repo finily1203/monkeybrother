@@ -18,6 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 File Contributions: Lew Zong Han Owen (100%)
 
 /*_______________________________________________________________________________________________________________*/
+#include "EngineDefinitions.h"
 #include "Debug.h"
 #include "GUIGameViewport.h"
 #include "GUIConsole.h"

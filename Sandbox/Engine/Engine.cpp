@@ -31,7 +31,7 @@ void Engine::initialiseSystem() {
 		system->initialise();
 	}
 
-	ecsCoordinator.initialise();
+	//ecsCoordinator.initialise();
 	
 }
 
@@ -103,7 +103,7 @@ void Engine::cleanupSystem() {
 		}
 	}
 
-	ecsCoordinator.cleanup();
+	//ecsCoordinator.cleanup();
 	
 }
 

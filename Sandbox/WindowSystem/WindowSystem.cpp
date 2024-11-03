@@ -200,8 +200,9 @@ void WindowSystem::update() {
 }
 
 void WindowSystem::cleanup() {
-	//GLFWFunctions::glfwCleanup();
+	Console::Cleanup();
 	graphicsSystem.cleanup();
+	GLFWFunctions::glfwCleanup();
 }
 
 //For perfomance viewer
