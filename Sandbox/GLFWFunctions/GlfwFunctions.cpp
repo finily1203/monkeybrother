@@ -30,6 +30,8 @@ float GLFWFunctions::delta_time = 0.0;
 float GLFWFunctions::volume = 0.5f;
 float GLFWFunctions::zoomMouseCoordX = 0.0f;
 float GLFWFunctions::zoomMouseCoordY = 0.0f;
+float GLFWFunctions::objMoveMouseCoordX = 0.0f;
+float GLFWFunctions::objMoveMouseCoordY = 0.0f;
 bool GLFWFunctions::audioPaused = false;
 bool GLFWFunctions::audioNext = false;
 int GLFWFunctions::audioNum = 0;
@@ -45,6 +47,11 @@ bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::hasBumped = false;
 bool GLFWFunctions::slideAudio = false;
 bool GLFWFunctions::bubblePopping = false;
+
+bool GLFWFunctions::enemyMoveLeft = false;
+bool GLFWFunctions::enemyMoveRight = false;
+bool GLFWFunctions::enemyMoveUp = false;
+bool GLFWFunctions::enemyMoveDown = false;
 
 GLboolean GLFWFunctions::left_turn_flag = false;
 GLboolean GLFWFunctions::right_turn_flag = false;
@@ -154,10 +161,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }
 
-    if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
+    if (GLFW_KEY_O == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
         GLFWFunctions::audioStopped = true;
     }
-    else if (GLFW_KEY_L == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == true) {
+    else if (GLFW_KEY_O == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == true) {
         GLFWFunctions::audioStopped = false;
     }
 
@@ -182,6 +189,34 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     if (GLFW_KEY_0 == key && GLFW_PRESS == action) {
         bubblePopping = true;
+    }
+
+    if (GLFW_KEY_J == key && GLFW_PRESS == action) {
+		enemyMoveLeft = true;
+	}
+    if (GLFW_KEY_J == key && GLFW_RELEASE == action) {
+		enemyMoveLeft = false;
+	}
+
+    if (GLFW_KEY_L == key && GLFW_PRESS == action) {
+        enemyMoveRight = true;
+    }
+    if (GLFW_KEY_L == key && GLFW_RELEASE == action) {
+        enemyMoveRight = false;
+    }
+
+    if (GLFW_KEY_I == key && GLFW_PRESS == action) {
+        enemyMoveUp = true;
+    }
+    if (GLFW_KEY_I == key && GLFW_RELEASE == action) {
+        enemyMoveUp = false;
+    }
+
+    if (GLFW_KEY_K == key && GLFW_PRESS == action) {
+        enemyMoveDown = true;
+    }
+    if (GLFW_KEY_K == key && GLFW_RELEASE == action) {
+        enemyMoveDown = false;
     }
 
     GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
@@ -230,28 +265,12 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 #endif
         break;
     }
-
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-
-    // Check if mouse is inside viewport using the static method
-    if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
-        GLFW_MOUSE_BUTTON_LEFT == button &&
-        GLFW_PRESS == action &&
-        GLFWFunctions::isGuiOpen) {
-
-        GLFWFunctions::zoomMouseCoordX = mouseX;
-        GLFWFunctions::zoomMouseCoordY = mouseY;
-        GLFWFunctions::zoomViewport = !GLFWFunctions::zoomViewport;
-    }
 }
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
-    /*zoomMouseCoordX = xpos;
-    zoomMouseCoordY = ypos;*/
 #endif
 }
 
@@ -260,32 +279,6 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
-
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-
-    if (GameViewWindow::IsPointInViewport(mouseX, mouseY) &&
-        GLFWFunctions::isGuiOpen) {
-        float zoomDelta = yoffset * 0.1f;
-        float newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
-
-        //// Check for max zoom condition
-        //if (GameViewWindow::zoomLevel >= GameViewWindow::MAX_ZOOM && zoomDelta > 0) {
-        //    isAtMaxZoom = true;
-        //    return;
-        //}
-        //isAtMaxZoom = false; // Reset the flag when not at max zoom
-
-        // Update coordinates and zoom level
-        GLFWFunctions::zoomMouseCoordX = mouseX;
-        GLFWFunctions::zoomMouseCoordY = mouseY;
-
-        GameViewWindow::zoomLevel = std::min(GameViewWindow::MAX_ZOOM,
-            std::max(GameViewWindow::MIN_ZOOM,
-                newZoomLevel));
-
-        GLFWFunctions::zoomViewport = (GameViewWindow::zoomLevel != 1.0f);
-    }
 }
 
 //Caluclate the FPS and delta_time to be used

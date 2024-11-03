@@ -4,7 +4,7 @@
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
-float Console::lastScrollY = 0.0f;
+float Console::lastScrollY;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
 
@@ -93,4 +93,40 @@ void Console::DrawImpl(const char* title) {
 	}
 
 	ImGui::End();
+}
+
+void Console::LoadConsoleConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+	
+	// checks if the JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+	
+	// retrieve the JSON object from the JSON file
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object, assign every read
+	// data to every elements that needs to be initialized
+	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
+	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
+}
+
+void Console::SaveConsoleConfigToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsobObj = serializer.GetJSONObject();
+
+	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
+	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY");
 }

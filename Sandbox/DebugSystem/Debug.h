@@ -32,22 +32,32 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "../Serialization/jsonSerialization.h"
 
+#define MAXNAMELENGTH 15
+#define MAXBUFFERSIZE 8
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
-class DebugSystem : public GameSystems {
+class DebugSystem : public GameSystems/*, public System*/ {
 public:
 
-	ImVec4 clear_color = ImVec4(.45f, .45f, .45f, 1.00f);
 	DebugSystem();
 	~DebugSystem();
 
-	void initialise() override;
-	void update() override;
-	void cleanup() override;
+	void GameSystems::initialise() override;
+	//void System::initialise() override;
+
+	//void System::update(float dt) override;
+	void GameSystems::update() override;
+
+	void GameSystems::cleanup() override;
+	//void System::cleanup() override;
+
 	SystemType getSystem() override;
 
 	void StartLoop(); //Start record game loop time
+
+	void StartLoopECS(); //Start record game loop time
 
 	void StartSystemTiming(const char* systemName); //Start record system loop time
 
@@ -55,20 +65,84 @@ public:
 
 	void EndLoop();  //End record game loop time
 
+	void EndLoopECS(); //Start record game loop time
+
 	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
 	void UpdateSystemTimes(); //Update all system loop time
 
+	void LoadDebugConfigFromJSON(std::string const& filename);
+
+	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
+	
+	void SaveDebugConfigFromJSON(std::string const& filename);
+
+	std::string GenerateSaveJSONFile(int& saveNumber);
+
 private:
 	ImGuiIO* io;
 	ImFont* font;
+	static float fontSize;
+	static float textBorderSize;
+	static ImVec4 clearColor;
+	static int numberOfColumn;
+
+	// Track combined ECS percentage
+	static float ecsTotal;
+	static bool foundECS;
+
+	static bool isZooming;
+	static bool isPanning;
+
+	static float defaultObjScaleX;
+	static float defaultObjScaleY;
+
+	static double coordinateMaxLimitsX;
+	static double coordinateMaxLimitsY;
+	static double coordinateMinLimitsX;
+	static double coordinateMinLimitsY;
+
+	static double orientationMaxLimit;
+	static double orientationMinLimit;
+
+	static int numEntitiesToCreate;
+	static char numBuffer[MAXBUFFERSIZE];
+	static char sigBuffer[MAXNAMELENGTH];
+	static char xCoordinatesBuffer[MAXBUFFERSIZE];
+	static char yCoordinatesBuffer[MAXBUFFERSIZE];
+	static char xOrientationBuffer[MAXBUFFERSIZE];
+	static char yOrientationBuffer[MAXBUFFERSIZE];
+	static double xCoordinates;
+	static double yCoordinates;
+	static double xOrientation;
+	static double yOrientation;
+
+	static int objAttributeSliderMaxLength;
+	static int objAttributeSliderMidLength;
+	static int objAttributeSliderMinLength;
+
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
+	static double loopStartTimeECS;
 	static double totalLoopTime;
+	static double totalLoopTimeECS;
 	static double lastUpdateTime;
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
+
+	static float objWidthSlide;
+	static float objHeightSlide;
+	static int objCount;
+
+	static float objSizeXMax;
+	static float objSizeXMin;
+	static float objSizeYMax;
+	static float objSizeYMin;
+
+	int saveCount;
+	bool saveFilePending;
+	float lastPosX;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map

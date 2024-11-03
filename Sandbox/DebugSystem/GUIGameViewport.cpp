@@ -1,56 +1,74 @@
 #include "GUIGameViewport.h"
 #include "GlfwFunctions.h"
 #include "GUIConsole.h"
-float Clamp(float value, float min, float max) {
-	if (value < min) return min;
-	if (value > max) return max;
-	return value;
-}
 
 //Variables for GameViewWindow
-int GameViewWindow::viewportHeight = 0;
-int GameViewWindow::viewportWidth = 0;
-ImVec2 GameViewWindow::lastViewportSize = { 0,0 };
-ImVec2 GameViewWindow::lastAspectSize = { 0,0 };
-ImVec2 GameViewWindow::lastRenderPos = { 0,0 };
-//ImVec2 GameViewWindow::windowSize = { 0,0 };
-ImVec2 GameViewWindow::viewportPos = { 0, 0 };
-GLuint GameViewWindow::viewportTexture = 0;
-bool zoomTestFlag = false;
+int GameViewWindow::viewportHeight;
+int GameViewWindow::viewportWidth;
+ImVec2 GameViewWindow::viewportPos;
+GLuint GameViewWindow::viewportTexture;
+ImVec2 GameViewWindow::windowSize;
 
-float GameViewWindow::zoomLevel = 1.f; 
-const float GameViewWindow::MIN_ZOOM = 1.f;  // minimum zoom constant
-const float GameViewWindow::MAX_ZOOM = 5.f;  //  maximum zoom constant
+bool insideViewport = false;
+bool zoomTestFlag = false;
+bool GameViewWindow::clickedZoom = false;
+float GameViewWindow::zoomLevel; 
+float GameViewWindow::MIN_ZOOM;  // minimum zoom constant
+float GameViewWindow::MAX_ZOOM;  //  maximum zoom constant
+
+bool GameViewWindow::clickedScreenPan = false;
+bool GameViewWindow::isDragging = false;
+ImVec2 GameViewWindow::initialMousePos;
+ImVec2 GameViewWindow::mouseDragDist;
+ImVec2 GameViewWindow::accumulatedMouseDragDist;
+ImVec2 GameViewWindow::currentMouseDragDist;
+
+float GameViewWindow::aspectRatioXScale;
+float GameViewWindow::aspectRatioYScale;
+float GameViewWindow::aspectRatioWidth;
+float GameViewWindow::aspectRatioHeight;
 
 void GameViewWindow::Initialise() {
-	viewportWidth = 1600;
-	viewportHeight = 900;
-	viewportTexture = 0;
+	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 }
 
 void GameViewWindow::Update() {
 	SetupViewportTexture();
-
 	//ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+	windowSize = ImGui::GetContentRegionAvail();
 
 	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
 		ImGuiWindowFlags_NoScrollWithMouse |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	viewportPos = ImGui::GetWindowPos();
+	ImVec2 textMouse = ImGui::GetMousePos();
+	ImVec2 testTest = ImGui::GetContentRegionAvail();
+	Console::GetLog() << textMouse.x - viewportPos.x << "," << viewportPos.x << "," << testTest.x
+		<< std::endl;
+	if (GameViewWindow::IsPointInViewport(textMouse.x, textMouse.y))
+		insideViewport = true;
+	else
+		insideViewport = false;
+	ImGuiIO& io = ImGui::GetIO();
+	float scrollY = io.MouseWheel;
+	float zoomDelta = scrollY * 0.1f;
+	float newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
+	if(insideViewport && clickedZoom)
+	zoomLevel = std::min(GameViewWindow::MAX_ZOOM,
+		std::max(GameViewWindow::MIN_ZOOM,
+		    newZoomLevel));
 
 	Console::GetLog() << "zoomLevel " << GameViewWindow::zoomLevel << " MAX_ZOOM " << GameViewWindow::MAX_ZOOM
 		<< std::endl;
 	CaptureMainWindow();
 
-	ImVec2 windowSize = GetLargestSizeForViewport();
-	ImVec2 renderPos = GetCenteredPosForViewport(windowSize);
+	ImVec2 availWindowSize = GetLargestSizeForViewport();
+	ImVec2 renderPos = GetCenteredPosForViewport(availWindowSize);
 
 	ImGui::SetCursorPos(renderPos);
 	ImTextureID textureID = (ImTextureID)(intptr_t)viewportTexture;
-	ImGui::Image(textureID, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image(textureID, availWindowSize, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 }
 
@@ -91,67 +109,133 @@ void GameViewWindow::CaptureMainWindow() {
 	glReadBuffer(previousBuffer);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	UpdateViewportSize();
 }
 
 //Function scale real time game scene to the size of the game viewport window
 ImVec2 GameViewWindow::GetLargestSizeForViewport()
 {
-	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	/*windowSize.x -= ImGui::GetScrollX();
-	windowSize.y -= ImGui::GetScrollY();*/
+	aspectRatioWidth = windowSize.x;
+	aspectRatioHeight = aspectRatioWidth / (aspectRatioXScale / aspectRatioYScale);
 
-	float aspectWidth;
-	float aspectHeight;
+	float scaledWidth = aspectRatioWidth;
+	float scaledHeight = aspectRatioHeight;
 
-	aspectWidth = windowSize.x;
-	aspectHeight = (aspectWidth / (16.0f / 9.0f));
+	// Use zoomLevel instead of fixed 3.0f multiplier
+	scaledWidth = aspectRatioWidth * zoomLevel;
+	scaledHeight = aspectRatioHeight * zoomLevel;
+	
 
-	if (GLFWFunctions::zoomViewport) {
-		// Use zoomLevel instead of fixed 3.0f multiplier
-		aspectWidth *= zoomLevel;
-		aspectHeight *= zoomLevel;
+	return ImVec2(scaledWidth, scaledHeight);
 
-	}
-
-	/*if (aspectHeight > windowSize.y) {
-		aspectHeight = windowSize.y;
-		aspectWidth = aspectHeight * (16.0f / 9.0f);
-	}*/
-
-	return ImVec2(aspectWidth, aspectHeight);
 }
 
 //Function to translate the real time game scene to the center of the game viewport window
 ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 {
-	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-	ImVec2 viewportPos = ImGui::GetCursorScreenPos();
 	float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
 	float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
 
-	if (GLFWFunctions::zoomViewport && !GLFWFunctions::isAtMaxZoom) {
-		// Only apply offset if we're not at max zoom
-		float localMouseX = GLFWFunctions::zoomMouseCoordX - viewportPos.x;
-		float localMouseY = GLFWFunctions::zoomMouseCoordY - viewportPos.y;
-
-		float offsetX = (localMouseX - windowSize.x / 2.0f) * (zoomLevel - 1.0f);
-		float offsetY = (localMouseY - windowSize.y / 2.0f) * (zoomLevel - 1.0f);
-
-		viewportX -= offsetX;
-		viewportY -= offsetY;
+	if (clickedScreenPan && insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+		ImVec2 Mouse = ImGui::GetMousePos();
+		if (!isDragging) {
+			isDragging = true;
+			initialMousePos = Mouse;
+		}
+		currentMouseDragDist = { initialMousePos.x - Mouse.x , initialMousePos.y - Mouse.y };
+		accumulatedMouseDragDist.x += (currentMouseDragDist.x - mouseDragDist.x);
+		accumulatedMouseDragDist.y += (currentMouseDragDist.y - mouseDragDist.y);
+		
+		mouseDragDist = currentMouseDragDist;
+	}
+	else {
+		isDragging = false;
+		mouseDragDist = { 0.0f,0.0f };
 	}
 
+	viewportX -= accumulatedMouseDragDist.x;  // Apply the accumulated offset
+	viewportY -= accumulatedMouseDragDist.y;
 	return ImVec2(viewportX, viewportY);
 
 }
 
 bool GameViewWindow::IsPointInViewport(double x, double y) {
+	return (x - viewportPos.x <= windowSize.x && x - viewportPos.x >= 0 
+		&& y - viewportPos.y <= windowSize.y && y - viewportPos.y >= 0);
+}
 
-	ImVec2 sceneStart = ImVec2(viewportPos.x + lastRenderPos.x, viewportPos.y + lastRenderPos.y);
-	ImVec2 sceneEnd = ImVec2(sceneStart.x + lastAspectSize.x, sceneStart.y + lastAspectSize.y);
+// load the IMGUI viewport configuration values from JSON file
+void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
 
-	return (x >= sceneStart.x && x <= sceneEnd.x &&
-		y >= sceneStart.y && y <= sceneEnd.y);
+	// checks if JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	// return the entire JSON object from the file
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object and assign all the read data to
+	// data elements of GameViewWindow class that needs to be initialized
+	// this is for viewport width and height
+	serializer.ReadInt(viewportWidth, "GUIViewport.viewportWidth");
+	serializer.ReadInt(viewportHeight, "GUIViewport.viewportHeight");
+
+	// this is for viewport position
+	serializer.ReadFloat(viewportPos.x, "GUIViewport.viewportPos.x");
+	serializer.ReadFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+
+	// this is for viewport texture
+	serializer.ReadUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+
+	// this is for zoom level
+	serializer.ReadFloat(zoomLevel, "GUIViewport.zoomLevel");
+
+	// this is for the minimum and maximum zoom
+	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
+	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+
+	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
+	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");
+
+	serializer.ReadFloat(initialMousePos.x, "GUIViewport.initialMousePos.x");
+	serializer.ReadFloat(initialMousePos.y, "GUIViewport.initialMousePos.y");
+
+	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
+	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
+
+	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
+	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
+
+	serializer.ReadFloat(aspectRatioXScale, "GUIViewport.aspectRatioXScale");
+	serializer.ReadFloat(aspectRatioYScale, "GUIViewport.aspectRatioYScale");
+}
+
+void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	serializer.WriteInt(viewportWidth, "GUIViewport.viewportWidth");
+	serializer.WriteInt(viewportHeight, "GUIViewport.viewportHeight");
+
+	serializer.WriteFloat(viewportPos.x, "GUIViewport.viewportPos.x");
+	serializer.WriteFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+
+	serializer.WriteUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+
+	serializer.WriteFloat(zoomLevel, "GUIViewport.zoomLevel");
+
+	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom");
+	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom");
 }

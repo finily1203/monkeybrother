@@ -2,6 +2,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "../Serialization/jsonSerialization.h"
+#include "../FilePaths/filePath.h"
 
 #include <iostream>
 #include <vector>
@@ -38,8 +40,12 @@ public:
 		return *this;
 	}
 
+	void LoadConsoleConfigFromJSON(std::string const& filename);
+	void SaveConsoleConfigToJSON(std::string const& filename);
+
 private:
-	static const size_t MAX_LOGS = 1000;
+	//static const size_t MAX_LOGS = 1000;
+	size_t MAX_LOGS;
 	static Console* instance;
 	static std::vector<std::string> items;
 	static bool autoScroll;
@@ -47,6 +53,6 @@ private:
 	static float lastScrollY;
 	static std::ostringstream currentLog;
 
-	Console() {}
+	Console() { LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath()); }
 	void DrawImpl(const char* title); //ImGui console GUI format
 };

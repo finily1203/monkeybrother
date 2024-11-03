@@ -93,11 +93,17 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
+	std::string GetExecutablePath();
+	std::string GetWindowConfigJSONPath();
+	std::string GetEntitiesJSONPath();
+
+	std::vector<Entity> getAllLiveEntities();
+	std::string getEntityID(Entity entity);
+	void setEntityID(Entity entity, std::string ID);
+
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	// update the entity's data
-	void UpdateEntityData(Entity& entity);
 
 	//System Manager Functions
 	//Register the system
@@ -107,14 +113,13 @@ public:
 	template <typename T>
 	void setSystemSignature(ComponentSig signature);
 
-	std::vector<Entity> getAllLiveEntities();
-	std::string getEntityID(Entity entity);
-	void setEntityID(Entity entity, std::string ID);
+	ComponentSig getEntitySignature(Entity entity);
 
 	//void test();
 	void test2();
 	void test3();
 	void test4();
+	void test5();
 	void initialiseSystemsAndComponents();
 
 private:

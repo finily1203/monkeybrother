@@ -19,6 +19,7 @@ File Contributions: Ian Loi (100%)
 *//*_________________________________________________________________________________________________-*/
 
 #include "vector2D.h"
+#include <glm/glm.hpp>
 
 
 namespace myMath
@@ -42,6 +43,9 @@ namespace myMath
         Matrix3x3& operator+=(Matrix3x3 const&);
         Matrix3x3& operator-=(Matrix3x3 const&);
         Matrix3x3& operator*=(Matrix3x3 const&);
+
+        static glm::mat3 ConvertToGLMMat3(Matrix3x3 const&);
+        static Matrix3x3 ConvertToMatrix3x3(glm::mat3 const&);
 
     private:
         float matrix[3][3];

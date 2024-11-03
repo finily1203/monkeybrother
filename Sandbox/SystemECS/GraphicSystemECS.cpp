@@ -20,6 +20,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AABBComponent.h"
 #include "MovementComponent.h"
 #include "AnimationComponent.h"
+#include "EnemyComponent.h"
+
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
@@ -29,12 +31,14 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 CameraSystem2D cameraSystem;
 std::vector<GraphicsSystem::GLViewport> vps;
 
+std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
 void GraphicSystemECS::initialise() {
 	cameraSystem.initialise();
 	vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
 	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 }
+void GraphicSystemECS::initialise() { entityManager = std::make_unique<EntityManager>(); }
 
 //Update function to update the graphics system
 //uses functions from GraphicsSystem class to update, draw
@@ -47,10 +51,11 @@ void GraphicSystemECS::update(float dt) {
 	for (auto entity : entities) {
 		//check if entity has transform component
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
+		//Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.x << ", " << transform.position.y << std::endl;
+		Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
-		auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
-		Console::GetLog() << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
+		//auto& graphics = ecsCoordinator.getComponent<GraphicsComponent>(entity);
+		//Console::GetLog() << "Entity: " << entity << " Position (GLObj): " << graphics.glObject.position.x << ", " << graphics.glObject.position.y << std::endl;
 
 		//check if entity has animation component
 		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
@@ -65,70 +70,107 @@ void GraphicSystemECS::update(float dt) {
 
 			//Taken from WindowSystem.cpp
 			bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
-			if (hasMovement) {
+			bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+			//if (hasMovement && isEnemy) {
+			if (hasMovement && hasEnemy) {
+				float speed = ecsCoordinator.getComponent<MovementComponent>(entity).speed;
+
 				if (GLFWFunctions::left_turn_flag) {
-					transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
-					graphics.glObject.orientation.y = transform.orientation.y;
+					//transform.orientation.y = 180.0f * GLFWFunctions::delta_time;
+					transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
+					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 				else if (GLFWFunctions::right_turn_flag) {
-					transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
-					graphics.glObject.orientation.y = transform.orientation.y;
+					//transform.orientation.y = -180.0f * GLFWFunctions::delta_time;
+					transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
+					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 				else {
-					transform.orientation.y = 0.0f;
-					graphics.glObject.orientation.y = transform.orientation.y;
+					//transform.orientation.y = 0.0f;
+					//transform.orientation.SetY(0.0f);
+					//graphics.glObject.orientation.y = transform.orientation.y;
 				}
 
 				// Scaling logic
 				if (GLFWFunctions::scale_up_flag) {
-					if (transform.scale.x < 5.0f && transform.scale.y < 5.0f) {
-						transform.scale.x += 1.78f * GLFWFunctions::delta_time;
-						transform.scale.y += 1.0f * GLFWFunctions::delta_time;
-						graphics.glObject.scaling = transform.scale;
+					//if (transform.scale.x < 5.0f && transform.scale.y < 5.0f) {
+					//	transform.scale.x += 1.78f * GLFWFunctions::delta_time;
+					//	transform.scale.y += 1.0f * GLFWFunctions::delta_time;
+					//	//graphics.glObject.scaling = transform.scale;
+					//}					
+					if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
+						transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
+						transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
+						//graphics.glObject.scaling = transform.scale;
 					}
 				}
 				else if (GLFWFunctions::scale_down_flag) {
-					if (transform.scale.x > 0.1f && transform.scale.y > 0.1f) {
-						transform.scale.x -= 1.78f * GLFWFunctions::delta_time;
-						transform.scale.y -= 1.0f * GLFWFunctions::delta_time;
-						graphics.glObject.scaling = transform.scale;
+					//if (transform.scale.x > 0.1f && transform.scale.y > 0.1f) {
+					//	transform.scale.x -= 1.78f * GLFWFunctions::delta_time;
+					//	transform.scale.y -= 1.0f * GLFWFunctions::delta_time;
+					//	//graphics.glObject.scaling = transform.scale;
+					//}
+					if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
+						transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
+						transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);
+						//graphics.glObject.scaling = transform.scale;
 					}
 				}
 
 				// Movement logic
-				if (GLFWFunctions::move_up_flag) {
-					transform.position.y += 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.position = transform.position;
+				if (GLFWFunctions::enemyMoveUp) {
+					//transform.position.y += 1.0f * GLFWFunctions::delta_time;
+					transform.position.SetY(transform.position.GetY() + speed * GLFWFunctions::delta_time);
+					//graphics.glObject.position = transform.position;
 				}
-				if (GLFWFunctions::move_down_flag) {
-					transform.position.y -= 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.position = transform.position;
+				if (GLFWFunctions::enemyMoveDown) {
+					//transform.position.y -= 1.0f * GLFWFunctions::delta_time;
+					transform.position.SetY(transform.position.GetY() - speed * GLFWFunctions::delta_time);
+					//graphics.glObject.position = transform.position;
 				}
-				if (GLFWFunctions::move_left_flag) {
-					transform.position.x -= 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.position = transform.position;
+				if (GLFWFunctions::enemyMoveLeft) {
+					//transform.position.x -= 1.0f * GLFWFunctions::delta_time;
+					transform.position.SetX(transform.position.GetX() - speed * GLFWFunctions::delta_time);
+					//graphics.glObject.position = transform.position;
 				}
-				if (GLFWFunctions::move_right_flag) {
-					transform.position.x += 1.0f * GLFWFunctions::delta_time;
-					graphics.glObject.position = transform.position;
+				if (GLFWFunctions::enemyMoveRight) {
+					//transform.position.x += 1.0f * GLFWFunctions::delta_time;
+					transform.position.SetX(transform.position.GetX() + speed * GLFWFunctions::delta_time);
+					//graphics.glObject.position = transform.position;
 				}
 
-				graphics.glObject.position = transform.position;
+				//graphics.glObject.position = transform.position;
 			}
 
-			//Update object and draw based on test mode.
-			graphics.glObject.update(GLFWFunctions::delta_time);
-			if (GLFWFunctions::testMode == 0)
+			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
+			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation);
+			
+
+			auto entitySig = ecsCoordinator.getEntitySignature(entity);
+
+
+			if (hasMovement && hasEnemy) 
 			{
-				graphics.glObject.draw(shader2, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
+				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture2"), transform.mdl_xform);
 			}
-			else if (GLFWFunctions::testMode == 1)
+			else if (hasMovement) 
 			{
-				graphics.glObject.draw(shader, graphicsSystem.GetVAO(), 0);
+				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
 			}
+			else if (entitySig.test(0) && entitySig.count() == 1) {
+				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
+			}
+			else 
+			{
+				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::COLOR, 0, transform.mdl_xform);
+			}
+
+
 		}
 		
 		else if (GLFWFunctions::testMode == 1) {
+			std::cout << "_______________________" << std::endl;
+			std::cout << "entities: " << ecsCoordinator.getEntityID(entity) << std::endl;
 			bool hasMovement = ecsCoordinator.hasComponent<MovementComponent>(entity);
 			if (hasMovement && GLFWFunctions::allow_camera_movement == true) {
 				if (GLFWFunctions::left_turn_flag) {
@@ -208,3 +250,7 @@ void GraphicSystemECS::update(float dt) {
 
 //cleanup currently does not do anything
 void GraphicSystemECS::cleanup() {}
+
+std::string GraphicSystemECS::getSystemECS() {
+	return "GraphicsSystemECS";
+}
