@@ -34,6 +34,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <string>
 #include "GlfwFunctions.h"
 #include "AABBComponent.h"
+#include "vector2D.h"
+#include "vector3D.h"
+#include "matrix3x3.h"
+
 
 class GraphicsSystem : public GameSystems
 {
@@ -53,7 +57,7 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    glm::mat3x3 UpdateObject(GLdouble deltaTime, glm::vec2 objPos, glm::vec2 objScale, glm::vec2 objOri, glm::mat3 viewMat);
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }

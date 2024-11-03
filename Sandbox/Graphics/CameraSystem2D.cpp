@@ -29,7 +29,8 @@ void CameraSystem2D::update()
     // If the camera is locked to an entity, update the camera position based on the entity's position
     if (m_LockedComponent && GLFWFunctions::allow_camera_movement == false)
     {
-        setCameraPosition(m_LockedComponent->position);
+		glm::vec2 entityPosition = { m_LockedComponent->position.GetX(), m_LockedComponent->position.GetY() };
+        setCameraPosition(entityPosition);
         if (GLFWFunctions::camera_zoom_in_flag)
             m_CameraZoom += 0.1f * GLFWFunctions::delta_time;
         if (GLFWFunctions::camera_zoom_out_flag)

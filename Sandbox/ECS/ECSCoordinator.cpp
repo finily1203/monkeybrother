@@ -499,30 +499,16 @@ void ECSCoordinator::test4() {
 	for (auto entity : entityManager->getLiveEntities()) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-		float left = transform.position.x - transform.scale.x / 2;
-		float right = transform.position.x + transform.scale.x / 2;
-		float top = transform.position.y + transform.scale.y / 2;
-		float bottom = transform.position.y - transform.scale.y / 2;
+		float left = transform.position.GetX() - transform.scale.GetX() / 2;
+		float right = transform.position.GetX() + transform.scale.GetX() / 2;
+		float top = transform.position.GetY() + transform.scale.GetY() / 2;
+		float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
 
 		addComponent(entity, AABBComponent{left, right, top, bottom});
 		if (entityManager->getEntityId(entity) == "Player") {
 			addComponent(entity, MovementComponent{.1f});
 		}
 	}
-}
-
-std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
-	return entityManager->getLiveEntities();
-}
-
-		/*if (entityId == "Object1" || entityId == "Object2") {
-			addComponent(entity, AnimationComponent{ true });
-		}*/
-		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
-	}
-	Entity platform1 = createEntity();
-	addComponent(platform1, TransformComponent{ myMath::Vector2D(0.f, 0.f), myMath::Vector2D(1000.0f, 50.0f), myMath::Vector2D(0.0f, -150.f) });
-	//std::cout <<"------------------------------" << entityManager->getEntityId(platform1) << std::endl;
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
