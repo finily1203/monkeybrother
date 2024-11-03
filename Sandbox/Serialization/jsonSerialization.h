@@ -61,6 +61,7 @@ public:
 	virtual void WriteFloat(float&, std::string const&, std::string const&);
 	virtual void WriteDouble(double&, std::string const&, std::string const&);
 	virtual void WriteString(std::string&, std::string const&, std::string const&);
+	virtual void WriteCharArray(char*, size_t, std::string const&, std::string const&);
 
 	nlohmann::json GetJSONObject() const;
 

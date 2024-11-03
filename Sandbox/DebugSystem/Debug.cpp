@@ -457,21 +457,21 @@ void DebugSystem::update() {
 				ImGui::Separator();
 			}
 
-			if (ImGui::Button("Save")) 
-			{
-				JSONSerializer serializer;
-				std::string saveFile = GenerateSaveJSONFile(saveCount);
+			//if (ImGui::Button("Save")) 
+			//{
+			//	JSONSerializer serializer;
+			//	std::string saveFile = GenerateSaveJSONFile(saveCount);
 
-				for (auto entity : ecsCoordinator.getAllLiveEntities())
-				{
-					ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
-				}
+			//	for (auto entity : ecsCoordinator.getAllLiveEntities())
+			//	{
+			//		ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+			//	}
 
-				saveCount++;
+			//	saveCount++;
 
-				SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
-				//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-			}
+			//	SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
+			//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+			//}
 		}
 
 		ImGui::End();
@@ -673,7 +673,12 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 	serializer.WriteFloat(orientationMinLimit, "Debug.orientationMinLimit", filename);
 
 	serializer.WriteInt(numEntitiesToCreate, "Debug.numEntitiesToCreate", filename);
-
+	serializer.WriteCharArray(numBuffer, MAXBUFFERSIZE, "Debug.numBuffer", filename);
+	serializer.WriteCharArray(sigBuffer, MAXNAMELENGTH, "Debug.sigBuffer", filename);
+	serializer.WriteCharArray(xCoordinatesBuffer, MAXBUFFERSIZE, "Debug.xCoordinatesBuffer", filename);
+	serializer.WriteCharArray(yCoordinatesBuffer, MAXBUFFERSIZE, "Debug.yCoordinatesBuffer", filename);
+	serializer.WriteCharArray(xOrientationBuffer, MAXBUFFERSIZE, "Debug.xOrientationBuffer", filename);
+	serializer.WriteCharArray(yOrientationBuffer, MAXBUFFERSIZE, "Debug.yOrientationBuffer", filename);
 	serializer.WriteFloat(xCoordinates, "Debug.xCoordinates", filename);
 	serializer.WriteFloat(yCoordinates, "Debug.yCoordinates", filename);
 	serializer.WriteFloat(xOrientation, "Debug.xOrientation", filename);
