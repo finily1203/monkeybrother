@@ -244,6 +244,20 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, rigidBody);
 		}
 
+		if (entityData.contains("font"))
+		{
+			FontComponent font{};
+			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
+			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
+			serializer.ReadObject(font.color, entityId, "entities.font.color");
+			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+
+			std::cout << font.text << std::endl;
+			std::cout << font.fontId << std::endl;
+
+			ecs.addComponent(entityObj, font);
+		}
+
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
@@ -350,8 +364,8 @@ void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdat
 	{
 		FontComponent& font = getComponent<FontComponent>(entity);
 		font.text = fontUpdate.text; 
-		font.position = fontUpdate.position; 
-		font.scale = fontUpdate.scale; 
+		//font.position = fontUpdate.position; 
+		//font.scale = fontUpdate.scale; 
 		font.color = fontUpdate.color; 
 	}
 }
@@ -446,43 +460,45 @@ void ECSCoordinator::test5() {
 
 
 	//create text entity
-	std::cout << "Create Text Entity 1" << std::endl;
-	Entity textEntity = createEntity();
-	addComponent(textEntity, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+	//std::cout << "Create Text Entity 1" << std::endl;
+	//Entity textEntity = createEntity();
+	//addComponent(textEntity, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
 
-	FontComponent fontComp{};
-	fontComp.fontPath = "Graphics/Assets/Antonio.ttf";
-	fontComp.text = "Hello World!";
+	//FontComponent fontComp{};
+	//fontComp.fontId = "Antonio";
+	//fontComp.text = "Hello World!";
+	//fontComp.textScale = 1.0f;
+	//fontComp.color = MyMath::Vector3D(0.0f, 0.0f, 255.0f);
 
-	float screenWidth = 1600.0f;
-	float screenHeight = 900.0f;
+	////float screenWidth = 1600.0f;
+	////float screenHeight = 900.0f;
 
-	float textScale = 1.0f;
-	glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
-	fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
-	fontComp.scale = textScale;
-	fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
+	////float textScale = 1.0f;
+	////glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
+	////fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
+	////fontComp.scale = textScale;
+	////fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
 
-	addComponent(textEntity, fontComp);
+	//addComponent(textEntity, fontComp);
 
-	// Create another text entity
-	std::cout << "Create Text Entity 2" << std::endl;
-	Entity textEntity2 = createEntity();
-	addComponent(textEntity2, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+	//// Create another text entity
+	//std::cout << "Create Text Entity 2" << std::endl;
+	//Entity textEntity2 = createEntity();
+	//addComponent(textEntity2, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
 
-	FontComponent fontComp2{};
-	fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
-	fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
+	//FontComponent fontComp2{};
+	//fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
+	//fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
 
-	float textScale2 = 1.0f;
-	glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
+	//float textScale2 = 1.0f;
+	//glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
 
-	
-	fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
-	fontComp2.scale = textScale2;
-	fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
+	//
+	//fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
+	//fontComp2.scale = textScale2;
+	//fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
 
-	addComponent(textEntity2, fontComp2);
+	//addComponent(textEntity2, fontComp2);
 
 }
 

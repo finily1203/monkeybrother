@@ -46,6 +46,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <vector>
 #include "vector2D.h"
 #include "matrix3x3.h"
+#include "vector3D.h"
 #include "../Serialization/jsonSerialization.h"
 #include "../Serialization/serialization.h"
 #include "../MessageSystem/baseMessageSystem.h"

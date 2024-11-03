@@ -3,13 +3,13 @@
 
 #include <string>
 #include <glm/glm.hpp>
+#include "vector3D.h"
 
 struct FontComponent {
     std::string text;
-    glm::vec2 position;
-    float scale;
-    glm::vec3 color;
-    std::string fontPath; 
+    float textScale;
+    MyMath::Vector3D color;
+    std::string fontId; 
 };
 
 #endif 

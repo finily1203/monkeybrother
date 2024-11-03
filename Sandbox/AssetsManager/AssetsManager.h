@@ -51,8 +51,8 @@ public:
 
 	//For loading fonts
 	void LoadFontAssets() const;
-	void LoadFont(const std::string& fontPath, unsigned int fontSize);
-	std::map<char, Character> GetFont(const std::string& fontPath) const;
+	void LoadFont(const std::string& fontName, const std::string& fontPath, unsigned int fontSize);
+	std::map<char, Character> GetFont(const std::string& fontName) const;
 	void UnloadFont(const std::string& fontPath);
 	void ClearFonts();
 	std::map<std::string, std::map<char, Character>> m_Fonts;

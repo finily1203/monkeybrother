@@ -10,7 +10,7 @@ FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatri
 
 // Destructor
 FontSystem::~FontSystem() {
-    cleanup();
+    //cleanup();
 }
 
 
@@ -126,7 +126,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
 
 
 //void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
-void FontSystem::renderText(const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
+void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, MyMath::Vector3D color, float maxWidth) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;
         return;
@@ -138,16 +138,16 @@ void FontSystem::renderText(const std::string& fontPath, const std::string& text
     //    return;
     //}
 
-    auto it = assetsManager.m_Fonts.find(fontPath);
+    auto it = assetsManager.m_Fonts.find(fontId);
     if (it == assetsManager.m_Fonts.end()) {
-		std::cerr << "ERROR: Font not loaded: " << fontPath << std::endl;
+		std::cerr << "ERROR: Font not loaded: " << fontId << std::endl;
 		return;
 	}
 
     const std::map<char, Character>& characters = it->second;
 
     assetsManager.GetShader("fontShader")->Bind();
-    assetsManager.GetShader("fontShader")->SetUniform3f("textColor", color.r, color.g, color.b);
+    assetsManager.GetShader("fontShader")->SetUniform3f("textColor", color.GetX(), color.GetY(), color.GetZ());
 
     float xpos = x;
     float ypos = y;
@@ -258,9 +258,9 @@ void FontSystem::renderText(const std::string& fontPath, const std::string& text
     assetsManager.GetShader("fontShader")->Unbind();
 }
 
-void FontSystem::draw(const std::string& text, const std::string& fontPath, float x, float y, float scale, glm::vec3 color, float maxWidth) {
+void FontSystem::draw(const std::string& text, const std::string& fontId, float x, float y, float scale, MyMath::Vector3D color, float maxWidth) {
     //renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
-    renderText(fontPath, text, x, y, scale, color, maxWidth);
+    renderText(fontId, text, x, y, scale, color, maxWidth);
 }
 
 void FontSystem::cleanup() {

@@ -9,6 +9,10 @@
 #include "Systems.h"
 //#include "GlobalCoordinator.h"
 
+#include "vector3D.h"
+#include "vector2D.h"
+
+
 struct Character {
     unsigned int TextureID;   // Texture ID for the character
     glm::ivec2 Size;          // Size of the glyph
@@ -28,14 +32,14 @@ public:
 
     void loadFont(const std::string& fontPath, unsigned int fontSize); // Load a font
 
-    void draw(const std::string& text, const std::string& fontPath, float x, float y, float scale, glm::vec3 color, float maxWidth);
+    void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, MyMath::Vector3D color, float maxWidth);
     bool isInitialized = false;
     std::map<std::string, std::map<char, Character>> Fonts;
 
 
 
 private:
-    void renderText(const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth);
+    void renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, MyMath::Vector3D color, float maxWidth);
     glm::mat4 projectionMatrix;
     std::map<char, Character> Characters; // Map of characters
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object

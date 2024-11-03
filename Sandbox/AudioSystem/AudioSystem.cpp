@@ -45,7 +45,7 @@ void AudioSystem::initialise() {
 
     //loadAudioAssets();
 
-    playSong("background");
+    //playSong("background");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song

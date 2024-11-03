@@ -306,12 +306,12 @@ void AssetsManager::LoadFontAssets() const {
         std::string relativePath = fontAssets["filePath"].get<std::string>();
 
         std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadFont(fontFilePath, 48 ); //default font size
+        assetsManager.LoadFont(fontName, fontFilePath, 48 ); //default font size
         
     }
 }
 
-void AssetsManager::LoadFont(const std::string& fontPath, unsigned int fontSize) {
+void AssetsManager::LoadFont(const std::string& fontName, const std::string& fontPath, unsigned int fontSize) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         std::cerr << "ERROR::FREETYPE: Could not initialize FreeType Library" << std::endl;
@@ -360,14 +360,14 @@ void AssetsManager::LoadFont(const std::string& fontPath, unsigned int fontSize)
 
     if (fontLoaded) {
         //Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
-        m_Fonts[fontPath] = std::move(tempCharacters);
+        m_Fonts[fontName] = std::move(tempCharacters);
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
     }
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts[fontPath].size() << std::endl;
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts[fontName].size() << std::endl;
 }
 
 std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) const {

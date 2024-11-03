@@ -334,6 +334,140 @@
       "enemy": {
         "isEnemy": true
       }
+    },
+    {
+      "id": "textBox1",
+      "transform": {
+        "localTransform": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "orientation": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "projectionMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "scale": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "font": {
+        "text": {
+          "string": "Hello World!"
+        },
+        "textScale": {
+          "scale": 1.0
+        },
+        "color": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 255.0
+        },
+        "fontId": {
+          "fontName": "Antonio"
+        }
+      }
+    },
+    {
+      "id": "textBox2",
+      "transform": {
+        "localTransform": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "orientation": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "position": {
+          "x": 800.0,
+          "y": 450.0
+        },
+        "projectionMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "scale": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "font": {
+        "text": {
+          "string": "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works"
+        },
+        "textScale": {
+          "scale": 1.0
+        },
+        "color": {
+          "x": 0.0,
+          "y": 255.0,
+          "z": 0.0
+        },
+        "fontId": {
+          "fontName": "Journey"
+        }
+      }
     }
   ]
 }

@@ -47,17 +47,20 @@ void FontSystemECS::update(float dt) {
     for (auto entity : entities) {
         if (ecsCoordinator.hasComponent<FontComponent>(entity)) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
+            auto& fontTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
            
             //if (fontSystem->Fonts.find(fontComp.fontPath) == fontSystem->Fonts.end()) {
             //    fontSystem->loadFont(fontComp.fontPath, fontSize);
             //}
 
-            if (assetsManager.m_Fonts.find(fontComp.fontPath) == assetsManager.m_Fonts.end()) {
-				assetsManager.LoadFont(fontComp.fontPath, 48);
-			}
+   //         if (assetsManager.m_Fonts.find(fontComp.fontId) == assetsManager.m_Fonts.end()) {
+			//	assetsManager.LoadFont(fontComp.fontId, 48);
+			//}
 
-            fontSystem->draw(fontComp.text, fontComp.fontPath, fontComp.position.x, fontComp.position.y, fontComp.scale, fontComp.color, maxWidth);
+            //std::cout << fontComp.fontId << std::endl;
+
+            fontSystem->draw(fontComp.text, fontComp.fontId, fontTransform.position.GetX(), fontTransform.position.GetY(), fontComp.textScale, fontComp.color, maxWidth);
         }
     }
 }
