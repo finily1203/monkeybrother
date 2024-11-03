@@ -45,12 +45,12 @@ bool DebugSystem::isPanning = false;
 float DebugSystem::defaultObjScaleX;
 float DebugSystem::defaultObjScaleY;
 
-double DebugSystem::coordinateMaxLimitsX;
-double DebugSystem::coordinateMaxLimitsY;
-double DebugSystem::coordinateMinLimitsX;
-double DebugSystem::coordinateMinLimitsY;
-double DebugSystem::orientationMaxLimit;
-double DebugSystem::orientationMinLimit;
+float DebugSystem::coordinateMaxLimitsX;
+float DebugSystem::coordinateMaxLimitsY;
+float DebugSystem::coordinateMinLimitsX;
+float DebugSystem::coordinateMinLimitsY;
+float DebugSystem::orientationMaxLimit;
+float DebugSystem::orientationMinLimit;
 	  
 int DebugSystem::numEntitiesToCreate;
 char DebugSystem::numBuffer[MAXBUFFERSIZE];
@@ -59,14 +59,14 @@ char DebugSystem::xCoordinatesBuffer[MAXBUFFERSIZE];
 char DebugSystem::yCoordinatesBuffer[MAXBUFFERSIZE];
 char DebugSystem::xOrientationBuffer[MAXBUFFERSIZE];
 char DebugSystem::yOrientationBuffer[MAXBUFFERSIZE];
-double DebugSystem::xCoordinates;
-double DebugSystem::yCoordinates;
-double DebugSystem::xOrientation;
-double DebugSystem::yOrientation;
+float DebugSystem::xCoordinates;
+float DebugSystem::yCoordinates;
+float DebugSystem::xOrientation;
+float DebugSystem::yOrientation;
 
-int DebugSystem::objAttributeSliderMaxLength;
-int DebugSystem::objAttributeSliderMidLength;
-int DebugSystem::objAttributeSliderMinLength;
+float DebugSystem::objAttributeSliderMaxLength;
+float DebugSystem::objAttributeSliderMidLength;
+float DebugSystem::objAttributeSliderMinLength;
 
 std::unordered_map<const char*, double> DebugSystem::systemTimes;
 double DebugSystem::loopStartTime;
@@ -87,6 +87,10 @@ float DebugSystem::objSizeXMax;
 float DebugSystem::objSizeXMin;
 float DebugSystem::objSizeYMax;
 float DebugSystem::objSizeYMin;
+
+int DebugSystem::saveCount;
+bool DebugSystem::saveFilePending;
+float DebugSystem::lastPosX;
 
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
@@ -172,7 +176,7 @@ void DebugSystem::update() {
 					// Check if this is an ECS system
 					if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 						if (strcmp(systemName, "EntityComponentSystem")) {
-							ecsTotal = systemGameLoopPercent[i];
+							ecsTotal = static_cast<float>(systemGameLoopPercent[i]);
 						}
 						foundECS = true;
 						continue; // Skip individual ECS systems
@@ -284,9 +288,7 @@ void DebugSystem::update() {
 
 			objCount = 0;
 
-			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-				objCount++;
-			}
+			objCount += static_cast<int>(ecsCoordinator.getAllLiveEntities().size());
 
 			const char* items[] = { "Player", "Enemy", "Platform" };
 			static int current_item = 0; // Keeps track of selected item
@@ -330,8 +332,8 @@ void DebugSystem::update() {
 			ImGui::SameLine();
 			ImGui::Text("Coordinates");
 
-			xCoordinates = std::max(coordinateMinLimitsX, atof(xCoordinatesBuffer));
-			yCoordinates = std::max(coordinateMinLimitsY, atof(yCoordinatesBuffer));
+			xCoordinates = std::max(coordinateMinLimitsX, strtof(xCoordinatesBuffer,nullptr));
+			yCoordinates = std::max(coordinateMinLimitsY, strtof(yCoordinatesBuffer, nullptr));
 
 			JSONSerializer serializer;
 			if (!serializer.Open(FilePathManager::GetEntitiesJSONPath())) {
@@ -417,7 +419,7 @@ void DebugSystem::update() {
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f");
-					if (ImGui::IsItemActivated) {
+					if (ImGui::IsItemActivated()) {
 						transform.position.SetX(posXSlide);
 
 						//if (posXSlide != lastPosX)
@@ -440,25 +442,25 @@ void DebugSystem::update() {
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f");
-					if (ImGui::IsItemActivated) {
+					if (ImGui::IsItemActivated()) {
 						transform.position.SetY(posYSlide);
 						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f");
-					if (ImGui::IsItemActivated) {
+					if (ImGui::IsItemActivated()) {
 						transform.orientation.SetX(orientationSlide);
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("Width", &objWidthSlide, objSizeXMin, objSizeXMax, "%.1f");
-					if (ImGui::IsItemActivated) {
+					if (ImGui::IsItemActivated()) {
 						transform.scale.SetX(objWidthSlide);
 					}
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("Height", &objHeightSlide, objSizeYMin, objSizeYMax, "%.1f");
-					if (ImGui::IsItemActivated) {
+					if (ImGui::IsItemActivated()) {
 						transform.scale.SetY(objHeightSlide);
 					}
 
@@ -600,12 +602,12 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(defaultObjScaleX, "Debug.defaultObjScaleX");
 	serializer.ReadFloat(defaultObjScaleY, "Debug.defaultObjScaleY");
 
-	serializer.ReadDouble(coordinateMaxLimitsX, "Debug.coordinateMaxLimitsX");
-	serializer.ReadDouble(coordinateMaxLimitsY, "Debug.coordinateMaxLimitsY");
-	serializer.ReadDouble(coordinateMinLimitsX, "Debug.coordinateMinLimitsX");
-	serializer.ReadDouble(coordinateMinLimitsY, "Debug.coordinateMinLimitsY");
-	serializer.ReadDouble(orientationMaxLimit, "Debug.orientationMaxLimit");
-	serializer.ReadDouble(orientationMinLimit, "Debug.orientationMinLimit");
+	serializer.ReadFloat(coordinateMaxLimitsX, "Debug.coordinateMaxLimitsX");
+	serializer.ReadFloat(coordinateMaxLimitsY, "Debug.coordinateMaxLimitsY");
+	serializer.ReadFloat(coordinateMinLimitsX, "Debug.coordinateMinLimitsX");
+	serializer.ReadFloat(coordinateMinLimitsY, "Debug.coordinateMinLimitsY");
+	serializer.ReadFloat(orientationMaxLimit, "Debug.orientationMaxLimit");
+	serializer.ReadFloat(orientationMinLimit, "Debug.orientationMinLimit");
 	
 
 	serializer.ReadInt(numEntitiesToCreate, "Debug.numEntitiesToCreate");
@@ -615,10 +617,10 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadCharArray(yCoordinatesBuffer, MAXBUFFERSIZE, "Debug.yCoordinatesBuffer");
 	serializer.ReadCharArray(xOrientationBuffer, MAXBUFFERSIZE, "Debug.xOrientationBuffer");
 	serializer.ReadCharArray(yOrientationBuffer, MAXBUFFERSIZE, "Debug.yOrientationBuffer");
-	serializer.ReadDouble(xCoordinates, "Debug.xCoordinates");
-	serializer.ReadDouble(yCoordinates, "Debug.yCoordinates");
-	serializer.ReadDouble(xOrientation, "Debug.xOrientation");
-	serializer.ReadDouble(yOrientation, "Debug.yOrientation");
+	serializer.ReadFloat(xCoordinates, "Debug.xCoordinates");
+	serializer.ReadFloat(yCoordinates, "Debug.yCoordinates");
+	serializer.ReadFloat(xOrientation, "Debug.xOrientation");
+	serializer.ReadFloat(yOrientation, "Debug.yOrientation");
 
 	serializer.ReadFloat(clearColor.x, "Debug.clearColor.r");
 	serializer.ReadFloat(clearColor.y, "Debug.clearColor.g");
@@ -632,9 +634,9 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	serializer.ReadFloat(objWidthSlide, "Debug.objWidthSlide");
 	serializer.ReadFloat(objHeightSlide, "Debug.objHeightSlide");
-	serializer.ReadInt(objAttributeSliderMaxLength, "Debug.objAttributeSliderMaxLength");
-	serializer.ReadInt(objAttributeSliderMidLength, "Debug.objAttributeSliderMidLength");
-	serializer.ReadInt(objAttributeSliderMinLength, "Debug.objAttributeSliderMinLength");
+	serializer.ReadFloat(objAttributeSliderMaxLength, "Debug.objAttributeSliderMaxLength");
+	serializer.ReadFloat(objAttributeSliderMidLength, "Debug.objAttributeSliderMidLength");
+	serializer.ReadFloat(objAttributeSliderMinLength, "Debug.objAttributeSliderMinLength");
 
 	serializer.ReadInt(objCount, "Debug.objCount");
 
@@ -731,7 +733,7 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 
 
 void DebugSystem::ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
-	if (items[current_item] == "Enemy") {
+	if (strcmp(items[current_item],"Enemy")) {
 
 		EnemyComponent enemy{};
 		serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
@@ -742,7 +744,7 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		ecsCoordinator.addComponent(entityObj, movement);
 
 	}
-	else if (items[current_item] == "Player") {
+	else if (strcmp(items[current_item], "Player")) {
 
 		AABBComponent aabb{};
 		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
@@ -761,7 +763,7 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		ecsCoordinator.addComponent(entityObj, animation);
 
 	}
-	else if (items[current_item] == "Platform") {
+	else if (strcmp(items[current_item], "Platform")) {
 
 		AABBComponent aabb{};
 		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");

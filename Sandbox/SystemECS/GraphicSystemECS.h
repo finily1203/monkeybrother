@@ -12,6 +12,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #pragma once
+#include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
 #include "EntityManager.h"
 #include "GraphicsSystem.h"

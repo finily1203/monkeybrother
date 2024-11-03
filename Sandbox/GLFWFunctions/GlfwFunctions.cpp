@@ -13,7 +13,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
          Yaoting (yaoting.liu): Added in variables for movement flags and debug flag.
 							   20%
 *//*___________________________________________________________________________-*/
-
+#include "EngineDefinitions.h"
 #include "Debug.h"
 #include "Crashlog.h"
 #include "GlfwFunctions.h"
@@ -89,7 +89,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
         throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
         //std::cerr << "Failed to create window" << std::endl;
         glfwTerminate();
-        return false;
+        //return false;
     }
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "EngineDefinitions.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "Systems.h"            // Include GameSystems

@@ -65,6 +65,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother;$(SolutionDir)lib\FMOD\studio\lib\x64;$(SolutionDir)lib\FMOD\core\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;fmodstudioL_vc.lib;fmodL_vc.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4099 /NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -91,6 +92,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother;$(SolutionDir)lib\FMOD\studio\lib\x64;$(SolutionDir)lib\FMOD\core\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4099 /NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -157,6 +159,7 @@
     <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="Engine\EngineDefinitions.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Systems.h" />
