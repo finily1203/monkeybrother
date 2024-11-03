@@ -74,8 +74,8 @@ public:
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
 	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
-	
-	void SaveDebugConfigFromJSON(std::string const& filename);
+
+	void SaveDebugConfigToJSON(std::string const& filename);
 
 	std::string GenerateSaveJSONFile(int& saveNumber);
 
@@ -141,7 +141,6 @@ private:
 	static float objSizeYMin;
 
 	int saveCount;
-	bool saveFilePending;
 	float lastPosX;
 };
 

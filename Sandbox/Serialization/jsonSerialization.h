@@ -54,13 +54,13 @@ public:
 	virtual void ReadString(std::string&, std::string const&);
 	virtual void ReadCharArray(char*, size_t, std::string const&);
 
-	virtual void WriteBool(bool&, std::string const&);
-	virtual void WriteInt(int&, std::string const&);
-	virtual void WriteUnsignedInt(unsigned int&, std::string const&);
-	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&);
-	virtual void WriteFloat(float&, std::string const&);
-	virtual void WriteDouble(double&, std::string const&);
-	virtual void WriteString(std::string&, std::string const&);
+	virtual void WriteBool(bool&, std::string const&, std::string const&);
+	virtual void WriteInt(int&, std::string const&, std::string const&);
+	virtual void WriteUnsignedInt(unsigned int&, std::string const&, std::string const&);
+	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&, std::string const&);
+	virtual void WriteFloat(float&, std::string const&, std::string const&);
+	virtual void WriteDouble(double&, std::string const&, std::string const&);
+	virtual void WriteString(std::string&, std::string const&, std::string const&);
 
 	nlohmann::json GetJSONObject() const;
 

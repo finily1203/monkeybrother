@@ -37,11 +37,11 @@ public:
 	virtual void ReadDouble(double&, std::string const&) = 0;
 	virtual void ReadString(std::string&, std::string const&) = 0;
 
-	virtual void WriteBool(bool&, std::string const&) = 0;
-	virtual void WriteInt(int&, std::string const&) = 0;
-	virtual void WriteUnsignedInt(unsigned int&, std::string const&) = 0;
-	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&) = 0;
-	virtual void WriteFloat(float&, std::string const&) = 0;
-	virtual void WriteDouble(double&, std::string const&) = 0;
-	virtual void WriteString(std::string&, std::string const&) = 0;
+	virtual void WriteBool(bool&, std::string const&, std::string const&) = 0;
+	virtual void WriteInt(int&, std::string const&, std::string const&) = 0;
+	virtual void WriteUnsignedInt(unsigned int&, std::string const&, std::string const&) = 0;
+	virtual void WriteUnsignedLongLong(unsigned long long&, std::string const&, std::string const&) = 0;
+	virtual void WriteFloat(float&, std::string const&, std::string const&) = 0;
+	virtual void WriteDouble(double&, std::string const&, std::string const&) = 0;
+	virtual void WriteString(std::string&, std::string const&, std::string const&) = 0;
 };
