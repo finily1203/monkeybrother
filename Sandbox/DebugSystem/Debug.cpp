@@ -447,17 +447,17 @@ void DebugSystem::update() {
 					if (ImGui::Button("Remove")) {
 						ecsCoordinator.destroyEntity(entity);
 					}
-					if (ImGui::Button("Save")) {
-						JSONSerializer serializer;
+					//if (ImGui::Button("Save")) {
+					//	JSONSerializer serializer;
 	
-						std::string saveFile = GenerateSaveJSONFile(saveCount);
-						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+					//	std::string saveFile = GenerateSaveJSONFile(saveCount);
+					//	ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
 
-						saveCount++;
-						SaveDebugConfigToJSON(FilePathManager::GetIMGUIDebugJSONPath());
+					//	saveCount++;
+					//	SaveDebugConfigToJSON(FilePathManager::GetIMGUIDebugJSONPath());
 
-						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-					}
+					//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+					//}
 
 					ImGui::TreePop();
 					
@@ -465,6 +465,22 @@ void DebugSystem::update() {
 
 				ImGui::PopID();
 				ImGui::Separator();
+			}
+
+			if (ImGui::Button("Save")) {
+				JSONSerializer serializer;
+
+				std::string saveFile = GenerateSaveJSONFile(saveCount);
+
+				for (auto entity : ecsCoordinator.getAllLiveEntities())
+				{
+					ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+				}
+
+				saveCount++;
+				SaveDebugConfigToJSON(FilePathManager::GetIMGUIDebugJSONPath());
+
+				//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 			}
 
 		}
@@ -719,6 +735,7 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
 
 	std::string sourceFilePath;
+
 	if (saveNumber == 1)
 	{
 		sourceFilePath = FilePathManager::GetEntitiesJSONPath();
@@ -726,9 +743,24 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 
 	else
 	{
-		sourceFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveCount - 1) + ".json";
+		sourceFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber - 1) + ".json";
 	}
 
+	//for (int i = saveNumber - 1; i > 0; --i)
+	//{
+	//	std::string saveFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(i) + ".json";
+
+	//	if (std::filesystem::exists(saveFilePath))
+	//	{
+	//		sourceFilePath = saveFilePath;
+	//		break;
+	//	}
+	//}
+
+	//if (sourceFilePath.empty())
+	//{
+	//	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+	//}
 
 	nlohmann::json entitiesJSON;
 
