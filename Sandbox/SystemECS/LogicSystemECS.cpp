@@ -170,6 +170,7 @@ void LogicSystemECS::update(float dt) {
 
 			// Dampening
 			eVel.SetX(eVel.GetX() * 0.9f);
+			eVel.SetY(eVel.GetY() * 0.9f);
 
 			ePos.SetX(ePos.GetX() + eVel.GetX());
 			ePos.SetY(ePos.GetY() + eVel.GetY());
