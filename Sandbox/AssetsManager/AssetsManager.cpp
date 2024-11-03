@@ -1,3 +1,5 @@
+#pragma once 
+#include "EngineDefinitions.h"
 #include "AssetsManager.h"
 #include "stb_image.h"
 #include "AudioSystem.h"

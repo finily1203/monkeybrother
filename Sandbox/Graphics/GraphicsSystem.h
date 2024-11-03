@@ -23,7 +23,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 /*_ _ _ _ ________________________________________________________________________________-\*/
 
 #pragma once
-
+#include "EngineDefinitions.h"
 #include <GL/glew.h>
 #include <memory>
 #include "Shader.h"

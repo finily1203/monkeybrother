@@ -8,6 +8,7 @@
 File Contributions: Lew Zong Han Owen (50%)
 File Contributions: Joel Chu (50%)
 /*_______________________________________________________________________________________________________________*/
+#include "EngineDefinitions.h"
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include <iostream>
 #include "WindowSystem.h"

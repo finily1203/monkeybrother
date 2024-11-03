@@ -10,11 +10,17 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #pragma once
+#ifdef _WIN32
+#define NOMINMAX  // Prevent Windows.h from defining min/max macros
+#define WIN32_LEAN_AND_MEAN  // Exclude rarely-used stuff from Windows headers
+#include <windows.h>
+#endif
+
+#include "GlobalCoordinator.h"
 #include "Systems.h"
 #include "fmod.hpp"
 #include <vector>
 #include <string>
-#include "GlobalCoordinator.h"
 
 class AudioSystem : public GameSystems
 {

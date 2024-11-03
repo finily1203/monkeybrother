@@ -13,7 +13,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
          Yaoting (yaoting.liu): Added in variables for movement flags and debug flag.
 							   20%
 *//*___________________________________________________________________________-*/
-
+#include "EngineDefinitions.h"
 #include "Debug.h"
 #include "Crashlog.h"
 #include "GlfwFunctions.h"

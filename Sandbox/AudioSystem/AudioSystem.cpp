@@ -11,10 +11,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
                                the AudioSystem class.
                                100%
 *//*___________________________________________________________________________-*/
-
-#include "GlobalCoordinator.h"
+#include "EngineDefinitions.h"
 #include "AudioSystem.h"
 #include "GlfwFunctions.h"
+#include "GlobalCoordinator.h"
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class

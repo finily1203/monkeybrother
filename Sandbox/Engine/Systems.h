@@ -13,7 +13,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //Systems used for the game
 
 //Forward declaration for perfomance viewer to avoid circular dependencies
-enum SystemType; 
+enum SystemType : int; 
 
 class GameSystems
 {

@@ -97,13 +97,13 @@ private:
 	static float defaultObjScaleX;
 	static float defaultObjScaleY;
 
-	static double coordinateMaxLimitsX;
-	static double coordinateMaxLimitsY;
-	static double coordinateMinLimitsX;
-	static double coordinateMinLimitsY;
+	static float coordinateMaxLimitsX;
+	static float coordinateMaxLimitsY;
+	static float coordinateMinLimitsX;
+	static float coordinateMinLimitsY;
 
-	static double orientationMaxLimit;
-	static double orientationMinLimit;
+	static float orientationMaxLimit;
+	static float orientationMinLimit;
 
 	static int numEntitiesToCreate;
 	static char numBuffer[MAXBUFFERSIZE];
@@ -112,14 +112,14 @@ private:
 	static char yCoordinatesBuffer[MAXBUFFERSIZE];
 	static char xOrientationBuffer[MAXBUFFERSIZE];
 	static char yOrientationBuffer[MAXBUFFERSIZE];
-	static double xCoordinates;
-	static double yCoordinates;
-	static double xOrientation;
-	static double yOrientation;
+	static float xCoordinates;
+	static float yCoordinates;
+	static float xOrientation;
+	static float yOrientation;
 
-	static int objAttributeSliderMaxLength;
-	static int objAttributeSliderMidLength;
-	static int objAttributeSliderMinLength;
+	static float objAttributeSliderMaxLength;
+	static float objAttributeSliderMidLength;
+	static float objAttributeSliderMinLength;
 
 	static std::unordered_map<const char*, double> systemTimes;
 	static double loopStartTime;
@@ -140,8 +140,8 @@ private:
 	static float objSizeYMax;
 	static float objSizeYMin;
 
-	int saveCount;
-	float lastPosX;
+	static int saveCount;
+	static float lastPosX;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map

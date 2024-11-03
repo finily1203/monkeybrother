@@ -1,9 +1,9 @@
 #pragma once
 
+#include "GraphicsSystem.h"
 #include <map>
 #include <memory>
 #include <string>
-#include "GraphicsSystem.h"
 #include "fmod.hpp"
 
 class AssetsManager : public GameSystems
