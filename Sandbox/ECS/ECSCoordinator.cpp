@@ -602,3 +602,7 @@ Entity ECSCoordinator::getEntityFromID(std::string ID) {
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
 }
+
+ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
+	return entityManager->getSignature(entity);
+}

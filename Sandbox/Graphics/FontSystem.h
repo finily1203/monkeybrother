@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include "Shader.h"
 #include "ECSCoordinator.h" // Include ECS Coordinator
-#include "GlobalCoordinator.h"
+//#include "GlobalCoordinator.h"
 
 struct Character {
     unsigned int TextureID;   // Texture ID for the character
@@ -20,12 +20,13 @@ public:
     FontSystem();              // Constructor
     ~FontSystem();             // Destructor
     
-    SystemType getSystem() override;
-
-    void loadFont(const std::string& fontPath, unsigned int fontSize); // Load a font
     void update() override;     // Update the FontSystem (if necessary)
     void initialise() override; // Initialize the FontSystem
     void cleanup() override;    // Clean up resources
+    SystemType getSystem() override;
+
+    void loadFont(const std::string& fontPath, unsigned int fontSize); // Load a font
+
     void draw(const std::string& text, const std::string& fontPath, float x, float y, float scale, glm::vec3 color, float maxWidth);
     bool isInitialized = false;
     std::map<std::string, std::map<char, Character>> Fonts;

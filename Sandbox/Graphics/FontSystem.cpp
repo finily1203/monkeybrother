@@ -1,4 +1,5 @@
 #include "FontSystem.h"
+#include "GlobalCoordinator.h"
 #include <iostream>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -272,5 +273,5 @@ void FontSystem::update() {
 }
 
 SystemType FontSystem::getSystem() {
-	return SystemType::AudioSystemType;
+	return SystemType::FontType;
 }
