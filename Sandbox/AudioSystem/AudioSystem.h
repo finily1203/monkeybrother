@@ -57,6 +57,6 @@ public:
 private:
 	FMOD::System* audioSystem;
 	FMOD::Channel* audioChannel;
-	std::vector<FMOD::Sound*> audioSongList;
+	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
 };

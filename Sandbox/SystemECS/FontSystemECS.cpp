@@ -49,9 +49,13 @@ void FontSystemECS::update(float dt) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
 
            
-            if (fontSystem->Fonts.find(fontComp.fontPath) == fontSystem->Fonts.end()) {
-                fontSystem->loadFont(fontComp.fontPath, fontSize);
-            }
+            //if (fontSystem->Fonts.find(fontComp.fontPath) == fontSystem->Fonts.end()) {
+            //    fontSystem->loadFont(fontComp.fontPath, fontSize);
+            //}
+
+            if (assetsManager.m_Fonts.find(fontComp.fontPath) == assetsManager.m_Fonts.end()) {
+				assetsManager.LoadFont(fontComp.fontPath, 48);
+			}
 
             fontSystem->draw(fontComp.text, fontComp.fontPath, fontComp.position.x, fontComp.position.y, fontComp.scale, fontComp.color, maxWidth);
         }

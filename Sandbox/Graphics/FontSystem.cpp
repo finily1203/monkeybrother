@@ -19,30 +19,34 @@ void FontSystem::initialise() {
     if (isInitialized) return;
     std::cout << "FontSystem initialized" << std::endl;
 
-    ShaderProgramSource source = Shader::ParseShader("./Graphics/font.shader");
+    //ShaderProgramSource source = Shader::ParseShader("./Graphics/font.shader");
 
-    if (source.VertexSource.empty() || source.FragmentSource.empty()) {
-        std::cerr << "ERROR: Shader file is empty or could not be loaded!" << std::endl;
-        return;
-    }
+    //if (source.VertexSource.empty() || source.FragmentSource.empty()) {
+    //    std::cerr << "ERROR: Shader file is empty or could not be loaded!" << std::endl;
+    //    return;
+    //}
 
-    textShader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
-    if (!textShader || !textShader->isInitialized()) {
-        std::cerr << "ERROR: Failed to create shader!" << std::endl;
-        return;
-    }
-    else {
-        std::cout << "Shader initialized successfully." << std::endl;
-    }
+    //textShader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
+    //if (!textShader || !textShader->isInitialized()) {
+    //    std::cerr << "ERROR: Failed to create shader!" << std::endl;
+    //    return;
+    //}
+    //else {
+    //    std::cout << "Shader initialized successfully." << std::endl;
+    //}
 
     // Set up OpenGL state
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     projectionMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f);
 
-    textShader->Bind(); // Bind the shader before setting uniforms
-    textShader->SetUniformMatrix4f("projection", projectionMatrix); // Set the projection matrix
-    textShader->Unbind(); // Unbind the shader
+    //textShader->Bind(); // Bind the shader before setting uniforms
+    //textShader->SetUniformMatrix4f("projection", projectionMatrix); // Set the projection matrix
+    //textShader->Unbind(); // Unbind the shader
+    
+    assetsManager.GetShader("fontShader")->Bind();
+    assetsManager.GetShader("fontShader")->SetUniformMatrix4f("projection", projectionMatrix);
+    assetsManager.GetShader("fontShader")->Unbind();
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -121,22 +125,29 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
 
 
 
-void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
+//void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
+void FontSystem::renderText(const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;
         return;
     }
 
-    auto it = Fonts.find(fontPath);
-    if (it == Fonts.end()) {
-        std::cerr << "ERROR: Font not loaded: " << fontPath << std::endl;
-        return;
-    }
+    //auto it = Fonts.find(fontPath);
+    //if (it == Fonts.end()) {
+    //    std::cerr << "ERROR: Font not loaded: " << fontPath << std::endl;
+    //    return;
+    //}
+
+    auto it = assetsManager.m_Fonts.find(fontPath);
+    if (it == assetsManager.m_Fonts.end()) {
+		std::cerr << "ERROR: Font not loaded: " << fontPath << std::endl;
+		return;
+	}
 
     const std::map<char, Character>& characters = it->second;
 
-    shader->Bind();
-    shader->SetUniform3f("textColor", color.r, color.g, color.b);
+    assetsManager.GetShader("fontShader")->Bind();
+    assetsManager.GetShader("fontShader")->SetUniform3f("textColor", color.r, color.g, color.b);
 
     float xpos = x;
     float ypos = y;
@@ -244,11 +255,12 @@ void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::st
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    shader->Unbind();
+    assetsManager.GetShader("fontShader")->Unbind();
 }
 
 void FontSystem::draw(const std::string& text, const std::string& fontPath, float x, float y, float scale, glm::vec3 color, float maxWidth) {
-    renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
+    //renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
+    renderText(fontPath, text, x, y, scale, color, maxWidth);
 }
 
 void FontSystem::cleanup() {
@@ -256,17 +268,20 @@ void FontSystem::cleanup() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    textShader.reset(); 
+    //textShader.reset(); 
 
     // Delete loaded fonts
-    for (auto& pair : Fonts) {
-        for (auto& character : pair.second) {
-            glDeleteTextures(1, &character.second.TextureID); 
-        }
-    }
-    Fonts.clear();
+    //for (auto& pair : Fonts) {
+    //    for (auto& character : pair.second) {
+    //        glDeleteTextures(1, &character.second.TextureID); 
+    //    }
+    //}
+    //Fonts.clear();
+
+    assetsManager.ClearFonts();
+
     isInitialized = false;
-    std::cout << "FontSystem cleaned up." << std::endl;
+    //std::cout << "FontSystem cleaned up." << std::endl;
 }
 
 void FontSystem::update() {

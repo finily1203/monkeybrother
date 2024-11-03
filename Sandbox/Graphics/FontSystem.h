@@ -3,9 +3,10 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <glm/glm.hpp>
 #include "Shader.h"
-#include "ECSCoordinator.h" // Include ECS Coordinator
+#include "Systems.h"
 //#include "GlobalCoordinator.h"
 
 struct Character {
@@ -34,7 +35,7 @@ public:
 
 
 private:
-    void renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth);
+    void renderText(const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth);
     glm::mat4 projectionMatrix;
     std::map<char, Character> Characters; // Map of characters
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object

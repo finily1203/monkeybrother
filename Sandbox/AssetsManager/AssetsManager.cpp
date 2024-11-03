@@ -1,11 +1,13 @@
 #include "AssetsManager.h"
 #include "stb_image.h"
-#include "AudioSystem.h"
+#include "fmod.hpp"
+#include "GlobalCoordinator.h"
 
 
-AssetsManager::AssetsManager()
-{
-}
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+AssetsManager::AssetsManager(){}
 
 AssetsManager::~AssetsManager()
 {
@@ -13,7 +15,11 @@ AssetsManager::~AssetsManager()
 
 //leave empty for now
 void AssetsManager::initialise()
-{}
+{
+    LoadShaderAssets();
+    LoadTextureAssets();
+    LoadFontAssets();
+}
 
 void AssetsManager::update()
 {
@@ -29,6 +35,27 @@ SystemType AssetsManager::getSystem()
 }
 
 //-----------------------------TEXTURE ASSETS----------------------------------//
+void AssetsManager::LoadTextureAssets() const {
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& textureAsset : jsonObj["textureAssets"])
+    {
+        std::string textureName = textureAsset["id"].get<std::string>();
+        std::string relativePath = textureAsset["filePath"].get<std::string>();
+
+        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadTexture(textureName, textureFilePath);
+    }
+}
+
 void AssetsManager::LoadTexture(const std::string& texName, const std::string& texPath) {
     if (m_Textures.find(texName) != m_Textures.end()) {
 		std::cerr << "Texture already loaded!" << std::endl;
@@ -110,6 +137,27 @@ int AssetsManager::nrChannelsGet() {
 }
 
 //-----------------------------SHADER ASSETS----------------------------------//
+void AssetsManager::LoadShaderAssets() const {
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& shaderAsset : jsonObj["shaderAssets"])
+    {
+        std::string shaderName = shaderAsset["id"].get<std::string>();
+        std::string relativePath = shaderAsset["filePath"].get<std::string>();
+
+        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadShader(shaderName, shaderFilePath);
+    }
+}
+
 void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
     if (m_Shaders.find(name) != m_Shaders.end()) {
         std::cerr << "Shader already loaded!" << std::endl;
@@ -197,5 +245,123 @@ void AssetsManager::ClearAudio() {
 	}
 	m_Audio.clear();
 	std::cout << "All audio cleared!" << std::endl;
+}
+
+
+//-----------------------------FONT ASSETS----------------------------------//
+void AssetsManager::LoadFontAssets() const {
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& fontAssets : jsonObj["fontAssets"])
+    {
+        std::string fontName = fontAssets["id"].get<std::string>();
+        std::string relativePath = fontAssets["filePath"].get<std::string>();
+
+        std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadFont(fontFilePath, 48 ); //default font size
+        
+    }
+}
+
+void AssetsManager::LoadFont(const std::string& fontPath, unsigned int fontSize) {
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft)) {
+        std::cerr << "ERROR::FREETYPE: Could not initialize FreeType Library" << std::endl;
+        return;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
+        std::cerr << "ERROR::FREETYPE: Failed to load font at path: " << fontPath << std::endl;
+        FT_Done_FreeType(ft);
+        return;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, fontSize);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    bool fontLoaded = true;
+    std::map<char, Character> tempCharacters;
+
+    for (unsigned char c = 0; c < 128; c++) {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            std::cerr << "ERROR::FREETYPE: Failed to load Glyph for character: " << c << std::endl;
+            fontLoaded = false;
+            continue;
+        }
+
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        Character character = {
+            texture,
+            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            static_cast<unsigned int>(face->glyph->advance.x)
+        };
+
+        tempCharacters.insert(std::pair<char, Character>(c, character));
+    }
+
+    if (fontLoaded) {
+        //Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
+        m_Fonts[fontPath] = std::move(tempCharacters);
+    }
+    else {
+        std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
+    }
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts[fontPath].size() << std::endl;
+}
+
+std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) const {
+	auto iterator = m_Fonts.find(fontPath);
+    if (iterator != m_Fonts.end()) {
+		return iterator->second;
+	}
+    else {
+		std::cerr << "Font not found!" << std::endl;
+		return std::map<char, Character>();
+	}
+}
+
+void AssetsManager::UnloadFont(const std::string& fontPath) {
+	auto iterator = m_Fonts.find(fontPath);
+    if (iterator != m_Fonts.end()) {
+        for (auto& character : iterator->second) {
+			glDeleteTextures(1, &character.second.TextureID);
+		}
+		m_Fonts.erase(iterator);
+		std::cout << "Font unloaded successfully!" << std::endl;
+	}
+    else {
+		std::cerr << "Font not found!" << std::endl;
+	}
+}
+
+void AssetsManager::ClearFonts() {
+    for (auto& font : m_Fonts) {
+        for (auto& character : font.second) {
+			glDeleteTextures(1, &character.second.TextureID);
+		}
+	}
+	m_Fonts.clear();
+	std::cout << "All fonts cleared!" << std::endl;
 }
 

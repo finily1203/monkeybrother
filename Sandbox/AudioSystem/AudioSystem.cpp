@@ -18,7 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : audioSystem(nullptr), audioSongList(), audioChannel(nullptr), currSongIndex(0) {}
+AudioSystem::AudioSystem() : audioSystem(nullptr), audioChannel(nullptr), currSongIndex(0) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
@@ -135,18 +135,18 @@ void AudioSystem::update() {
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
 void AudioSystem::cleanup() {
-    for (auto song : audioSongList) {
-        if (song) {
-            song->release();
-        }
-    }
-    audioSongList.clear();
+    //for (auto song : audioSongList) {
+    //    if (song) {
+    //        song->release();
+    //    }
+    //}
+    //audioSongList.clear();
 
-    if (audioSystem) {
-        audioSystem->close();
-        audioSystem->release();
-        audioSystem = nullptr;
-    }
+    //if (audioSystem) {
+    //    audioSystem->close();
+    //    audioSystem->release();
+    //    audioSystem = nullptr;
+    //}
 }
 
 void AudioSystem::playSong(const std::string& songName) {

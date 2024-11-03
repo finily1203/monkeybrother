@@ -28,8 +28,8 @@ enum SystemType { //For perfomance viewer
 	FontType,
 };
 
+extern AssetsManager assetsManager;
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
 extern DebugSystem debugSystem;
-extern AssetsManager assetsManager;
 extern FontSystem fontSystem;

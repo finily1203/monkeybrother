@@ -123,7 +123,7 @@ void WindowSystem::initialise() {
 	glViewport(0, 0, width, height);
 
 
-	graphicsSystem.initialise();
+	/*graphicsSystem.initialise();*/
 
 
 	//gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
