@@ -41,6 +41,10 @@
     {
       "id": "background",
       "filePath": "assets/textures/L1_Flat_Background.jpg"
+    },
+    {
+      "id": "woodtile",
+      "filePath": "assets/textures/TOP_BODY_1.png"
     }
   ],
   "shaderAssets": [
