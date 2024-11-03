@@ -19,6 +19,7 @@ void AssetsManager::initialise()
     LoadShaderAssets();
     LoadTextureAssets();
     LoadFontAssets();
+    LoadAudioAssets();
 }
 
 void AssetsManager::update()
@@ -206,6 +207,41 @@ void AssetsManager::ClearShaders() {
 
 
 //-----------------------------AUDIO ASSETS----------------------------------//
+void AssetsManager::LoadAudioAssets() {
+    FMOD_RESULT result;
+
+    result = FMOD::System_Create(&audSystem);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD error! (" << result << ") " << std::endl;
+        return;
+    }
+
+    result = audSystem->init(32, FMOD_INIT_NORMAL, nullptr);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD error! (" << result << ") " << std::endl;
+        return;
+    }
+
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    std::ifstream file(jsonFilePath);
+    nlohmann::json jsonObj;
+
+    if (file.is_open())
+    {
+        file >> jsonObj;
+        file.close();
+    }
+
+    for (const auto& audioAsset : jsonObj["audioAssets"])
+    {
+        std::string audioName = audioAsset["audioName"].get<std::string>();
+        std::string relativePath = audioAsset["filePath"].get<std::string>();
+
+        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        assetsManager.LoadAudio(audioName, audioFilePath, audSystem);
+    }
+}
+
 void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* audioSystem) {
     FMOD::Sound* audioSong = nullptr;
     FMOD_RESULT result = audioSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
@@ -226,6 +262,10 @@ FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
 		std::cerr << "Audio not found!" << std::endl;
 		return 0;
 	}
+}
+
+FMOD::System* AssetsManager::GetAudioSystem() const {
+	return audSystem;
 }
 
 void AssetsManager::UnloadAudio(const std::string& name) {
