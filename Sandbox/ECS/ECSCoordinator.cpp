@@ -131,20 +131,20 @@ void ECSCoordinator::test2() {
 }
 
 
-class PlayerSystem : public System {
-public:
-	void initialise() override {
-		std::cout << "PlayerSystem initialise" << std::endl;
-	}
-
-	void update(float dt) override {
-		//std::cout << "PlayerSystem update" << std::endl;
-	}
-
-	void cleanup() override {
-		std::cout << "PlayerSystem cleanup" << std::endl;
-	}
-};
+//class PlayerSystem : public System {
+//public:
+//	void initialise() override {
+//		std::cout << "PlayerSystem initialise" << std::endl;
+//	}
+//
+//	void update(float dt) override {
+//		//std::cout << "PlayerSystem update" << std::endl;
+//	}
+//
+//	void cleanup() override {
+//		std::cout << "PlayerSystem cleanup" << std::endl;
+//	}
+//};
 
 // this is the definition of the function that loads the data from JSON file to the entity
 // open the JSON file and initialize the entity data based on the values read
@@ -350,25 +350,25 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 	}
 }
 // this function handles the updating of the entity's data
-void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
-{
-	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
-	{
-		TransformComponent& transform = getComponent<TransformComponent>(entity);
-		// assign the new data of the transform component to the entity's transform component
-		transform.orientation = transUpdate.orientation;
-		transform.position = transUpdate.position;
-		transform.scale = transUpdate.scale;
-	}
-	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
-	{
-		FontComponent& font = getComponent<FontComponent>(entity);
-		font.text = fontUpdate.text; 
-		//font.position = fontUpdate.position; 
-		//font.scale = fontUpdate.scale; 
-		font.color = fontUpdate.color; 
-	}
-}
+//void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
+//{
+//	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+//	{
+//		TransformComponent& transform = getComponent<TransformComponent>(entity);
+//		// assign the new data of the transform component to the entity's transform component
+//		transform.orientation = transUpdate.orientation;
+//		transform.position = transUpdate.position;
+//		transform.scale = transUpdate.scale;
+//	}
+//	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+//	{
+//		FontComponent& font = getComponent<FontComponent>(entity);
+//		font.text = fontUpdate.text; 
+//		//font.position = fontUpdate.position; 
+//		//font.scale = fontUpdate.scale; 
+//		font.color = fontUpdate.color; 
+//	}
+//}
 
 //clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
@@ -591,19 +591,19 @@ void ECSCoordinator::test4() {
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	
 	//Iterate through the entities to find Object1 and Object2
-	for (auto entity : entityManager->getLiveEntities()) {
-		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+	//for (auto entity : entityManager->getLiveEntities()) {
+	//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-		float left = transform.position.GetX() - transform.scale.GetX() / 2;
-		float right = transform.position.GetX() + transform.scale.GetX() / 2;
-		float top = transform.position.GetY() + transform.scale.GetY() / 2;
-		float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
+	//	float left = transform.position.GetX() - transform.scale.GetX() / 2;
+	//	float right = transform.position.GetX() + transform.scale.GetX() / 2;
+	//	float top = transform.position.GetY() + transform.scale.GetY() / 2;
+	//	float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
 
-		addComponent(entity, AABBComponent{left, right, top, bottom});
-		if (entityManager->getEntityId(entity) == "Player") {
-			addComponent(entity, MovementComponent{.1f});
-		}
-	}
+	//	addComponent(entity, AABBComponent{left, right, top, bottom});
+	//	if (entityManager->getEntityId(entity) == "Player") {
+	//		addComponent(entity, MovementComponent{.1f});
+	//	}
+	//}
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {

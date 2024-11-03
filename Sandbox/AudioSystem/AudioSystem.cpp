@@ -71,7 +71,7 @@ void AudioSystem::update() {
 
             if (!isPaused) {
                 // If the sound is not paused, pause it
-                FMOD_RESULT result = audioChannel->setPaused(true);
+                result = audioChannel->setPaused(true);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD pause error! (" << result << ")" << std::endl;
                 }
@@ -87,7 +87,7 @@ void AudioSystem::update() {
 
             if (isPaused) {
                 // If the sound is paused, unpause it
-                FMOD_RESULT result = audioChannel->setPaused(false);
+                result = audioChannel->setPaused(false);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD resume error! (" << result << ")" << std::endl;
                 }
@@ -169,7 +169,7 @@ void AudioSystem::playSong(const std::string& songName) {
 void AudioSystem::playSoundEffect(const std::string& soundName)
 {
 	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
-	FMOD::Channel* audioChannel = nullptr;
+	audioChannel = nullptr;
 	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &audioChannel);
 	if (result != FMOD_OK) {
 		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;

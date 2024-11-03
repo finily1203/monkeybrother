@@ -14,4 +14,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 struct AABBComponent 
 {
 	float left, right, top, bottom;
+
+	AABBComponent() : left(0.f), right(0.f), top(0.f), bottom(0.f) {}
 };

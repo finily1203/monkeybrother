@@ -31,14 +31,14 @@ public:
 
 	void ReadSpecificObject(myMath::Vector2D&, nlohmann::json const&);
 	void ReadSpecificObject(myMath::Matrix3x3&, nlohmann::json const&);
-	void ReadSpecificObject(MyMath::Vector3D&, nlohmann::json const&);
+	void ReadSpecificObject(myMath::Vector3D&, nlohmann::json const&);
 	void ReadSpecificObject(float&, nlohmann::json const&);
 	void ReadSpecificObject(bool&, nlohmann::json const&);
 	void ReadSpecificObject(std::string&, nlohmann::json const&);
 
 	void WriteSpecificObject(myMath::Vector2D const&, nlohmann::json&);
 	void WriteSpecificObject(myMath::Matrix3x3 const&, nlohmann::json&);
-	void WriteSpecificObject(MyMath::Vector3D const&, nlohmann::json&);
+	void WriteSpecificObject(myMath::Vector3D const&, nlohmann::json&);
 	void WriteSpecificObject(float const&, nlohmann::json&);
 	void WriteSpecificObject(bool const&, nlohmann::json&);
 	//void ReadSpecificObject(std::string&, nlohmann::json const&);

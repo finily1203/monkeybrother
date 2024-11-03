@@ -32,14 +32,14 @@ public:
 
     void loadFont(const std::string& fontPath, unsigned int fontSize); // Load a font
 
-    void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, MyMath::Vector3D color, float maxWidth);
+    void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth);
     bool isInitialized = false;
     std::map<std::string, std::map<char, Character>> Fonts;
 
 
 
 private:
-    void renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, MyMath::Vector3D color, float maxWidth);
+    void renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth);
     glm::mat4 projectionMatrix;
     std::map<char, Character> Characters; // Map of characters
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object

@@ -22,7 +22,7 @@ void LogicSystemECS::update(float dt) {
 	myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
 	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
 	float mass =					ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).mass;
-	float gravityScale =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
+	//float gravityScale =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
 
 	if (GLFWFunctions::move_left_flag) {
 		ApplyForce(playerEntity, -force);
@@ -58,8 +58,8 @@ void LogicSystemECS::update(float dt) {
 		acceleration.SetX(0);
 	}
 
-	vel.SetX(vel.GetX() + acceleration.GetX() * GLFWFunctions::delta_time);
-	vel.SetY(vel.GetY() + acceleration.GetY() * GLFWFunctions::delta_time);
+	vel.SetX(vel.GetX() + acceleration.GetX() * dt);
+	vel.SetY(vel.GetY() + acceleration.GetY() * dt);
 
 	// Dampening
 	vel.SetX(vel.GetX() * 0.9f);
@@ -81,22 +81,22 @@ void LogicSystemECS::update(float dt) {
 			myMath::Vector2D velocity = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
 
 			if (GLFWFunctions::left_turn_flag) {
-				transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
+				transform.orientation.SetY(transform.orientation.GetY() + (180.f * dt));
 			}
 			else if (GLFWFunctions::right_turn_flag) {
-				transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
+				transform.orientation.SetY(transform.orientation.GetY() - (180.0f * dt));
 			}
 
 			if (GLFWFunctions::scale_up_flag) {
 				if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
-					transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
-					transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
+					transform.scale.SetX(transform.scale.GetX() + 53.4f * dt);
+					transform.scale.SetY(transform.scale.GetY() + 30.0f * dt);
 				}
 			}
 			else if (GLFWFunctions::scale_down_flag) {
 				if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
-					transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
-					transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);
+					transform.scale.SetX(transform.scale.GetX() - 53.4f * dt);
+					transform.scale.SetY(transform.scale.GetY() - 30.0f * dt);
 				}
 			}
 
@@ -106,7 +106,7 @@ void LogicSystemECS::update(float dt) {
 			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
 			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).accumulatedForce;
 			float eMass					   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).mass;
-			float eGravityScale			   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
+			//float eGravityScale			   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
 
 			if (GLFWFunctions::enemyMoveUp) {
 				eForce.SetX(0.0f);
@@ -154,7 +154,7 @@ void LogicSystemECS::update(float dt) {
 				}
 			}
 
-			float invMass = mass > 0.f ? 1.f / mass : 0.f;
+			invMass = eMass > 0.f ? 1.f / eMass : 0.f;
 			eAcceleration = eAccForce * invMass;
 
 			// Clamp speed without interfering with velocity
@@ -165,8 +165,8 @@ void LogicSystemECS::update(float dt) {
 				eAcceleration.SetX(0);
 			}
 
-			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * GLFWFunctions::delta_time);
-			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * GLFWFunctions::delta_time);
+			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
+			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
 
 			// Dampening
 			eVel.SetX(eVel.GetX() * 0.9f);

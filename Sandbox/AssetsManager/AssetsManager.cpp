@@ -3,9 +3,9 @@
 #include "fmod.hpp"
 #include "GlobalCoordinator.h"
 
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
 
 AssetsManager::AssetsManager(){}
 

@@ -42,8 +42,8 @@ void GraphicSystemECS::initialise() {
 //uses functions from GraphicsSystem class to update, draw
 //and render objects.
 void GraphicSystemECS::update(float dt) {
-	Shader* shader = assetsManager.GetShader("shader1");
-	Shader* shader2 = assetsManager.GetShader("shader2");
+	//Shader* shader = assetsManager.GetShader("shader1");
+	//Shader* shader2 = assetsManager.GetShader("shader2");
 
 
 	for (auto entity : entities) {
@@ -59,8 +59,8 @@ void GraphicSystemECS::update(float dt) {
 			bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
 			bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 
-			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
-			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
+			graphicsSystem.Update(dt / 10, true);
+			transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 			
 
 			auto entitySig = ecsCoordinator.getEntitySignature(entity);
@@ -109,9 +109,9 @@ void GraphicSystemECS::update(float dt) {
 			}
 			
 			// It updates the object based on the animation component
-			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
+			graphicsSystem.Update(dt / 10, true);
 			// calculate the model transform matrix using update object function
-			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation
+			transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation
 																, cameraSystem.getViewMatrix());
 			
 			// Draw the object

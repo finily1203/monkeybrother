@@ -126,7 +126,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
 
 
 //void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
-void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, MyMath::Vector3D color, float maxWidth) {
+void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;
         return;
@@ -258,7 +258,7 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
     assetsManager.GetShader("fontShader")->Unbind();
 }
 
-void FontSystem::draw(const std::string& text, const std::string& fontId, float x, float y, float scale, MyMath::Vector3D color, float maxWidth) {
+void FontSystem::draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth) {
     //renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
     renderText(fontId, text, x, y, scale, color, maxWidth);
 }

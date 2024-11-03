@@ -305,8 +305,8 @@ void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& applied
 }
 
 // Player input handling for movement (left: 'A', right: 'D')
-void PhysicsSystemECS::HandlePlayerInput(Entity player)
-{
+//void PhysicsSystemECS::HandlePlayerInput(Entity player)
+//{
  //   //float speed = ecsCoordinator.getComponent<MovementComponent>(player).speed;
  //   //float maxSpeed = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity.GetX() * 8.f;
  //   const float maxSpeed = 0.6f;
@@ -361,7 +361,7 @@ void PhysicsSystemECS::HandlePlayerInput(Entity player)
 
  //   playerPos.SetX(playerPos.GetX() + vel.GetX() * GLFWFunctions::delta_time);
  //   playerPos.SetY(playerPos.GetY() + vel.GetY() * GLFWFunctions::delta_time);
-}
+//}
 
 //// PROTOTYPING: Handling Circle vs Rectangle side collision
 //void PhysicsSystemECS::HandleSideCollision(int collisionSide, float circleRadius, Entity player, Entity closestPlatform) {

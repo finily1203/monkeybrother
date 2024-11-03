@@ -8,8 +8,10 @@
 struct FontComponent {
     std::string text;
     float textScale;
-    MyMath::Vector3D color;
+    myMath::Vector3D color;
     std::string fontId; 
+
+    FontComponent() : textScale(0.f){}
 };
 
 #endif 

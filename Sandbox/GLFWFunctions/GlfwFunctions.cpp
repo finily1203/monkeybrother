@@ -282,7 +282,7 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
 }
 
 //Caluclate the FPS and delta_time to be used
-void GLFWFunctions::getFps(double fpsCalculateInt) {
+void GLFWFunctions::getFps() {
 
     static double prevTime = glfwGetTime();
     double currTime = glfwGetTime();

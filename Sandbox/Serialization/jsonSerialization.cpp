@@ -79,7 +79,7 @@ void JSONSerializer::ReadSpecificObject(myMath::Vector2D& object, nlohmann::json
 	}
 }
 
-void JSONSerializer::ReadSpecificObject(MyMath::Vector3D& object, nlohmann::json const& jsonObj)
+void JSONSerializer::ReadSpecificObject(myMath::Vector3D& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_object() && jsonObj.contains("x") && jsonObj.contains("y") && jsonObj.contains("z"))
 	{	
@@ -140,7 +140,7 @@ void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohman
 	jsonObj["y"] = object.GetY();
 }
 
-void JSONSerializer::WriteSpecificObject(MyMath::Vector3D const& object, nlohmann::json& jsonObj)
+void JSONSerializer::WriteSpecificObject(myMath::Vector3D const& object, nlohmann::json& jsonObj)
 {
 	jsonObj["x"] = object.GetX();
 	jsonObj["y"] = object.GetY();

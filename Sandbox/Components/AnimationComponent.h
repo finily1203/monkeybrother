@@ -14,4 +14,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 struct AnimationComponent
 {
 	bool isAnimated;
+
+	AnimationComponent() : isAnimated(false) {}
 };

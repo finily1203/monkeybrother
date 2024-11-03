@@ -189,7 +189,7 @@ void WindowSystem::update() {
 
 	//DebugSystem::EndSystemTiming("Graphics"); 
 
-	GLFWFunctions::getFps(1);
+	GLFWFunctions::getFps();
 
 	//glfwSwapBuffers(GLFWFunctions::pWindow);
 
