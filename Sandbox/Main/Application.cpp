@@ -39,13 +39,18 @@ int main() {
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
 
+		engine->addSystem(&assetsManager);
+
 		AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
-		//engine->addSystem(&graphicsSystem);
 
+		engine->addSystem(&graphicsSystem);
+	
 		engine->addSystem(&debugSystem);
+
+		engine->addSystem(&fontSystem);
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();

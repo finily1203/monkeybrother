@@ -53,6 +53,7 @@ void GraphicSystemECS::update(float dt) {
 			graphicsSystem.Update(GLFWFunctions::delta_time / 10, true);
 			transform.mdl_xform = graphicsSystem.UpdateObject(GLFWFunctions::delta_time, transform.position, transform.scale, transform.orientation);
 
+			//auto entitySig = ecsCoordinator.getEntitySignature(entity);
 			auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
 			if (hasMovement && hasEnemy) 

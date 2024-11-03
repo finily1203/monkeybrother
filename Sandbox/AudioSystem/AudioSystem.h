@@ -52,11 +52,11 @@ public:
 	void loadAudioAssets() const;
 
 	//get audioSystem
-	FMOD::System* getAudioSystem() const { return audioSystem; }
+	//FMOD::System* getAudioSystem() const { return audioSystem; }
 
 private:
-	FMOD::System* audioSystem;
+	//FMOD::System* audioSystem;
 	FMOD::Channel* audioChannel;
-	std::vector<FMOD::Sound*> audioSongList;
+	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
 };

@@ -39,6 +39,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
 #include "RigidBodyComponent.h"
+#include "FontComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -112,6 +113,9 @@ public:
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	// update the entity's data
+	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
+
 
 	//System Manager Functions
 	//Register the system

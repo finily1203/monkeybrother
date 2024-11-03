@@ -43,6 +43,20 @@
     {
       "id": "shader2",
       "filePath": "assets/shaders/Basic1.shader"
+    },
+    {
+      "id": "fontShader",
+      "filePath": "assets/shaders/font.shader"
+    }
+  ],
+  "fontAssets": [
+    {
+      "id": "Journey",
+      "filePath": "assets/fonts/SS Journey.ttf"
+    },
+    {
+      "id": "Antonio",
+      "filePath": "assets/fonts/Antonio.ttf"
     }
   ]
 }

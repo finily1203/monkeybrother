@@ -87,11 +87,8 @@ void GraphicsSystem::initialise() {
     //    return;
     //}
 
-    loadShaderAssets();
-    loadTextureAssets();
-    std::cout << assetsManager.texWidthGet() << std::endl;
-    std::cout << assetsManager.texHeightGet() << std::endl;
-    std::cout << assetsManager.nrChannelsGet() << std::endl;
+    //loadShaderAssets();
+    //loadTextureAssets();
 
     int width = assetsManager.texWidthGet();
     int height = assetsManager.texHeightGet();
@@ -467,43 +464,43 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
 }
 
 void GraphicsSystem::loadShaderAssets() const {
-    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    std::ifstream file(jsonFilePath);
-    nlohmann::json jsonObj;
+    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ifstream file(jsonFilePath);
+    //nlohmann::json jsonObj;
 
-    if (file.is_open())
-    {
-        file >> jsonObj;
-        file.close();
-    }
+    //if (file.is_open())
+    //{
+    //    file >> jsonObj;
+    //    file.close();
+    //}
 
-    for (const auto& shaderAsset : jsonObj["shaderAssets"])
-    {
-        std::string shaderName = shaderAsset["id"].get<std::string>();
-        std::string relativePath = shaderAsset["filePath"].get<std::string>();
+    //for (const auto& shaderAsset : jsonObj["shaderAssets"])
+    //{
+    //    std::string shaderName = shaderAsset["id"].get<std::string>();
+    //    std::string relativePath = shaderAsset["filePath"].get<std::string>();
 
-        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadShader(shaderName, shaderFilePath);
-    }
+    //    std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+    //    assetsManager.LoadShader(shaderName, shaderFilePath);
+    //}
 }
 
 void GraphicsSystem::loadTextureAssets() const {
-    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    std::ifstream file(jsonFilePath);
-    nlohmann::json jsonObj;
+    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ifstream file(jsonFilePath);
+    //nlohmann::json jsonObj;
 
-    if (file.is_open())
-    {
-        file >> jsonObj;
-        file.close();
-    }
+    //if (file.is_open())
+    //{
+    //    file >> jsonObj;
+    //    file.close();
+    //}
 
-    for (const auto& textureAsset : jsonObj["textureAssets"])
-    {
-        std::string textureName = textureAsset["id"].get<std::string>();
-        std::string relativePath = textureAsset["filePath"].get<std::string>();
+    //for (const auto& textureAsset : jsonObj["textureAssets"])
+    //{
+    //    std::string textureName = textureAsset["id"].get<std::string>();
+    //    std::string relativePath = textureAsset["filePath"].get<std::string>();
 
-        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadTexture(textureName, textureFilePath);
-    }
+    //    std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+    //    assetsManager.LoadTexture(textureName, textureFilePath);
+    //}
 }
