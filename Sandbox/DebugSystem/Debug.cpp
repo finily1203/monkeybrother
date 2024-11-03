@@ -642,9 +642,7 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadInt(saveCount, "Debug.saveCount");
 	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
 }
-
-void DebugSystem::SaveDebugConfigToJSON(std::string const& filename)
-{
+void DebugSystem::SaveDebugConfigToJSON(std::string const& filename) {
 	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))
