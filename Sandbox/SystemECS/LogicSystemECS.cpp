@@ -68,8 +68,6 @@ void LogicSystemECS::update(float dt) {
 	position.SetY(position.GetY() + vel.GetY());
 
 	//--------------------------------END OF PLAYER MOVEMENT--------------------------------//
-
-
 	for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 		
@@ -106,7 +104,7 @@ void LogicSystemECS::update(float dt) {
 			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
 			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).accumulatedForce;
 			float eMass					   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).mass;
-			//float eGravityScale			   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
+			//float eGravityScale		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
 
 			if (GLFWFunctions::enemyMoveUp) {
 				eForce.SetX(0.0f);
@@ -177,6 +175,46 @@ void LogicSystemECS::update(float dt) {
 		}
 		//--------------------------------END OF ENEMY MOVEMENT--------------------------------//
 
+		//------------------------------------CAMERA MOVEMENT-----------------------------------//
+		auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+		cameraSystem.lockToComponent(playerTransform);
+
+		if (cameraSystem.checkLockedComponent() && (GLFWFunctions::allow_camera_movement == false)) {
+			if (GLFWFunctions::camera_zoom_in_flag)
+				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + 0.1f * GLFWFunctions::delta_time);
+			if (GLFWFunctions::camera_zoom_out_flag)
+				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() - 0.1f * GLFWFunctions::delta_time);
+		}
+		else {
+			myMath::Vector2D camPos = cameraSystem.getCameraPosition();
+			if (GLFWFunctions::move_up_flag) {
+				camPos.SetY(camPos.GetY() + (20 * GLFWFunctions::delta_time));
+				cameraSystem.setCameraPosition(camPos);
+			}
+			if (GLFWFunctions::move_down_flag) {
+				camPos.SetY(camPos.GetY() - (20 * GLFWFunctions::delta_time));
+				cameraSystem.setCameraPosition(camPos);
+			}
+			if (GLFWFunctions::move_left_flag) {
+				camPos.SetX(camPos.GetX() - (20 * GLFWFunctions::delta_time));
+				cameraSystem.setCameraPosition(camPos);
+			}
+			if (GLFWFunctions::move_right_flag) {
+				camPos.SetX(camPos.GetX() + (20 * GLFWFunctions::delta_time));
+				cameraSystem.setCameraPosition(camPos);
+			}
+
+			if (GLFWFunctions::camera_zoom_in_flag)
+				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + 0.1f * GLFWFunctions::delta_time);
+			if (GLFWFunctions::camera_zoom_out_flag)
+				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() - 0.1f * GLFWFunctions::delta_time);
+
+			if (GLFWFunctions::camera_rotate_left_flag)
+				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() + 0.1f * GLFWFunctions::delta_time);
+			if (GLFWFunctions::camera_rotate_right_flag)
+				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
+		}
+		//--------------------------------END OF CAMERA MOVEMENT--------------------------------//
 	}
 }
 

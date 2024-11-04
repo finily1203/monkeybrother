@@ -55,7 +55,9 @@ GraphicsSystem::GraphicsSystem()
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
     m_AnimationData = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
     idleAnimation = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
-
+    std::vector<GraphicsSystem::GLViewport> vps;
+    vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
+    glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 }
 
 GraphicsSystem::~GraphicsSystem() {
@@ -345,7 +347,7 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
 
 
 
-myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
@@ -377,13 +379,16 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
+
+    glm::mat3 cameraMtx = myMath::Matrix3x3::ConvertToGLMMat3(viewMat);
+
     mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform = projMat * viewMat * mdl_xform;
+    mdl_to_ndc_xform = projMat * cameraMtx * mdl_xform;
     myMath::Matrix3x3 final_xform = myMath::Matrix3x3::ConvertToMatrix3x3(mdl_to_ndc_xform);
     return final_xform;
 }
 
-void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
+void GraphicsSystem::drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMatrix) {
 
     glBegin(GL_LINES);
 
@@ -396,6 +401,8 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
     glm::vec4 topRight(aabb.right, aabb.top, 0.0f, 1.0f);
     glm::vec4 topLeft(aabb.left, aabb.top, 0.0f, 1.0f);
 
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+
     // Create the projection matrix
     glm::mat4 projMat = glm::ortho(
         -GLFWFunctions::windowWidth / 2.0f,  // left
@@ -403,6 +410,7 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
+
     glm::mat4 viewMat4 = {
 		viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
 		viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
