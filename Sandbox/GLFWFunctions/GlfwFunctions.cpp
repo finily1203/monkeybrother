@@ -71,6 +71,10 @@ GLboolean GLFWFunctions::camera_rotate_right_flag = false;
 
 int GLFWFunctions::testMode = 0;
 
+std::unordered_map<Key, bool> GLFWFunctions::keyState;
+std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
+
+
 // Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -113,13 +117,14 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
+#if 0
     if (GLFW_PRESS == action) {
 #ifdef _DEBUG
         std::cout << "Key pressed" << std::endl;
 #endif
 		if (GLFW_KEY_F2 == key)
 		{
-            GLFWFunctions::allow_camera_movement = !GLFWFunctions::allow_camera_movement;
+            GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
 		}
     }
     else if (GLFW_REPEAT == action) {
@@ -237,22 +242,100 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+#endif
+	Key mappedKey;
+    switch (key) {
+        // Alphabet keys
+    case GLFW_KEY_A: mappedKey = Key::A; break;
+    case GLFW_KEY_B: mappedKey = Key::B; break;
+    case GLFW_KEY_C: mappedKey = Key::C; break;
+    case GLFW_KEY_D: mappedKey = Key::D; break;
+    case GLFW_KEY_E: mappedKey = Key::E; break;
+    case GLFW_KEY_F: mappedKey = Key::F; break;
+    case GLFW_KEY_G: mappedKey = Key::G; break;
+    case GLFW_KEY_H: mappedKey = Key::H; break;
+    case GLFW_KEY_I: mappedKey = Key::I; break;
+    case GLFW_KEY_J: mappedKey = Key::J; break;
+    case GLFW_KEY_K: mappedKey = Key::K; break;
+    case GLFW_KEY_L: mappedKey = Key::L; break;
+    case GLFW_KEY_M: mappedKey = Key::M; break;
+    case GLFW_KEY_N: mappedKey = Key::N; break;
+    case GLFW_KEY_O: mappedKey = Key::O; break;
+    case GLFW_KEY_P: mappedKey = Key::P; break;
+    case GLFW_KEY_Q: mappedKey = Key::Q; break;
+    case GLFW_KEY_R: mappedKey = Key::R; break;
+    case GLFW_KEY_S: mappedKey = Key::S; break;
+    case GLFW_KEY_T: mappedKey = Key::T; break;
+    case GLFW_KEY_U: mappedKey = Key::U; break;
+    case GLFW_KEY_V: mappedKey = Key::V; break;
+    case GLFW_KEY_W: mappedKey = Key::W; break;
+    case GLFW_KEY_X: mappedKey = Key::X; break;
+    case GLFW_KEY_Y: mappedKey = Key::Y; break;
+    case GLFW_KEY_Z: mappedKey = Key::Z; break;
+
+        // Function keys
+    case GLFW_KEY_F1: mappedKey = Key::F1; break;
+    case GLFW_KEY_F2: mappedKey = Key::F2; break;
+    case GLFW_KEY_F3: mappedKey = Key::F3; break;
+    case GLFW_KEY_F4: mappedKey = Key::F4; break;
+    case GLFW_KEY_F5: mappedKey = Key::F5; break;
+    case GLFW_KEY_F6: mappedKey = Key::F6; break;
+    case GLFW_KEY_F7: mappedKey = Key::F7; break;
+    case GLFW_KEY_F8: mappedKey = Key::F8; break;
+    case GLFW_KEY_F9: mappedKey = Key::F9; break;
+    case GLFW_KEY_F10: mappedKey = Key::F10; break;
+    case GLFW_KEY_F11: mappedKey = Key::F11; break;
+    case GLFW_KEY_F12: mappedKey = Key::F12; break;
+
+        // Control and special keys
+    case GLFW_KEY_SPACE: mappedKey = Key::SPACE; break;
+    case GLFW_KEY_ESCAPE: mappedKey = Key::ESCAPE; break;
+    case GLFW_KEY_LEFT: mappedKey = Key::LEFT; break;
+    case GLFW_KEY_RIGHT: mappedKey = Key::RIGHT; break;
+    case GLFW_KEY_UP: mappedKey = Key::UP; break;
+    case GLFW_KEY_DOWN: mappedKey = Key::DOWN; break;
+    case GLFW_KEY_LEFT_SHIFT: mappedKey = Key::LSHIFT; break;
+    case GLFW_KEY_LEFT_CONTROL: mappedKey = Key::LCTRL; break;
+    case GLFW_KEY_LEFT_ALT: mappedKey = Key::LALT; break;
+
+        // Default case
+    default: return; // Use Key::UNKNOWN for unmapped keys if defined.
+    }
+
+	if (action == GLFW_PRESS) {
+		keyState[mappedKey] = true;
+	}
+    else if (action == GLFW_RELEASE) {
+        keyState[mappedKey] = false;
+    }
+    else if (action == GLFW_REPEAT) {
+        keyState[mappedKey] = true;
+    }
 }
 
 //Handle mouse button events
 void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
+#if 0
+	MouseButton mappedButton;
     switch (button) {
-    case GLFW_MOUSE_BUTTON_LEFT:
+    case GLFW_MOUSE_BUTTON_LEFT:mappedButton = MouseButton::left;
 #ifdef _DEBUG
         std::cout << "Left mouse button ";
 #endif
         break;
-    case GLFW_MOUSE_BUTTON_RIGHT:
+	case GLFW_MOUSE_BUTTON_RIGHT:mappedButton = MouseButton::right;
 #ifdef _DEBUG
         std::cout << "Right mouse button ";
 #endif
         break;
+    case GLFW_MOUSE_BUTTON_MIDDLE:mappedButton = MouseButton::middle;
+#ifdef _DEBUG
+		std::cout << "Middle mouse button ";
+#endif
+		break;
     }
+
     switch (action) {
     case GLFW_PRESS:
 #ifdef _DEBUG
@@ -265,6 +348,22 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 #endif
         break;
     }
+#endif
+
+	MouseButton mappedButton;
+	switch (button) {
+	case GLFW_MOUSE_BUTTON_LEFT: mappedButton = MouseButton::left; break;
+	case GLFW_MOUSE_BUTTON_RIGHT: mappedButton = MouseButton::right; break;
+	case GLFW_MOUSE_BUTTON_MIDDLE: mappedButton = MouseButton::middle; break;
+	default: return;
+	}
+
+	if (action == GLFW_PRESS) {
+		mouseButtonState[mappedButton] = true;
+	}
+	else if (action == GLFW_RELEASE) {
+		mouseButtonState[mappedButton] = false;
+	}
 }
 
 //Handle cursor position events
@@ -314,4 +413,21 @@ void GLFWFunctions::getFps(double fpsCalculateInt) {
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
+}
+
+// Input state functions
+bool GLFWFunctions::isKeyPressed(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
+}
+
+bool GLFWFunctions::isKeyReleased(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
+}
+
+bool GLFWFunctions::isKeyHeld(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
+}
+
+bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
+	return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
 }

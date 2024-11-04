@@ -17,6 +17,17 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <unordered_map>
+
+enum class Key {
+	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+	F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+	SPACE, ESCAPE, LEFT, RIGHT, UP, DOWN, LSHIFT, LCTRL, LALT
+};
+
+enum class MouseButton {
+	left, right, middle
+};
 
 struct GLFWFunctions {
 	
@@ -39,6 +50,18 @@ struct GLFWFunctions {
 
 	//Caluclate the FPS and delta_time to be used
 	static void getFps(double fpsCalculateInt);
+
+	// Input state functions
+	static bool isKeyPressed(Key key);
+	static bool isKeyReleased(Key key);
+	static bool isKeyHeld(Key key);
+
+	static bool isMouseButtonPressed(MouseButton button);
+
+	// key state
+	static std::unordered_map<Key, bool> keyState;
+	static std::unordered_map<MouseButton, bool> mouseButtonState;
+
 
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
