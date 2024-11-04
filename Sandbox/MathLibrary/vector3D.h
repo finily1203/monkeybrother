@@ -19,7 +19,7 @@ File Contributions: Ian Loi (100%)
 *//*_________________________________________________________________________________________________-*/
 
 
-namespace MyMath
+namespace myMath
 {
 	class Vector3D
 	{

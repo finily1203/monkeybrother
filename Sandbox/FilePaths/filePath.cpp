@@ -102,3 +102,15 @@ std::string FilePathManager::GetIMGUIFontPath()
 
     return fontFilePath;
 }
+
+// this function retrieves the save JSON file
+std::string FilePathManager::GetSaveJSONPath(int& saveCount)
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the save JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveCount) + ".json";
+
+    return jsonPath;
+}

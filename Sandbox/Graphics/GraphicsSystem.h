@@ -23,7 +23,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 /*_ _ _ _ ________________________________________________________________________________-\*/
 
 #pragma once
-
+#include "EngineDefinitions.h"
 #include <GL/glew.h>
 #include <memory>
 #include "Shader.h"
@@ -32,20 +32,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/gtc/type_ptr.hpp>
 #include "Systems.h"
 #include <string>
+#include "GlfwFunctions.h"
+#include "AABBComponent.h"
 #include "vector2D.h"
+#include "vector3D.h"
 #include "matrix3x3.h"
 
-
-struct AABB {
-    glm::vec2 min; // Minimum corner (bottom-left)
-    glm::vec2 max; // Maximum corner (top-right)
-
-    // Constructor
-    AABB(const glm::vec2& position, const glm::vec2& scaling);
-
-    // Check for collision with another AABB
-    bool intersects(const AABB& other) const;
-};
 
 class GraphicsSystem : public GameSystems
 {
@@ -65,8 +57,8 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri);
-    void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
+    glm::mat3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat);
+    void DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }
     //Shader* GetShader2() const{ return m_Shader2.get(); }
@@ -100,7 +92,7 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
-    void drawDebugLines(const GLObject& obj);
+    void drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat);
 
 private:
     GLuint m_VAO;

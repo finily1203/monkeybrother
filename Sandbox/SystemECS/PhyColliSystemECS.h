@@ -10,6 +10,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
                   100%
 *//*    _________________________________________________________________-*/
 #pragma once
+#include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
 #include "vector2D.h"
 

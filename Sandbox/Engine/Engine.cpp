@@ -10,7 +10,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   systems.
 							   100%
 *//*___________________________________________________________________________-*/
-
+#include "EngineDefinitions.h"
 #include <GL/glew.h>    
 #include "Engine.h"
 #include "Systems.h"

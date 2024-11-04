@@ -513,16 +513,18 @@ void ECSCoordinator::test4() {
 	
 	//Iterate through the entities to find Object1 and Object2
 	for (auto entity : entityManager->getLiveEntities()) {
-		std::string entityId = this->entityManager->getEntityId(entity); // Assume you have a method to get the entity ID
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-		/*if (entityId == "Object1" || entityId == "Object2") {
-			addComponent(entity, AnimationComponent{ true });
-		}*/
-		/*std::cout << "------------------------------" << entityManager->getEntityID(entity) << std::endl;*/
+		float left = transform.position.GetX() - transform.scale.GetX() / 2;
+		float right = transform.position.GetX() + transform.scale.GetX() / 2;
+		float top = transform.position.GetY() + transform.scale.GetY() / 2;
+		float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
+
+		addComponent(entity, AABBComponent{left, right, top, bottom});
+		if (entityManager->getEntityId(entity) == "Player") {
+			addComponent(entity, MovementComponent{.1f});
+		}
 	}
-	Entity platform1 = createEntity();
-	addComponent(platform1, TransformComponent{ myMath::Vector2D(0.f, 0.f), myMath::Vector2D(1000.0f, 50.0f), myMath::Vector2D(0.0f, -150.f) });
-	//std::cout <<"------------------------------" << entityManager->getEntityID(platform1) << std::endl;
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {

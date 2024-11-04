@@ -9,6 +9,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 Joel Chu (c.weiyuan): Defined the functions in SystemManager class
 							   100%
 *//*___________________________________________________________________________-*/
+#include "EngineDefinitions.h"
 #include <GL/glew.h>  // GLEW must come first
 #include <GL/gl.h>    // Then regular OpenGL
 #include <GLFW/glfw3.h>  // Then GLFW

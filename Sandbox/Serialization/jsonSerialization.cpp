@@ -7,11 +7,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @brief  :  jsonSerialization.cpp handles basic serialization/deserialization operations.
 
 *Ian Loi (ian.loi) :
-		- Create functions that open a JSON file for deserialization, save to JSON file 
+		- Create functions that open a JSON file for deserialization, save to JSON file
 		  for serialization and all the operations of reading/writing of int, float and string.
 
 File Contributions: Ian Loi (100%)
-				 
+
 *//*__________________________________________________________________________________________________*/
 
 
@@ -28,7 +28,7 @@ bool JSONSerializer::Open(std::string const& filename)
 	{
 		// read the contents of the JSON file into the JSON object
 		fileStream >> jsonObject;
-			
+
 		// close the JSON file
 		fileStream.close();
 
@@ -49,7 +49,7 @@ bool JSONSerializer::Save(std::string const& filename)
 	if (outputFile.is_open())
 	{
 		// write the contents of the JSON object to the output JSON file
-		outputFile << jsonObject.dump(4);
+		outputFile << jsonObject.dump(2);
 
 		// close the output JSON file
 		outputFile.close();
@@ -148,6 +148,42 @@ void JSONSerializer::WriteSpecificObject(float const& object, nlohmann::json& js
 void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
+}
+
+void JSONSerializer::ReadBool(bool& data, std::string const& jsonKey)
+{
+	// string buffer that contains the sequence of characters of jsonKey
+	std::istringstream keyStream(jsonKey);
+
+	// holds each different key from the keyStream
+	std::string keySegment;
+
+	// currentObj is initialized to the root JSON object
+	nlohmann::json currentObj = jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// the JSON object contains the key from the key stored in keySegment
+		// eg. my JSON object contains the key "position" the keySegment value
+		// is "position" so this is true and it will execute this if statement
+		if (currentObj.contains(keySegment))
+		{
+			// key exists, currentObj will now be pointing to nested JSON
+			// object based on the key
+			currentObj = currentObj[keySegment];
+		}
+
+		// the JSON object does not contain the key
+		else
+		{
+			return;
+		}
+	}
+
+	// initialize data with the value associated with the final key in currentObj
+	data = currentObj.get<bool>();
 }
 
 void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
@@ -349,7 +385,36 @@ void JSONSerializer::ReadString(std::string& data, std::string const& jsonKey)
 	data = currentObj.get<std::string>();
 }
 
-void JSONSerializer::WriteInt(int& data, std::string const& jsonKey)
+void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const& jsonKey)
+{
+	std::istringstream keyStream(jsonKey);
+	std::string keySegment;
+	nlohmann::json currentObj = jsonObject;
+
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		if (currentObj.contains(keySegment))
+		{
+			currentObj = currentObj[keySegment];
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	// Get the string from JSON
+	std::string tempStr = currentObj.get<std::string>();
+
+	// Copy characters to the buffer, respecting the size limit
+	size_t length = std::min(tempStr.length(), maxSize);
+	for (size_t i = 0; i < length; i++)
+	{
+		data[i] = tempStr[i];
+	}
+}
+
+void JSONSerializer::WriteBool(bool& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
 	std::istringstream keyStream(jsonKey);
@@ -370,9 +435,56 @@ void JSONSerializer::WriteInt(int& data, std::string const& jsonKey)
 
 	// assign the integer data to the current JSON object
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+		outFile.close();
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
 }
 
-void JSONSerializer::WriteUnsignedInt(unsigned int& data, std::string const& jsonKey)
+void JSONSerializer::WriteInt(int& data, std::string const& jsonKey, std::string const& filename)
+{
+	// string buffer that contains the sequence of characters of jsonKey
+	std::istringstream keyStream(jsonKey);
+
+	// holds each different key from the keyStream
+	std::string keySegment;
+
+	// pointer to the root of the JSON object
+	nlohmann::json* currentObj = &jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// Update the current JSON object pointer to point to the next segment
+		currentObj = &((*currentObj)[keySegment]);
+	}
+
+	// assign the integer data to the current JSON object
+	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+		outFile.close();
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
+}
+
+void JSONSerializer::WriteUnsignedInt(unsigned int& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
 	std::istringstream keyStream(jsonKey);
@@ -392,9 +504,21 @@ void JSONSerializer::WriteUnsignedInt(unsigned int& data, std::string const& jso
 	}
 
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+		outFile.close();
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
 }
 
-void JSONSerializer::WriteUnsignedLongLong(unsigned long long& data, std::string const& jsonKey)
+void JSONSerializer::WriteUnsignedLongLong(unsigned long long& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
 	std::istringstream keyStream(jsonKey);
@@ -414,9 +538,20 @@ void JSONSerializer::WriteUnsignedLongLong(unsigned long long& data, std::string
 	}
 
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
 }
 
-void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey)
+void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
 	std::istringstream keyStream(jsonKey);
@@ -436,9 +571,20 @@ void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey)
 	}
 
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
 }
 
-void JSONSerializer::WriteDouble(double& data, std::string const& jsonKey)
+void JSONSerializer::WriteDouble(double& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
 	std::istringstream keyStream(jsonKey);
@@ -458,9 +604,20 @@ void JSONSerializer::WriteDouble(double& data, std::string const& jsonKey)
 	}
 
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
 }
 
-void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey)
+void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey, std::string const& filename)
 {
 	// holds each different key from the keyStream
 	std::istringstream keyStream(jsonKey);
@@ -480,6 +637,52 @@ void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey)
 	}
 
 	*currentObj = data;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+	}
+
+	else
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+	}
+}
+
+void JSONSerializer::WriteCharArray(char* data, size_t maxSize, std::string const& jsonKey, std::string const& filename)
+{
+	// holds each different key from the keyStream
+	std::istringstream keyStream(jsonKey);
+
+	// pointer to the root of the JSON object
+	std::string keySegment;
+
+	// pointer to the root of the JSON object
+	nlohmann::json* currentObj = &jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// Update the current JSON object pointer to point to the next segment
+		currentObj = &((*currentObj)[keySegment]);
+	}
+
+	std::string tempStr(data, std::min(strlen(data), maxSize));
+
+	*currentObj = tempStr;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+		outFile.close();
+	}
+	else
+	{
+		std::cerr << "Error: could not write to file " << filename << std::endl;
+	}
 }
 
 nlohmann::json JSONSerializer::GetJSONObject() const
