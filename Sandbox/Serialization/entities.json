@@ -229,26 +229,29 @@
       },
       "rigidBody": {
         "mass": 1.0,
-        "gravityScale": -0.98,
-        "jump": 0.8,
-        "dampening": 0.9,
-        "velocity": {
-          "x": 0.0,
-          "y": 0.0
+        "gravityScale": {
+          "x": 0.98,
+          "y": 0.98
+          },
+          "jump": 0.8,
+          "dampening": 0.9,
+          "velocity": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "force": {
+            "x": 0.05,
+            "y": 0.0
+          },
+          "accumulatedForce": {
+            "x": 0.0,
+            "y": 0.0
+          }
         },
-        "acceleration": {
-          "x": 0.0,
-          "y": 0.0
-        },
-        "force": {
-          "x": 0.05,
-          "y": 0.0
-        },
-        "accumulatedForce": {
-          "x": 0.0,
-          "y": 0.0
-        }
-      },
       "animation": {
         "isAnimated": true
       }
