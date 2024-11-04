@@ -18,6 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AssetsManager.h"
 #include "AudioSystem.h"
 #include "CameraSystem2D.h"
+#include "FontSystem.h"
 
 enum SystemType { //For perfomance viewer
 	AudioSystemType,
@@ -26,13 +27,13 @@ enum SystemType { //For perfomance viewer
 	GraphicsSystemType,
 	CameraType,
 	ECSType,
-	AssetsManagerType
+	AssetsManagerType,
+	FontType,
 };
 
-
+extern AssetsManager assetsManager;
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
 //extern CameraSystem2D cameraSystem;
 extern DebugSystem debugSystem;
-extern AssetsManager assetsManager;
-//extern AudioSystem audioSystem;
+extern FontSystem fontSystem;

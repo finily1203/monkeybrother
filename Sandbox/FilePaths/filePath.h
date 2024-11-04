@@ -16,4 +16,5 @@ public:
 	static std::string GetIMGUIDebugJSONPath();
 	static std::string GetAssetsJSONPath();
 	static std::string GetIMGUIFontPath();
+	static std::string GetSaveJSONPath(int& saveCount);
 };

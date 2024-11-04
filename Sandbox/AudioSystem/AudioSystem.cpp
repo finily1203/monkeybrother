@@ -18,7 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : audioSystem(nullptr), audioSongList(), audioChannel(nullptr), currSongIndex(0) {}
+AudioSystem::AudioSystem() : audioChannel(nullptr), currSongIndex(0) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
@@ -29,21 +29,21 @@ SystemType AudioSystem::getSystem() {
 
 //Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
-    FMOD_RESULT result;
+    //FMOD_RESULT result;
 
-    result = FMOD::System_Create(&audioSystem);
-    if (result != FMOD_OK) {
-        std::cout << "FMOD error! (" << result << ") " << std::endl;
-        return;
-    }
+    //result = FMOD::System_Create(&audioSystem);
+    //if (result != FMOD_OK) {
+    //    std::cout << "FMOD error! (" << result << ") " << std::endl;
+    //    return;
+    //}
 
-    result = audioSystem->init(32, FMOD_INIT_NORMAL, nullptr);
-    if (result != FMOD_OK) {
-        std::cout << "FMOD error! (" << result << ") " << std::endl;
-        return;
-    }
+    //result = audioSystem->init(32, FMOD_INIT_NORMAL, nullptr);
+    //if (result != FMOD_OK) {
+    //    std::cout << "FMOD error! (" << result << ") " << std::endl;
+    //    return;
+    //}
 
-    loadAudioAssets();
+    //loadAudioAssets();
 
     //playSong("background");
 }
@@ -71,7 +71,7 @@ void AudioSystem::update() {
 
             if (!isPaused) {
                 // If the sound is not paused, pause it
-                FMOD_RESULT result = audioChannel->setPaused(true);
+                result = audioChannel->setPaused(true);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD pause error! (" << result << ")" << std::endl;
                 }
@@ -87,7 +87,7 @@ void AudioSystem::update() {
 
             if (isPaused) {
                 // If the sound is paused, unpause it
-                FMOD_RESULT result = audioChannel->setPaused(false);
+                result = audioChannel->setPaused(false);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD resume error! (" << result << ")" << std::endl;
                 }
@@ -130,23 +130,23 @@ void AudioSystem::update() {
         GLFWFunctions::bubblePopping = false;
     }
 
-    audioSystem->update();
+    assetsManager.GetAudioSystem()->update();
 }
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
 void AudioSystem::cleanup() {
-    for (auto song : audioSongList) {
-        if (song) {
-            song->release();
-        }
-    }
-    audioSongList.clear();
+    //for (auto song : audioSongList) {
+    //    if (song) {
+    //        song->release();
+    //    }
+    //}
+    //audioSongList.clear();
 
-    if (audioSystem) {
-        audioSystem->close();
-        audioSystem->release();
-        audioSystem = nullptr;
-    }
+    //if (audioSystem) {
+    //    audioSystem->close();
+    //    audioSystem->release();
+    //    audioSystem = nullptr;
+    //}
 }
 
 void AudioSystem::playSong(const std::string& songName) {
@@ -158,7 +158,7 @@ void AudioSystem::playSong(const std::string& songName) {
 		}
 		audioChannel = nullptr;
 	}
-	FMOD_RESULT result = audioSystem->playSound(audioSong, nullptr, false, &audioChannel);
+	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSong, nullptr, false, &audioChannel);
     if (result != FMOD_OK) {
 		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
 	}
@@ -169,8 +169,8 @@ void AudioSystem::playSong(const std::string& songName) {
 void AudioSystem::playSoundEffect(const std::string& soundName)
 {
 	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
-	FMOD::Channel* audioChannel = nullptr;
-	FMOD_RESULT result = audioSystem->playSound(audioSound, nullptr, false, &audioChannel);
+	audioChannel = nullptr;
+	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &audioChannel);
 	if (result != FMOD_OK) {
 		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
 	}
@@ -179,22 +179,22 @@ void AudioSystem::playSoundEffect(const std::string& soundName)
 
 void AudioSystem::loadAudioAssets() const
 {
-    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    std::ifstream file(jsonFilePath);
-    nlohmann::json jsonObj;
+    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ifstream file(jsonFilePath);
+    //nlohmann::json jsonObj;
 
-    if (file.is_open())
-    {
-        file >> jsonObj;
-        file.close();
-    }
+    //if (file.is_open())
+    //{
+    //    file >> jsonObj;
+    //    file.close();
+    //}
 
-    for (const auto& audioAsset : jsonObj["audioAssets"])
-    {
-        std::string audioName = audioAsset["audioName"].get<std::string>();
-        std::string relativePath = audioAsset["filePath"].get<std::string>();
+    //for (const auto& audioAsset : jsonObj["audioAssets"])
+    //{
+    //    std::string audioName = audioAsset["audioName"].get<std::string>();
+    //    std::string relativePath = audioAsset["filePath"].get<std::string>();
 
-        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadAudio(audioName, audioFilePath, audioSystem);
-    }
+    //    std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+    //    assetsManager.LoadAudio(audioName, audioFilePath, audioSystem);
+    //}
 }

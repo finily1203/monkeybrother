@@ -52,15 +52,6 @@
       }
     },
     {
-      "aabb": {
-        "bottom": -175.0,
-        "left": -250.0,
-        "right": 250.0,
-        "top": -125.0
-      },
-      "closestPlatform": {
-        "isClosest": true
-      },
       "id": "flatplatform",
       "transform": {
         "localTransform": [
@@ -109,18 +100,18 @@
           "x": 500.0,
           "y": 50.0
         }
+      },
+      "aabb": {
+        "bottom": -175.0,
+        "left": -250.0,
+        "right": 250.0,
+        "top": -125.0
+      },
+      "closestPlatform": {
+        "isClosest": true
       }
     },
     {
-      "aabb": {
-        "bottom": -225.0,
-        "left": -650.0,
-        "right": -350.0,
-        "top": -175.0
-      },
-      "closestPlatform": {
-        "isClosest": false
-      },
       "id": "tiltedplatform",
       "transform": {
         "localTransform": [
@@ -169,22 +160,19 @@
           "x": 300.0,
           "y": 50.0
         }
+      },
+      "aabb": {
+        "bottom": -225.0,
+        "left": -650.0,
+        "right": -350.0,
+        "top": -175.0
+      },
+      "closestPlatform": {
+        "isClosest": false
       }
     },
     {
-      "aabb": {
-        "bottom": 250.0,
-        "left": -50.0,
-        "right": 50.0,
-        "top": 350.0
-      },
-      "animation": {
-        "isAnimated": true
-      },
       "id": "player",
-      "movement": {
-        "speed": 0.2
-      },
       "transform": {
         "localTransform": [
           [
@@ -232,22 +220,41 @@
           "x": 100.0,
           "y": 100.0
         }
-      }
-    },
-    {
+      },
       "aabb": {
         "bottom": 150.0,
         "left": 250.0,
         "right": 350.0,
         "top": 250.0
       },
-      "enemy": {
-        "isEnemy": true
+      "rigidBody": {
+        "mass": 1.0,
+        "gravityScale": -0.98,
+        "jump": 0.8,
+        "dampening": 0.9,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "x": 0.05,
+          "y": 0.0
+        },
+        "accumulatedForce": {
+          "x": 0.0,
+          "y": 0.0
+        }
       },
+      "animation": {
+        "isAnimated": true
+      }
+    },
+    {
       "id": "enemy",
-      "movement": {
-        "speed": 50.0
-      },
       "transform": {
         "localTransform": [
           [
@@ -294,6 +301,171 @@
         "scale": {
           "x": 100.0,
           "y": 100.0
+        }
+      },
+      "aabb": {
+        "left": 250.0,
+        "right": 350.0,
+        "top": 250.0,
+        "bottom": 150.0
+      },
+      "rigidBody": {
+        "mass": 1.0,
+        "gravityScale": -0.98,
+        "jump": 0.8,
+        "dampening": 0.9,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "x": 0.05,
+          "y": 0.05
+        },
+        "accumulatedForce": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "enemy": {
+        "isEnemy": true
+      }
+    },
+    {
+      "id": "textBox1",
+      "transform": {
+        "localTransform": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "orientation": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "projectionMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "scale": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "font": {
+        "text": {
+          "string": "Hello World!"
+        },
+        "textScale": {
+          "scale": 1.0
+        },
+        "color": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 255.0
+        },
+        "fontId": {
+          "fontName": "Antonio"
+        }
+      }
+    },
+    {
+      "id": "textBox2",
+      "transform": {
+        "localTransform": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "orientation": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "position": {
+          "x": 800.0,
+          "y": 450.0
+        },
+        "projectionMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "scale": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "font": {
+        "text": {
+          "string": "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works"
+        },
+        "textScale": {
+          "scale": 1.0
+        },
+        "color": {
+          "x": 0.0,
+          "y": 255.0,
+          "z": 0.0
+        },
+        "fontId": {
+          "fontName": "Journey"
         }
       }
     }

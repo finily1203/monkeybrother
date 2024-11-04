@@ -3,8 +3,12 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "GraphicsSystem.h"
 #include "fmod.hpp"
+#include "GraphicsSystem.h"
+
+#include "FontSystem.h"
+
+
 
 class AssetsManager : public GameSystems
 {
@@ -18,6 +22,7 @@ public:
 	SystemType getSystem() override;
 
 	//For loading textures
+	void LoadTextureAssets() const;
 	void LoadTexture(const std::string& name, const std::string& filePath);
 	GLuint GetTexture(const std::string& name) const;
 	void UnloadTexture(const std::string& name);
@@ -28,62 +33,37 @@ public:
 	int nrChannelsGet();
 
 	//For loading shaders
+	void LoadShaderAssets() const;
 	void LoadShader(const std::string& name, const std::string& filePath);
 	Shader* GetShader(const std::string& name) const;
 	void UnloadShader(const std::string& name);
 	void ClearShaders();
 
 
+	//For loading audio
+	void LoadAudioAssets();
 	void LoadAudio(const std::string& name, const std::string& filePath, FMOD::System* audioSystem);
 	FMOD::Sound* GetAudio(const std::string& name) const;
+	FMOD::System* GetAudioSystem() const;
 	void UnloadAudio(const std::string& name);
 	void ClearAudio();
 
 
+	//For loading fonts
+	void LoadFontAssets() const;
+	void LoadFont(const std::string& fontName, const std::string& fontPath, unsigned int fontSize);
+	std::map<char, Character> GetFont(const std::string& fontName) const;
+	void UnloadFont(const std::string& fontPath);
+	void ClearFonts();
+	std::map<std::string, std::map<char, Character>> m_Fonts;
+
+
 private:
+	FMOD::System* audSystem;
+
 	std::map<std::string, GLuint> m_Textures;
 	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
 	std::map<std::string, FMOD::Sound*> m_Audio;
 
 	int m_textureWidth, m_textureHeight, nrChannels;
 };
-
-//#include <unordered_map>
-//#include <memory>
-//#include <string>
-//#include "../Nlohmann/json.hpp"
-//#include <fstream>
-//
-//
-//template <typename T>
-//class AssestsManager
-//{
-//private:
-//	std::unordered_map<std::string, std::shared_ptr<T>> assets;
-//
-//public:
-//	std::shared_ptr<T> Load(std::string const& filePath);
-//	void Unload(std::string const& filePath);
-//	void Clear();
-//};
-//
-//template<typename T>
-//std::shared_ptr<T> AssestsManager<T>::Load(std::string const& filePath)
-//{
-//	if (assets.find(filePath) != assets.end())
-//	{
-//		return assets[filePath];
-//	}
-//}
-//
-//template<typename T>
-//void AssestsManager<T>::Unload(std::string const& filePath)
-//{
-//	assets.erase(filePath);
-//}
-//
-//template<typename T>
-//void AssestsManager<T>::Clear()
-//{
-//	assets.clear();
-//}

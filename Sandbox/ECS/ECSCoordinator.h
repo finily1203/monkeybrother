@@ -30,15 +30,24 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "GraphicsSystem.h"
 #include "Systems.h"
+
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
-
+#include "AABBComponent.h"
+#include "MovementComponent.h"
+#include "ClosestPlatform.h"
+#include "GraphicsSystem.h"
+#include "AnimationComponent.h"
+#include "EnemyComponent.h"
+#include "RigidBodyComponent.h"
+#include "FontComponent.h"
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include "vector2D.h"
 #include "matrix3x3.h"
+#include "vector3D.h"
 #include "../Serialization/jsonSerialization.h"
 #include "../Serialization/serialization.h"
 #include "../MessageSystem/baseMessageSystem.h"
@@ -100,11 +109,15 @@ public:
 
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
+	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
+	// update the entity's data
+	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
+
 
 	//System Manager Functions
 	//Register the system

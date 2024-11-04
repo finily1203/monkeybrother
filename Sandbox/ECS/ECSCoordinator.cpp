@@ -18,17 +18,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #include "ECSCoordinator.h"
 
-#include "TransformComponent.h"
-#include "GraphicsComponent.h"
-#include "AABBComponent.h"
-#include "MovementComponent.h"
-#include "ClosestPlatform.h"
-#include "GraphicsSystem.h"
-#include "AnimationComponent.h"
-#include "EnemyComponent.h"
-
 #include "GraphicSystemECS.h"
 #include "PhyColliSystemECS.h"
+#include "LogicSystemECS.h"
+#include "FontSystemECS.h"
 #include "GraphicsSystem.h"
 #include <Windows.h>
 
@@ -138,20 +131,20 @@ void ECSCoordinator::test2() {
 }
 
 
-class PlayerSystem : public System {
-public:
-	void initialise() override {
-		std::cout << "PlayerSystem initialise" << std::endl;
-	}
-
-	void update(float dt) override {
-		//std::cout << "PlayerSystem update" << std::endl;
-	}
-
-	void cleanup() override {
-		std::cout << "PlayerSystem cleanup" << std::endl;
-	}
-};
+//class PlayerSystem : public System {
+//public:
+//	void initialise() override {
+//		std::cout << "PlayerSystem initialise" << std::endl;
+//	}
+//
+//	void update(float dt) override {
+//		//std::cout << "PlayerSystem update" << std::endl;
+//	}
+//
+//	void cleanup() override {
+//		std::cout << "PlayerSystem cleanup" << std::endl;
+//	}
+//};
 
 // this is the definition of the function that loads the data from JSON file to the entity
 // open the JSON file and initialize the entity data based on the values read
@@ -234,6 +227,35 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
 
 			ecs.addComponent(entityObj, enemy);
+		}
+
+		if (entityData.contains("rigidBody"))
+		{
+			RigidBodyComponent rigidBody{};
+			serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
+			serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
+			serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
+			serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
+			serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
+			serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
+			serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
+			serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+
+			ecs.addComponent(entityObj, rigidBody);
+		}
+
+		if (entityData.contains("font"))
+		{
+			FontComponent font{};
+			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
+			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
+			serializer.ReadObject(font.color, entityId, "entities.font.color");
+			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+
+			std::cout << font.text << std::endl;
+			std::cout << font.fontId << std::endl;
+
+			ecs.addComponent(entityObj, font);
 		}
 
 		// set the entityId for the current entity
@@ -327,6 +349,26 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 		std::cout << "Error: could not save to file " << filename << std::endl;
 	}
 }
+// this function handles the updating of the entity's data
+//void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
+//{
+//	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+//	{
+//		TransformComponent& transform = getComponent<TransformComponent>(entity);
+//		// assign the new data of the transform component to the entity's transform component
+//		transform.orientation = transUpdate.orientation;
+//		transform.position = transUpdate.position;
+//		transform.scale = transUpdate.scale;
+//	}
+//	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+//	{
+//		FontComponent& font = getComponent<FontComponent>(entity);
+//		font.text = fontUpdate.text; 
+//		//font.position = fontUpdate.position; 
+//		//font.scale = fontUpdate.scale; 
+//		font.color = fontUpdate.color; 
+//	}
+//}
 
 //clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
@@ -415,20 +457,50 @@ void ECSCoordinator::test5() {
 	//}
 
 	//SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
-}
 
-ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
-	return entityManager->getSignature(entity);
-}
 
-//AABBComponent ECSCoordinator::calculateAABB(myMath::Vector2D pos, myMath::Vector2D scl) {
-//	float left	 = pos.GetX() - scl.GetX() / 2;
-//	float right	 = pos.GetX() + scl.GetX() / 2;
-//	float top	 = pos.GetY() + scl.GetY() / 2;
-//	float bottom = pos.GetY() - scl.GetY() / 2;
-//	AABBComponent aabb{ left, right, top, bottom };
-//	return aabb;
-//}
+	//create text entity
+	//std::cout << "Create Text Entity 1" << std::endl;
+	//Entity textEntity = createEntity();
+	//addComponent(textEntity, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+
+	//FontComponent fontComp{};
+	//fontComp.fontId = "Antonio";
+	//fontComp.text = "Hello World!";
+	//fontComp.textScale = 1.0f;
+	//fontComp.color = MyMath::Vector3D(0.0f, 0.0f, 255.0f);
+
+	////float screenWidth = 1600.0f;
+	////float screenHeight = 900.0f;
+
+	////float textScale = 1.0f;
+	////glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
+	////fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
+	////fontComp.scale = textScale;
+	////fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
+
+	//addComponent(textEntity, fontComp);
+
+	//// Create another text entity
+	//std::cout << "Create Text Entity 2" << std::endl;
+	//Entity textEntity2 = createEntity();
+	//addComponent(textEntity2, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
+
+	//FontComponent fontComp2{};
+	//fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
+	//fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
+
+	//float textScale2 = 1.0f;
+	//glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
+
+	//
+	//fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
+	//fontComp2.scale = textScale2;
+	//fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
+
+	//addComponent(textEntity2, fontComp2);
+
+}
 
 
 //Initialises all required components and systems for the ECS system
@@ -441,6 +513,19 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<ClosestPlatform>();
 	registerComponent<AnimationComponent>();
 	registerComponent<EnemyComponent>();
+	registerComponent<RigidBodyComponent>();
+	registerComponent<FontComponent>();
+
+	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
+
+	auto logicSystem = std::make_shared<LogicSystemECS>();
+	registerSystem<LogicSystemECS>();
+	{
+		ComponentSig logicSystemSig;
+		logicSystemSig.set(getComponentType<TransformComponent>(), true);
+	}
+
+	logicSystem->initialise();
 
 	auto physicsSystem = std::make_shared<PhysicsSystemECS>();
 	registerSystem<PhysicsSystemECS>();
@@ -450,7 +535,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
 		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
 		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
-		//physicsSystemSig.set(getComponentType<GraphicsComponent>(), true);
+		physicsSystemSig.set(getComponentType<RigidBodyComponent>(), true);
 	}
 
 	physicsSystem->initialise();
@@ -460,13 +545,23 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	{
 		ComponentSig graphicSystemSig;
 		graphicSystemSig.set(getComponentType<TransformComponent>(), true);
-		//graphicSystemSig.set(getComponentType<GraphicsComponent>(), true);
 		graphicSystemSig.set(getComponentType<AnimationComponent>(), true);
 		graphicSystemSig.set(getComponentType<EnemyComponent>(), false);
 	}
 
 
 	graphicSystem->initialise();
+
+	auto fontSystemECS = std::make_shared<FontSystemECS>();
+
+	registerSystem<FontSystemECS>();
+	{
+		ComponentSig fontSystemSig;
+		fontSystemSig.set(getComponentType<TransformComponent>(), true);
+		fontSystemSig.set(getComponentType<FontComponent>(), true);  
+	}
+
+	fontSystemECS->initialise();
 
 	test5();
 }
@@ -496,19 +591,19 @@ void ECSCoordinator::test4() {
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	
 	//Iterate through the entities to find Object1 and Object2
-	for (auto entity : entityManager->getLiveEntities()) {
-		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+	//for (auto entity : entityManager->getLiveEntities()) {
+	//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-		float left = transform.position.GetX() - transform.scale.GetX() / 2;
-		float right = transform.position.GetX() + transform.scale.GetX() / 2;
-		float top = transform.position.GetY() + transform.scale.GetY() / 2;
-		float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
+	//	float left = transform.position.GetX() - transform.scale.GetX() / 2;
+	//	float right = transform.position.GetX() + transform.scale.GetX() / 2;
+	//	float top = transform.position.GetY() + transform.scale.GetY() / 2;
+	//	float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
 
-		addComponent(entity, AABBComponent{left, right, top, bottom});
-		if (entityManager->getEntityId(entity) == "Player") {
-			addComponent(entity, MovementComponent{.1f});
-		}
-	}
+	//	addComponent(entity, AABBComponent{left, right, top, bottom});
+	//	if (entityManager->getEntityId(entity) == "Player") {
+	//		addComponent(entity, MovementComponent{.1f});
+	//	}
+	//}
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
@@ -519,6 +614,14 @@ std::string ECSCoordinator::getEntityID(Entity entity) {
 	return entityManager->getEntityId(entity);
 }
 
+Entity ECSCoordinator::getEntityFromID(std::string ID) {
+	return entityManager->getEntityById(ID);
+}
+
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
+}
+
+ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
+	return entityManager->getSignature(entity);
 }

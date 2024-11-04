@@ -90,7 +90,6 @@ float DebugSystem::objSizeYMax;
 float DebugSystem::objSizeYMin;
 
 int DebugSystem::saveCount;
-bool DebugSystem::saveFilePending;
 float DebugSystem::lastPosX;
 
 //Constructor for DebugSystem class
@@ -422,30 +421,12 @@ void DebugSystem::update() {
 					ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f");
 					if (ImGui::IsItemActivated()) {
 						transform.position.SetX(posXSlide);
-
-						//if (posXSlide != lastPosX)
-						//{
-						//	saveFilePending = true;
-						//	lastPosX = posXSlide;
-						//}
-
-						//if (saveFilePending && ImGui::IsItemDeactivatedAfterEdit())
-						//{
-						//	std::string saveFile = GenerateSaveJSONFile(saveCount);
-						//	ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
-
-						//	saveCount++;
-						//	saveFilePending = false;
-						//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-						//}
-						
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 					ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f");
 					if (ImGui::IsItemActivated()) {
 						transform.position.SetY(posYSlide);
-						//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 					}
 
 					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
@@ -468,9 +449,6 @@ void DebugSystem::update() {
 					if (ImGui::Button("Remove")) {
 						ecsCoordinator.destroyEntity(entity);
 					}
-					/*if (ImGui::Button("Save")) {
-						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-					}*/
 
 					ImGui::TreePop();
 					
@@ -480,6 +458,21 @@ void DebugSystem::update() {
 				ImGui::Separator();
 			}
 
+			//if (ImGui::Button("Save")) 
+			//{
+			//	JSONSerializer serializer;
+			//	std::string saveFile = GenerateSaveJSONFile(saveCount);
+
+			//	for (auto entity : ecsCoordinator.getAllLiveEntities())
+			//	{
+			//		ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+			//	}
+
+			//	saveCount++;
+
+			//	SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
+			//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+			//}
 		}
 
 		ImGui::End();
@@ -649,11 +642,7 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	serializer.ReadInt(systemCount, "Debug.systemCount");
 
-	// ???? object size x max, object size x min ????
-	// ???? object size y max, object size y min ????
-
 	serializer.ReadInt(saveCount, "Debug.saveCount");
-	serializer.ReadBool(saveFilePending, "Debug.saveFilePending");
 	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
 }
 
@@ -669,27 +658,60 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
+	serializer.WriteFloat(fontSize, "Debug.fontSize", filename);
+	serializer.WriteFloat(textBorderSize, "Debug.textBorderSize", filename);
+	serializer.WriteInt(numberOfColumn, "Debug.numberOfColumn", filename);
+	serializer.WriteFloat(ecsTotal, "Debug.ecsTotal", filename);
+
+	serializer.WriteFloat(defaultObjScaleX, "Debug.defaultObjScaleX", filename);
+	serializer.WriteFloat(defaultObjScaleY, "Debug.defaultObjScaleY", filename);
+
+	serializer.WriteFloat(coordinateMaxLimitsX, "Debug.coordinateMaxLimitsX", filename);
+	serializer.WriteFloat(coordinateMaxLimitsY, "Debug.coordinateMaxLimitsY", filename);
+	serializer.WriteFloat(coordinateMinLimitsX, "Debug.coordinateMinLimitsX", filename);
+	serializer.WriteFloat(coordinateMinLimitsY, "Debug.coordinateMinLimitsY", filename);
+	serializer.WriteFloat(orientationMaxLimit, "Debug.orientationMaxLimit", filename);
+	serializer.WriteFloat(orientationMinLimit, "Debug.orientationMinLimit", filename);
+
+	serializer.WriteInt(numEntitiesToCreate, "Debug.numEntitiesToCreate", filename);
+	serializer.WriteCharArray(numBuffer, MAXBUFFERSIZE, "Debug.numBuffer", filename);
+	serializer.WriteCharArray(sigBuffer, MAXNAMELENGTH, "Debug.sigBuffer", filename);
+	serializer.WriteCharArray(xCoordinatesBuffer, MAXBUFFERSIZE, "Debug.xCoordinatesBuffer", filename);
+	serializer.WriteCharArray(yCoordinatesBuffer, MAXBUFFERSIZE, "Debug.yCoordinatesBuffer", filename);
+	serializer.WriteCharArray(xOrientationBuffer, MAXBUFFERSIZE, "Debug.xOrientationBuffer", filename);
+	serializer.WriteCharArray(yOrientationBuffer, MAXBUFFERSIZE, "Debug.yOrientationBuffer", filename);
+	serializer.WriteFloat(xCoordinates, "Debug.xCoordinates", filename);
+	serializer.WriteFloat(yCoordinates, "Debug.yCoordinates", filename);
+	serializer.WriteFloat(xOrientation, "Debug.xOrientation", filename);
+	serializer.WriteFloat(yOrientation, "Debug.yOrientation", filename);
+
 	serializer.WriteFloat(clearColor.x, "Debug.clearColor.r", filename);
 	serializer.WriteFloat(clearColor.y, "Debug.clearColor.g", filename);
 	serializer.WriteFloat(clearColor.z, "Debug.clearColor.b", filename);
 	serializer.WriteFloat(clearColor.w, "Debug.clearColor.a", filename);
 
-	serializer.WriteFloat(objWidthSlide, "Debug.widthSlide", filename);
-	serializer.WriteFloat(objWidthSlide, "Debug.heightSlide", filename);
+	serializer.WriteFloat(objSizeXMax, "Debug.objSizeXMax", filename);
+	serializer.WriteFloat(objSizeXMin, "Debug.objSizeXMin", filename);
+	serializer.WriteFloat(objSizeYMax, "Debug.objSizeYMax", filename);
+	serializer.WriteFloat(objSizeYMin, "Debug.objSizeYMin", filename);
 
-	// ???? object count ????
+	serializer.WriteFloat(objWidthSlide, "Debug.widthSlide", filename);
+	serializer.WriteFloat(objHeightSlide, "Debug.heightSlide", filename);
+	serializer.WriteFloat(objAttributeSliderMaxLength, "Debug.objAttributeSliderMaxLength", filename);
+	serializer.WriteFloat(objAttributeSliderMidLength, "Debug.objAttributeSliderMidLength", filename);
+	serializer.WriteFloat(objAttributeSliderMinLength, "Debug.objAttributeSliderMinLength", filename);
+
+	serializer.WriteInt(objCount, "Debug.objCount", filename);
 
 	serializer.WriteDouble(loopStartTime, "Debug.loopStartTime", filename);
+	serializer.WriteDouble(loopStartTimeECS, "Debug.loopStartTimeECS", filename);
 	serializer.WriteDouble(totalLoopTime, "Debug.totalLoopTime", filename);
+	serializer.WriteDouble(totalLoopTimeECS, "Debug.totalLoopTimeECS", filename);
 	serializer.WriteDouble(lastUpdateTime, "Debug.lastUpdateTime", filename);
 
 	serializer.WriteInt(systemCount, "Debug.systemCount", filename);
 
-	// ???? object size x max, object size x min ????
-	// ???? object size y max, object size y min ????
-
 	serializer.WriteInt(saveCount, "Debug.saveCount", filename);
-	serializer.WriteBool(saveFilePending, "Debug.saveFilePending", filename);
 	serializer.WriteFloat(lastPosX, "Debug.lastPosX", filename);
 }
 
@@ -697,15 +719,42 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
+	std::string sourceFilePath;
+
+	if (saveNumber == 1)
+	{
+		sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+	}
+
+	else
+	{
+		sourceFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber - 1) + ".json";
+	}
+
+	//for (int i = saveNumber - 1; i > 0; --i)
+	//{
+	//	std::string saveFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(i) + ".json";
+
+	//	if (std::filesystem::exists(saveFilePath))
+	//	{
+	//		sourceFilePath = saveFilePath;
+	//		break;
+	//	}
+	//}
+
+	//if (sourceFilePath.empty())
+	//{
+	//	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+	//}
 
 	nlohmann::json entitiesJSON;
 
-	std::ifstream entitiesJSONFile(FilePathManager::GetEntitiesJSONPath());
+	std::ifstream sourceFile(sourceFilePath);
 
-	if (entitiesJSONFile.is_open())
+	if (sourceFile.is_open())
 	{
-		entitiesJSONFile >> entitiesJSON;
-		entitiesJSONFile.close();
+		sourceFile >> entitiesJSON;
+		sourceFile.close();
 	}
 
 	std::ofstream outFile(jsonPath);

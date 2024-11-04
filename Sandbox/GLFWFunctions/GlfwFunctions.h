@@ -38,7 +38,7 @@ struct GLFWFunctions {
 	static void glfwCleanup();
 
 	//Caluclate the FPS and delta_time to be used
-	static void getFps(double fpsCalculateInt);
+	static void getFps();
 
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;

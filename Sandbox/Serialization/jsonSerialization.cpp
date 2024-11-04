@@ -79,7 +79,17 @@ void JSONSerializer::ReadSpecificObject(myMath::Vector2D& object, nlohmann::json
 	}
 }
 
-void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const& jsonObj)
+void JSONSerializer::ReadSpecificObject(myMath::Vector3D& object, nlohmann::json const& jsonObj)
+{
+	if (jsonObj.is_object() && jsonObj.contains("x") && jsonObj.contains("y") && jsonObj.contains("z"))
+	{	
+		object.SetX(jsonObj["x"].get<float>());
+		object.SetY(jsonObj["y"].get<float>());
+		object.SetZ(jsonObj["z"].get<float>());
+	}
+}
+
+void JSONSerializer::ReadSpecificObject(myMath::Matrix3x3& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_array() && jsonObj.size() == 3)
 	{
@@ -89,7 +99,9 @@ void JSONSerializer::ReadSpecificObject(glm::mat3& object, nlohmann::json const&
 			{
 				for (int j{}; j < 3; ++j)
 				{
-					object[i][j] = jsonObj[i][j].get<float>();
+					//object[i][j] = jsonObj[i][j].get<float>();
+					float value = jsonObj[i][j].get<float>();
+					object.SetMatrixValue(i, j, value);
 				}
 			}
 		}
@@ -112,6 +124,14 @@ void JSONSerializer::ReadSpecificObject(bool& object, nlohmann::json const& json
 	}
 }
 
+void JSONSerializer::ReadSpecificObject(std::string& object, nlohmann::json const& jsonObj)
+{
+	if (jsonObj.is_string())
+	{
+		object = jsonObj.get<std::string>();
+	}
+}
+
 void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohmann::json& jsonObj)
 {
 	//jsonObj["x"] = object.x;
@@ -120,7 +140,14 @@ void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohman
 	jsonObj["y"] = object.GetY();
 }
 
-void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json& jsonObj)
+void JSONSerializer::WriteSpecificObject(myMath::Vector3D const& object, nlohmann::json& jsonObj)
+{
+	jsonObj["x"] = object.GetX();
+	jsonObj["y"] = object.GetY();
+	jsonObj["z"] = object.GetZ();
+}
+
+void JSONSerializer::WriteSpecificObject(myMath::Matrix3x3 const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = nlohmann::json::array();
 
@@ -130,7 +157,8 @@ void JSONSerializer::WriteSpecificObject(glm::mat3 const& object, nlohmann::json
 
 		for (int j{}; j < 3; ++j)
 		{
-			row.push_back(object[i][j]);
+			float value = object.GetMatrixValue(i, j);
+			row.push_back(value);
 		}
 
 		jsonObj.push_back(row);
@@ -410,6 +438,7 @@ void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const
 		data[i] = tempStr[i];
 	}
 }
+
 void JSONSerializer::WriteBool(bool& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -643,6 +672,41 @@ void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey, 
 	else
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
+	}
+}
+
+void JSONSerializer::WriteCharArray(char* data, size_t maxSize, std::string const& jsonKey, std::string const& filename)
+{
+	// holds each different key from the keyStream
+	std::istringstream keyStream(jsonKey);
+
+	// pointer to the root of the JSON object
+	std::string keySegment;
+
+	// pointer to the root of the JSON object
+	nlohmann::json* currentObj = &jsonObject;
+
+	// this will read each of the character in keyStream and assign these
+	// characters to keySegment with '.' as the delimitter
+	while (std::getline(keyStream, keySegment, '.'))
+	{
+		// Update the current JSON object pointer to point to the next segment
+		currentObj = &((*currentObj)[keySegment]);
+	}
+
+	std::string tempStr(data, std::min(strlen(data), maxSize));
+
+	*currentObj = tempStr;
+
+	std::ofstream outFile(filename);
+	if (outFile.is_open())
+	{
+		outFile << jsonObject.dump(2);
+		outFile.close();
+	}
+	else
+	{
+		std::cerr << "Error: could not write to file " << filename << std::endl;
 	}
 }
 

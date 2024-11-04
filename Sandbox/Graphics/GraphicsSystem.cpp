@@ -87,11 +87,8 @@ void GraphicsSystem::initialise() {
     //    return;
     //}
 
-    loadShaderAssets();
-    loadTextureAssets();
-    std::cout << assetsManager.texWidthGet() << std::endl;
-    std::cout << assetsManager.texHeightGet() << std::endl;
-    std::cout << assetsManager.nrChannelsGet() << std::endl;
+    //loadShaderAssets();
+    //loadTextureAssets();
 
     int width = assetsManager.texWidthGet();
     int height = assetsManager.texHeightGet();
@@ -348,7 +345,7 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
 
 
 
-glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
@@ -382,7 +379,8 @@ glm::mat3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D ob
     );
     mdl_xform = Translating * (Rotating * Scaling);
     mdl_to_ndc_xform = projMat * viewMat * mdl_xform;
-    return mdl_to_ndc_xform;
+    myMath::Matrix3x3 final_xform = myMath::Matrix3x3::ConvertToMatrix3x3(mdl_to_ndc_xform);
+    return final_xform;
 }
 
 void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
@@ -435,7 +433,7 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
     glEnd();
 }
 
-void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 xform) {
+void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
     // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
         //m_Shader->Bind();
@@ -446,11 +444,13 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 x
     // bind VAO of this object
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glm::mat3 mdl_xform(1.0f);
+    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
     //GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
-        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(xform));
+        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
     }
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
@@ -464,43 +464,43 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, glm::mat3 x
 }
 
 void GraphicsSystem::loadShaderAssets() const {
-    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    std::ifstream file(jsonFilePath);
-    nlohmann::json jsonObj;
+    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ifstream file(jsonFilePath);
+    //nlohmann::json jsonObj;
 
-    if (file.is_open())
-    {
-        file >> jsonObj;
-        file.close();
-    }
+    //if (file.is_open())
+    //{
+    //    file >> jsonObj;
+    //    file.close();
+    //}
 
-    for (const auto& shaderAsset : jsonObj["shaderAssets"])
-    {
-        std::string shaderName = shaderAsset["id"].get<std::string>();
-        std::string relativePath = shaderAsset["filePath"].get<std::string>();
+    //for (const auto& shaderAsset : jsonObj["shaderAssets"])
+    //{
+    //    std::string shaderName = shaderAsset["id"].get<std::string>();
+    //    std::string relativePath = shaderAsset["filePath"].get<std::string>();
 
-        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadShader(shaderName, shaderFilePath);
-    }
+    //    std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+    //    assetsManager.LoadShader(shaderName, shaderFilePath);
+    //}
 }
 
 void GraphicsSystem::loadTextureAssets() const {
-    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    std::ifstream file(jsonFilePath);
-    nlohmann::json jsonObj;
+    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ifstream file(jsonFilePath);
+    //nlohmann::json jsonObj;
 
-    if (file.is_open())
-    {
-        file >> jsonObj;
-        file.close();
-    }
+    //if (file.is_open())
+    //{
+    //    file >> jsonObj;
+    //    file.close();
+    //}
 
-    for (const auto& textureAsset : jsonObj["textureAssets"])
-    {
-        std::string textureName = textureAsset["id"].get<std::string>();
-        std::string relativePath = textureAsset["filePath"].get<std::string>();
+    //for (const auto& textureAsset : jsonObj["textureAssets"])
+    //{
+    //    std::string textureName = textureAsset["id"].get<std::string>();
+    //    std::string relativePath = textureAsset["filePath"].get<std::string>();
 
-        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-        assetsManager.LoadTexture(textureName, textureFilePath);
-    }
+    //    std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+    //    assetsManager.LoadTexture(textureName, textureFilePath);
+    //}
 }

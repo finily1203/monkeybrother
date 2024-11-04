@@ -30,14 +30,18 @@ public:
 	virtual bool IsGood();
 
 	void ReadSpecificObject(myMath::Vector2D&, nlohmann::json const&);
-	void ReadSpecificObject(glm::mat3&, nlohmann::json const&);
+	void ReadSpecificObject(myMath::Matrix3x3&, nlohmann::json const&);
+	void ReadSpecificObject(myMath::Vector3D&, nlohmann::json const&);
 	void ReadSpecificObject(float&, nlohmann::json const&);
 	void ReadSpecificObject(bool&, nlohmann::json const&);
+	void ReadSpecificObject(std::string&, nlohmann::json const&);
 
 	void WriteSpecificObject(myMath::Vector2D const&, nlohmann::json&);
-	void WriteSpecificObject(glm::mat3 const&, nlohmann::json&);
+	void WriteSpecificObject(myMath::Matrix3x3 const&, nlohmann::json&);
+	void WriteSpecificObject(myMath::Vector3D const&, nlohmann::json&);
 	void WriteSpecificObject(float const&, nlohmann::json&);
 	void WriteSpecificObject(bool const&, nlohmann::json&);
+	//void ReadSpecificObject(std::string&, nlohmann::json const&);
 
 	template <typename T>
 	void ReadObject(T&, std::string const&, std::string const&);
@@ -61,6 +65,7 @@ public:
 	virtual void WriteFloat(float&, std::string const&, std::string const&);
 	virtual void WriteDouble(double&, std::string const&, std::string const&);
 	virtual void WriteString(std::string&, std::string const&, std::string const&);
+	virtual void WriteCharArray(char*, size_t, std::string const&, std::string const&);
 
 	nlohmann::json GetJSONObject() const;
 

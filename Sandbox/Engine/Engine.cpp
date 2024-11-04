@@ -97,7 +97,8 @@ void Engine::cleanupSystem() {
 		if (system != nullptr) {
 			system->cleanup();
 			
-			if (system != &ecsCoordinator && system != &debugSystem) {
+			if (system != &ecsCoordinator && system != &debugSystem && system != &fontSystem 
+				&& system != &assetsManager && system != &graphicsSystem) {
 				delete system;
 			}
 		}

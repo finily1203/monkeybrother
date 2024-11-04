@@ -26,6 +26,7 @@ File Contributions: Lew Zong Han Owen (100%)
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
+//#include <filesystem>
 #include "GlfwFunctions.h"
 
 #include "Systems.h"
@@ -142,7 +143,6 @@ private:
 	static float objSizeYMin;
 
 	static int saveCount;
-	static bool saveFilePending;
 	static float lastPosX;
 };
 

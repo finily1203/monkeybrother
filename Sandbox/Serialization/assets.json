@@ -31,8 +31,20 @@
       "filePath": "assets/textures/image.png"
     },
     {
-      "id": "texture3",
-      "filePath": "assets/textures/image1.jpg"
+      "id": "mossball",
+      "filePath": "assets/textures/mossball_idle_body.png"
+    },
+    {
+      "id": "goldfish",
+      "filePath": "assets/textures/goldfish_move.png"
+    },
+    {
+      "id": "background",
+      "filePath": "assets/textures/L1_Flat_Background.jpg"
+    },
+    {
+      "id": "woodtile",
+      "filePath": "assets/textures/TOP_BODY_1.png"
     }
   ],
   "shaderAssets": [
@@ -43,6 +55,20 @@
     {
       "id": "shader2",
       "filePath": "assets/shaders/Basic1.shader"
+    },
+    {
+      "id": "fontShader",
+      "filePath": "assets/shaders/font.shader"
+    }
+  ],
+  "fontAssets": [
+    {
+      "id": "Journey",
+      "filePath": "assets/fonts/SS Journey.ttf"
+    },
+    {
+      "id": "Antonio",
+      "filePath": "assets/fonts/Antonio.ttf"
     }
   ]
 }

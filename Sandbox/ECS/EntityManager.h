@@ -40,6 +40,7 @@ public:
 	Entity getEntityById(std::string const& id);
 	void setEntityId(Entity entity, std::string const& id);
 	std::string getEntityId(Entity entity);
+	Entity getEntityFromId(std::string const& id);
 
 	std::unordered_map<Entity, std::string> getEntityMap() const;
 
