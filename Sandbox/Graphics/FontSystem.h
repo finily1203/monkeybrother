@@ -35,7 +35,10 @@ public:
     void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth);
     bool isInitialized = false;
     std::map<std::string, std::map<char, Character>> Fonts;
-
+    const float WORLD_LEFT = -800.0f;
+    const float WORLD_RIGHT = 800.0f;
+    const float WORLD_BOTTOM = -450.0f;
+    const float WORLD_TOP = 450.0f;
 
 
 private:
@@ -45,6 +48,8 @@ private:
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object
     std::unique_ptr<Shader> textShader;         // Shader for rendering text
     bool isCleanedUp = false;
+
+
 };
 
 #endif // FONTSYSTEM_H

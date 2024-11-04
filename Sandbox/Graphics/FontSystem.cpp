@@ -38,7 +38,8 @@ void FontSystem::initialise() {
     // Set up OpenGL state
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    projectionMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f);
+    projectionMatrix = glm::ortho(WORLD_LEFT, WORLD_RIGHT, WORLD_BOTTOM, WORLD_TOP);
+
 
     //textShader->Bind(); // Bind the shader before setting uniforms
     //textShader->SetUniformMatrix4f("projection", projectionMatrix); // Set the projection matrix

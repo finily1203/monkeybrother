@@ -53,8 +53,8 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
-    idleAnimation = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
+    m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
+   
 
 }
 
@@ -237,8 +237,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
         m_AnimationData->Update(deltaTime);
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-        idleAnimation->Update(deltaTime);
-        const auto& idleUVs = idleAnimation->GetCurrentUVs();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
     }
@@ -254,11 +253,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
     }
 }
-void GraphicsSystem::SetCurrentAction(int actionRow) {
-    if (m_AnimationData) {
-        m_AnimationData->SetCurrentAction(actionRow);  // Switch the action (e.g., walk, attack)
-    }
-}
+
 void GraphicsSystem::Render(float deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, 1600, 900);
