@@ -62,7 +62,7 @@ void AnimationData::Update(float deltaTime) {
             lastDirection = Direction::Right;
         }
         else {
-            // When idle, continue displaying frames in the last direction
+            
             if (lastDirection == Direction::Left) {
                 currentFrame = 24 + (currentFrame + 1) % 24;
             }
@@ -71,7 +71,7 @@ void AnimationData::Update(float deltaTime) {
             }
         }
 
-        uvDirty = true; // Mark UVs for update
+        uvDirty = true; 
     }
 
     if (uvDirty) {

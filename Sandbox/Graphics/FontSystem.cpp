@@ -38,12 +38,9 @@ void FontSystem::initialise() {
     // Set up OpenGL state
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    projectionMatrix = glm::ortho(WORLD_LEFT, WORLD_RIGHT, WORLD_BOTTOM, WORLD_TOP);
+    projectionMatrix = glm::ortho(-800.0f, 800.0f, -450.0f, 450.0f);
 
 
-    //textShader->Bind(); // Bind the shader before setting uniforms
-    //textShader->SetUniformMatrix4f("projection", projectionMatrix); // Set the projection matrix
-    //textShader->Unbind(); // Unbind the shader
     
     assetsManager.GetShader("fontShader")->Bind();
     assetsManager.GetShader("fontShader")->SetUniformMatrix4f("projection", projectionMatrix);
@@ -62,9 +59,6 @@ void FontSystem::initialise() {
     glBindVertexArray(0);
     isInitialized = true;
 }
-
-
-
 
 void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     FT_Library ft;
@@ -126,7 +120,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
 
 
 
-//void FontSystem::renderText(const std::unique_ptr<Shader>& shader, const std::string& fontPath, const std::string& text, float x, float y, float scale, glm::vec3 color, float maxWidth) {
+
 void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;

@@ -35,10 +35,7 @@ public:
     void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth);
     bool isInitialized = false;
     std::map<std::string, std::map<char, Character>> Fonts;
-    const float WORLD_LEFT = -800.0f;
-    const float WORLD_RIGHT = 800.0f;
-    const float WORLD_BOTTOM = -450.0f;
-    const float WORLD_TOP = 450.0f;
+
 
 
 private:
