@@ -41,9 +41,7 @@ void ECSCoordinator::initialise() {
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
-	debugSystem.StartLoopECS();
 	systemManager->update();
-	debugSystem.EndLoopECS();
 	if (GLFWFunctions::goNextMode) {
 		for (Entity entity : entityManager->getLiveEntities()) {
 			destroyEntity(entity);
@@ -251,6 +249,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
 			serializer.ReadObject(font.color, entityId, "entities.font.color");
 			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+			serializer.ReadObject(font.textBoxWidth, entityId, "entities.font.text.BoxWidth");
 
 			std::cout << font.text << std::endl;
 			std::cout << font.fontId << std::endl;

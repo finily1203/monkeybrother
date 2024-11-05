@@ -53,6 +53,10 @@ void SystemManager::update() {
 		if (system->getSystemECS() == "LogicSystemECS") {
 			debugSystem.StartSystemTiming("LogicSystemECS");
 		}
+		if (system->getSystemECS() == "FontSystemECS") {
+			debugSystem.StartSystemTiming("FontSystemECS");
+		}
+		
 		
 		system->update(GLFWFunctions::delta_time);
 
@@ -63,7 +67,10 @@ void SystemManager::update() {
 			debugSystem.EndSystemTiming("GraphicsSystemECS");
 		}
 		if (system->getSystemECS() == "LogicSystemECS") {
-			debugSystem.StartSystemTiming("LogicSystemECS");
+			debugSystem.EndSystemTiming("LogicSystemECS");
+		}
+		if (system->getSystemECS() == "FontSystemECS") {
+			debugSystem.EndSystemTiming("FontSystemECS");
 		}
 		
 	}

@@ -28,7 +28,7 @@ enum SystemType { //For perfomance viewer
 	CameraType,
 	ECSType,
 	AssetsManagerType,
-	FontType,
+	FontType
 };
 
 extern AssetsManager assetsManager;

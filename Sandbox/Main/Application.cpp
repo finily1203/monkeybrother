@@ -46,10 +46,13 @@ int main() {
 		AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(audioSystem);
 
+		CameraSystem2D* cameraSystem = new CameraSystem2D();
+		engine->addSystem(cameraSystem);
+
 		engine->addSystem(&ecsCoordinator);
 
 		engine->addSystem(&graphicsSystem);
-	
+
 		engine->addSystem(&debugSystem);
 
 		engine->addSystem(&fontSystem);
@@ -66,7 +69,6 @@ int main() {
 				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
 				GLFWFunctions::cloneObject = false;
 			}
-
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);
 		}

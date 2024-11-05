@@ -288,5 +288,5 @@ void FontSystem::update() {
 }
 
 SystemType FontSystem::getSystem() {
-	return SystemType::FontType;
+	return FontType;
 }

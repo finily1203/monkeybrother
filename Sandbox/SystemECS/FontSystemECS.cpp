@@ -60,7 +60,7 @@ void FontSystemECS::update(float dt) {
 
             //std::cout << fontComp.fontId << std::endl;
 
-            fontSystem->draw(fontComp.text, fontComp.fontId, fontTransform.position.GetX(), fontTransform.position.GetY(), fontComp.textScale, fontComp.color, maxWidth);
+            fontSystem->draw(fontComp.text, fontComp.fontId, fontTransform.position.GetX(), fontTransform.position.GetY(), fontComp.textScale, fontComp.color, fontComp.textBoxWidth);
         }
     }
 }

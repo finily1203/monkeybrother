@@ -58,6 +58,7 @@ void GraphicSystemECS::update(float dt) {
 		if (GLFWFunctions::testMode == 0) {
 			bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
 			bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+			bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
 
 			graphicsSystem.Update(dt / 10, true);
 			transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
@@ -94,7 +95,7 @@ void GraphicSystemECS::update(float dt) {
 				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("texture1"), transform.mdl_xform);
 				//graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
 			}
-			else 
+			else if(isPlatform)
 			{
 				//graphicsSystem.DrawObject(GraphicsSystem::DrawMode::COLOR, 0, transform.mdl_xform);
 				graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);

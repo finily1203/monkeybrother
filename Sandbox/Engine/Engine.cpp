@@ -41,7 +41,7 @@ void Engine::updateSystem() {
 	//ecsCoordinator.update();
 
 	for (auto& system : m_systems) {
-
+		//Console::GetLog() << "System type: " << static_cast<int>(system->getSystem()) << std::endl;
 		//Start time record for perfomance viewer
 		switch (system->getSystem()) {
 		case SystemType::AudioSystemType:
@@ -53,16 +53,25 @@ void Engine::updateSystem() {
 		case SystemType::DebugSystemType:
 			debugSystem.StartSystemTiming("DebugSystem");
 			break;
+		case SystemType::GraphicsSystemType:
+			debugSystem.StartSystemTiming("GraphicsSystem");
+			break;
+		case SystemType::CameraType:
+			debugSystem.StartSystemTiming("CameraSystem");
+			break;
 		case SystemType::ECSType:
 			debugSystem.StartSystemTiming("EntityComponentSystem");
 			break;
 		case SystemType::AssetsManagerType:
 			debugSystem.StartSystemTiming("AssetsManager");
 			break;
+		case SystemType::FontType:
+			debugSystem.StartSystemTiming("FontSystem");
+			break;
 		default:
 			break;
 		}
-		
+
 		system->update();
 		
 		//End time record for perfomance viewer
@@ -76,11 +85,20 @@ void Engine::updateSystem() {
 		case SystemType::DebugSystemType:
 			debugSystem.EndSystemTiming("DebugSystem");
 			break;
+		case SystemType::GraphicsSystemType:
+			debugSystem.EndSystemTiming("GraphicsSystem");
+			break;
+		case SystemType::CameraType:
+			debugSystem.EndSystemTiming("CameraSystem");
+			break;
 		case SystemType::ECSType:
 			debugSystem.EndSystemTiming("EntityComponentSystem");
 			break;
 		case SystemType::AssetsManagerType:
 			debugSystem.EndSystemTiming("AssetsManager");
+			break;
+		case SystemType::FontType:
+			debugSystem.EndSystemTiming("FontSystem");
 			break;
 		default:
 			break;
