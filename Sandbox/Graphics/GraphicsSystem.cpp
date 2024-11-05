@@ -33,6 +33,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include "GlobalCoordinator.h"
 
+
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
 	x;\
@@ -383,18 +384,27 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
     return final_xform;
 }
 
-void GraphicsSystem::drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMatrix) {
+void GraphicsSystem::drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix) {
 
     glBegin(GL_LINES);
 
     // Set color for debug lines
     glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
 
+    float left, right, top, bottom;
+    left = -transform.scale.GetX() / 2.0f;
+    right = transform.scale.GetX() / 2.0f;
+    top = transform.scale.GetY() / 2.0f;
+    bottom = -transform.scale.GetY() / 2.0f;
+
+
     // Define the corners of the AABB in homogeneous coordinates
-    glm::vec4 bottomLeft(aabb.left, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 bottomRight(aabb.right, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 topRight(aabb.right, aabb.top, 0.0f, 1.0f);
-    glm::vec4 topLeft(aabb.left, aabb.top, 0.0f, 1.0f);
+    glm::vec4 bottomLeft(left, bottom, 0.0f, 1.0f);
+    glm::vec4 bottomRight(right, bottom, 0.0f, 1.0f);
+    glm::vec4 topRight(right, top, 0.0f, 1.0f);
+    glm::vec4 topLeft(left, top, 0.0f, 1.0f);
+
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
 
     // Create the projection matrix
     glm::mat4 projMat = glm::ortho(
@@ -403,22 +413,29 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMat
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
-
-    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
-
     glm::mat4 viewMat4 = {
-		viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
-		viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
-		0,             0,             viewMat[2][2], 0,
-		viewMat[2][0], viewMat[2][1], 1,             1
+        viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
+        viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
+        0,             0,             viewMat[2][2], 0,
+        viewMat[2][0], viewMat[2][1], 1,             1
     };
+    // Define the rotation angle (in radians)
+    float angle = glm::radians(transform.orientation.GetX()); // Example: 45 degrees
 
-    // Apply the projection matrix to each corner
-    bottomLeft = projMat * viewMat4 *bottomLeft;
-	bottomRight = projMat * viewMat4 * bottomRight;
-	topRight = projMat * viewMat4 * topRight;
-	topLeft = projMat * viewMat4 * topLeft;
+    // Create the rotation matrix
+    glm::mat4 rotationMat = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
+    // Define the translation vector using transform.position
+    glm::vec3 translationVec(transform.position.GetX(), transform.position.GetY(), 0.0f);
+
+    // Create the translation matrix
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translationVec);
+
+    // Apply the projection, view, rotation, and translation matrices to each corner
+    bottomLeft = projMat * viewMat4 * translationMat * rotationMat * bottomLeft;
+    bottomRight = projMat * viewMat4 * translationMat * rotationMat * bottomRight;
+    topRight = projMat * viewMat4 * translationMat * rotationMat * topRight;
+    topLeft = projMat * viewMat4 * translationMat * rotationMat * topLeft;
 
     // Draw the AABB lines using the transformed coordinates
     glVertex2f(bottomLeft.x, bottomLeft.y);   // Bottom left

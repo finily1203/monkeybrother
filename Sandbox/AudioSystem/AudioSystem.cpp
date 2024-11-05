@@ -18,7 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : audioChannel(nullptr), soundEffectChannel(nullptr), currSongIndex(0), volume(0.3f) {}
+AudioSystem::AudioSystem() : audioChannel(nullptr), soundEffectChannel(nullptr), currSongIndex(0), volume(0.1f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }

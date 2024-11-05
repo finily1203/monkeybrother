@@ -7,7 +7,7 @@
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager(){}
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0) {}
 
 AssetsManager::~AssetsManager()
 {

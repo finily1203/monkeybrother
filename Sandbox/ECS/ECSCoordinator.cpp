@@ -42,7 +42,6 @@ void ECSCoordinator::initialise() {
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
 	systemManager->update();
-	debugSystem.EndLoopECS();
 	//if (GLFWFunctions::goNextMode) {
 	//	for (Entity entity : entityManager->getLiveEntities()) {
 	//		destroyEntity(entity);

@@ -37,6 +37,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector2D.h"
 #include "vector3D.h"
 #include "matrix3x3.h"
+#include "TransformComponent.h"
 
 
 class GraphicsSystem : public GameSystems
@@ -92,7 +93,7 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
-    void drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMat);
+    void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 
 private:
     GLuint m_VAO;

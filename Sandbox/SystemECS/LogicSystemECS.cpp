@@ -16,6 +16,8 @@ void LogicSystemECS::update(float dt) {
 
 	const float maxSpeed = 0.6f;
 
+	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+
 	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
 	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
 	myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
@@ -220,10 +222,16 @@ void LogicSystemECS::update(float dt) {
 			if (GLFWFunctions::keyState[Key::X])
 				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() - 0.1f * GLFWFunctions::delta_time);
 
-			if (GLFWFunctions::keyState[Key::Q])
+			if (GLFWFunctions::keyState[Key::Q]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() + 0.1f * GLFWFunctions::delta_time);
-			if (GLFWFunctions::keyState[Key::E])
+				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() - 0.1f * GLFWFunctions::delta_time);
+			}
+				
+			if (GLFWFunctions::keyState[Key::E]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
+				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() + 0.1f * GLFWFunctions::delta_time);
+			}
+				
 		}
 		//--------------------------------END OF CAMERA MOVEMENT--------------------------------//
 	}

@@ -73,7 +73,7 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag) {
-            graphicsSystem.drawDebugAABB(ecsCoordinator.getComponent<AABBComponent>(entity), cameraSystem.getViewMatrix());
+            graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
         }
 
         // Drawing based on entity components
