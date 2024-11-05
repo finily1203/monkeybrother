@@ -258,9 +258,9 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
                 glBindTexture(GL_TEXTURE_2D, ch.TextureID);
                 glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
-                std::cout << "Rendering character: " << wc
-                    << " at position (x: " << xpos
-                    << ", y: " << yposAdjusted << ")" << std::endl;
+                //std::cout << "Rendering character: " << wc
+                //    << " at position (x: " << xpos
+                //    << ", y: " << yposAdjusted << ")" << std::endl;
                 xpos += (ch.Advance >> 6) * scale; 
             }
         }

@@ -63,10 +63,10 @@ int main() {
 			//DebugSystem::StartLoop(); //Get time for start of gameloop
 
 			//If user presses clone button ("C"), clone first object
-			if (GLFWFunctions::cloneObject) {
-				ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
-				GLFWFunctions::cloneObject = false;
-			}
+			//if (GLFWFunctions::cloneObject) {
+			//	ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
+			//	GLFWFunctions::cloneObject = false;
+			//}
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);

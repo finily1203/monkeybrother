@@ -17,9 +17,22 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <unordered_map>
+
+enum class Key {
+	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+	F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+	LEFT, RIGHT, UP, DOWN,
+	LSHIFT, LCTRL, LALT, SPACE, ESCAPE, COMMA, PERIOD,
+	NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9
+};
+
+enum class MouseButton {
+	left, right, middle
+};
 
 struct GLFWFunctions {
-	
+
 	// Initialize the window
 	static bool init(int width, int height, std::string title);
 
@@ -40,53 +53,82 @@ struct GLFWFunctions {
 	//Caluclate the FPS and delta_time to be used
 	static void getFps();
 
-	static bool isAKeyPressed;
+	// Input state functions
+	static bool isKeyPressed(Key key);
+	static bool isKeyReleased(Key key);
+	static bool isKeyHeld(Key key);
+
+	static bool isMouseButtonPressed(MouseButton button);
+
+	// key state
+
+
+
+	//static bool isAKeyPressed;
+
+	//static float volume;
+	//static float zoomMouseCoordX;
+	//static float zoomMouseCoordY;
+	//static float objMoveMouseCoordX;
+	//static float objMoveMouseCoordY;
+	//static bool isAtMaxZoom;
+	//static bool audioPaused;
+	//static bool audioNext;
+
+	//static bool audioStopped;
+	//static bool cloneObject;
+	//static bool goNextMode;
+
+	//static bool slideAudio;
+	//static bool bubblePopping;
+
+	//static bool enemyMoveLeft;
+	//static bool enemyMoveRight;
+	//static bool enemyMoveUp;
+	//static bool enemyMoveDown;
+
+	//static GLboolean left_turn_flag;
+	//static GLboolean right_turn_flag;
+	//static GLboolean scale_up_flag;
+	//static GLboolean scale_down_flag;
+	//static GLboolean move_up_flag;
+	//static GLboolean move_down_flag;
+	//static GLboolean move_left_flag;
+	//static GLboolean move_right_flag;
+
+	//static GLboolean move_jump_flag;
+
+	//static GLboolean camera_zoom_in_flag;
+	//static GLboolean camera_zoom_out_flag;
+	//static GLboolean camera_rotate_left_flag;
+	//static GLboolean camera_rotate_right_flag;
+
+	//static bool isGuiOpen;
+	//static bool zoomViewport;
+	//static int testMode;
+
 	static GLFWwindow* pWindow;
 	static double fps;
 	static float delta_time;
-	static float volume;
-	static float zoomMouseCoordX;
-	static float zoomMouseCoordY;
-	static float objMoveMouseCoordX;
-	static float objMoveMouseCoordY;
-	static bool isAtMaxZoom;
-	static bool audioPaused;
-	static bool audioNext;
+
+
+	static GLboolean debug_flag;
+	static GLboolean isGuiOpen;
+	static GLboolean allow_camera_movement;
+	static GLboolean audioPaused;
+	static GLboolean audioStopped;
+	static GLboolean adjustVol;
+	static GLboolean audioNext;
+
+
 	static int audioNum;
-	static int windowWidth, windowHeight;
-	static bool audioStopped;
-	static bool cloneObject;
-	static bool goNextMode;
+	static int windowWidth;
+	static int windowHeight;
 	static bool bumpAudio;
 	static bool hasBumped;
-	static bool slideAudio;
-	static bool bubblePopping;
 
-	static bool enemyMoveLeft;
-	static bool enemyMoveRight;
-	static bool enemyMoveUp;
-	static bool enemyMoveDown;
-
-	static GLboolean left_turn_flag;
-	static GLboolean right_turn_flag;
-	static GLboolean scale_up_flag;
-	static GLboolean scale_down_flag;
-	static GLboolean move_up_flag;
-	static GLboolean move_down_flag;
-	static GLboolean move_left_flag;
-	static GLboolean move_right_flag;
-	static GLboolean debug_flag;
-	static GLboolean move_jump_flag;
-	static GLboolean allow_camera_movement;
-	static GLboolean camera_zoom_in_flag;
-	static GLboolean camera_zoom_out_flag;
-	static GLboolean camera_rotate_left_flag;
-	static GLboolean camera_rotate_right_flag;
-
-	static bool isGuiOpen;
-	static bool zoomViewport;
-
-	static int testMode;
+	static std::unordered_map<Key, bool> keyState;
+	static std::unordered_map<MouseButton, bool> mouseButtonState;
 };
 
 #endif

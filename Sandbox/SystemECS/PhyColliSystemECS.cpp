@@ -620,7 +620,7 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
 
             //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
             //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
-            if(GLFWFunctions::move_jump_flag)
+            if(GLFWFunctions::keyState[Key::SPACE])
             {
                 ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
                 //std::cout << "jumping ";

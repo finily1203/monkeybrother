@@ -284,6 +284,11 @@ void AssetsManager::ClearAudio() {
 		audio.second->release();
 	}
 	m_Audio.clear();
+    if (audSystem) {
+        audSystem->close();
+        audSystem->release();
+        audSystem = nullptr;
+    }
 	std::cout << "All audio cleared!" << std::endl;
 }
 

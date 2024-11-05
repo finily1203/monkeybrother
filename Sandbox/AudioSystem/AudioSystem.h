@@ -5,7 +5,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   AudioSystem.h
 @brief:  This header file includes all the declaration of the AudioSystem class.
-		 Joel Chu (c.weiyuan): Declared all the functions in AudioSystem and 
+		 Joel Chu (c.weiyuan): Declared all the functions in AudioSystem and
 							   integrated FMOD lib to handle audio files.
 							   100%
 *//*___________________________________________________________________________-*/
@@ -30,7 +30,7 @@ public:
 	//Update function for AudioSystem class to handle pausing, playing of song
 	//setting volume and to update the song being played
 	void update() override;
-	
+
 	//Clears all the songs from the audioSystem and terminates the audioSystem
 	void cleanup() override;
 	SystemType getSystem() override; //For perfomance viewer
@@ -58,6 +58,8 @@ public:
 private:
 	//FMOD::System* audioSystem;
 	FMOD::Channel* audioChannel;
+	FMOD::Channel* soundEffectChannel;
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
+	float volume;
 };

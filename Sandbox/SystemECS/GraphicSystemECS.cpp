@@ -51,45 +51,45 @@ void GraphicSystemECS::update(float dt) {
         auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
         Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
-        if (GLFWFunctions::testMode == 0) {
-            bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
-            bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+        //if (GLFWFunctions::testMode == 0) {
+        bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
+        bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 
-            // Use hasMovement for the update parameter
-            graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
-            transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
+        // Use hasMovement for the update parameter
+        graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
+        transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
-            auto entitySig = ecsCoordinator.getEntitySignature(entity);
+        auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
-            // Compute view matrix
-            if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
-                cameraSystem.update();
-            }
-            else if (ecsCoordinator.getEntityID(entity) == "player") {
-                cameraSystem.lockToComponent(transform);
-                cameraSystem.update();
-            }
-
-            // TODO:: Update AABB component inside game loop
-            // Press F1 to draw out debug AABB
-            if (GLFWFunctions::debug_flag) {
-                graphicsSystem.drawDebugAABB(ecsCoordinator.getComponent<AABBComponent>(entity), cameraSystem.getViewMatrix());
-            }
-
-            // Drawing based on entity components
-            if (hasMovement && hasEnemy) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
-            }
-            else if (hasMovement) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
-            }
-            else if (entitySig.test(0) && entitySig.count() == 1) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-            }
-            else {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
-            }
+        // Compute view matrix
+        if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
+            cameraSystem.update();
         }
+        else if (ecsCoordinator.getEntityID(entity) == "player") {
+            cameraSystem.lockToComponent(transform);
+            cameraSystem.update();
+        }
+
+        // TODO:: Update AABB component inside game loop
+        // Press F1 to draw out debug AABB
+        if (GLFWFunctions::debug_flag) {
+            graphicsSystem.drawDebugAABB(ecsCoordinator.getComponent<AABBComponent>(entity), cameraSystem.getViewMatrix());
+        }
+
+        // Drawing based on entity components
+        if (hasMovement && hasEnemy) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
+        }
+        else if (hasMovement) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
+        }
+        else if (entitySig.test(0) && entitySig.count() == 1) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+        }
+        else {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
+        }
+        //}
     }
 }
 

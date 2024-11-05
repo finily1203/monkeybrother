@@ -20,14 +20,14 @@ public:
     SystemType getSystem() override; // For performance viewer
 
     // Camera-specific methods
-    void setViewMatrix(const glm::mat3& viewMatrix);
-    glm::mat3 getViewMatrix() const;
+    void setViewMatrix(const myMath::Matrix3x3& viewMatrix);
+    myMath::Matrix3x3 getViewMatrix() const;
 
-    void setProjectionMatrix(const glm::mat3& projectionMatrix);
-    glm::mat3 getProjectionMatrix() const;
+    void setProjectionMatrix(const myMath::Matrix3x3& projectionMatrix);
+    myMath::Matrix3x3 getProjectionMatrix() const;
 
-    void setCameraPosition(const glm::vec2& position);
-    glm::vec2 getCameraPosition() const;
+    void setCameraPosition(const myMath::Vector2D& position);
+    myMath::Vector2D getCameraPosition() const;
 
     void setCameraRotation(const GLfloat& rotation);
     GLfloat getCameraRotation() const;
@@ -36,11 +36,12 @@ public:
     GLfloat getCameraZoom() const;
 
     void lockToComponent(const TransformComponent& component); // Lock camera to an entity
+    bool checkLockedComponent() const; // Check if camera is locked to an entity
 
 private:
-    glm::mat3 m_ViewMatrix;
-    glm::mat3 m_ProjectionMatrix;
-    glm::vec2 m_CameraPosition;
+    myMath::Matrix3x3 m_ViewMatrix;
+    myMath::Matrix3x3 m_ProjectionMatrix;
+    myMath::Vector2D m_CameraPosition;
     GLfloat m_CameraRotation;
     GLfloat m_CameraZoom;
     const TransformComponent* m_LockedComponent;

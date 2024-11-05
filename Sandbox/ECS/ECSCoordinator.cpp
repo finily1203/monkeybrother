@@ -44,19 +44,19 @@ void ECSCoordinator::update() {
 	debugSystem.StartLoopECS();
 	systemManager->update();
 	debugSystem.EndLoopECS();
-	if (GLFWFunctions::goNextMode) {
-		for (Entity entity : entityManager->getLiveEntities()) {
-			destroyEntity(entity);
-		}
-		//std::cout << getEntityNum() << std::endl;
-		if (GLFWFunctions::testMode == 0) {
-			test5();
-		}
-		else if (GLFWFunctions::testMode == 1) {
-			test4();
-		}
-		GLFWFunctions::goNextMode = false;
-	}
+	//if (GLFWFunctions::goNextMode) {
+	//	for (Entity entity : entityManager->getLiveEntities()) {
+	//		destroyEntity(entity);
+	//	}
+	//	//std::cout << getEntityNum() << std::endl;
+	//	if (GLFWFunctions::testMode == 0) {
+	//		test5();
+	//	}
+	//	else if (GLFWFunctions::testMode == 1) {
+	//		test4();
+	//	}
+	//	GLFWFunctions::goNextMode = false;
+	//}
 }
 
 //Cleans up the ECS system by calling the cleanup function

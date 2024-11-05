@@ -342,7 +342,7 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
 
 
 
-myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMatrix) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
@@ -374,13 +374,16 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
+
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+
     mdl_xform = Translating * (Rotating * Scaling);
     mdl_to_ndc_xform = projMat * viewMat * mdl_xform;
     myMath::Matrix3x3 final_xform = myMath::Matrix3x3::ConvertToMatrix3x3(mdl_to_ndc_xform);
     return final_xform;
 }
 
-void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
+void GraphicsSystem::drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMatrix) {
 
     glBegin(GL_LINES);
 
@@ -400,6 +403,9 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
+
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+
     glm::mat4 viewMat4 = {
 		viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
 		viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
