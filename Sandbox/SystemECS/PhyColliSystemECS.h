@@ -94,11 +94,10 @@ public:
     bool GetAlrJumped() const { return alrJumped; }
 
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
-
     void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
     void ApplyGravity(Entity entity, float dt);
     Entity FindClosestPlatform(Entity player);
-
+    myMath::Vector2D directionalVector(float angle);
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
     //// Handling slope collision for the player
@@ -110,74 +109,17 @@ public:
     // Player input handling for movement (left: 'A', right: 'D')
     void HandlePlayerInput(Entity player);
 
-    //// PROTYPING: Handling Circle vs Rectangle collision
-    //void HandleCircleCollision(Entity closestPlatform, Entity player);
-
-    //// PROTOTYPING: Handling Circle vs Rectangle side collision
-    //void HandleSideCollision(int collisionSide, float circleRadius, Entity player, Entity closestPlatform);
-
-    //// PROTOTYPING: Handling Circle vs Rectangle slope collision (sliding off)
-    //void HandleCircleSlopeCollision(Entity closestPlatform, Entity player);
+    void LoadPhysicsConfigFromJSON(std::string const& filename);
+    void SavePhysicsConfigFromJSON(std::string const& filename);
 
 
 private:
-    float friction;
-    bool alrJumped;
-    bool isFalling;
+    static float friction;
+    static float threshold;
+    static bool alrJumped;
+    static bool isFalling;
     PlayerEventPublisher eventSource;
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
 };
-
-//class ForcesSystemECS
-//{
-//public:
-//    ForcesSystemECS();
-//
-//    //void ApplyForce(Entity entity, glm::vec2 force);
-//    //void ApplyImpulse(Entity entity, glm::vec2 impulse);
-//    //void ApplyFriction(Entity entity, float friction);
-//    void ApplyGravity(Entity entity, float dt);
-//    //void ApplyJumpForce(Entity entity, float jumpForce);
-//    //void ApplyAcceleration(Entity entity, glm::vec2 acceleration);
-//    //void ApplyMass(Entity entity, float mass);
-//
-//    float GetFriction() const { return friction; }
-//    float GetGravity() const { return gravity; }
-//    float GetJump() const { return jump; }
-//    glm::vec2 GetAcceleration() const { return acceleration; }
-//    float GetMass() const { return mass; }
-//
-//    void SetFriction(float newFriction) { friction = newFriction; }
-//    void SetGravity(float newGravity) { gravity = newGravity; }
-//    void SetJump(float newJump) { jump = newJump; }
-//    void SetAcceleration(glm::vec2 newAcceleration) { acceleration = newAcceleration; }
-//    void SetMass(float newMass) { mass = newMass; }
-//
-//    //Rotational Force
-//    //void ApplyAngularVelocity(Entity entity, float angularVelocity);
-//    //void ApplyAngularAcceleration(Entity entity, float angularAcceleration);
-//    //void ApplyTorque(Entity entity, float torque);
-//    //void ApplyImpulseAt(Entity entity, glm::vec2 impulse, glm::vec2 position);
-//    //void ApplyTorqueAt(Entity entity, float torque, glm::vec2 position);
-//    //void ApplyForceAt(Entity entity, glm::vec2 force, glm::vec2 position);
-//    //void ApplyImpulseAtCenter(Entity entity, glm::vec2 impulse);
-//    //void ApplyTorqueAtCenter(Entity entity, float torque);
-//    //void ApplyForceAtCenter(Entity entity, glm::vec2 force);
-//    //void ApplyImpulseAtLocalPoint(Entity entity, glm::vec2 impulse, glm::vec2 localPoint);
-//    //void ApplyTorqueAtLocalPoint(Entity entity, float torque, glm::vec2 localPoint);
-//    //void ApplyForceAtLocalPoint(Entity entity, glm::vec2 force, glm::vec2 localPoint);
-//    //void ApplyImpulseAtWorldPoint(Entity entity, glm::vec2 impulse, glm::vec2 worldPoint);
-//    //void ApplyTorqueAtWorldPoint(Entity entity, float torque, glm::vec2 worldPoint);
-//    //void ApplyForceAtWorldPoint(Entity entity, glm::vec2 force, glm::vec2 worldPoint);
-//    //void ApplyImpulseAtLocalCenter(Entity entity, glm::vec2 impulse);
-//    //void ApplyTorqueAtLocalCenter(Entity entity, float torque);
-//    //void ApplyForceAtLocalCenter(Entity entity, glm::vec2);
-//private:
-//    float friction;
-//    float gravity;
-//    float jump;
-//    glm::vec2 acceleration;
-//    float mass;
-//};

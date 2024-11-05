@@ -25,19 +25,33 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #define M_PI   3.14159265358979323846264338327950288f
 
+float PhysicsSystemECS::friction;
+float PhysicsSystemECS::threshold;
+bool PhysicsSystemECS::alrJumped;
+bool PhysicsSystemECS::isFalling;
+
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
-PhysicsSystemECS::PhysicsSystemECS() : friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>()) 
+PhysicsSystemECS::PhysicsSystemECS() : eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>())
 {
     eventSource.Register(MessageId::FALL, eventObserver);
     eventSource.Register(MessageId::JUMP, eventObserver);
 }
 
-
-void PhysicsSystemECS::initialise() {}
+void PhysicsSystemECS::initialise() {
+    LoadPhysicsConfigFromJSON(FilePathManager::GetPhysicsPath());
+    //std::cout << friction << " nwihediwwwwwwwwwwwwwwww" << std::endl;
+}
 
 void PhysicsSystemECS::cleanup() {}
+
+myMath::Vector2D PhysicsSystemECS::directionalVector(float angle) {
+    float adjustedAngle = angle * (M_PI / 180.0f) - M_PI / 2;
+
+    return myMath::Vector2D(cos(adjustedAngle), sin(adjustedAngle));
+}
+
 
 // Applying gravity to player when no collision detected (jumping, falling)
 void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
@@ -45,31 +59,20 @@ void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
 
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
-    float grav = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
-
-    // Apply gravity to vertical velocity (no friction for vertical motion)
-    vel.SetY(vel.GetY() + grav * dt);
+    myMath::Vector2D gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
+    // Get the directional gravity vector based on the player's orientation
+    myMath::Vector2D direction = directionalVector(ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX());
     
-    // Apply friction to horizontal velocity
-    vel.SetX(vel.GetX() * (1 - friction * dt));
+    float radians = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX() * (M_PI / 180.0f);
+    float rotatedX = gravity.GetX() * sin(radians);
+    float rotatedY = -gravity.GetY() * cos(radians);
+    
+    // Apply gravity along the rotated gravity vector
+    vel.SetX(vel.GetX() + direction.GetX() * std::abs(rotatedX) * gravity.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * std::abs(rotatedY) * gravity.GetY());
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * dt));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * dt));
-
-
-    //float velocityX = GetVelocity().GetX();
-    //float velocityY = GetVelocity().GetY();
-
-    //velocityY += gravity * dt;
-
-    // Apply friction to horizontal velocity
-    //velocityX *= (1 - friction * dt);
-
-    //ecsCoordinator.getComponent<TransformComponent>(player).position.SetX(ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() + velocityX * dt);
-    //ecsCoordinator.getComponent<TransformComponent>(player).position.SetY(ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() + velocityY * dt);
-
-
-    //SetVelocity({ velocityX, velocityY });
 }
 
 // Find the closest platform to the player
@@ -612,24 +615,31 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
         //    SetVelocity({ GetVelocity().x, -GetVelocity().y });
         //}
 
-        if (normal.GetX() != 0) {
-            ApplyGravity(player, GLFWFunctions::delta_time);
-        }
+        //if (normal.GetX() != 0) {
+        //    ApplyGravity(player, GLFWFunctions::delta_time);
+        //}
 
 
         //printf("velocity: %f, %f\n", GetVelocity().x, GetVelocity().y);
         // Allow jumping
         if (GLFWFunctions::move_jump_flag) {
-            myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
-            float jumping = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump;
-            
-            vel.SetY(jumping);
+            float jumpForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump *100.f;
+            float rotationAngle = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
+            myMath::Vector2D jumpDirection = directionalVector(rotationAngle);
+            //std::cout << jumpDirection.GetX() << ", " << jumpDirection.GetY() << std::endl;
+            // Apply jump force along rotated direction
+            vel.SetX(jumpDirection.GetX() * jumpForce);
+            vel.SetY(jumpDirection.GetY() * jumpForce);
+
+            //std::cout << vel.GetX() << ", " << vel.GetY() << std::endl;
+            //ApplyGravity(player, GLFWFunctions::delta_time);
         }
     }
     else {
-        // No collision, apply gravity
         ApplyGravity(player, GLFWFunctions::delta_time);
     }
+
+    //std::cout << "Player Position: " << playerPos.GetX() << ", " << playerPos.GetY() << std::endl;
 
     //if (collisionSystem.checkOBBCollisionSAT(playerOBB, platformOBB, normal, penetration)) {
     //    // Collision occurred! Handle the response
@@ -1049,6 +1059,54 @@ void PhysicsSystemECS::update(float dt) {
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
 
 }
+
+void PhysicsSystemECS::LoadPhysicsConfigFromJSON(std::string const& filename)
+{
+    JSONSerializer serializer;
+
+    // checks if the JSON file can be opened
+    if (!serializer.Open(filename))
+    {
+        Console::GetLog() << "Error: could not open file " << filename << std::endl;
+        return;
+    }
+
+    // retrieve the JSON object from the JSON file
+    nlohmann::json currentObj = serializer.GetJSONObject();
+
+    // read all of the data from the JSON object, assign every read
+    // data to every elements that needs to be initialized
+    serializer.ReadFloat(friction, "physics.friction");
+    serializer.ReadFloat(threshold, "physics.threshold");
+    serializer.ReadBool(alrJumped, "physics.alrJumped");
+    serializer.ReadBool(isFalling, "physics.isFalling");
+
+    //std::cout << friction << " hello" << std::endl;
+}
+
+void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename) 
+{
+    JSONSerializer serializer;
+
+    // checks if the JSON file can be opened
+    if (!serializer.Open(filename))
+    {
+        Console::GetLog() << "Error: could not open file " << filename << std::endl;
+        return;
+    }
+
+    // retrieve the JSON object from the JSON file
+    nlohmann::json jsonObj = serializer.GetJSONObject();
+
+    // read all of the data from the JSON object, assign every read
+    // data to every elements that needs to be initialized
+    serializer.WriteFloat(friction, "physics.friction", filename);
+    serializer.WriteFloat(threshold, "physics.threshold", filename);
+    serializer.WriteBool(alrJumped, "physics.alrJumped", filename);
+    serializer.WriteBool(isFalling, "physics.isFalling", filename);
+}
+
+
 
 std::string PhysicsSystemECS::getSystemECS() {
     return "PhysicsColliSystemECS";

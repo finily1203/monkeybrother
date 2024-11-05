@@ -127,7 +127,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
 
 
 
-void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth, myMath::Matrix3x3 viewMat) {
+void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;
         return;
@@ -140,15 +140,6 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
 	}
 
     const std::map<char, Character>& characters = it->second;
-
-    glm::mat3 viewMatrix = myMath::Matrix3x3::ConvertToGLMMat3(viewMat);
-    glm::mat4 viewMat4 = {
-        viewMatrix[0][0], viewMatrix[0][1], viewMatrix[0][2], 0,
-        viewMatrix[1][0], viewMatrix[1][1], viewMatrix[1][2], 0,
-        0,             0,             viewMatrix[2][2], 0,
-        viewMatrix[2][0], viewMatrix[2][1], 1,             1
-    };
-    projectionMatrix = projectionMatrix * viewMat4;
 
     assetsManager.GetShader("fontShader")->Bind();
     assetsManager.GetShader("fontShader")->SetUniform3f("textColor", color.GetX(), color.GetY(), color.GetZ());
@@ -264,9 +255,9 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
     assetsManager.GetShader("fontShader")->Unbind();
 }
 
-void FontSystem::draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth, myMath::Matrix3x3 viewMat) {
+void FontSystem::draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth) {
     //renderText(textShader, fontPath, text, x, y, scale, color, maxWidth);
-    renderText(fontId, text, x, y, scale, color, maxWidth, viewMat);
+    renderText(fontId, text, x, y, scale, color, maxWidth);
 }
 
 void FontSystem::cleanup() {
