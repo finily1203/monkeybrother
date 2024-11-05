@@ -76,7 +76,7 @@ public:
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
-	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId, char* textBuffer);
+	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
 	
 	void SaveDebugConfigFromJSON(std::string const& filename);
 

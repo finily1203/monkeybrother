@@ -11,8 +11,8 @@ void LogicSystemECS::cleanup() {}
 void LogicSystemECS::update(float dt) {
 
 	//------------------------------------PLAYER MOVEMENT-----------------------------------//
-	Entity playerEntity = ecsCoordinator.getFirstEntity();
-	playerEntity = ecsCoordinator.getEntityFromID("player");
+	//Entity playerEntity = ecsCoordinator.getFirstEntity();
+	Entity playerEntity = ecsCoordinator.getEntityFromID("player");
 
 	const float maxSpeed = 0.6f;
 

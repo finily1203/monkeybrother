@@ -436,8 +436,9 @@ void ECSCoordinator::test3() {
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
 	//LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 
-	int saveNum = DebugSystem::GetSaveCount();
+	/*int saveNum = DebugSystem::GetSaveCount();
 	if (saveNum == 1)
 	{
 		LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
@@ -447,7 +448,7 @@ void ECSCoordinator::test5() {
 	{
 		saveNum -= 1;
 		LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(saveNum));
-	}
+	}*/
 
 	//std::string entityId = "player";
 	//Entity entity = entityManager->getEntityById(entityId);

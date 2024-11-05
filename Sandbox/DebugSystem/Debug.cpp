@@ -43,6 +43,7 @@ bool DebugSystem::isSliding = false;
 bool DebugSystem::isRedToggled = false;
 bool DebugSystem::isGreenToggled = false;
 bool DebugSystem::isBlueToggled = false;
+bool isSelectingFile = false;
 
 float DebugSystem::defaultObjScaleX;
 float DebugSystem::defaultObjScaleY;
@@ -391,14 +392,6 @@ void DebugSystem::update() {
 			nlohmann::json jsonObj = serializer.GetJSONObject();
 
 			if (ImGui::Button("Create Entity")) {
-				//nlohmann::json jsonData;
-				//std::ifstream inputFile(FilePathManager::GetEntitiesJSONPath());
-
-				//if (inputFile.is_open())
-				//{
-				//	inputFile >> jsonData;
-				//	inputFile.close();
-				//}
 
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 			
@@ -478,7 +471,7 @@ void DebugSystem::update() {
 					
 					ecsCoordinator.addComponent(entityObj, transform);
 
-					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId, nullptr);
+					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId);
 
 					ecsCoordinator.setEntityID(entityObj, entityId);
 				}
@@ -648,8 +641,60 @@ void DebugSystem::update() {
 				newEntities.clear();
 				saveCount++;
 
+				//serializer.WriteInt(saveCount, "Debug.saveCount", FilePathManager::GetIMGUIDebugJSONPath());
 				SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
 				//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Load")) {
+				isSelectingFile = true;
+			}
+
+			if (isSelectingFile) {
+				ImGui::OpenPopup("Load save files");
+			}
+
+			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+			// Create popup modal window
+			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
+				// Your content goes here
+				ImGui::BeginChild("SaveFilesList", ImVec2(300, 200), true);
+
+				for (int i = 0; i < saveCount; i++) {
+					char label[32];
+					sprintf_s(label, "Save File %d", i + 1);
+					int saveNum = saveCount;
+
+					if (ImGui::Button(label, ImVec2(280, 30))) {
+
+						for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+							ecsCoordinator.destroyEntity(entity);
+						}
+						if (saveNum == 1) {
+							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+						}
+						else {
+							saveNum -= 1;
+							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
+						}
+					}
+
+					ImGui::Spacing();  // Add space between buttons
+				}
+				
+				ImGui::EndChild();
+
+				// Close button
+				if (ImGui::Button("Close")) {
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
 			}
 		}
 
@@ -858,15 +903,15 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	serializer.ReadInt(numEntitiesToCreate, "Debug.numEntitiesToCreate");
 	serializer.ReadCharArray(numBuffer,MAXBUFFERSIZE, "Debug.numBuffer");
-	serializer.ReadCharArray(sigBuffer, MAXNAMELENGTH, "Debug.sigBuffer");
+	//serializer.ReadCharArray(sigBuffer, MAXNAMELENGTH, "Debug.sigBuffer");
 	serializer.ReadCharArray(textBuffer, MAXTEXTSIZE, "Debug.textBuffer");
 	serializer.ReadCharArray(textScaleBuffer, MAXBUFFERSIZE, "Debug.textScaleBuffer");
 	serializer.ReadCharArray(xCoordinatesBuffer, MAXBUFFERSIZE, "Debug.xCoordinatesBuffer");
 	serializer.ReadCharArray(yCoordinatesBuffer, MAXBUFFERSIZE, "Debug.yCoordinatesBuffer");
 	serializer.ReadCharArray(xOrientationBuffer, MAXBUFFERSIZE, "Debug.xOrientationBuffer");
 	serializer.ReadCharArray(yOrientationBuffer, MAXBUFFERSIZE, "Debug.yOrientationBuffer");
-	serializer.ReadFloat(xCoordinates, "Debug.xCoordinates");
-	serializer.ReadFloat(yCoordinates, "Debug.yCoordinates");
+	//serializer.ReadFloat(xCoordinates, "Debug.xCoordinates");
+	//serializer.ReadFloat(yCoordinates, "Debug.yCoordinates");
 	serializer.ReadFloat(xOrientation, "Debug.xOrientation");
 	serializer.ReadFloat(yOrientation, "Debug.yOrientation");
 	serializer.ReadFloat(textScale, "Debug.textScale");
@@ -918,7 +963,7 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	serializer.WriteFloat(fontSize, "Debug.fontSize", filename);
+	/*serializer.WriteFloat(fontSize, "Debug.fontSize", filename);
 	serializer.WriteFloat(textBorderSize, "Debug.textBorderSize", filename);
 
 	serializer.WriteFloat(defaultObjScaleX, "Debug.defaultObjScaleX", filename);
@@ -965,10 +1010,10 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 	serializer.WriteDouble(totalLoopTime, "Debug.totalLoopTime", filename);
 	serializer.WriteDouble(lastUpdateTime, "Debug.lastUpdateTime", filename);
 
-	serializer.WriteInt(systemCount, "Debug.systemCount", filename);
+	serializer.WriteInt(systemCount, "Debug.systemCount", filename);*/
 
 	serializer.WriteInt(saveCount, "Debug.saveCount", filename);
-	serializer.WriteFloat(lastPosX, "Debug.lastPosX", filename);
+	//serializer.WriteFloat(lastPosX, "Debug.lastPosX", filename);
 }
 
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
@@ -1043,7 +1088,7 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 }
 
 
-void DebugSystem::ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId, char* textBuffer) {
+void DebugSystem::ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
 	if (!strcmp(items[current_item],"Enemy")) {
 
 		EnemyComponent enemy{};
