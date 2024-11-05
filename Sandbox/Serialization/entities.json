@@ -368,19 +368,19 @@
         },
         "projectionMatrix": [
           [
-            1.0,
+            0.0,
             0.0,
             0.0
           ],
           [
             0.0,
-            1.0,
+            0.0,
             0.0
           ],
           [
             0.0,
             0.0,
-            1.0
+            0.0
           ]
         ],
         "scale": {
@@ -390,7 +390,7 @@
       },
       "font": {
         "text": {
-          "string": "Hello World!"
+          "string": "MonkeHood"
         },
         "textScale": {
           "scale": 1.0
@@ -430,8 +430,8 @@
           "y": 0.0
         },
         "position": {
-          "x": 800.0,
-          "y": 450.0
+          "x": -50.0,
+          "y": 50.0
         },
         "projectionMatrix": [
           [
@@ -457,10 +457,10 @@
       },
       "font": {
         "text": {
-          "string": "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works"
+          "string": "Mossball"
         },
         "textScale": {
-          "scale": 1.0
+          "scale": 0.8
         },
         "color": {
           "x": 0.0,
