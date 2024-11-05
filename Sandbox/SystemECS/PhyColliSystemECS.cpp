@@ -609,41 +609,34 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     float invMass;
     bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
 
-    if (!colliding && !alrJumped && isFalling) {
+    if (!colliding) {
         ApplyForce(player, gravity * GLFWFunctions::delta_time);
-        std::cout << "falling ";
+        //std::cout << "falling ";
     }
 
     if (colliding) {
-        if (GLFWFunctions::move_jump_flag && !alrJumped) {
+        if (!alrJumped) {
             //accForce.SetY(-jumpForce);
 
             //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
-            ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
-            alrJumped = true;
-            isFalling = false;
+            //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+            if(GLFWFunctions::move_jump_flag)
+            {
+                ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+                //std::cout << "jumping ";
+                alrJumped = true;
+            }
         }
+        else
+        {
+            alrJumped = false;
+            accForce.SetY(0);
+        }
+
     }
-
-    //if (alrJumped) {
-    //    ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
-    //}
-
-    //std::cout << accForce.GetY() << std::endl;
-
-
-    if (colliding && vel.GetY() == 0 && !alrJumped) {
-        accForce.SetY(0);
-    }
-
-    if (alrJumped && accForce.GetY() <= 0.f) {
-		alrJumped = false;
-        isFalling = true;
-	}
 
     vel.SetX(vel.GetX() + direction.GetX() * accForce.GetX());
     vel.SetY(vel.GetY() + direction.GetY() * accForce.GetY());
-    //std::cout << vel.GetY() << std::endl;
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
