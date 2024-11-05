@@ -1,6 +1,9 @@
 {
   "entities": [
     {
+      "id": "placeholderentity"
+    },
+    {
       "id": "background",
       "transform": {
         "localTransform": [

@@ -43,7 +43,7 @@ void EntityManager::destroyEntity(Entity entity) {
 		std::cerr << "Entity is not valid" << std::endl;
 		return;
 	}
-
+	entityIds.erase(entity); //erase the entity id
 	entitySig[entity].reset(); //destroy entity from entitySig
 	availableEnt.push(entity); //push back the number to availableEnt
 

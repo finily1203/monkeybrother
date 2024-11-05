@@ -674,6 +674,7 @@ void DebugSystem::update() {
 						for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 							ecsCoordinator.destroyEntity(entity);
 						}
+
 						if (saveNum == 1) {
 							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
 						}
@@ -1141,6 +1142,7 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, rigidBody);
 
+		std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(entityObj).dampening<< "," << std::endl;
 	}
 	else if (!strcmp(items[current_item], "Platform")) {
 
