@@ -95,6 +95,7 @@ float DebugSystem::objWidthSlide;
 float DebugSystem::objHeightSlide;
 int DebugSystem::objCount;
 bool createEntity = false;
+std::vector<Entity> newEntities;
 
 float DebugSystem::objSizeXMax;
 float DebugSystem::objSizeXMin;
@@ -390,6 +391,15 @@ void DebugSystem::update() {
 			nlohmann::json jsonObj = serializer.GetJSONObject();
 
 			if (ImGui::Button("Create Entity")) {
+				//nlohmann::json jsonData;
+				//std::ifstream inputFile(FilePathManager::GetEntitiesJSONPath());
+
+				//if (inputFile.is_open())
+				//{
+				//	inputFile >> jsonData;
+				//	inputFile.close();
+				//}
+
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 			
 					entityObj = ecsCoordinator.createEntity();
@@ -421,10 +431,20 @@ void DebugSystem::update() {
 
 					ecsCoordinator.addComponent(entityObj, transform);
 
-					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId, textBuffer);
-
+					ObjectCreationCondition(items, current_item, serializer, entityObj, entityId);
+					newEntities.push_back(entityObj);
 					ecsCoordinator.setEntityID(entityObj, entityId);
+
+					//nlohmann::json newEntityJSON = AddNewEntityToJSON(transform, entityId);
+					//jsonData["entities"].push_back(newEntityJSON);
 				}
+
+				//std::ofstream outFile(FilePathManager::GetEntitiesJSONPath());
+				//if (outFile.is_open())
+				//{
+				//	outFile << jsonData.dump(2);
+				//	outFile.close();
+				//}
 			}
 			ImGui::SameLine();
 
@@ -590,21 +610,47 @@ void DebugSystem::update() {
 				}
 			}
 
-			//if (ImGui::Button("Save")) 
-			//{
-			//	JSONSerializer serializer;
-			//	std::string saveFile = GenerateSaveJSONFile(saveCount);
+			if (ImGui::Button("Save")) 
+			{
+				JSONSerializer serializer;
+				std::string saveFile = GenerateSaveJSONFile(saveCount);
 
-			//	for (auto entity : ecsCoordinator.getAllLiveEntities())
-			//	{
-			//		ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
-			//	}
+				for (auto entity : ecsCoordinator.getAllLiveEntities())
+				{
+					ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+				}
 
-			//	saveCount++;
+				nlohmann::json jsonData;
+				std::ifstream inputFile(saveFile);
 
-			//	SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
-			//	//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
-			//}
+				if (inputFile.is_open())
+				{
+					inputFile >> jsonData;
+					inputFile.close();
+				}
+
+				for (auto& entity : newEntities) {
+					TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					std::string entityId = ecsCoordinator.getEntityID(entity);
+
+					nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId);
+
+					jsonData["entities"].push_back(newEntityJSON);
+				}
+
+				std::ofstream outputFile(saveFile);
+				if (outputFile.is_open())
+				{
+					outputFile << jsonData.dump(2);
+					outputFile.close();
+				}
+
+				newEntities.clear();
+				saveCount++;
+
+				SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
+				//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
+			}
 		}
 
 		ImGui::End();
@@ -711,6 +757,73 @@ void DebugSystem::UpdateSystemTimes() {
 		}
 
 		lastUpdateTime = currentTime;
+	}
+}
+
+nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId)
+{
+	nlohmann::json entityJSON;
+	nlohmann::json localTransformJSON = nlohmann::json::array();
+	nlohmann::json projectionMatrixJSON = nlohmann::json::array();
+
+	entityJSON["id"] = entityId;
+
+	entityJSON["transform"]["position"]["x"] = transform.position.GetX();
+	entityJSON["transform"]["position"]["y"] = transform.position.GetY();
+
+	entityJSON["transform"]["orientation"]["x"] = transform.orientation.GetX();
+	entityJSON["transform"]["orientation"]["y"] = transform.orientation.GetY();
+
+	entityJSON["transform"]["scale"]["x"] = transform.scale.GetX();
+	entityJSON["transform"]["scale"]["y"] = transform.scale.GetY();
+
+	for (int i = 0; i < 3; ++i)
+	{
+		nlohmann::json transformRowJSON = nlohmann::json::array();
+		nlohmann::json projectionRowJSON = nlohmann::json::array();
+
+		for (int j = 0; j < 3; ++j)
+		{
+			transformRowJSON.push_back(i == j ? 1.0 : 0.0);
+			projectionRowJSON.push_back(i == j ? 1.0 : 0.0);
+		}
+
+		localTransformJSON.push_back(transformRowJSON);
+		projectionMatrixJSON.push_back(projectionRowJSON);
+	}
+
+	entityJSON["transform"]["localTransform"] = localTransformJSON;
+	entityJSON["transform"]["projectionMatrix"] = projectionMatrixJSON;
+
+	return entityJSON;
+}
+
+void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
+{
+	nlohmann::json jsonData;
+	std::ifstream inputFile(FilePathManager::GetEntitiesJSONPath());
+
+	if (inputFile.is_open())
+	{
+		inputFile >> jsonData;
+		inputFile.close();
+	}
+
+	if (jsonData.contains("entities") && jsonData["entities"].is_array())
+	{
+		auto& entitiesArrayObj = jsonData["entities"];
+
+		entitiesArrayObj.erase(std::remove_if(entitiesArrayObj.begin(), entitiesArrayObj.end(), [&entityId](nlohmann::json const& entity) {
+			return entity.contains("id") && entity["id"] == entityId;
+		}), entitiesArrayObj.end());
+	}
+	
+	std::ofstream outFile(FilePathManager::GetEntitiesJSONPath());
+	
+	if (outFile.is_open())
+	{
+		outFile << jsonData.dump(2);
+		outFile.close();
 	}
 }
 
@@ -915,6 +1028,11 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 	}
 
 	return jsonPath;
+}
+
+int DebugSystem::GetSaveCount()
+{
+	return saveCount;
 }
 
 //Check if legacy key is mapped in ImGui key map

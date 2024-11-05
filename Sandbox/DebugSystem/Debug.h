@@ -34,6 +34,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "TransformComponent.h"
 #include "../Serialization/jsonSerialization.h"
 
 #define MAXNAMELENGTH 15
@@ -67,6 +68,11 @@ public:
 	void EndLoop();  //End record game loop time
 
 	void UpdateSystemTimes(); //Update all system loop time
+
+	static int GetSaveCount();
+
+	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
+	void RemoveEntityFromJSON(std::string const& entityId);
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
