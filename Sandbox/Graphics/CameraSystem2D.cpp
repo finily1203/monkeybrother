@@ -32,37 +32,6 @@ void CameraSystem2D::update()
     // If the camera is locked to an entity, update the camera position based on the entity's position
     if (m_LockedComponent && GLFWFunctions::allow_camera_movement == false)
     {
-		glm::vec2 entityPosition = { m_LockedComponent->position.GetX(), m_LockedComponent->position.GetY() };
-        setCameraPosition(entityPosition);
-        if (GLFWFunctions::camera_zoom_in_flag)
-            m_CameraZoom += 0.1f * GLFWFunctions::delta_time;
-        if (GLFWFunctions::camera_zoom_out_flag)
-            m_CameraZoom -= 0.1f * GLFWFunctions::delta_time;
-        // Update the view matrix based on the camera's position, rotation, and zoom
-       
-        translationMatrix[2][0] = -m_CameraPosition.x;
-        translationMatrix[2][1] = -m_CameraPosition.y;
-    }
-    else {
-		// Update the camera position based on user input or other logic
-        if (GLFWFunctions::move_up_flag)
-            m_CameraPosition.y -= 20 * GLFWFunctions::delta_time;
-        if (GLFWFunctions::move_down_flag)
-            m_CameraPosition.y += 20 * GLFWFunctions::delta_time;
-        if (GLFWFunctions::move_left_flag)
-            m_CameraPosition.x += 20 * GLFWFunctions::delta_time;
-        if (GLFWFunctions::move_right_flag)
-            m_CameraPosition.x -= 20 * GLFWFunctions::delta_time;
-        //------------------------------------------------------------//
-		if (GLFWFunctions::camera_zoom_in_flag)
-			m_CameraZoom += 0.1f * GLFWFunctions::delta_time;
-		if (GLFWFunctions::camera_zoom_out_flag)
-			m_CameraZoom -= 0.1f * GLFWFunctions::delta_time;
-		//------------------------------------------------------------//
-		if (GLFWFunctions::camera_rotate_left_flag)
-			m_CameraRotation += 0.1f * GLFWFunctions::delta_time;
-		if (GLFWFunctions::camera_rotate_right_flag)
-			m_CameraRotation -= 0.1f * GLFWFunctions::delta_time;
 		myMath::Vector2D entityPosition = { m_LockedComponent->position.GetX(), m_LockedComponent->position.GetY() };
         setCameraPosition(entityPosition);       
 

@@ -48,8 +48,6 @@ int main() {
 		engine->addSystem(&ecsCoordinator);
 
 		engine->addSystem(&graphicsSystem);
-
-		engine->addSystem(&cameraSystem);
 	
 		engine->addSystem(&debugSystem);
 
