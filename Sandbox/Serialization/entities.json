@@ -1,6 +1,9 @@
 {
   "entities": [
     {
+      "id": "placeholderentity"
+    },
+    {
       "id": "background",
       "transform": {
         "localTransform": [
@@ -390,7 +393,8 @@
       },
       "font": {
         "text": {
-          "string": "MonkeHood"
+          "string": "Hello World!",
+          "BoxWidth": 450.0
         },
         "textScale": {
           "scale": 1.0
@@ -398,7 +402,7 @@
         "color": {
           "x": 0.0,
           "y": 0.0,
-          "z": 255.0
+          "z": 1.0
         },
         "fontId": {
           "fontName": "Antonio"
@@ -457,14 +461,15 @@
       },
       "font": {
         "text": {
-          "string": "Mossball"
+          "string": "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works",
+          "BoxWidth": 450.0
         },
         "textScale": {
           "scale": 0.8
         },
         "color": {
           "x": 0.0,
-          "y": 255.0,
+          "y": 1.0,
           "z": 0.0
         },
         "fontId": {

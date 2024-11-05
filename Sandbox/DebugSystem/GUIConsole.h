@@ -15,6 +15,10 @@ public:
 
 	static void Update(const char* title);
 
+	static void Cleanup();
+
+	~Console();
+
 	static Console& GetLog(); //Called for logging
 
 	Console(Console const&) = delete; //Prevents copying

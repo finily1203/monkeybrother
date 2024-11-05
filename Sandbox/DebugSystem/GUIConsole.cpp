@@ -19,6 +19,18 @@ void Console::Update(const char* title) {
 	GetLog().DrawImpl(title);
 }
 
+void Console::Cleanup() {
+	if (instance) {
+		delete instance;
+		instance = nullptr;
+	}
+}
+
+Console::~Console() {
+	// Save settings before the object is destroyed
+	SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+}
+
 void Console::DrawImpl(const char* title) {
 	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin(title)) {

@@ -29,7 +29,8 @@ namespace monkeybrother {
 }
 
 int main() {
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(54393);
 
 
 	try {
@@ -45,10 +46,13 @@ int main() {
 		AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(audioSystem);
 
+		CameraSystem2D* cameraSystem = new CameraSystem2D();
+		engine->addSystem(cameraSystem);
+
 		engine->addSystem(&ecsCoordinator);
 
 		engine->addSystem(&graphicsSystem);
-	
+
 		engine->addSystem(&debugSystem);
 
 		engine->addSystem(&fontSystem);
@@ -92,7 +96,7 @@ int main() {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
 		CrashLog::LogDebugMessage("Unknown exception caught");
 		CrashLog::LogDebugMessage("End Log");
-		//_CrtDumpMemoryLeaks();
+		_CrtDumpMemoryLeaks();
 	}
 	return 0;
 }

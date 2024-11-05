@@ -41,7 +41,6 @@ void ECSCoordinator::initialise() {
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
-	debugSystem.StartLoopECS();
 	systemManager->update();
 	debugSystem.EndLoopECS();
 	//if (GLFWFunctions::goNextMode) {
@@ -251,6 +250,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
 			serializer.ReadObject(font.color, entityId, "entities.font.color");
 			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+			serializer.ReadObject(font.textBoxWidth, entityId, "entities.font.text.BoxWidth");
 
 			std::cout << font.text << std::endl;
 			std::cout << font.fontId << std::endl;
@@ -436,7 +436,20 @@ void ECSCoordinator::test3() {
 
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
+	//LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+
+	/*int saveNum = DebugSystem::GetSaveCount();
+	if (saveNum == 1)
+	{
+		LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+	}
+	 
+	else
+	{
+		saveNum -= 1;
+		LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(saveNum));
+	}*/
 
 	//std::string entityId = "player";
 	//Entity entity = entityManager->getEntityById(entityId);

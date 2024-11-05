@@ -34,10 +34,12 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "TransformComponent.h"
 #include "../Serialization/jsonSerialization.h"
 
 #define MAXNAMELENGTH 15
 #define MAXBUFFERSIZE 8
+#define MAXTEXTSIZE 1000
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
 class DebugSystem : public GameSystems/*, public System*/ {
@@ -59,19 +61,18 @@ public:
 
 	void StartLoop(); //Start record game loop time
 
-	void StartLoopECS(); //Start record game loop time
-
 	void StartSystemTiming(const char* systemName); //Start record system loop time
 
 	void EndSystemTiming(const char* systemName); //End record system loop time
 
 	void EndLoop();  //End record game loop time
 
-	void EndLoopECS(); //Start record game loop time
-
-	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
-
 	void UpdateSystemTimes(); //Update all system loop time
+
+	static int GetSaveCount();
+
+	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
+	void RemoveEntityFromJSON(std::string const& entityId);
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
@@ -87,14 +88,13 @@ private:
 	static float fontSize;
 	static float textBorderSize;
 	static ImVec4 clearColor;
-	static int numberOfColumn;
-
-	// Track combined ECS percentage
-	static float ecsTotal;
-	static bool foundECS;
 
 	static bool isZooming;
 	static bool isPanning;
+	static bool isSliding;
+	static bool isRedToggled;
+	static bool isGreenToggled;
+	static bool isBlueToggled;
 
 	static float defaultObjScaleX;
 	static float defaultObjScaleY;
@@ -103,13 +103,21 @@ private:
 	static float coordinateMaxLimitsY;
 	static float coordinateMinLimitsX;
 	static float coordinateMinLimitsY;
-
 	static float orientationMaxLimit;
 	static float orientationMinLimit;
+
+	static float fontScaleMaxLimit;
+	static float fontScaleMinLimit;
+	static float fontColorMaxLimit;
+	static float fontColorMinLimit;
+	static float textBoxMaxLimit;
+	static float textBoxMinLimit;
 
 	static int numEntitiesToCreate;
 	static char numBuffer[MAXBUFFERSIZE];
 	static char sigBuffer[MAXNAMELENGTH];
+	static char textBuffer[MAXTEXTSIZE];
+	static char textScaleBuffer[MAXBUFFERSIZE];
 	static char xCoordinatesBuffer[MAXBUFFERSIZE];
 	static char yCoordinatesBuffer[MAXBUFFERSIZE];
 	static char xOrientationBuffer[MAXBUFFERSIZE];
@@ -118,17 +126,21 @@ private:
 	static float yCoordinates;
 	static float xOrientation;
 	static float yOrientation;
+	static float textScale;
 
 	static float objAttributeSliderMaxLength;
 	static float objAttributeSliderMidLength;
 	static float objAttributeSliderMinLength;
 
 	static std::unordered_map<const char*, double> systemTimes;
+	static std::unordered_map<std::string, double> systemStartTimes;
+	static std::unordered_map<std::string, double> systemTotalTimes;
+	static std::unordered_map<std::string, double> accumulatedTimes;
 	static double loopStartTime;
-	static double loopStartTimeECS;
 	static double totalLoopTime;
-	static double totalLoopTimeECS;
+	static double totalECSTime;
 	static double lastUpdateTime;
+	static bool firstFrame;
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
