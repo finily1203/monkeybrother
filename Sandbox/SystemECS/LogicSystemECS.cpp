@@ -16,39 +16,47 @@ void LogicSystemECS::update(float dt) {
 
 	const float maxSpeed = 0.6f;
 
-	//myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
-	//myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
-	//myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
-	//myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
-	//myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
+	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
+	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
+	myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
+	myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
+	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
 	float mass =					ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).mass;
-	//float gravityScale =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
+	myMath::Vector2D gravityScale =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
+	float invMass;
+	if (GLFWFunctions::move_left_flag) {
+		ApplyForce(playerEntity, -force);
+	}
+	else if (GLFWFunctions::move_right_flag) {
+		ApplyForce(playerEntity, force);
+	}
+	else if (GLFWFunctions::move_jump_flag) {
+		//ApplyForce(playerEntity, myMath::Vector2D(0.f, 0.1f));
+		//vel.SetY(0.8f);
+	}
+	else {
 
-	//if (GLFWFunctions::move_left_flag) {
-	//	ApplyForce(playerEntity, -force);
-	//}
-	//else if (GLFWFunctions::move_right_flag) {
-	//	ApplyForce(playerEntity, force);
-	//}
-	//else {
+		//// Apply friction to gradually slow down
+		//if (accForce.GetX() > 0) {
+		//	ApplyForce(playerEntity, -force);
+		//}
+		//else if (accForce.GetX() < 0) {
+		//	ApplyForce(playerEntity, force);
+		//}
 
-	//	// Apply friction to gradually slow down
-	//	if (accForce.GetX() > 0) {
-	//		ApplyForce(playerEntity, -force);
-	//	}
-	//	else if (accForce.GetX() < 0) {
-	//		ApplyForce(playerEntity, force);
-	//	}
+		//if (std::abs(accForce.GetX()) < 0.01f) { // threshold
+		//	vel.SetX(0.f);
+		//	accForce.SetX(0.f);
+		//}
 
-	//	if (std::abs(accForce.GetX()) < 0.01f) { // threshold
-	//		vel.SetX(0.f);
-	//		accForce.SetX(0.f);
-	//	}
-
-	//}
-
-	float invMass = mass > 0.f ? 1.f / mass : 0.f;
+	}
+	
+	//invMass = mass > 0.f ? 1.f / mass : 0.f;
 	//acceleration = accForce * invMass;
+	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
+	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
+	//position.SetX(position.GetX() + vel.GetX());
+	//position.SetY(position.GetY() + vel.GetY());
 
 	 //Clamp speed without interfering with velocity
 	//if (vel.GetX() > maxSpeed) {
@@ -62,7 +70,8 @@ void LogicSystemECS::update(float dt) {
 	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
 
 	//// Dampening
-	////vel.SetX(vel.GetX() * 0.9f);
+	//vel.SetX(vel.GetX() * 0.9f);
+	//vel.SetY(vel.GetY() * 0.9f);
 
 	//position.SetX(position.GetX() + vel.GetX());
 	//position.SetY(position.GetY() + vel.GetY());

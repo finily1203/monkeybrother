@@ -59,17 +59,13 @@ void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
 
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
-    myMath::Vector2D gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
+    myMath::Vector2D& gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
     // Get the directional gravity vector based on the player's orientation
     myMath::Vector2D direction = directionalVector(ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX());
-    
-    float radians = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX() * (M_PI / 180.0f);
-    float rotatedX = gravity.GetX() * sin(radians);
-    float rotatedY = -gravity.GetY() * cos(radians);
-    
+
     // Apply gravity along the rotated gravity vector
-    vel.SetX(vel.GetX() + direction.GetX() * std::abs(rotatedX) * gravity.GetX());
-    vel.SetY(vel.GetY() + direction.GetY() * std::abs(rotatedY) * gravity.GetY());
+    vel.SetX(vel.GetX() + direction.GetX() * gravity.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * gravity.GetY());
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * dt));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * dt));
@@ -300,10 +296,10 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 //}
 
 void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& appliedForce) {
-    myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
-    
-    force.SetX(force.GetX() + appliedForce.GetX());
-    force.SetY(force.GetY() + appliedForce.GetY());
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
+
+    accForce.SetX(accForce.GetX() + appliedForce.GetX());
+    accForce.SetY(accForce.GetY() + appliedForce.GetY());
 
 }
 
@@ -593,65 +589,86 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     myMath::Vector2D plat = ecsCoordinator.getComponent<TransformComponent>(platform).position;
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-    myMath::Vector2D directionVector;
-    myMath::NormalizeVector2D(directionVector, vel);
+    float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
+    myMath::Vector2D direction = directionalVector(rotation);
+
+    float jumpForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump;
+
+    myMath::Vector2D oppDirection = -directionalVector(rotation);
+
+    float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
+    myMath::Vector2D& acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
+
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
+    myMath::Vector2D& gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
 
     myMath::Vector2D normal{};
     float penetration{};
+    float invMass;
+    bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
 
-    if (collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration)) {
-        //printf("playerPos: %f, %f \n", playerPos.x, playerPos.y);
-		//printf("platform: %f, %f \n", plat.x, plat.y);
-        playerPos += normal * penetration;  // Adjust position to resolve penetration
-        //std::cout << directionVector.GetX() << ", " << directionVector.GetY() << std::endl;
-        // change this so that when top of player is in collision instead of checking bottom of platform in collision (direction of player)
-        //// Check if collision is from below
-        //bool isBottomCollision = (normal.y < 0);
+    if (!colliding && !alrJumped && isFalling) {
+        ApplyForce(player, gravity * GLFWFunctions::delta_time);
+        std::cout << "falling ";
+    }
 
-        //if (isBottomCollision) {
-        //    // Invert the y-component of velocity on bottom collision to simulate bounce
-        //    SetVelocity({ GetVelocity().x, -GetVelocity().y });
-        //}
+    if (colliding) {
+        if (GLFWFunctions::move_jump_flag && !alrJumped) {
+            //accForce.SetY(-jumpForce);
 
-        //if (normal.GetX() != 0) {
+            //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
+            ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+            alrJumped = true;
+            isFalling = false;
+        }
+    }
+
+    //if (alrJumped) {
+    //    ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+    //}
+
+    //std::cout << accForce.GetY() << std::endl;
+
+
+    if (colliding && vel.GetY() == 0 && !alrJumped) {
+        accForce.SetY(0);
+    }
+
+    if (alrJumped && accForce.GetY() <= 0.f) {
+		alrJumped = false;
+        isFalling = true;
+	}
+
+    vel.SetX(vel.GetX() + direction.GetX() * accForce.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * accForce.GetY());
+    //std::cout << vel.GetY() << std::endl;
+
+    playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
+    playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
+
+
+    if (colliding) {
+
+
+        //if (-normal.GetX() != direction.GetX() && -normal.GetY() != direction.GetY()) {
         //    ApplyGravity(player, GLFWFunctions::delta_time);
         //}
 
+        // Calculate the component of velocity along the platform (tangent)
+        myMath::Vector2D tangent(-normal.GetY(), normal.GetX()); // Tangent vector along platform
+        float tangentVelocity = myMath::DotProductVector2D(vel, tangent); // Velocity along tangent
+        vel = tangent * tangentVelocity;
 
-        //printf("velocity: %f, %f\n", GetVelocity().x, GetVelocity().y);
-        // Allow jumping
-        if (GLFWFunctions::move_jump_flag) {
-            float jumpForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump *100.f;
-            float rotationAngle = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
-            myMath::Vector2D jumpDirection = directionalVector(rotationAngle);
-            //std::cout << jumpDirection.GetX() << ", " << jumpDirection.GetY() << std::endl;
-            // Apply jump force along rotated direction
-            vel.SetX(jumpDirection.GetX() * jumpForce);
-            vel.SetY(jumpDirection.GetY() * jumpForce);
+        playerPos.SetX(playerPos.GetX() + normal.GetX() * penetration);
+        playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
 
-            //std::cout << vel.GetX() << ", " << vel.GetY() << std::endl;
-            //ApplyGravity(player, GLFWFunctions::delta_time);
-        }
-    }
-    else {
-        ApplyGravity(player, GLFWFunctions::delta_time);
     }
 
-    //std::cout << "Player Position: " << playerPos.GetX() << ", " << playerPos.GetY() << std::endl;
 
-    //if (collisionSystem.checkOBBCollisionSAT(playerOBB, platformOBB, normal, penetration)) {
-    //    // Collision occurred! Handle the response
-    //    auto& transform1 = ecsCoordinator.getComponent<TransformComponent>(player);
+    //std::cout << vel.GetY() << std::endl;
 
-    //    // Move entity1 out of collision
-    //    transform1.position += normal * (penetration);
-    //}
-    //else {
-    //    // No collision, apply gravity
-    //    ApplyGravity(player, GLFWFunctions::delta_time);
-    //}
 }
 
 // AABB collision detection
@@ -1013,30 +1030,30 @@ void PhysicsSystemECS::update(float dt) {
     myMath::Vector2D velocity = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
 
     //if (GetVelocity().y < 0 && !isFalling)
-    if (velocity.GetY() < 0 && !isFalling)
-    {
-        isFalling = true;
-        eventSource.NotifyFall(playerEntity);
-    }
+    //if (velocity.GetY() < 0 && !isFalling)
+    //{
+    //    isFalling = true;
+    //    eventSource.NotifyFall(playerEntity);
+    //}
 
-    //if (GetVelocity().y >= 0 && isFalling)
-    if (velocity.GetY() >= 0 && isFalling)
-    {
-        isFalling = false;
-    }
+    ////if (GetVelocity().y >= 0 && isFalling)
+    //if (velocity.GetY() >= 0 && isFalling)
+    //{
+    //    isFalling = false;
+    //}
 
-    //if (GetVelocity().y > 0 && !alrJumped)
-    if (velocity.GetY() > 0 && !alrJumped)
-    {
-        alrJumped = true;
-        eventSource.NotifyJump(playerEntity);
-    }
+    ////if (GetVelocity().y > 0 && !alrJumped)
+    //if (velocity.GetY() > 0 && !alrJumped)
+    //{
+    //    alrJumped = true;
+    //    eventSource.NotifyJump(playerEntity);
+    //}
 
-    //if (GetVelocity().y <= 0 && alrJumped)
-    if (velocity.GetY() <= 0 && alrJumped)
-    {
-        alrJumped = false;
-    }
+    ////if (GetVelocity().y <= 0 && alrJumped)
+    //if (velocity.GetY() <= 0 && alrJumped)
+    //{
+    //    alrJumped = false;
+    //}
     //HandlePlayerInput(playerEntity);
 
     closestPlatformEntity = FindClosestPlatform(playerEntity);
