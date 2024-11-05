@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  FontSystem.h
+@brief  :  This file contains the declaration of the FontSystem class, which
+           is responsible for rendering the font in the game
+
+* Javier Chua (javierjunliang.chua) :
+*       - Implemented the declaration structure of the FontSystem class which inherits the GameSystems which includes member functions to initialise, update 
+*         and render. Character structure is also implemented to encapsulate the features needed to render each character
+*
+* File Contributions: Javier Chua 
+*
+/*_ _ _ _ ________________________________________________________________________________-\*/
 #ifndef FONTSYSTEM_H
 #define FONTSYSTEM_H
 
@@ -7,7 +23,7 @@
 #include <glm/glm.hpp>
 #include "Shader.h"
 #include "Systems.h"
-//#include "GlobalCoordinator.h"
+
 
 #include "vector3D.h"
 #include "vector2D.h"

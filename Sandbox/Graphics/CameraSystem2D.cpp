@@ -43,13 +43,13 @@ void CameraSystem2D::update()
     else {
 		// Update the camera position based on user input or other logic
         if (GLFWFunctions::move_up_flag)
-            m_CameraPosition.y += 20 * GLFWFunctions::delta_time;
-        if (GLFWFunctions::move_down_flag)
             m_CameraPosition.y -= 20 * GLFWFunctions::delta_time;
+        if (GLFWFunctions::move_down_flag)
+            m_CameraPosition.y += 20 * GLFWFunctions::delta_time;
         if (GLFWFunctions::move_left_flag)
-            m_CameraPosition.x -= 20 * GLFWFunctions::delta_time;
-        if (GLFWFunctions::move_right_flag)
             m_CameraPosition.x += 20 * GLFWFunctions::delta_time;
+        if (GLFWFunctions::move_right_flag)
+            m_CameraPosition.x -= 20 * GLFWFunctions::delta_time;
         //------------------------------------------------------------//
 		if (GLFWFunctions::camera_zoom_in_flag)
 			m_CameraZoom += 0.1f * GLFWFunctions::delta_time;

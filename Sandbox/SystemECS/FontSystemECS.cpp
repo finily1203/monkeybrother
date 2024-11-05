@@ -1,3 +1,23 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  FontSystemECS.cpp
+@brief  :  Implementation of the FontSystemECS class, an ECS-based system for managing and rendering
+           text entities in the game environment. Integrates with FontSystem to provide efficient
+           font rendering within the ECS framework.
+
+* Javier Chua (javierjunliang.chua) :
+        - Developed default and parameterized constructors to initialize FontSystemECS with or without custom font size.
+        - Implemented initialise() to manage the initialization of FontSystem, including font loading with size control.
+        - Added update() to iterate over font entities and render text based on entity components and delta time.
+        - Implemented cleanup() to release resources and reset FontSystemECS to a clean state.
+        - Created getSystemECS() to return the system type as a string for ECS identification purposes.
+
+File Contributions: Javier Chua
+_______________________________________________________________________________________________________________*/
+
 #include "FontSystemECS.h"
 #include "ECSCoordinator.h"
 #include "GlobalCoordinator.h"
@@ -49,16 +69,6 @@ void FontSystemECS::update(float dt) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
             auto& fontTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-           
-            //if (fontSystem->Fonts.find(fontComp.fontPath) == fontSystem->Fonts.end()) {
-            //    fontSystem->loadFont(fontComp.fontPath, fontSize);
-            //}
-
-   //         if (assetsManager.m_Fonts.find(fontComp.fontId) == assetsManager.m_Fonts.end()) {
-			//	assetsManager.LoadFont(fontComp.fontId, 48);
-			//}
-
-            //std::cout << fontComp.fontId << std::endl;
 
             fontSystem->draw(fontComp.text, fontComp.fontId, fontTransform.position.GetX(), fontTransform.position.GetY(), fontComp.textScale, fontComp.color, maxWidth);
         }
