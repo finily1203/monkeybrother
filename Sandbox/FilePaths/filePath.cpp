@@ -103,18 +103,6 @@ std::string FilePathManager::GetIMGUIFontPath()
     return fontFilePath;
 }
 
-// this function retrieves the physics JSON file
-std::string FilePathManager::GetPhysicsPath()
-{
-    // retrieves the executable path
-    std::string execPath = GetExecutablePath();
-
-    // retrieves the physics JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\physicsConfig.json";
-
-    return jsonPath;
-}
-
 // this function retrieves the save JSON file
 std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 {

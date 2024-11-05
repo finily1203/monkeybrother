@@ -57,7 +57,7 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
+    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }
@@ -92,7 +92,7 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
-    void drawDebugAABB(AABBComponent aabb, myMath::Matrix3x3 viewMat);
+    void drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat);
 
 private:
     GLuint m_VAO;

@@ -16,58 +16,60 @@ void LogicSystemECS::update(float dt) {
 
 	const float maxSpeed = 0.6f;
 
-	//myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
-	//myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
-	//myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
-	//myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
-	//myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
+	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
+	myMath::Vector2D acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
+	myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
+	myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
+	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
 	float mass =					ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).mass;
 	//float gravityScale =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
 
-	//if (GLFWFunctions::move_left_flag) {
-	//	ApplyForce(playerEntity, -force);
-	//}
-	//else if (GLFWFunctions::move_right_flag) {
-	//	ApplyForce(playerEntity, force);
-	//}
-	//else {
+	if (GLFWFunctions::move_left_flag) {
+		ApplyForce(playerEntity, -force);
+	}
+	else if (GLFWFunctions::move_right_flag) {
+		ApplyForce(playerEntity, force);
+	}
+	else {
 
-	//	// Apply friction to gradually slow down
-	//	if (accForce.GetX() > 0) {
-	//		ApplyForce(playerEntity, -force);
-	//	}
-	//	else if (accForce.GetX() < 0) {
-	//		ApplyForce(playerEntity, force);
-	//	}
+		// Apply friction to gradually slow down
+		if (accForce.GetX() > 0) {
+			ApplyForce(playerEntity, -force);
+		}
+		else if (accForce.GetX() < 0) {
+			ApplyForce(playerEntity, force);
+		}
 
-	//	if (std::abs(accForce.GetX()) < 0.01f) { // threshold
-	//		vel.SetX(0.f);
-	//		accForce.SetX(0.f);
-	//	}
+		if (std::abs(accForce.GetX()) < 0.01f) { // threshold
+			vel.SetX(0.f);
+			accForce.SetX(0.f);
+		}
 
-	//}
+	}
 
 	float invMass = mass > 0.f ? 1.f / mass : 0.f;
-	//acceleration = accForce * invMass;
+	acceleration = accForce * invMass;
 
-	 //Clamp speed without interfering with velocity
-	//if (vel.GetX() > maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
-	//else if (vel.GetX() < -maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
+	// Clamp speed without interfering with velocity
+	if (vel.GetX() > maxSpeed) {
+		acceleration.SetX(0);
+	}
+	else if (vel.GetX() < -maxSpeed) {
+		acceleration.SetX(0);
+	}
 
-	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
-	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
+	vel.SetX(vel.GetX() + acceleration.GetX() * dt);
+	vel.SetY(vel.GetY() + acceleration.GetY() * dt);
 
-	//// Dampening
-	////vel.SetX(vel.GetX() * 0.9f);
+	// Dampening
+	vel.SetX(vel.GetX() * 0.9f);
 
-	//position.SetX(position.GetX() + vel.GetX());
-	//position.SetY(position.GetY() + vel.GetY());
+	position.SetX(position.GetX() + vel.GetX());
+	position.SetY(position.GetY() + vel.GetY());
 
 	//--------------------------------END OF PLAYER MOVEMENT--------------------------------//
+
+
 	for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 		
@@ -104,7 +106,7 @@ void LogicSystemECS::update(float dt) {
 			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
 			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).accumulatedForce;
 			float eMass					   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).mass;
-			//float eGravityScale		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
+			//float eGravityScale			   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
 
 			if (GLFWFunctions::enemyMoveUp) {
 				eForce.SetX(0.0f);
@@ -166,8 +168,7 @@ void LogicSystemECS::update(float dt) {
 			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
 			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
 
-			// 
-			// ing
+			// Dampening
 			eVel.SetX(eVel.GetX() * 0.9f);
 			eVel.SetY(eVel.GetY() * 0.9f);
 
@@ -176,46 +177,6 @@ void LogicSystemECS::update(float dt) {
 		}
 		//--------------------------------END OF ENEMY MOVEMENT--------------------------------//
 
-		//------------------------------------CAMERA MOVEMENT-----------------------------------//
-		auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
-		cameraSystem.lockToComponent(playerTransform);
-
-		if (cameraSystem.checkLockedComponent() && (GLFWFunctions::allow_camera_movement == false)) {
-			if (GLFWFunctions::camera_zoom_in_flag)
-				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + 0.1f * GLFWFunctions::delta_time);
-			if (GLFWFunctions::camera_zoom_out_flag)
-				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() - 0.1f * GLFWFunctions::delta_time);
-		}
-		else {
-			myMath::Vector2D camPos = cameraSystem.getCameraPosition();
-			if (GLFWFunctions::move_up_flag) {
-				camPos.SetY(camPos.GetY() + (20 * GLFWFunctions::delta_time));
-				cameraSystem.setCameraPosition(camPos);
-			}
-			if (GLFWFunctions::move_down_flag) {
-				camPos.SetY(camPos.GetY() - (20 * GLFWFunctions::delta_time));
-				cameraSystem.setCameraPosition(camPos);
-			}
-			if (GLFWFunctions::move_left_flag) {
-				camPos.SetX(camPos.GetX() - (20 * GLFWFunctions::delta_time));
-				cameraSystem.setCameraPosition(camPos);
-			}
-			if (GLFWFunctions::move_right_flag) {
-				camPos.SetX(camPos.GetX() + (20 * GLFWFunctions::delta_time));
-				cameraSystem.setCameraPosition(camPos);
-			}
-
-			if (GLFWFunctions::camera_zoom_in_flag)
-				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + 0.1f * GLFWFunctions::delta_time);
-			if (GLFWFunctions::camera_zoom_out_flag)
-				cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() - 0.1f * GLFWFunctions::delta_time);
-
-			if (GLFWFunctions::camera_rotate_left_flag)
-				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() + 0.1f * GLFWFunctions::delta_time);
-			if (GLFWFunctions::camera_rotate_right_flag)
-				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
-		}
-		//--------------------------------END OF CAMERA MOVEMENT--------------------------------//
 	}
 }
 

@@ -17,5 +17,6 @@ GraphicsSystem graphicsSystem;
 DebugSystem debugSystem;
 AssetsManager assetsManager;
 FontSystem fontSystem;
-CameraSystem2D cameraSystem;
+
+//CameraSystem2D cameraSystem;
 //AudioSystem audioSystem;

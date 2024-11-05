@@ -27,15 +27,15 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
-//CameraSystem2D cameraSystem;
-
+CameraSystem2D cameraSystem;
+std::vector<GraphicsSystem::GLViewport> vps;
 
 //std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
 void GraphicSystemECS::initialise() {
-	//cameraSystem.initialise();
-	
-	
+	cameraSystem.initialise();
+	vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
+	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 }
 
 //Update function to update the graphics system
@@ -71,14 +71,6 @@ void GraphicSystemECS::update(float dt) {
                 cameraSystem.lockToComponent(transform);
                 cameraSystem.update();
             }
-			//// compute view matrix
-			//if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
-			//	cameraSystem.update();
-			//}
-			//else if (ecsCoordinator.getEntityID(entity) == "player") {
-			//	cameraSystem.lockToComponent(transform);
-			//	cameraSystem.update();
-			//}
 
             // TODO:: Update AABB component inside game loop
             // Press F1 to draw out debug AABB
