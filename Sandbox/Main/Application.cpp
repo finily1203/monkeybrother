@@ -53,6 +53,8 @@ int main() {
 
 		engine->addSystem(&fontSystem);
 
+		engine->addSystem(&cameraSystem);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 		//ecsCoordinator.test3();

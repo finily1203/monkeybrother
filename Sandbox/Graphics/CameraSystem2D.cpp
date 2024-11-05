@@ -1,5 +1,5 @@
 #include "CameraSystem2D.h"
-
+#include "GlobalCoordinator.h"
 CameraSystem2D::CameraSystem2D()
 	: m_CameraPosition(0.0f, 0.0f), m_CameraRotation(0.0f), m_CameraZoom(1.0f), ecsCoordinator(ecsCoordinator), m_LockedComponent(nullptr), m_ViewMatrix(1.0f), m_ProjectionMatrix(1.0f)
 {

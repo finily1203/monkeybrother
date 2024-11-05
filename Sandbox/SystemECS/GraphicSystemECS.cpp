@@ -27,15 +27,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
-CameraSystem2D cameraSystem;
-std::vector<GraphicsSystem::GLViewport> vps;
+//CameraSystem2D cameraSystem;
+
 
 //std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
 void GraphicSystemECS::initialise() {
-	cameraSystem.initialise();
-	vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
-	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
+
 }
 
 //Update function to update the graphics system
