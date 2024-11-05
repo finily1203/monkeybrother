@@ -34,6 +34,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "GraphicsSystem.h"
 #include "WindowSystem.h"
 #include "SystemManager.h"
+#include "TransformComponent.h"
 #include "../Serialization/jsonSerialization.h"
 
 #define MAXNAMELENGTH 15
@@ -72,6 +73,11 @@ public:
 	double SystemPercentage(const char* systemName); //Convert all system loop time to percentage
 
 	void UpdateSystemTimes(); //Update all system loop time
+
+	static int GetSaveCount();
+
+	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
+	void RemoveEntityFromJSON(std::string const& entityId);
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
