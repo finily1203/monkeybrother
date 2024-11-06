@@ -140,13 +140,13 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
     glm::mat3 viewMatrix = myMath::Matrix3x3::ConvertToGLMMat3(viewMat);
 
     // Construct the glm::mat4 view matrix using the 2D transformation
-    glm::mat4 viewMat4 = {
-        viewMatrix[0][0], viewMatrix[1][0], 0, 0,
-        viewMatrix[0][1], viewMatrix[1][1], 0, 0,
-        viewMatrix[0][2], viewMatrix[1][2], 1, 0,
-        0,                0,                0, 1
-    };
-
+    /*glm::mat4 viewMat4 = {
+        viewMatrix[0][0], viewMatrix[0][1], viewMatrix[0][2], 0,
+        viewMatrix[1][0], viewMatrix[1][1], viewMatrix[1][2], 0,
+        0,             0,             viewMatrix[2][2], 0,
+        viewMatrix[2][0], viewMatrix[2][1], 1,             1
+    };*/
+    glm::mat4 viewMat4{ 1 };
     // Combine the projection and view matrices
     glm::mat4 finalProjection = projectionMatrix * viewMat4;
 
