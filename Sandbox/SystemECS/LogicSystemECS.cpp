@@ -25,33 +25,36 @@ void LogicSystemECS::update(float dt) {
 	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
 	float mass =					ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).mass;
 	myMath::Vector2D gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
+	myMath::Vector2D& rotation =		ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
 	float invMass;
-	//if (GLFWFunctions::move_left_flag) {
-	//	ApplyForce(playerEntity, -force);
-	//}
-	//else if (GLFWFunctions::move_right_flag) {
-	//	ApplyForce(playerEntity, force);
-	//}
-	//else if (GLFWFunctions::move_jump_flag) {
-	//	//ApplyForce(playerEntity, myMath::Vector2D(0.f, 0.1f));
-	//	//vel.SetY(0.8f);
-	//}
-	//else {
+	if (GLFWFunctions::keyState[Key::Q]) {
+		//ApplyForce(playerEntity, -force);
+		rotation.SetX(rotation.GetX() + (180.f * dt));
+		std::cout << "current rotation: " << rotation.GetX() << std::endl;
+	}
+	else if (GLFWFunctions::keyState[Key::E]) {
+		//ApplyForce(playerEntity, force);
+		rotation.SetX(rotation.GetX() - (180.f * dt));
+		std::cout << "current rotation: " << rotation.GetX() << std::endl;
 
-	//	// Apply friction to gradually slow down
-	//	if (accForce.GetX() > 0) {
-	//		ApplyForce(playerEntity, -force);
-	//	}
-	//	else if (accForce.GetX() < 0) {
-	//		ApplyForce(playerEntity, force);
-	//	}
+	}
 
-	//	if (std::abs(accForce.GetX()) < 0.01f) { // threshold
-	//		vel.SetX(0.f);
-	//		accForce.SetX(0.f);
-	//	}
+	else {
 
-	//}
+		// Apply friction to gradually slow down
+		//if (accForce.GetX() > 0) {
+		//	ApplyForce(playerEntity, -force);
+		//}
+		//else if (accForce.GetX() < 0) {
+		//	ApplyForce(playerEntity, force);
+		//}
+
+		//if (std::abs(accForce.GetX()) < 0.01f) { // threshold
+		//	vel.SetX(0.f);
+		//	accForce.SetX(0.f);
+		//}
+
+	}
 	
 	//invMass = mass > 0.f ? 1.f / mass : 0.f;
 	//acceleration = accForce * invMass;

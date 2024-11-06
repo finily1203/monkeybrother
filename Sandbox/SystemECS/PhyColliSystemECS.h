@@ -98,6 +98,8 @@ public:
     void ApplyGravity(Entity entity, float dt);
     Entity FindClosestPlatform(Entity player);
     myMath::Vector2D directionalVector(float angle);
+    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxVelocity);
+
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
     //// Handling slope collision for the player
@@ -118,6 +120,7 @@ private:
     static float threshold;
     static bool alrJumped;
     static bool isFalling;
+    static bool isSliding;
     PlayerEventPublisher eventSource;
     std::shared_ptr<Observer> eventObserver;
 
