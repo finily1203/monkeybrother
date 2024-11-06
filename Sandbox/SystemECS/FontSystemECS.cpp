@@ -70,9 +70,6 @@ void FontSystemECS::update(float dt) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
             auto& fontTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-            //std::cout << "Entity ID: " << entity << " Position: ("
-            //    << fontTransform.position.GetX() << ", "
-            //    << fontTransform.position.GetY() << ")" << std::endl;
             fontSystem->draw(fontComp.text, fontComp.fontId, fontTransform.position.GetX(), fontTransform.position.GetY(), fontComp.textScale, fontComp.color, maxWidth, cameraSystem.getViewMatrix());
         }
     }

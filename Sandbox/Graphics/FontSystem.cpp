@@ -47,10 +47,6 @@ void FontSystem::initialise() {
     );
 
 
-    
-    /*assetsManager.GetShader("fontShader")->Bind();
-    assetsManager.GetShader("fontShader")->SetUniformMatrix4f("projection", projectionMatrix);
-    assetsManager.GetShader("fontShader")->Unbind();*/
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
