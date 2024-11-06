@@ -605,45 +605,47 @@ void DebugSystem::update() {
 
 			if (ImGui::Button("Save")) 
 			{
-				JSONSerializer serializer;
-				std::string saveFile = GenerateSaveJSONFile(saveCount);
+				if (saveCount < 2) {
+					std::string saveFile = GenerateSaveJSONFile(saveCount);
 
-				for (auto entity : ecsCoordinator.getAllLiveEntities())
-				{
-					ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+					for (auto entity : ecsCoordinator.getAllLiveEntities())
+					{
+						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
+					}
+
+					nlohmann::json jsonData;
+					std::ifstream inputFile(saveFile);
+
+					if (inputFile.is_open())
+					{
+						inputFile >> jsonData;
+						inputFile.close();
+					}
+
+					for (auto& entity : newEntities) {
+						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						std::string entityId = ecsCoordinator.getEntityID(entity);
+
+						nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
+
+						jsonData["entities"].push_back(newEntityJSON);
+					}
+
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open())
+					{
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+
+					newEntities.clear();
+					if (saveCount < 2)
+						saveCount++;
+
+					//serializer.WriteInt(saveCount, "Debug.saveCount", FilePathManager::GetIMGUIDebugJSONPath());
+					SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
+					//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 				}
-
-				nlohmann::json jsonData;
-				std::ifstream inputFile(saveFile);
-
-				if (inputFile.is_open())
-				{
-					inputFile >> jsonData;
-					inputFile.close();
-				}
-
-				for (auto& entity : newEntities) {
-					TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					std::string entityId = ecsCoordinator.getEntityID(entity);
-
-					nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId);
-
-					jsonData["entities"].push_back(newEntityJSON);
-				}
-
-				std::ofstream outputFile(saveFile);
-				if (outputFile.is_open())
-				{
-					outputFile << jsonData.dump(2);
-					outputFile.close();
-				}
-
-				newEntities.clear();
-				saveCount++;
-
-				//serializer.WriteInt(saveCount, "Debug.saveCount", FilePathManager::GetIMGUIDebugJSONPath());
-				SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
-				//ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, FilePathManager::GetEntitiesJSONPath());
 			}
 
 			ImGui::SameLine();
@@ -664,21 +666,24 @@ void DebugSystem::update() {
 				// Your content goes here
 				ImGui::BeginChild("SaveFilesList", ImVec2(300, 200), true);
 
-				for (int i = 0; i < saveCount; i++) {
-					char label[32];
-					sprintf_s(label, "Save File %d", i + 1);
-					int saveNum = saveCount;
+				if (ImGui::Button("Original File", ImVec2(280, 30))) {
+					for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+						ecsCoordinator.destroyEntity(entity);
+					}
+					ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+				}
 
+				for (int i = 1; i < saveCount; i++) {
+					char label[32];
+					sprintf_s(label, "Save File %d", i);
+					int saveNum = saveCount;
+					
 					if (ImGui::Button(label, ImVec2(280, 30))) {
 
-						for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-							ecsCoordinator.destroyEntity(entity);
-						}
-
-						if (saveNum == 1) {
-							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-						}
-						else {
+						if (saveNum == 2) {
+							for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+								ecsCoordinator.destroyEntity(entity);
+							}
 							saveNum -= 1;
 							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
 						}
@@ -806,43 +811,141 @@ void DebugSystem::UpdateSystemTimes() {
 	}
 }
 
-nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId)
+nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
 	nlohmann::json entityJSON;
 	nlohmann::json localTransformJSON = nlohmann::json::array();
 	nlohmann::json projectionMatrixJSON = nlohmann::json::array();
 
+	// ID
 	entityJSON["id"] = entityId;
 
+	// Transform Component
 	entityJSON["transform"]["position"]["x"] = transform.position.GetX();
 	entityJSON["transform"]["position"]["y"] = transform.position.GetY();
-
 	entityJSON["transform"]["orientation"]["x"] = transform.orientation.GetX();
 	entityJSON["transform"]["orientation"]["y"] = transform.orientation.GetY();
-
 	entityJSON["transform"]["scale"]["x"] = transform.scale.GetX();
 	entityJSON["transform"]["scale"]["y"] = transform.scale.GetY();
 
+	// Transform Matrices
 	for (int i = 0; i < 3; ++i)
 	{
 		nlohmann::json transformRowJSON = nlohmann::json::array();
 		nlohmann::json projectionRowJSON = nlohmann::json::array();
-
 		for (int j = 0; j < 3; ++j)
 		{
-			transformRowJSON.push_back(i == j ? 1.0 : 0.0);
-			projectionRowJSON.push_back(i == j ? 1.0 : 0.0);
+			transformRowJSON.push_back(transform.mdl_xform.GetMatrixValue(i, j));
+			projectionRowJSON.push_back(transform.mdl_to_ndc_xform.GetMatrixValue(i, j));
 		}
-
 		localTransformJSON.push_back(transformRowJSON);
 		projectionMatrixJSON.push_back(projectionRowJSON);
 	}
-
 	entityJSON["transform"]["localTransform"] = localTransformJSON;
 	entityJSON["transform"]["projectionMatrix"] = projectionMatrixJSON;
 
+	// AABB Component
+	if (ecs.hasComponent<AABBComponent>(entity))
+	{
+		AABBComponent& aabb = ecs.getComponent<AABBComponent>(entity);
+		entityJSON["aabb"]["left"] = aabb.left;
+		entityJSON["aabb"]["right"] = aabb.right;
+		entityJSON["aabb"]["top"] = aabb.top;
+		entityJSON["aabb"]["bottom"] = aabb.bottom;
+	}
+
+	// RigidBody Component
+	if (ecs.hasComponent<RigidBodyComponent>(entity))
+	{
+		RigidBodyComponent& rb = ecs.getComponent<RigidBodyComponent>(entity);
+		entityJSON["rigidBody"]["mass"] = rb.mass;
+		entityJSON["rigidBody"]["gravityScale"] = rb.gravityScale;
+		entityJSON["rigidBody"]["jump"] = rb.jump;
+		entityJSON["rigidBody"]["dampening"] = rb.dampening;
+		entityJSON["rigidBody"]["velocity"]["x"] = rb.velocity.GetX();
+		entityJSON["rigidBody"]["velocity"]["y"] = rb.velocity.GetY();
+		entityJSON["rigidBody"]["acceleration"]["x"] = rb.acceleration.GetX();
+		entityJSON["rigidBody"]["acceleration"]["y"] = rb.acceleration.GetY();
+		entityJSON["rigidBody"]["force"]["x"] = rb.force.GetX();
+		entityJSON["rigidBody"]["force"]["y"] = rb.force.GetY();
+		entityJSON["rigidBody"]["accumulatedForce"]["x"] = rb.accumulatedForce.GetX();
+		entityJSON["rigidBody"]["accumulatedForce"]["y"] = rb.accumulatedForce.GetY();
+	}
+
+	// Enemy Component
+	if (ecs.hasComponent<EnemyComponent>(entity))
+	{
+		EnemyComponent& enemy = ecs.getComponent<EnemyComponent>(entity);
+		entityJSON["enemy"]["isEnemy"] = enemy.isEnemy;
+	}
+
+	// Animation Component
+	if (ecs.hasComponent<AnimationComponent>(entity))
+	{
+		AnimationComponent& anim = ecs.getComponent<AnimationComponent>(entity);
+		entityJSON["animation"]["isAnimated"] = anim.isAnimated;
+	}
+
+	// ClosestPlatform Component
+	if (ecs.hasComponent<ClosestPlatform>(entity))
+	{
+		ClosestPlatform& platform = ecs.getComponent<ClosestPlatform>(entity);
+		entityJSON["closestPlatform"]["isClosest"] = platform.isClosest;
+	}
+
+	// Font Component
+	if (ecs.hasComponent<FontComponent>(entity))
+	{
+		FontComponent& font = ecs.getComponent<FontComponent>(entity);
+		entityJSON["font"]["text"]["string"] = font.text;
+		entityJSON["font"]["text"]["BoxWidth"] = font.textBoxWidth;
+		entityJSON["font"]["textScale"]["scale"] = font.textScale;
+		entityJSON["font"]["color"]["x"] = font.color.GetX();
+		entityJSON["font"]["color"]["y"] = font.color.GetY();
+		entityJSON["font"]["color"]["z"] = font.color.GetZ();
+		entityJSON["font"]["fontId"]["fontName"] = font.fontId;
+	}
+
 	return entityJSON;
 }
+
+//nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId)
+//{
+//	nlohmann::json entityJSON;
+//	nlohmann::json localTransformJSON = nlohmann::json::array();
+//	nlohmann::json projectionMatrixJSON = nlohmann::json::array();
+//
+//	entityJSON["id"] = entityId;
+//
+//	entityJSON["transform"]["position"]["x"] = transform.position.GetX();
+//	entityJSON["transform"]["position"]["y"] = transform.position.GetY();
+//
+//	entityJSON["transform"]["orientation"]["x"] = transform.orientation.GetX();
+//	entityJSON["transform"]["orientation"]["y"] = transform.orientation.GetY();
+//
+//	entityJSON["transform"]["scale"]["x"] = transform.scale.GetX();
+//	entityJSON["transform"]["scale"]["y"] = transform.scale.GetY();
+//
+//	for (int i = 0; i < 3; ++i)
+//	{
+//		nlohmann::json transformRowJSON = nlohmann::json::array();
+//		nlohmann::json projectionRowJSON = nlohmann::json::array();
+//
+//		for (int j = 0; j < 3; ++j)
+//		{
+//			transformRowJSON.push_back(i == j ? 1.0 : 0.0);
+//			projectionRowJSON.push_back(i == j ? 1.0 : 0.0);
+//		}
+//
+//		localTransformJSON.push_back(transformRowJSON);
+//		projectionMatrixJSON.push_back(projectionRowJSON);
+//	}
+//
+//	entityJSON["transform"]["localTransform"] = localTransformJSON;
+//	entityJSON["transform"]["projectionMatrix"] = projectionMatrixJSON;
+//
+//	return entityJSON;
+//}
 
 void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
 {
@@ -1023,15 +1126,17 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
 	std::string sourceFilePath;
 
-	if (saveNumber == 1)
+	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+
+	/*if (saveNumber == 0)
 	{
 		sourceFilePath = FilePathManager::GetEntitiesJSONPath();
-	}
+	}*/
 
-	else
+	/*else
 	{
 		sourceFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber - 1) + ".json";
-	}
+	}*/
 
 	//for (int i = saveNumber - 1; i > 0; --i)
 	//{

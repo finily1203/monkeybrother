@@ -26,9 +26,9 @@ File Contributions: Lew Zong Han Owen (100%)
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
-//#include <filesystem>
 #include "GlfwFunctions.h"
 
+#include "ECSCoordinator.h"
 #include "Systems.h"
 #include "matrix3x3.h"
 #include "GraphicsSystem.h"
@@ -71,7 +71,8 @@ public:
 
 	static int GetSaveCount();
 
-	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
+	//nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
+	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
 	void RemoveEntityFromJSON(std::string const& entityId);
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
