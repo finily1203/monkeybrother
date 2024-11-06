@@ -47,11 +47,6 @@ void PhysicsSystemECS::initialise() {
 
 void PhysicsSystemECS::cleanup() {}
 
-myMath::Vector2D PhysicsSystemECS::directionalVector(float angle) {
-    float adjustedAngle = angle * (M_PI / 180.0f) - M_PI / 2;
-
-    return myMath::Vector2D(cos(adjustedAngle), sin(adjustedAngle));
-}
 
 
 // Applying gravity to player when no collision detected (jumping, falling)
@@ -296,7 +291,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 //    ApplyGravity(player, GLFWFunctions::delta_time);
 //}
 
-void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& appliedForce) {
+void Force::ApplyForce(Entity player, const myMath::Vector2D& appliedForce) {
     myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
 
     accForce.SetX(accForce.GetX() + appliedForce.GetX());
@@ -423,6 +418,38 @@ bool CollisionSystemECS::checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, 
 //
 //}
 
+myMath::Vector2D PhysicsSystemECS::directionalVector(float angle) {
+    myMath::Vector2D vector;
+    float adjustedAngle = (angle - 90.0f) * (M_PI / 180.0f);
+
+    float cosValue = cos(adjustedAngle);
+    float sinValue = sin(adjustedAngle);
+
+    if (adjustedAngle == M_PI / 2.f || adjustedAngle == -M_PI / 2.f) {
+        cosValue = 0;
+    }
+
+    vector.SetX(cosValue);
+    vector.SetY(sinValue);
+
+    return vector;
+}
+
+float Force::ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce) {
+	float dotProduct = myMath::DotProductVector2D(direction, -normal);
+	float angle = std::acos(dotProduct); // Angle in radians
+
+	// Calculate force factor based on angle (steeper angle = higher force)
+	float forceFactor = std::sin(angle); // Will be between 0 and 1
+
+	// Apply accumulated force based on angle
+	return maxAccForce * forceFactor;
+}
+
+bool CCF = true;
+bool CS = true;
+bool slantedPlatformFirst = false;
+
 void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) {
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D plat = ecsCoordinator.getComponent<TransformComponent>(platform).position;
@@ -443,78 +470,120 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
     myMath::Vector2D& gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
-
+    float targetForce;
     myMath::Vector2D normal{};
     float penetration{};
     float invMass;
     bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
     
 
-    if (!colliding) {
-        isFalling = true;
-        isSliding = false;
-        //std::cout << "falling ";
-    }
-    
-    if (isFalling) {
-        ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
-    }
+    //if (!colliding) {
+    //    isFalling = true;
+    //    isSliding = false;
+    //    //std::cout << "falling ";
+    //}
+    //
+    //if (isFalling) {
+    //    Force.ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
+    //}
+    //
+    //if(!isFalling && !isSliding){
+    //    accForce.SetX(0.f + gravity.GetX() * mass * GLFWFunctions::delta_time);
+    //    accForce.SetY(0.f + gravity.GetY() * mass * GLFWFunctions::delta_time);
+    //    isSliding = true;
+    //}
+    //
+    //if (isSliding) {
+    //    Force.ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
+    //}
+    //
+    //
+    //
+    //if (colliding) {
+    //
+    //    isFalling = false;
+    //    // Calculate angle between player direction and platform normal
+    //    float dotProduct = myMath::DotProductVector2D(direction, -normal);
+    //    float angle = std::acos(dotProduct); // Angle in radians
+    //
+    //    // Calculate force factor based on angle (steeper angle = higher force)
+    //    float forceFactor = std::sin(angle); // Will be between 0 and 1
+    //
+    //    // Apply accumulated force based on angle
+    //    targetForce = Force.ResultantForce(direction, normal, maxAccForce);
+    //
+    //    if (isSliding) {
+    //        accForce.SetX(targetForce + gravity.GetX() * mass * GLFWFunctions::delta_time);
+    //        accForce.SetY(targetForce + gravity.GetY() * mass * GLFWFunctions::delta_time);
+    //    }
+    //
+    //    if (!alrJumped) {
+    //        //accForce.SetY(-jumpForce);
+    //
+    //        //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
+    //        //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+    //        if(GLFWFunctions::keyState[Key::SPACE])
+    //        {
+    //            Force.ApplyForce(player, myMath::Vector2D(-jumpForce, -jumpForce));
+    //            //std::cout << "jumping ";
+    //            alrJumped = true;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        alrJumped = false;
+    //        //accForce.SetX(0);
+    //        accForce.SetY(0);
+    //    }
+    //
+    //}
 
-    if(!isFalling && !isSliding){
-        accForce.SetX(0.f + gravity.GetX() * mass * GLFWFunctions::delta_time);
-        accForce.SetY(0.f + gravity.GetY() * mass * GLFWFunctions::delta_time);
-        isSliding = true;
-    }
+    Force.ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
 
-    if (isSliding) {
-        ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
-    }
-
-    
+    //if (CCF) {
+    //    if (CS) {
+    //        slantedPlatformFirst = true;
+    //    }
+    //    else {
+    //        slantedPlatformFirst = false;
+    //    }
+    //}
 
     if (colliding) {
-
-        isFalling = false;
-        // Calculate angle between player direction and platform normal
-        float dotProduct = myMath::DotProductVector2D(direction, -normal);
-        float angle = std::acos(dotProduct); // Angle in radians
-
-        // Calculate force factor based on angle (steeper angle = higher force)
-        float forceFactor = std::sin(angle); // Will be between 0 and 1
-
-        // Apply accumulated force based on angle
-        float targetForce = maxAccForce * forceFactor;
-
-        if (isSliding) {
-            accForce.SetX(targetForce + gravity.GetX() * mass * GLFWFunctions::delta_time);
-            accForce.SetY(targetForce + gravity.GetY() * mass * GLFWFunctions::delta_time);
-        }
-
-        if (!alrJumped) {
-            //accForce.SetY(-jumpForce);
-
-            //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
-            //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
-            if(GLFWFunctions::keyState[Key::SPACE])
-            {
-                ApplyForce(player, myMath::Vector2D(-jumpForce, -jumpForce));
-                //std::cout << "jumping ";
-                alrJumped = true;
+        if (CCF) {
+            if (-normal.GetX() == direction.GetX() && -normal.GetY() == direction.GetY()) {
+                slantedPlatformFirst = false;
             }
+            else {
+                slantedPlatformFirst = true;
+            }
+            CCF = false;
         }
-        else
-        {
-            alrJumped = false;
-            //accForce.SetX(0);
+        //std::cout << -normal.GetX() << " " << direction.GetX() << " " << -normal.GetY() << " " << direction.GetY() << std::endl;
+        if (-normal.GetX() == direction.GetX() && -normal.GetY() == direction.GetY()) {
+            acceleration.SetX(0);
+            acceleration.SetY(0);
+            accForce.SetX(0);
             accForce.SetY(0);
         }
 
+        //if (slantedPlatformFirst) {
+        //    targetForce = Force.ResultantForce(direction, normal, maxAccForce);
+        //    accForce.SetX(targetForce);
+        //    accForce.SetY(targetForce);
+        //    slantedPlatformFirst = false;
+        //}
+
+        targetForce = Force.ResultantForce(direction, normal, maxAccForce);
+        accForce.SetX(targetForce);
+        accForce.SetY(targetForce);
+    }
+    else {
+        CCF = true;
     }
 
-
-
     invMass = mass > 0.f ? 1.f / mass : 0.f;
-    acceleration = accForce * invMass;
+    acceleration = accForce * invMass + gravity * GLFWFunctions::delta_time;
 
     vel.SetX(vel.GetX() + direction.GetX() * accForce.GetX());
     vel.SetY(vel.GetY() + direction.GetY() * accForce.GetY());
@@ -533,7 +602,7 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     if (vel.GetY() > maxVelocity) vel.SetY(maxVelocity);
     if (vel.GetY() < -maxVelocity) vel.SetY(-maxVelocity);
 
-    std::cout << vel.GetX() << " " << vel.GetY() << std::endl;
+    //std::cout << vel.GetX() << " " << vel.GetY() << std::endl;
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
