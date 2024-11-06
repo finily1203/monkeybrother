@@ -78,6 +78,12 @@ private:
 
 };
 
+class Force {
+public:
+    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
+    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxSpeed);
+    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
+};
 
 class PhysicsSystemECS : public System
 {
@@ -99,6 +105,7 @@ public:
     Entity FindClosestPlatform(Entity player);
     myMath::Vector2D directionalVector(float angle);
     myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxVelocity);
+    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
 
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
@@ -125,4 +132,5 @@ private:
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
+    Force Force;
 };
