@@ -33,6 +33,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include "GlobalCoordinator.h"
 
+
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
 	x;\
@@ -53,8 +54,10 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
-    idleAnimation = std::make_unique<AnimationData>(16, 0.2f, 4, 4);
+    m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
+    std::vector<GraphicsSystem::GLViewport> vps;
+    vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
+    glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 
 }
 
@@ -237,8 +240,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
         m_AnimationData->Update(deltaTime);
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-        idleAnimation->Update(deltaTime);
-        const auto& idleUVs = idleAnimation->GetCurrentUVs();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
     }
@@ -254,11 +256,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
     }
 }
-void GraphicsSystem::SetCurrentAction(int actionRow) {
-    if (m_AnimationData) {
-        m_AnimationData->SetCurrentAction(actionRow);  // Switch the action (e.g., walk, attack)
-    }
-}
+
 void GraphicsSystem::Render(float deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, 1600, 900);
@@ -345,7 +343,7 @@ void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLui
 
 
 
-myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMatrix) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
 
     Translating =
@@ -377,24 +375,36 @@ myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vecto
         -GLFWFunctions::windowHeight / 2.0f, // bottom
         GLFWFunctions::windowHeight / 2.0f   // top
     );
+
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+
     mdl_xform = Translating * (Rotating * Scaling);
     mdl_to_ndc_xform = projMat * viewMat * mdl_xform;
     myMath::Matrix3x3 final_xform = myMath::Matrix3x3::ConvertToMatrix3x3(mdl_to_ndc_xform);
     return final_xform;
 }
 
-void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
+void GraphicsSystem::drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix) {
 
     glBegin(GL_LINES);
 
     // Set color for debug lines
     glColor3f(1.0f, 0.0f, 0.0f); // Red color for debug lines
 
+    float left, right, top, bottom;
+    left = -transform.scale.GetX() / 2.0f;
+    right = transform.scale.GetX() / 2.0f;
+    top = transform.scale.GetY() / 2.0f;
+    bottom = -transform.scale.GetY() / 2.0f;
+
+
     // Define the corners of the AABB in homogeneous coordinates
-    glm::vec4 bottomLeft(aabb.left, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 bottomRight(aabb.right, aabb.bottom, 0.0f, 1.0f);
-    glm::vec4 topRight(aabb.right, aabb.top, 0.0f, 1.0f);
-    glm::vec4 topLeft(aabb.left, aabb.top, 0.0f, 1.0f);
+    glm::vec4 bottomLeft(left, bottom, 0.0f, 1.0f);
+    glm::vec4 bottomRight(right, bottom, 0.0f, 1.0f);
+    glm::vec4 topRight(right, top, 0.0f, 1.0f);
+    glm::vec4 topLeft(left, top, 0.0f, 1.0f);
+
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
 
     // Create the projection matrix
     glm::mat4 projMat = glm::ortho(
@@ -404,18 +414,28 @@ void GraphicsSystem::drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat) {
         GLFWFunctions::windowHeight / 2.0f   // top
     );
     glm::mat4 viewMat4 = {
-		viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
-		viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
-		0,             0,             viewMat[2][2], 0,
-		viewMat[2][0], viewMat[2][1], 1,             1
+        viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
+        viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
+        0,             0,             viewMat[2][2], 0,
+        viewMat[2][0], viewMat[2][1], 1,             1
     };
+    // Define the rotation angle (in radians)
+    float angle = glm::radians(transform.orientation.GetX()); // Example: 45 degrees
 
-    // Apply the projection matrix to each corner
-    bottomLeft = projMat * viewMat4 *bottomLeft;
-	bottomRight = projMat * viewMat4 * bottomRight;
-	topRight = projMat * viewMat4 * topRight;
-	topLeft = projMat * viewMat4 * topLeft;
+    // Create the rotation matrix
+    glm::mat4 rotationMat = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
+    // Define the translation vector using transform.position
+    glm::vec3 translationVec(transform.position.GetX(), transform.position.GetY(), 0.0f);
+
+    // Create the translation matrix
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translationVec);
+
+    // Apply the projection, view, rotation, and translation matrices to each corner
+    bottomLeft = projMat * viewMat4 * translationMat * rotationMat * bottomLeft;
+    bottomRight = projMat * viewMat4 * translationMat * rotationMat * bottomRight;
+    topRight = projMat * viewMat4 * translationMat * rotationMat * topRight;
+    topLeft = projMat * viewMat4 * translationMat * rotationMat * topLeft;
 
     // Draw the AABB lines using the transformed coordinates
     glVertex2f(bottomLeft.x, bottomLeft.y);   // Bottom left

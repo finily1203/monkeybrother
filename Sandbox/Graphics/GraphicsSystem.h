@@ -37,6 +37,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector2D.h"
 #include "vector3D.h"
 #include "matrix3x3.h"
+#include "TransformComponent.h"
 
 
 class GraphicsSystem : public GameSystems
@@ -57,7 +58,7 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, glm::mat3 viewMat);
+    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
     //Shader* GetShader() const{ return m_Shader.get(); }
@@ -92,7 +93,7 @@ public:
         void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
 
     };
-    void drawDebugAABB(AABBComponent aabb, glm::mat3 viewMat);
+    void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 
 private:
     GLuint m_VAO;

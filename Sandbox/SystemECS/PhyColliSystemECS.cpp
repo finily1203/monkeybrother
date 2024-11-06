@@ -25,19 +25,33 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #define M_PI   3.14159265358979323846264338327950288f
 
+float PhysicsSystemECS::friction;
+float PhysicsSystemECS::threshold;
+bool PhysicsSystemECS::alrJumped;
+bool PhysicsSystemECS::isFalling;
+
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
-PhysicsSystemECS::PhysicsSystemECS() : friction{ 0.1f }, alrJumped{ false }, isFalling{ false }, eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>()) 
+PhysicsSystemECS::PhysicsSystemECS() : eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>())
 {
     eventSource.Register(MessageId::FALL, eventObserver);
     eventSource.Register(MessageId::JUMP, eventObserver);
 }
 
-
-void PhysicsSystemECS::initialise() {}
+void PhysicsSystemECS::initialise() {
+    LoadPhysicsConfigFromJSON(FilePathManager::GetPhysicsPath());
+    //std::cout << friction << " nwihediwwwwwwwwwwwwwwww" << std::endl;
+}
 
 void PhysicsSystemECS::cleanup() {}
+
+myMath::Vector2D PhysicsSystemECS::directionalVector(float angle) {
+    float adjustedAngle = angle * (M_PI / 180.0f) - M_PI / 2;
+
+    return myMath::Vector2D(cos(adjustedAngle), sin(adjustedAngle));
+}
+
 
 // Applying gravity to player when no collision detected (jumping, falling)
 void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
@@ -45,31 +59,16 @@ void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
 
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
-    float grav = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
+    myMath::Vector2D& gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
+    // Get the directional gravity vector based on the player's orientation
+    myMath::Vector2D direction = directionalVector(ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX());
 
-    // Apply gravity to vertical velocity (no friction for vertical motion)
-    vel.SetY(vel.GetY() + grav * dt);
-    
-    // Apply friction to horizontal velocity
-    vel.SetX(vel.GetX() * (1 - friction * dt));
+    // Apply gravity along the rotated gravity vector
+    vel.SetX(vel.GetX() + direction.GetX() * gravity.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * gravity.GetY());
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * dt));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * dt));
-
-
-    //float velocityX = GetVelocity().GetX();
-    //float velocityY = GetVelocity().GetY();
-
-    //velocityY += gravity * dt;
-
-    // Apply friction to horizontal velocity
-    //velocityX *= (1 - friction * dt);
-
-    //ecsCoordinator.getComponent<TransformComponent>(player).position.SetX(ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() + velocityX * dt);
-    //ecsCoordinator.getComponent<TransformComponent>(player).position.SetY(ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() + velocityY * dt);
-
-
-    //SetVelocity({ velocityX, velocityY });
 }
 
 // Find the closest platform to the player
@@ -297,10 +296,10 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player) {
 //}
 
 void PhysicsSystemECS::ApplyForce(Entity player, const myMath::Vector2D& appliedForce) {
-    myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
-    
-    force.SetX(force.GetX() + appliedForce.GetX());
-    force.SetY(force.GetY() + appliedForce.GetY());
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
+
+    accForce.SetX(accForce.GetX() + appliedForce.GetX());
+    accForce.SetY(accForce.GetY() + appliedForce.GetY());
 
 }
 
@@ -590,58 +589,79 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
     myMath::Vector2D plat = ecsCoordinator.getComponent<TransformComponent>(platform).position;
     myMath::Vector2D& vel = ecsCoordinator.getComponent<RigidBodyComponent>(player).velocity;
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-    myMath::Vector2D directionVector;
-    myMath::NormalizeVector2D(directionVector, vel);
+    float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
+    myMath::Vector2D direction = directionalVector(rotation);
+
+    float jumpForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump;
+
+    myMath::Vector2D oppDirection = -directionalVector(rotation);
+
+    float mass = ecsCoordinator.getComponent<RigidBodyComponent>(player).mass;
+    myMath::Vector2D& acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(player).acceleration;
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(player).accumulatedForce;
+
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
+    myMath::Vector2D& gravity = ecsCoordinator.getComponent<RigidBodyComponent>(player).gravityScale;
 
     myMath::Vector2D normal{};
     float penetration{};
+    float invMass;
+    bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
 
-    if (collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration)) {
-        //printf("playerPos: %f, %f \n", playerPos.x, playerPos.y);
-		//printf("platform: %f, %f \n", plat.x, plat.y);
-        playerPos += normal * penetration;  // Adjust position to resolve penetration
-        //std::cout << directionVector.GetX() << ", " << directionVector.GetY() << std::endl;
-        // change this so that when top of player is in collision instead of checking bottom of platform in collision (direction of player)
-        //// Check if collision is from below
-        //bool isBottomCollision = (normal.y < 0);
+    if (!colliding) {
+        ApplyForce(player, gravity * GLFWFunctions::delta_time);
+        //std::cout << "falling ";
+    }
 
-        //if (isBottomCollision) {
-        //    // Invert the y-component of velocity on bottom collision to simulate bounce
-        //    SetVelocity({ GetVelocity().x, -GetVelocity().y });
+    if (colliding) {
+        if (!alrJumped) {
+            //accForce.SetY(-jumpForce);
+
+            //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
+            //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+            if(GLFWFunctions::keyState[Key::SPACE])
+            {
+                ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
+                //std::cout << "jumping ";
+                alrJumped = true;
+            }
+        }
+        else
+        {
+            alrJumped = false;
+            accForce.SetY(0);
+        }
+
+    }
+
+    vel.SetX(vel.GetX() + direction.GetX() * accForce.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * accForce.GetY());
+
+    playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
+    playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
+
+
+    if (colliding) {
+
+
+        //if (-normal.GetX() != direction.GetX() && -normal.GetY() != direction.GetY()) {
+        //    ApplyGravity(player, GLFWFunctions::delta_time);
         //}
 
-        if (normal.GetX() != 0) {
-            ApplyGravity(player, GLFWFunctions::delta_time);
-        }
+        // Calculate the component of velocity along the platform (tangent)
+        myMath::Vector2D tangent(-normal.GetY(), normal.GetX()); // Tangent vector along platform
+        float tangentVelocity = myMath::DotProductVector2D(vel, tangent); // Velocity along tangent
+        vel = tangent * tangentVelocity;
 
+        playerPos.SetX(playerPos.GetX() + normal.GetX() * penetration);
+        playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
 
-        //printf("velocity: %f, %f\n", GetVelocity().x, GetVelocity().y);
-        // Allow jumping
-        if (GLFWFunctions::move_jump_flag) {
-            myMath::Vector2D& force = ecsCoordinator.getComponent<RigidBodyComponent>(player).force;
-            float jumping = ecsCoordinator.getComponent<RigidBodyComponent>(player).jump;
-            
-            vel.SetY(jumping);
-        }
-    }
-    else {
-        // No collision, apply gravity
-        ApplyGravity(player, GLFWFunctions::delta_time);
     }
 
-    //if (collisionSystem.checkOBBCollisionSAT(playerOBB, platformOBB, normal, penetration)) {
-    //    // Collision occurred! Handle the response
-    //    auto& transform1 = ecsCoordinator.getComponent<TransformComponent>(player);
 
-    //    // Move entity1 out of collision
-    //    transform1.position += normal * (penetration);
-    //}
-    //else {
-    //    // No collision, apply gravity
-    //    ApplyGravity(player, GLFWFunctions::delta_time);
-    //}
+    //std::cout << vel.GetY() << std::endl;
+
 }
 
 // AABB collision detection
@@ -1003,30 +1023,30 @@ void PhysicsSystemECS::update(float dt) {
     myMath::Vector2D velocity = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
 
     //if (GetVelocity().y < 0 && !isFalling)
-    if (velocity.GetY() < 0 && !isFalling)
-    {
-        isFalling = true;
-        eventSource.NotifyFall(playerEntity);
-    }
+    //if (velocity.GetY() < 0 && !isFalling)
+    //{
+    //    isFalling = true;
+    //    eventSource.NotifyFall(playerEntity);
+    //}
 
-    //if (GetVelocity().y >= 0 && isFalling)
-    if (velocity.GetY() >= 0 && isFalling)
-    {
-        isFalling = false;
-    }
+    ////if (GetVelocity().y >= 0 && isFalling)
+    //if (velocity.GetY() >= 0 && isFalling)
+    //{
+    //    isFalling = false;
+    //}
 
-    //if (GetVelocity().y > 0 && !alrJumped)
-    if (velocity.GetY() > 0 && !alrJumped)
-    {
-        alrJumped = true;
-        eventSource.NotifyJump(playerEntity);
-    }
+    ////if (GetVelocity().y > 0 && !alrJumped)
+    //if (velocity.GetY() > 0 && !alrJumped)
+    //{
+    //    alrJumped = true;
+    //    eventSource.NotifyJump(playerEntity);
+    //}
 
-    //if (GetVelocity().y <= 0 && alrJumped)
-    if (velocity.GetY() <= 0 && alrJumped)
-    {
-        alrJumped = false;
-    }
+    ////if (GetVelocity().y <= 0 && alrJumped)
+    //if (velocity.GetY() <= 0 && alrJumped)
+    //{
+    //    alrJumped = false;
+    //}
     //HandlePlayerInput(playerEntity);
 
     closestPlatformEntity = FindClosestPlatform(playerEntity);
@@ -1049,6 +1069,54 @@ void PhysicsSystemECS::update(float dt) {
     //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
 
 }
+
+void PhysicsSystemECS::LoadPhysicsConfigFromJSON(std::string const& filename)
+{
+    JSONSerializer serializer;
+
+    // checks if the JSON file can be opened
+    if (!serializer.Open(filename))
+    {
+        Console::GetLog() << "Error: could not open file " << filename << std::endl;
+        return;
+    }
+
+    // retrieve the JSON object from the JSON file
+    nlohmann::json currentObj = serializer.GetJSONObject();
+
+    // read all of the data from the JSON object, assign every read
+    // data to every elements that needs to be initialized
+    serializer.ReadFloat(friction, "physics.friction");
+    serializer.ReadFloat(threshold, "physics.threshold");
+    serializer.ReadBool(alrJumped, "physics.alrJumped");
+    serializer.ReadBool(isFalling, "physics.isFalling");
+
+    //std::cout << friction << " hello" << std::endl;
+}
+
+void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename) 
+{
+    JSONSerializer serializer;
+
+    // checks if the JSON file can be opened
+    if (!serializer.Open(filename))
+    {
+        Console::GetLog() << "Error: could not open file " << filename << std::endl;
+        return;
+    }
+
+    // retrieve the JSON object from the JSON file
+    nlohmann::json jsonObj = serializer.GetJSONObject();
+
+    // read all of the data from the JSON object, assign every read
+    // data to every elements that needs to be initialized
+    serializer.WriteFloat(friction, "physics.friction", filename);
+    serializer.WriteFloat(threshold, "physics.threshold", filename);
+    serializer.WriteBool(alrJumped, "physics.alrJumped", filename);
+    serializer.WriteBool(isFalling, "physics.isFalling", filename);
+}
+
+
 
 std::string PhysicsSystemECS::getSystemECS() {
     return "PhysicsColliSystemECS";

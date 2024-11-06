@@ -2,23 +2,23 @@
   "audioAssets": [
     {
       "audioName": "background",
-      "filePath": "assets/audio/WATER-UNDERWATER_GEN-HDF-25662.wav"
+      "filePath": "assets/audio/Iris_L2_BGM_Loop.wav"
     },
     {
       "audioName": "bubbles",
       "filePath": "assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav"
     },
     {
-      "audioName": "bump",
-      "filePath": "assets/audio/bump.wav"
+      "audioName": "splashSound1",
+      "filePath": "assets/audio/Splash_1.wav"
     },
     {
-      "audioName": "bubblePopping",
-      "filePath": "assets/audio/bubblePop.wav"
+      "audioName": "bubbleForm",
+      "filePath": "assets/audio/Bubbles.wav"
     },
     {
-      "audioName": "slide",
-      "filePath": "assets/audio/slide.wav"
+      "audioName": "splashSound2",
+      "filePath": "assets/audio/Splash_2.wav"
     }
   ],
   "textureAssets": [

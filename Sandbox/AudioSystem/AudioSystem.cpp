@@ -18,13 +18,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : audioChannel(nullptr), currSongIndex(0) {}
+AudioSystem::AudioSystem() : audioChannel(nullptr), soundEffectChannel(nullptr), currSongIndex(0), volume(0.1f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
 
 SystemType AudioSystem::getSystem() {
-	return SystemType::AudioSystemType;
+    return SystemType::AudioSystemType;
 }
 
 //Init function for AudioSystem class to add songs and defaultly play the first song
@@ -45,7 +45,7 @@ void AudioSystem::initialise() {
 
     //loadAudioAssets();
 
-    //playSong("background");
+    playSong("background");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -109,25 +109,42 @@ void AudioSystem::update() {
             GLFWFunctions::audioNext = false;
         }
 
-        result = audioChannel->setVolume(GLFWFunctions::volume);
+        if (GLFWFunctions::keyState[Key::COMMA]) {
+            volume -= 0.1f;
+            if (volume < 0.0f) {
+                volume = 0.0f;
+            }
+            GLFWFunctions::keyState[Key::COMMA] = false;
+            std::cout << volume << std::endl;
+        }
+        else if (GLFWFunctions::keyState[Key::PERIOD]) {
+            volume += 0.1f;
+            if (volume > 1.0f) {
+                volume = 1.0f;
+            }
+            GLFWFunctions::keyState[Key::PERIOD] = false;
+            std::cout << volume << std::endl;
+        }
+
+        result = audioChannel->setVolume(volume);
         if (result != FMOD_OK) {
             std::cout << "FMOD setVolume error! (" << result << ")" << std::endl;
         }
     }
 
     if (GLFWFunctions::bumpAudio) {
-		playSoundEffect("bump");
-		GLFWFunctions::bumpAudio = false;
+        playSoundEffect("splashSound1");
+        GLFWFunctions::bumpAudio = false;
     }
 
-    if (GLFWFunctions::slideAudio) {
-        playSoundEffect("slide");
-        GLFWFunctions::slideAudio = false;
+    if (GLFWFunctions::keyState[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
+        playSoundEffect("splashSound2");
+        GLFWFunctions::keyState[Key::NUM_9] = false;
     }
 
-    if (GLFWFunctions::bubblePopping) {
-        playSoundEffect("bubblePopping");
-        GLFWFunctions::bubblePopping = false;
+    if (GLFWFunctions::keyState[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
+        playSoundEffect("bubbleForm");
+        GLFWFunctions::keyState[Key::NUM_0] = false;
     }
 
     assetsManager.GetAudioSystem()->update();
@@ -152,28 +169,28 @@ void AudioSystem::cleanup() {
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
     if (audioChannel) {
-	    FMOD_RESULT result = audioChannel->stop();
+        FMOD_RESULT result = audioChannel->stop();
         if (result != FMOD_OK) {
-			std::cout << "FMOD stop error! (" << result << ") " << std::endl;
-		}
-		audioChannel = nullptr;
-	}
-	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSong, nullptr, false, &audioChannel);
+            std::cout << "FMOD stop error! (" << result << ") " << std::endl;
+        }
+        audioChannel = nullptr;
+    }
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSong, nullptr, false, &audioChannel);
     if (result != FMOD_OK) {
-		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
-	}
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
 
 }
 
 
 void AudioSystem::playSoundEffect(const std::string& soundName)
 {
-	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
-	audioChannel = nullptr;
-	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &audioChannel);
-	if (result != FMOD_OK) {
-		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
-	}
+    FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
+    soundEffectChannel = nullptr;
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &soundEffectChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
 }
 
 

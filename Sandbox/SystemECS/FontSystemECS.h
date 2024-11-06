@@ -5,7 +5,7 @@
 #include "FontSystem.h"
 #include "ECSCoordinator.h"
 #include "FontComponent.h"
-
+#include "CameraSystem2D.h"
 class FontSystemECS : public System {
 public:
     FontSystemECS();

@@ -7,7 +7,7 @@
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager(){}
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0) {}
 
 AssetsManager::~AssetsManager()
 {
@@ -284,6 +284,11 @@ void AssetsManager::ClearAudio() {
 		audio.second->release();
 	}
 	m_Audio.clear();
+    if (audSystem) {
+        audSystem->close();
+        audSystem->release();
+        audSystem = nullptr;
+    }
 	std::cout << "All audio cleared!" << std::endl;
 }
 

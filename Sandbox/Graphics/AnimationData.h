@@ -9,7 +9,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 *
 * Javier Chua (javierjunliang.chua) :
 *       - Implemented the AnimationData class, which is responsible for managing the
-		  animation data of a game object.
+          animation data of a game object.
 *
 * File Contributions: Javier Chua (100%)
 *
@@ -22,16 +22,19 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <map>
 #include <iostream>
 
-
+enum class Direction {
+    Left,
+    Right
+};
 class AnimationData {
 public:
     AnimationData(int totalFrames, float frameDuration, int columns, int rows);
 
     void Update(float deltaTime);
-    void SetCurrentAction(int action);
+
     void UpdateUVCoordinates();
 
-   
+
     inline const std::vector<glm::vec2>& GetCurrentUVs() const {
         return currentUVs;
     }
@@ -54,7 +57,7 @@ public:
     void TriggerFrameEvents();
 
 private:
-    
+
     int totalFrames;
     int columns;
     int rows;
@@ -69,7 +72,8 @@ private:
 
     float frameWidth;
     float frameHeight;
-
+    Direction lastDirection;
     std::vector<glm::vec2> currentUVs;
     std::map<int, std::vector<std::string>> frameEvents;
+
 };

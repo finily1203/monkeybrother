@@ -17,17 +17,10 @@ public:
 	//and render objects.
 	void update(float dt) override;
 
-	//void setPlayerEntity(Entity player);
-	//void setClosestPlatformEntity(Entity platform);
-
-	//Entity getPlayerEntity();
-	//Entity getClosestPlatformEntity();
-
 	void ApplyForce(Entity entity, const myMath::Vector2D& appliedForce);
 
 	std::string getSystemECS() override;
 
 private:
-	//Entity playerEntity;
-	//Entity closestPlatformEntity;
+
 };

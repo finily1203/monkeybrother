@@ -705,7 +705,7 @@ void DebugSystem::update() {
 		}
 
 		ImGui::End();
-		Console::GetLog() << GLFWFunctions::objMoveMouseCoordX << std::endl;
+		//Console::GetLog() << GLFWFunctions::objMoveMouseCoordX << std::endl;
 
 		ImGuiWindowFlags viewportWindowFlags =
 			ImGuiWindowFlags_NoScrollbar |

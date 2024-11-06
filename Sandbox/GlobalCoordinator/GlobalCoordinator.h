@@ -34,6 +34,6 @@ enum SystemType { //For perfomance viewer
 extern AssetsManager assetsManager;
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;
-//extern CameraSystem2D cameraSystem;
+extern CameraSystem2D cameraSystem;
 extern DebugSystem debugSystem;
 extern FontSystem fontSystem;

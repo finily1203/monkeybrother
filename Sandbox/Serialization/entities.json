@@ -75,7 +75,7 @@
           ]
         ],
         "orientation": {
-          "x": 0.0,
+          "x": 0.00,
           "y": 0.0
         },
         "position": {
@@ -195,7 +195,7 @@
           ]
         ],
         "orientation": {
-          "x": 0.0,
+          "x": 0.00,
           "y": 0.0
         },
         "position": {
@@ -232,26 +232,29 @@
       },
       "rigidBody": {
         "mass": 1.0,
-        "gravityScale": -0.98,
-        "jump": 0.8,
-        "dampening": 0.9,
-        "velocity": {
-          "x": 0.0,
-          "y": 0.0
+        "gravityScale": {
+          "x": 0.98,
+          "y": 0.98
+          },
+          "jump": 1.2,
+          "dampening": 0.9,
+          "velocity": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "force": {
+            "x": 0.05,
+            "y": 0.05
+          },
+          "accumulatedForce": {
+            "x": 0.0,
+            "y": 0.0
+          }
         },
-        "acceleration": {
-          "x": 0.0,
-          "y": 0.0
-        },
-        "force": {
-          "x": 0.05,
-          "y": 0.0
-        },
-        "accumulatedForce": {
-          "x": 0.0,
-          "y": 0.0
-        }
-      },
       "animation": {
         "isAnimated": true
       }
@@ -368,19 +371,19 @@
         },
         "projectionMatrix": [
           [
-            1.0,
+            0.0,
             0.0,
             0.0
           ],
           [
             0.0,
-            1.0,
+            0.0,
             0.0
           ],
           [
             0.0,
             0.0,
-            1.0
+            0.0
           ]
         ],
         "scale": {
@@ -431,8 +434,8 @@
           "y": 0.0
         },
         "position": {
-          "x": 800.0,
-          "y": 450.0
+          "x": -50.0,
+          "y": 50.0
         },
         "projectionMatrix": [
           [
@@ -462,7 +465,7 @@
           "BoxWidth": 450.0
         },
         "textScale": {
-          "scale": 1.0
+          "scale": 0.8
         },
         "color": {
           "x": 0.0,
