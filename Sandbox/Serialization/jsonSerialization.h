@@ -41,7 +41,7 @@ public:
 	void WriteSpecificObject(myMath::Vector3D const&, nlohmann::json&);
 	void WriteSpecificObject(float const&, nlohmann::json&);
 	void WriteSpecificObject(bool const&, nlohmann::json&);
-	//void ReadSpecificObject(std::string&, nlohmann::json const&);
+	void WriteSpecificObject(std::string const&, nlohmann::json&);
 
 	template <typename T>
 	void ReadObject(T&, std::string const&, std::string const&);
