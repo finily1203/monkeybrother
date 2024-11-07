@@ -72,16 +72,47 @@ public:
 
     // PROTOTYPING: Circle vs Rectangle collision detection
     //CollisionSide circleRectCollision(float circleX, float circleY, float circleRadius, Entity platform);
+    
+    void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
 
+    //bool GetCheckCollisionFirstTime() const { return checkCollisionFirstTime; }
+    //void SetCheckCollisionFirstTime(bool newCheckCollisionFirstTime) { checkCollisionFirstTime = newCheckCollisionFirstTime; }
+
+    //bool GetCheckSlanted() const { return checkSlanted; }
+    //void SetCheckSlanted(bool newCheckSlanted) { checkSlanted = newCheckSlanted; }
+
+    //bool GetSlantedPlatformFirstTime() const { return slantedPlatformFirstTime; }
+    //void SetSlantedPlatformFirstTime(bool newSlantedPlatformFirstTime) { slantedPlatformFirstTime = newSlantedPlatformFirstTime; }
 private:
     myMath::Vector2D collisionPoint;
-
+    //static bool checkCollisionFirstTime; 
+    //static bool checkSlanted;
+    //static bool slantedPlatformFirstTime;
 };
 
-class Force {
+//class Force
+//{
+//public:
+//
+//    Force(myMath::Vector2D direction, float magnitude) : direction(direction), magnitude(magnitude) {}
+//
+//	myMath::Vector2D GetDirection() const { return direction; }
+//	void SetDirection(myMath::Vector2D newDirection) { direction = newDirection; }
+//
+//	float GetMagnitude() const { return magnitude; }
+//	void SetMagnitude(float newMagnitude) { magnitude = newMagnitude; }
+//private:
+//    myMath::Vector2D direction;
+//    float magnitude;
+//};
+
+class ForceManager
+{
 public:
-    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
-    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxSpeed);
+    void AddForce(Entity player, const myMath::Vector2D& appliedForce);
+    void ClearForce(Entity player);
+    void ApplyForce(Entity player, myMath::Vector2D direction, float magnitude);
+
     float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
 };
 
@@ -96,31 +127,27 @@ public:
 
     std::string getSystemECS() override;
 
-    // Getters and Setters
     bool GetAlrJumped() const { return alrJumped; }
-
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
-    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
-    void ApplyGravity(Entity entity, float dt);
-    Entity FindClosestPlatform(Entity player);
-    myMath::Vector2D directionalVector(float angle);
-    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxVelocity);
-    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
 
+    Entity FindClosestPlatform(Entity player);
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
-    //// Handling slope collision for the player
-    //void HandleSlopeCollision(Entity closestPlatform, Entity player);
-
-    //// Handling AABB collision for the player
-    //void HandleAABBCollision(Entity player, Entity closestPlatform);
-
-    // Player input handling for movement (left: 'A', right: 'D')
-    void HandlePlayerInput(Entity player);
+    myMath::Vector2D directionalVector(float angle);
+    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxVelocity);
 
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
 
+    // MILESTONE 1
+    //// Handling slope collision for the player
+    //void HandleSlopeCollision(Entity closestPlatform, Entity player);
+    //// Handling AABB collision for the player
+    //void HandleAABBCollision(Entity player, Entity closestPlatform);
+    // Player input handling for movement (left: 'A', right: 'D')
+
+    void HandlePlayerInput(Entity player);
+    void ApplyGravity(Entity entity, float dt);
 
 private:
     static float friction;
@@ -132,5 +159,6 @@ private:
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
-    Force Force;
+    ForceManager forceManager;
+    //Force Force;
 };

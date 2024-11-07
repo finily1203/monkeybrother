@@ -83,7 +83,7 @@
     <ClInclude Include="Graphics\CameraSystem2D.h" />
     <ClInclude Include="Components\EnemyComponent.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
-    <ClInclude Include="Components\RigidBodyComponent.h" />
+    <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="Engine\EngineDefinitions.h" />

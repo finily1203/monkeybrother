@@ -230,13 +230,13 @@
         "right": 350.0,
         "top": 250.0
       },
-      "rigidBody": {
+      "forces": {
         "mass": 1.0,
         "gravityScale": {
           "x": 9.8,
           "y": 9.8
           },
-          "jump": 15.0,
+          "jump": 0.0,
           "dampening": 0.9,
           "velocity": {
             "x": 0.0,
@@ -253,8 +253,9 @@
           "accumulatedForce": {
             "x": 0.0,
             "y": 0.0
-          }
-        },
+          },
+          "prevForce": 0.0
+      },
       "animation": {
         "isAnimated": true
       }
@@ -315,7 +316,7 @@
         "top": 250.0,
         "bottom": 150.0
       },
-      "rigidBody": {
+      "forces": {
         "mass": 1.0,
         "gravityScale": -0.98,
         "jump": 0.8,

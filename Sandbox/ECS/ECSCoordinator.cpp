@@ -227,19 +227,20 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, enemy);
 		}
 
-		if (entityData.contains("rigidBody"))
+		if (entityData.contains("forces"))
 		{
-			RigidBodyComponent rigidBody{};
-			serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
-			serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
-			serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
-			serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
-			serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
-			serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
-			serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
-			serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+			PhysicsComponent forces{};
+			serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
+			serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
+			serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
+			serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
+			serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+			serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
+			serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+			serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+			serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForce");
 
-			ecs.addComponent(entityObj, rigidBody);
+			ecs.addComponent(entityObj, forces);
 		}
 
 		if (entityData.contains("font"))
@@ -525,7 +526,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<ClosestPlatform>();
 	registerComponent<AnimationComponent>();
 	registerComponent<EnemyComponent>();
-	registerComponent<RigidBodyComponent>();
+	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
@@ -547,7 +548,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 		physicsSystemSig.set(getComponentType<AABBComponent>(), true);
 		physicsSystemSig.set(getComponentType<MovementComponent>(), true);
 		physicsSystemSig.set(getComponentType<ClosestPlatform>(), true);
-		physicsSystemSig.set(getComponentType<RigidBodyComponent>(), true);
+		physicsSystemSig.set(getComponentType<PhysicsComponent>(), true);
 	}
 
 	physicsSystem->initialise();

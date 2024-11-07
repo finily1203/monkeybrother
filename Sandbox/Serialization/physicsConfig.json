@@ -6,5 +6,10 @@
     "isFalling": false,
     "isSliding": false,
     "eventSource": "PlayerEventSource"
+  },
+  "collision": {
+    "checkCollisionFirstTime": true,
+    "checkSlanted": true,
+    "slantedPlatformFirstTime": false
   }
 }

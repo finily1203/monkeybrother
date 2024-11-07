@@ -1098,19 +1098,19 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		MovementComponent movement{};
 		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
 
-		RigidBodyComponent rigidBody{};
-		serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
-		serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
-		serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
-		serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
-		serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
-		serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
-		serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
-		serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+		PhysicsComponent forces{};
+		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
+		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
+		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
+		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
+		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
+		serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
 
 		ecsCoordinator.addComponent(entityObj, enemy);
 		ecsCoordinator.addComponent(entityObj, movement);
-		ecsCoordinator.addComponent(entityObj, rigidBody);
+		ecsCoordinator.addComponent(entityObj, forces);
 
 	}
 	else if (!strcmp(items[current_item], "Player")) {
@@ -1127,22 +1127,22 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		AnimationComponent animation{};
 		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
-		RigidBodyComponent rigidBody{};
-		serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
-		serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
-		serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
-		serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
-		serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
-		serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
-		serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
-		serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+		PhysicsComponent forces{};
+		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
+		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
+		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
+		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
+		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
+		serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, animation);
-		ecsCoordinator.addComponent(entityObj, rigidBody);
+		ecsCoordinator.addComponent(entityObj, forces);
 
-		std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(entityObj).dampening<< "," << std::endl;
+		std::cout << ecsCoordinator.getComponent<PhysicsComponent>(entityObj).dampening<< "," << std::endl;
 	}
 	else if (!strcmp(items[current_item], "Platform")) {
 

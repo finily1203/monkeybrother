@@ -19,12 +19,12 @@ void LogicSystemECS::update(float dt) {
 	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
 
 	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
-	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).acceleration;
-	myMath::Vector2D force =		ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).force;
-	myMath::Vector2D& vel =			ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).velocity;
-	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).accumulatedForce;
-	float mass =					ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).mass;
-	myMath::Vector2D gravityScale = ecsCoordinator.getComponent<RigidBodyComponent>(playerEntity).gravityScale;
+	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).acceleration;
+	myMath::Vector2D force =		ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+	myMath::Vector2D& vel =			ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).velocity;
+	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).accumulatedForce;
+	float mass =					ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
+	myMath::Vector2D gravityScale = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
 	myMath::Vector2D& rotation =		ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
 	float invMass;
 	if (GLFWFunctions::keyState[Key::Q]) {
@@ -88,11 +88,11 @@ void LogicSystemECS::update(float dt) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 		
 		//------------------------------------ENEMY MOVEMENT-----------------------------------//
-		bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
+		bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
 		bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 
 		if (hasMovement && hasEnemy) {
-			myMath::Vector2D velocity = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
+			myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
 			if (GLFWFunctions::keyState[Key::LEFT]) {
 				transform.orientation.SetY(transform.orientation.GetY() + (180.f * dt));
@@ -115,12 +115,12 @@ void LogicSystemECS::update(float dt) {
 			}
 
 			myMath::Vector2D& ePos		   = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-			myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<RigidBodyComponent>(entity).acceleration;
-			myMath::Vector2D eForce		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).force;
-			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).velocity;
-			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).accumulatedForce;
-			float eMass					   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).mass;
-			//float eGravityScale			   = ecsCoordinator.getComponent<RigidBodyComponent>(entity).gravityScale;
+			myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
+			myMath::Vector2D eForce		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
+			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
+			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
+			float eMass					   = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
+			//float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
 
 			if (GLFWFunctions::keyState[Key::I]) {
 				eForce.SetX(0.0f);
@@ -241,7 +241,7 @@ void LogicSystemECS::update(float dt) {
 }
 
 void LogicSystemECS::ApplyForce(Entity entity, const myMath::Vector2D& appliedForce) {
-	myMath::Vector2D& accForce = ecsCoordinator.getComponent<RigidBodyComponent>(entity).accumulatedForce;
+	myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
 
 	accForce.SetX(accForce.GetX() + appliedForce.GetX());
 	accForce.SetY(accForce.GetY() + appliedForce.GetY());

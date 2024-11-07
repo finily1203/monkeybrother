@@ -39,7 +39,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
-#include "RigidBodyComponent.h"
+#include "PhysicsComponent.h"
 #include "FontComponent.h"
 
 #include <iostream>
