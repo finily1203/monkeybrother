@@ -587,7 +587,7 @@ void DebugSystem::update() {
 					ImGui::Separator();
 					
 				}
-				else if (ecsCoordinator.hasComponent<MovementComponent>(entity) //Player specific data modification features
+				else if (ecsCoordinator.hasComponent<RigidBodyComponent>(entity) //Player specific data modification features
 					&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
 					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					auto signature = ecsCoordinator.getEntityID(entity);
@@ -1226,9 +1226,6 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
 		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
 
-		MovementComponent movement{};
-		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
-
 		AnimationComponent animation{};
 		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
@@ -1243,11 +1240,9 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
 
 		ecsCoordinator.addComponent(entityObj, aabb);
-		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, rigidBody);
 
-		std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(entityObj).dampening<< "," << std::endl;
 	}
 	else if (!strcmp(items[itemIndex], "Platform")) {
 

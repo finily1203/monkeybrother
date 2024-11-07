@@ -11,6 +11,7 @@ AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textur
 
 AssetsManager::~AssetsManager()
 {
+    ClearAudio();
 }
 
 //leave empty for now

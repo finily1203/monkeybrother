@@ -30,14 +30,14 @@ namespace monkeybrother {
 
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(54393);
+	_CrtSetBreakAlloc(183);
 
 
 	try {
 		CrashLog::SignalChecks();
 		CrashLog::Initialise();
 		Engine* engine = new Engine();
-
+		
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
 
@@ -57,9 +57,10 @@ int main() {
 		engine->addSystem(&cameraSystem);
 
 		engine->initialiseSystem();
+	
 		ecsCoordinator.initialiseSystemsAndComponents();
 		//ecsCoordinator.test3();
-
+		
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			//DebugSystem::StartLoop(); //Get time for start of gameloop
 
@@ -93,7 +94,8 @@ int main() {
 		std::cerr << "Program crashed! Check crash-log.txt for more information" << std::endl;
 		CrashLog::LogDebugMessage("Unknown exception caught");
 		CrashLog::LogDebugMessage("End Log");
-		_CrtDumpMemoryLeaks();
+		
 	}
+	_CrtDumpMemoryLeaks();
 	return 0;
 }

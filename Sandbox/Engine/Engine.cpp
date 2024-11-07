@@ -30,18 +30,14 @@ void Engine::initialiseSystem() {
 	for (auto& system : m_systems) {
 		system->initialise();
 	}
-
-	//ecsCoordinator.initialise();
 	
 }
 
 //Update all systems. Should be used after all systems are initialised
 void Engine::updateSystem() {
 	debugSystem.StartLoop();
-	//ecsCoordinator.update();
 
 	for (auto& system : m_systems) {
-		//Console::GetLog() << "System type: " << static_cast<int>(system->getSystem()) << std::endl;
 		//Start time record for perfomance viewer
 		switch (system->getSystem()) {
 		case SystemType::AudioSystemType:
@@ -122,7 +118,6 @@ void Engine::cleanupSystem() {
 		}
 	}
 
-	//ecsCoordinator.cleanup();
 	
 }
 
