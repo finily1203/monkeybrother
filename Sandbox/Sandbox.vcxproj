@@ -190,6 +190,7 @@
     <ClInclude Include="MessageSystem\observer.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
+    <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />

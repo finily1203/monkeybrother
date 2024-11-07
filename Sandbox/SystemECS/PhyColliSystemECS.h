@@ -13,6 +13,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
 #include "vector2D.h"
+#include "Force.h"
 
 enum CollisionSide {
     NONE,
@@ -90,32 +91,9 @@ private:
     //static bool slantedPlatformFirstTime;
 };
 
-class Force
-{
-public:
 
-    Force(myMath::Vector2D direction, float magnitude) : direction(direction), magnitude(magnitude) {}
 
-	myMath::Vector2D GetDirection() const { return direction; }
-	void SetDirection(myMath::Vector2D newDirection) { direction = newDirection; }
 
-	float GetMagnitude() const { return magnitude; }
-	void SetMagnitude(float newMagnitude) { magnitude = newMagnitude; }
-
-private:
-    myMath::Vector2D direction;
-    float magnitude;
-};
-
-class ForceManager
-{
-public:
-    void AddForce(Entity player, const myMath::Vector2D& appliedForce);
-    void ClearForce(Entity player);
-    void ApplyForce(Entity player, myMath::Vector2D direction, float magnitude);
-
-    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
-};
 
 class PhysicsSystemECS : public System
 {
@@ -163,5 +141,5 @@ private:
 
     CollisionSystemECS collisionSystem;
     ForceManager forceManager;
-    Force Force;
+    //Force Force;
 };

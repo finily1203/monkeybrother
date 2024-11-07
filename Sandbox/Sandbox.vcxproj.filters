@@ -87,6 +87,7 @@
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="Engine\EngineDefinitions.h" />
+    <ClInclude Include="SystemECS\Force.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

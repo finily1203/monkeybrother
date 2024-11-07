@@ -1,5 +1,6 @@
 #pragma once
 #include "vector2D.h"
+#include "Force.h"
 
 struct PhysicsComponent
 {
