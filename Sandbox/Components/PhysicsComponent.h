@@ -9,9 +9,11 @@ struct PhysicsComponent
 	float jump;
 	float dampening;
 	myMath::Vector2D velocity;
+	float maxVelocity;
 	myMath::Vector2D acceleration;
 	Force force;
 	myMath::Vector2D accumulatedForce;
+	float maxAccumulatedForce;
 	float prevForce;
 	float targetForce;
 

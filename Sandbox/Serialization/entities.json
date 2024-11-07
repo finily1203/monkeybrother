@@ -242,6 +242,7 @@
           "x": 0.0,
           "y": 0.0
         },
+        "maxVelocity": 200.0,
         "acceleration": {
           "x": 0.0,
           "y": 0.0
@@ -257,6 +258,7 @@
           "x": 0.0,
           "y": 0.0
         },
+        "maxAccumulatedForce": 40.0,
         "prevForce": 0.0,
         "targetForce": 0.0
         },
@@ -332,6 +334,7 @@
           "x": 0.0,
           "y": 0.0
         },
+        "maxVelocity": 0.0,
         "acceleration": {
           "x": 0.0,
           "y": 0.0
@@ -347,6 +350,7 @@
           "x": 0.0,
           "y": 0.0
         },
+        "maxAccumulatedForce": 0.0,
         "prevForce": 0.0,
         "targetForce": 0.0
       },
