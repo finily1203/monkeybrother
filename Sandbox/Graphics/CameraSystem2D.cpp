@@ -1,3 +1,22 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  CameraSystem2D.cpp
+@brief  :  This file contains the implementation of the CameraSystem2D class. It is 
+           responsible for managing the camera's position,
+           rotation, and zoom, as well as updating the view matrix based on these values. 
+           The CameraSystem2D class also provides functionality to lock the camera to an
+           entity's position and orientation.
+		
+
+ File Contributions: Liu YaoTing (100%)
+
+/*_______________________________________________________________________________________________________________*/
+
+
+
 #include "CameraSystem2D.h"
 #include "GlobalCoordinator.h"
 
