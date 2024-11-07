@@ -190,4 +190,9 @@ void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::s
 	// example will be a matrix3x3 object and a vector2D object can all
 	// be written by calling this function
 	WriteSpecificObject(gameObj, *currentObj);
+
+	std::cout << "After write - JSON content: " << currentObj->dump(2) << std::endl;
+
+	// Also verify the full JSON object
+	std::cout << "Full JSON: " << jsonObject.dump(2) << std::endl;
 }

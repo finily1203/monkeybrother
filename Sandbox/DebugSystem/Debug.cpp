@@ -558,6 +558,9 @@ void DebugSystem::update() {
 						if (ImGui::SliderFloat("Text Box", &textBoxSlide, textBoxMinLimit, textBoxMaxLimit, "%.1f")) {
 							fontComp.textBoxWidth = textBoxSlide;
 						}
+						if (ImGui::Button("Remove")) {
+							ecsCoordinator.destroyEntity(entity);
+						}
 						ImGui::TreePop();
 
 					}
@@ -690,9 +693,15 @@ void DebugSystem::update() {
 						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 						std::string entityId = ecsCoordinator.getEntityID(entity);
 
+						std::cout << "Before AddNewEntityToJSON for " << entityId << ": " << jsonData.dump(2) << std::endl;
+
+
 						nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
 
+						std::cout << "New entity JSON for " << entityId << ": " << newEntityJSON.dump(2) << std::endl;
+
 						jsonData["entities"].push_back(newEntityJSON);
+						std::cout << "After push_back: " << jsonData.dump(2) << std::endl;
 					}
 
 					std::ofstream outputFile(saveFile);
@@ -725,7 +734,7 @@ void DebugSystem::update() {
 
 			// Create popup modal window
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-				Console::GetLog() << fileWindowWidth << "," << fileWindowHeight << " gay" << std::endl;
+	
 				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 				if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
