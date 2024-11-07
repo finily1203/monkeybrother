@@ -143,6 +143,7 @@ DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 //Destructor for DebugSystem class
 DebugSystem::~DebugSystem() {}
 
+//Initialize ImGui settings and configuration
 void DebugSystem::initialise() {
 	LoadDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
 	IMGUI_CHECKVERSION();
@@ -172,9 +173,10 @@ void DebugSystem::initialise() {
 
 }
 
+//Handle rendering of the debug and level editor features
 void DebugSystem::update() {
-	if (GLFWFunctions::debug_flag) { //F1 key to open imgui GUI
-		//std::cout << "GUI Open" << std::endl;
+	if (GLFWFunctions::debug_flag) { //1 key to open imgui GUI
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -197,7 +199,8 @@ void DebugSystem::update() {
 		ImGui::End();
 
 		ImGui::Begin("Debug");
-	
+		
+		//Performance Data formatting
 		if (ImGui::CollapsingHeader("Performance Data")) {
 			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
@@ -265,7 +268,7 @@ void DebugSystem::update() {
 				ImGui::EndTable();
 			}
 		}
-
+		//Input Data formatting
 		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
 			ImGui::SeparatorText("Mouse Coordinates");
 			if (ImGui::IsMousePosValid())
@@ -291,6 +294,7 @@ void DebugSystem::update() {
 			ImGui::NewLine();
 		}
 
+		//Game Viewport Controls formatting
 		if (ImGui::CollapsingHeader("Game Viewport Controls")) {
 			if (ImGui::Button("Reset Perspective")) {
 				GameViewWindow::setAccumulatedDragDistance(initialDragDistX, initialDragDistY);
@@ -326,6 +330,7 @@ void DebugSystem::update() {
 			}
 		}
 
+		//Object Creation formatting
 		if (ImGui::CollapsingHeader("Object Creation")) {
 
 			ImGui::AlignTextToFramePadding();
@@ -352,7 +357,7 @@ void DebugSystem::update() {
 			ImGui::SameLine();
 			ImGui::Text("Object type");
 
-			if (!strcmp(items[currentItem], "TextBox")) {
+			if (!strcmp(items[currentItem], "TextBox")) { //Specifically for textbox
 				ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 				ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
 				ImGui::SameLine();
@@ -383,7 +388,7 @@ void DebugSystem::update() {
 				ImGui::SameLine();
 				ImGui::Text("Coordinates");
 			}
-			else {
+			else { //The remaining object types
 				ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 				ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
 				ImGui::SameLine();
@@ -422,7 +427,7 @@ void DebugSystem::update() {
 			std::string entityId;
 
 			nlohmann::json jsonObj = serializer.GetJSONObject();
-
+			//Entity creation button functionalities
 			if (ImGui::Button("Create Entity")) {
 
 				for (int i = 0; i < numEntitiesToCreate; i++) {
@@ -467,6 +472,7 @@ void DebugSystem::update() {
 			}
 			ImGui::SameLine();
 
+			//For creating entity with random position
 			if (ImGui::Button("Random")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 					entityObj = ecsCoordinator.createEntity();
@@ -503,6 +509,7 @@ void DebugSystem::update() {
 				}
 			}
 
+			//Button to destroy all existing entity
 			if (ImGui::Button("Remove All Entity")) {
 				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 					if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {}
@@ -514,11 +521,12 @@ void DebugSystem::update() {
 
 			ImGui::NewLine();
 		}
-		if (ImGui::CollapsingHeader("Hierachy List")) {
+		//Hierarchy List formating
+		if (ImGui::CollapsingHeader("Hierarchy List")) {
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {
 				}else
-				if (ecsCoordinator.hasComponent<FontComponent>(entity)) {
+				if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
 					auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
 					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					auto signature = ecsCoordinator.getEntityID(entity);
@@ -531,8 +539,6 @@ void DebugSystem::update() {
 					float fontColorR = fontComp.color.GetX();
 					float fontColorG = fontComp.color.GetY();
 					float fontColorB = fontComp.color.GetZ();
-
-					Console::GetLog() << "string: " << fontComp.text << std::endl;
 
 					ImGui::PushID(entity);
 					if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
@@ -581,7 +587,8 @@ void DebugSystem::update() {
 					ImGui::Separator();
 					
 				}
-				else if (ecsCoordinator.getEntityID(entity) == "player") {
+				else if (ecsCoordinator.hasComponent<MovementComponent>(entity) //Player specific data modification features
+					&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
 					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					auto signature = ecsCoordinator.getEntityID(entity);
 
@@ -628,7 +635,7 @@ void DebugSystem::update() {
 					ImGui::PopID();
 					ImGui::Separator();
 				}else
-				{
+				{ //Remaining object's data modification features
 					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					auto signature = ecsCoordinator.getEntityID(entity);
 
@@ -683,7 +690,7 @@ void DebugSystem::update() {
 				}
 			}
 
-			if (ImGui::Button("Save")) 
+			if (ImGui::Button("Save")) //Generate 1 new json file and save existing object data in it
 			{
 				if (saveCount < saveLimit) {
 					std::string saveFile = GenerateSaveJSONFile(saveCount);
@@ -745,7 +752,7 @@ void DebugSystem::update() {
 			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-			// Create popup modal window
+			// Create popup modal window for loading of save files
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
 	
 				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
@@ -791,11 +798,8 @@ void DebugSystem::update() {
 
 		ImGui::End();
 
-		ImGuiWindowFlags viewportWindowFlags =
-			ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoScrollWithMouse;
-
-		ImGui::Begin("Game Viewport", nullptr, viewportWindowFlags);
+		ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
 
@@ -816,13 +820,13 @@ void DebugSystem::update() {
 
 	}
 }
-	
+//Clean up and shut down ImGui resources	
 void DebugSystem::cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
-
+//For performance viewer
 SystemType DebugSystem::getSystem() {
 	return DebugSystemType;
 }
@@ -894,7 +898,7 @@ void DebugSystem::UpdateSystemTimes() {
 		lastUpdateTime = currentTime;
 	}
 }
-
+//Add new entity's data to JSON save file
 nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
 	nlohmann::json entityJSON;
@@ -993,7 +997,7 @@ nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, st
 
 	return entityJSON;
 }
-
+//Remove an entity from JSON save file
 void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
 {
 	nlohmann::json jsonData;
@@ -1022,7 +1026,7 @@ void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
 		outFile.close();
 	}
 }
-
+//Load debug system configuration from JSON
 void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -1125,7 +1129,7 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(textBoxMaxLimit, "Debug.textBoxMaxLimit");
 	serializer.ReadFloat(textBoxMinLimit, "Debug.textBoxMinLimit");
 }
-
+//Save debug saveCount data back into same JSON file
 void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -1141,7 +1145,7 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 	serializer.WriteInt(saveCount, "Debug.saveCount", filename);
 	
 }
-
+//Generates a new JSON save file
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
@@ -1176,7 +1180,7 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 
 	return jsonPath;
 }
-
+//Get current save count
 int DebugSystem::GetSaveCount()
 {
 	return saveCount;
@@ -1189,7 +1193,7 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 		&& ImGui::GetIO().KeyMap[key] != -1; 
 }
 
-
+//Creates appropriate components based on object type
 void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
 	if (!strcmp(items[itemIndex],"Enemy")) {
 

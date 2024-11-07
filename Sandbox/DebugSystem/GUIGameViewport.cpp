@@ -53,13 +53,14 @@ float GameViewWindow::aspectRatioYScale;
 float GameViewWindow::aspectRatioWidth;
 float GameViewWindow::aspectRatioHeight;
 
+//Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 }
-
+//Handle viewport setup, processing and rendering
 void GameViewWindow::Update() {
 	SetupViewportTexture();
-	//ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
 	windowSize = ImGui::GetContentRegionAvail();
 
 	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
@@ -95,7 +96,7 @@ void GameViewWindow::Update() {
 	ImGui::Image(textureID, availWindowSize, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 }
-
+//Clean up resources
 void GameViewWindow::Cleanup() {
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
@@ -181,13 +182,13 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
 	return ImVec2(viewportX, viewportY);
 
 }
-
+//Checks if mouse coordinates are in viewport
 bool GameViewWindow::IsPointInViewport(double x, double y) {
 	return (x - viewportPos.x <= windowSize.x && x - viewportPos.x >= 0 
 		&& y - viewportPos.y <= windowSize.y && y - viewportPos.y >= 0);
 }
 
-// load the IMGUI viewport configuration values from JSON file
+// Load the IMGUI viewport configuration values from JSON file
 void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -204,21 +205,16 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 	// read all of the data from the JSON object and assign all the read data to
 	// data elements of GameViewWindow class that needs to be initialized
-	// this is for viewport width and height
 	serializer.ReadInt(viewportWidth, "GUIViewport.viewportWidth");
 	serializer.ReadInt(viewportHeight, "GUIViewport.viewportHeight");
 
-	// this is for viewport position
 	serializer.ReadFloat(viewportPos.x, "GUIViewport.viewportPos.x");
 	serializer.ReadFloat(viewportPos.y, "GUIViewport.viewportPos.y");
 
-	// this is for viewport texture
 	serializer.ReadUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
 
-	// this is for zoom level
 	serializer.ReadFloat(zoomLevel, "GUIViewport.zoomLevel");
 
-	// this is for the minimum and maximum zoom
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
 
@@ -245,7 +241,7 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(aspectRatioXScale, "GUIViewport.aspectRatioXScale");
 	serializer.ReadFloat(aspectRatioYScale, "GUIViewport.aspectRatioYScale");
 }
-
+//Save viewport configuration to JSON
 void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 {
 	JSONSerializer serializer;

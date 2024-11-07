@@ -1,3 +1,17 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  Crashlog.cpp
+@brief  :  This file contains the function definition of the crashlog system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated crash log system to capture data timestamp and code line location during an error
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "Crashlog.h"
 
 #include <iomanip>

@@ -31,38 +31,32 @@ File Contributions: Lew Zong Han Owen (90%)
 //Class for ImGui game viewport window in debugging mode
 class GameViewWindow {
 public:
-
+	//Initialize game viewport system
 	static void Initialise();
-
+	//Handle viewport setup, processing and rendering
 	static void Update();
-
+	//Checks if mouse coordinates are in viewport
 	static bool IsPointInViewport(double x, double y);
-
-	static ImVec2 getViewportPos() { return viewportPos; }
+	//Load viewport configuration from JSON file
 	static void LoadViewportConfigFromJSON(std::string const& filename);
+	//Save viewport configuration to JSON file
 	static void SaveViewportConfigToJSON(std::string const& filename);
-
+	//Set accumulated mouse drag distance
 	static void setAccumulatedDragDistance(float valueX, float valueY) {
 		accumulatedMouseDragDist.x = valueX;
 		accumulatedMouseDragDist.y = valueY;
 	}
-
+	//Set zoom level
 	static void setZoomLevel(float value) {
 		zoomLevel = value;
 	}
-
+	//Enable or disable zoom feature
 	static void setClickedZoom(bool state) {
 		clickedZoom = state;
 	}
-
+	//Enable or disable pan feature
 	static void setClickedScreenPan(bool state) {
 		clickedScreenPan = state;
-	}
-
-	float Clamp(float value, float min, float max) {
-		if (value < min) return min;
-		if (value > max) return max;
-		return value;
 	}
 
 private:

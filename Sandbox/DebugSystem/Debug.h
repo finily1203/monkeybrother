@@ -81,18 +81,24 @@ public:
 
 	void UpdateSystemTimes(); //Update all system loop time
 
-	static int GetSaveCount();
+	static int GetSaveCount(); //Returns save count
 
+	//Serialize entity data to JSON file
 	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
 
+	//Remove entity data from JSON save file
 	void RemoveEntityFromJSON(std::string const& entityId);
 
+	//Load debug system configuration from JSON file
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
+	//Create appropriate components based on object type
 	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
 	
+	//Save current debug save count configuration to JSON
 	void SaveDebugConfigFromJSON(std::string const& filename);
 
+	//Generate new JSON save file
 	std::string GenerateSaveJSONFile(int& saveNumber);
 
 private:

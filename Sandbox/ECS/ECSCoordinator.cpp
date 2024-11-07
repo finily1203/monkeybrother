@@ -14,7 +14,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							the entity, save data from entity to JSON file and update
 							entity data respectively.
 						    30%
-*//*___________________________________________________________________________-*/
+*//*____________________________________________________________________________*/
 
 #include "ECSCoordinator.h"
 
