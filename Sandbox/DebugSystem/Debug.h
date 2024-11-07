@@ -40,6 +40,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #define MAXNAMELENGTH 15
 #define MAXBUFFERSIZE 8
 #define MAXTEXTSIZE 1000
+#define MAXOBJTYPE 4
 
 //Class for the ImGui GUI debugbug mode which displays debug, gameviewport, and console window
 class DebugSystem : public GameSystems/*, public System*/ {
@@ -90,13 +91,24 @@ private:
 	static float textBorderSize;
 	static ImVec4 clearColor;
 
+	static bool isSelectingFile;
 	static bool isZooming;
 	static bool isPanning;
 	static bool isSliding;
 	static bool isRedToggled;
 	static bool isGreenToggled;
 	static bool isBlueToggled;
+	static bool createEntity;
+	static int currentItem;
 
+	static double ecsTotal;
+	static bool foundECS;
+	static int numberOfColumnPV;
+	static float paddingPV;
+	static float initialZoomLevel;
+	static float initialDragDistX;
+	static float initialDragDistY;
+	
 	static float defaultObjScaleX;
 	static float defaultObjScaleY;
 
@@ -113,8 +125,10 @@ private:
 	static float fontColorMinLimit;
 	static float textBoxMaxLimit;
 	static float textBoxMinLimit;
+	static float textBoxWidth;
 
 	static int numEntitiesToCreate;
+	static int minEntitesToCreate;
 	static char numBuffer[MAXBUFFERSIZE];
 	static char sigBuffer[MAXNAMELENGTH];
 	static char textBuffer[MAXTEXTSIZE];
@@ -128,6 +142,7 @@ private:
 	static float xOrientation;
 	static float yOrientation;
 	static float textScale;
+	static float textScaleMinLimit;
 
 	static float objAttributeSliderMaxLength;
 	static float objAttributeSliderMidLength;
@@ -155,8 +170,13 @@ private:
 	static float objSizeYMax;
 	static float objSizeYMin;
 
+	static int saveLimit;
 	static int saveCount;
 	static float lastPosX;
+	static float fileWindowWidth;
+	static float saveWindowHeight;
+	static float fileWindowHeight;
+	static float saveWindowWidth;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map

@@ -61,6 +61,13 @@ void GraphicSystemECS::update(float dt) {
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
+        /*if (ecsCoordinator.getEntityID(entity) == "background") {
+            transform.scale.SetX(GLFWFunctions::windowWidth);
+            transform.scale.SetY(GLFWFunctions::windowHeight);
+        }
+        std::cout << "Window X : " << GLFWFunctions::windowWidth << std::endl;
+        std::cout << "Window Y : " << GLFWFunctions::windowHeight << std::endl;*/
+
         // Compute view matrix
         if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
             cameraSystem.update();

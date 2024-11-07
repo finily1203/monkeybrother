@@ -342,7 +342,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::F2])
         allow_camera_movement = ~allow_camera_movement;
 
-    if (keyState[Key::F1]) {
+    if (keyState[Key::NUM_1]) {
         debug_flag = ~debug_flag;
         isGuiOpen = ~isGuiOpen;
     }
@@ -466,18 +466,18 @@ void GLFWFunctions::glfwCleanup() {
 }
 
 // Input state functions
-bool GLFWFunctions::isKeyPressed(Key key) {
-    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
-}
-
-bool GLFWFunctions::isKeyReleased(Key key) {
-    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
-}
-
-bool GLFWFunctions::isKeyHeld(Key key) {
-    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
-}
-
-bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
-    return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
-}
+//bool GLFWFunctions::isKeyPressed(Key key) {
+//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
+//}
+//
+//bool GLFWFunctions::isKeyReleased(Key key) {
+//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
+//}
+//
+//bool GLFWFunctions::isKeyHeld(Key key) {
+//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
+//}
+//
+//bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
+//    return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
+//}
