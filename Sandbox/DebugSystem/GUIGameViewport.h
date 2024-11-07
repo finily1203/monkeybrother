@@ -1,3 +1,23 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIGameViewport.h
+@brief  :  This file contains the function declaration of ImGui game viewport system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
+		- Integrated game viewport camera controls for zooming and panning current game scene in real time
+
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables from json file, which
+		  allows saving and loading feature in the level editor
+
+File Contributions: Lew Zong Han Owen (90%)
+					Ian Loi           (10%)
+
+/*_______________________________________________________________________________________________________________*/
 #pragma once
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -54,9 +74,14 @@ private:
 	static bool clickedZoom;
 	static bool clickedScreenPan;
 
+	static float newZoomLevel;
+	static float zoomDelta;
 	static float zoomLevel;
 	static float MIN_ZOOM;  // minimum zoom constant
 	static float MAX_ZOOM;  // maximum zoom constant
+
+	static ImVec2 currentMousePos;
+	static float scrollY;
 
 	static bool isDragging;
 	static ImVec2 accumulatedMouseDragDist;

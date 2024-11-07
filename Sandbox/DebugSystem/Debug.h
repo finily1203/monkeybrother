@@ -4,18 +4,29 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @team   :  MonkeHood
 @course :  CSD2401
 @file   :  Debug.h
-@brief  :  This file contains the function declaration of ImGui GUI debugging features which include the debug
-		   window, game viewport window, console window, and crash logging system.
+@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the 
+		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's 
+		   level editor systems such as game viewport camera controls, object creation, hierarchy list, and save
+		   and load feature
 
 *Lew Zong Han Owen (z.lew) :
 		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
 		  indication
-		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
-		- Integrated ImGui console window to allow direct custom debugging output in debugging mode
-		- Integrated a crash logging system to detect and log custom and standard exceptions into a crash-log
-		  text file
+		- Designed the display synergy between all of ImGui's sub systems in the main debugging window
+		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
+		  properties' data
+		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to 
+		  them
+		- Integrated ImGui game viewport camera controls to zoom and pan current game scene
+		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level 
+		  editor
 
-File Contributions: Lew Zong Han Owen (100%)
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables from json file, which allows
+		  saving and loading feature in the level editor
+
+File Contributions: Lew Zong Han Owen (80%)
+					Ian Loi           (20%)
 
 /*_______________________________________________________________________________________________________________*/
 #pragma once
@@ -72,8 +83,8 @@ public:
 
 	static int GetSaveCount();
 
-	//nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId);
 	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
+
 	void RemoveEntityFromJSON(std::string const& entityId);
 
 	void LoadDebugConfigFromJSON(std::string const& filename);
