@@ -725,10 +725,11 @@ void DebugSystem::update() {
 
 			// Create popup modal window
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-				// Your content goes here
+				Console::GetLog() << fileWindowWidth << "," << fileWindowHeight << " gay" << std::endl;
 				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 				if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
+
 					for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 						ecsCoordinator.destroyEntity(entity);
 					}
@@ -1090,10 +1091,10 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadInt(saveLimit, "Debug.saveLimit");
 	serializer.ReadInt(saveCount, "Debug.saveCount");
 	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
-	serializer.ReadFloat(fileWindowWidth, "Debug.fileWindoWidth");
-	serializer.ReadFloat(saveWindowHeight, "Debug.saveWindoHeight");
+	serializer.ReadFloat(fileWindowWidth, "Debug.fileWindowWidth");
+	serializer.ReadFloat(saveWindowHeight, "Debug.saveWindowHeight");
 	serializer.ReadFloat(fileWindowHeight, "Debug.fileWindowHeight");
-	serializer.ReadFloat(saveWindowWidth, "Debug.saveWindoWidth");
+	serializer.ReadFloat(saveWindowWidth, "Debug.saveWindowWidth");
 
 	serializer.ReadFloat(fontScaleMaxLimit, "Debug.fontScaleMaxLimit");
 	serializer.ReadFloat(fontScaleMinLimit, "Debug.fontScaleMinLimit");

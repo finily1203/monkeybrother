@@ -339,6 +339,17 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 
 				serializer.WriteObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
 			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+			{
+				FontComponent fontComp = getComponent<FontComponent>(entity);
+
+				//serializer.WriteObject(fontComp.text, entityId, "font.text.string");
+				serializer.WriteObject(fontComp.textBoxWidth, entityId, "font.text.BoxWidth");
+				serializer.WriteObject(fontComp.textScale, entityId, "font.textScale.scale");
+				serializer.WriteObject(fontComp.color, entityId, "font.color");
+				//serializer.WriteObject(fontComp.fontId, entityId, "font.fontId");
+			}
 		}
 	}
 
