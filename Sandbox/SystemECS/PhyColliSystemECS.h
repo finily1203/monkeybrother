@@ -72,12 +72,15 @@ public:
 
     ForceManager getForceManager() const { return forceManager; }
 
+    bool getIsColliding() const { return isColliding; } 
+
 private:
     static float friction;
     static float threshold;
     static bool alrJumped;
     static bool isFalling;
     static bool isSliding;
+    bool isColliding;
     PlayerEventPublisher eventSource;
     std::shared_ptr<Observer> eventObserver;
 

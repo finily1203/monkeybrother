@@ -12,25 +12,15 @@ void LogicSystemECS::cleanup() {}
 void LogicSystemECS::update(float dt) {
 
 	//------------------------------------PLAYER MOVEMENT-----------------------------------//
-	//Entity playerEntity = ecsCoordinator.getFirstEntity();
 	Entity playerEntity = ecsCoordinator.getEntityFromID("player");
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 
 	const float maxSpeed = 0.6f;
-
-	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
-
-	myMath::Vector2D& position =	 ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
-	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).acceleration;
-	//myMath::Vector2D force =		 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
-	myMath::Vector2D& vel =			 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).velocity;
-	myMath::Vector2D& accForce =	 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).accumulatedForce;
-	float mass =					 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
+	float invMass;
+	Force playerForce =				 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
 	myMath::Vector2D gravityScale =  ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
 	myMath::Vector2D& rotation =	 ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
-	float invMass;
 
-	float magnitude = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force.GetMagnitude();
 
 	if (GLFWFunctions::keyState[Key::Q]) {
 		//ApplyForce(playerEntity, -force);
@@ -44,51 +34,12 @@ void LogicSystemECS::update(float dt) {
 
 	}
 
-	if (GLFWFunctions::keyState[Key::SPACE]) {
-		PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-0, -magnitude));
+	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
+		if (GLFWFunctions::keyState[Key::SPACE]) {
+			PhysicsSystemRef->SetAlrJumped(false);  // Set jump state to prevent multiple jumps
+			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-10.0f, -10.f));
+		}
 	}
-
-	//else {
-
-	//	// Apply friction to gradually slow down
-	//	//if (accForce.GetX() > 0) {
-	//	//	ApplyForce(playerEntity, -force);
-	//	//}
-	//	//else if (accForce.GetX() < 0) {
-	//	//	ApplyForce(playerEntity, force);
-	//	//}
-
-	//	//if (std::abs(accForce.GetX()) < 0.01f) { // threshold
-	//	//	vel.SetX(0.f);
-	//	//	accForce.SetX(0.f);
-	//	//}
-
-	//}
-	
-	//invMass = mass > 0.f ? 1.f / mass : 0.f;
-	//acceleration = accForce * invMass;
-	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
-	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
-	//position.SetX(position.GetX() + vel.GetX());
-	//position.SetY(position.GetY() + vel.GetY());
-
-	 //Clamp speed without interfering with velocity
-	//if (vel.GetX() > maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
-	//else if (vel.GetX() < -maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
-
-	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
-	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
-
-	//// Dampening
-	//vel.SetX(vel.GetX() * 0.9f);
-	//vel.SetY(vel.GetY() * 0.9f);
-
-	//position.SetX(position.GetX() + vel.GetX());
-	//position.SetY(position.GetY() + vel.GetY());
 
 	//--------------------------------END OF PLAYER MOVEMENT--------------------------------//
 
@@ -184,8 +135,6 @@ void LogicSystemECS::update(float dt) {
 			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
 			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
 
-			// 
-			// ing
 			eVel.SetX(eVel.GetX() * 0.9f);
 			eVel.SetY(eVel.GetY() * 0.9f);
 
@@ -229,12 +178,10 @@ void LogicSystemECS::update(float dt) {
 
 			if (GLFWFunctions::keyState[Key::Q]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() + 0.1f * GLFWFunctions::delta_time);
-				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() - 0.1f * GLFWFunctions::delta_time);
 			}
 				
 			if (GLFWFunctions::keyState[Key::E]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
-				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() + 0.1f * GLFWFunctions::delta_time);
 			}
 				
 		}
