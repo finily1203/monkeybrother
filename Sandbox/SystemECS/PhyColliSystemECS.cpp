@@ -496,12 +496,12 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float m
     float mass                      = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
     float dampen                    = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
     float maxVelocity               = 200.f; // need create clamp velocity function
-    float& test = ecsCoordinator.getComponent<PhysicsComponent>(player).jump;
+    float& targetForce              = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
+    float& prevForce				= ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
 
-    if (test != magnitude) {
+    if (prevForce != magnitude) {
         accForce.SetX(magnitude);
         accForce.SetY(magnitude);
-        std::cout << "hello" << std::endl;
     }
 
     float invMass = mass > 0.f ? 1.f / mass : 0.f;
@@ -534,91 +534,27 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     myMath::Vector2D& playerPos         = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
     myMath::Vector2D& force             = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
-    float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
     float radius                        = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
     float rotation                      = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
     myMath::Vector2D direction          = directionalVector(rotation);
     myMath::Vector2D gravity            = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
     float mass                          = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
-    float& test                         = ecsCoordinator.getComponent<PhysicsComponent>(player).jump;
     float maxAccForce                   = 40.f;
+    float& targetForce                  = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
+    float& prevForce                    = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
 
     CollisionSystemECS::OBB playerOBB   = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
-    //std::cout << direction.GetX() << " " << direction.GetY() << std::endl;
-    //float targetForce;
 
     myMath::Vector2D normal{};
     float penetration{};
 
     bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
     
-    //if (!colliding) {
-    //    isFalling = true;
-    //    isSliding = false;
-    //    //std::cout << "falling ";
-    //}
-    //
-    //if (isFalling) {
-    //    Force.ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
-    //}
-    //
-    //if(!isFalling && !isSliding){
-    //    accForce.SetX(0.f + gravity.GetX() * mass * GLFWFunctions::delta_time);
-    //    accForce.SetY(0.f + gravity.GetY() * mass * GLFWFunctions::delta_time);
-    //    isSliding = true;
-    //}
-    //
-    //if (isSliding) {
-    //    Force.ApplyForce(player, gravity * mass * GLFWFunctions::delta_time);
-    //}
-    //
-    //
-    //
-    //if (colliding) {
-    //
-    //    isFalling = false;
-    //    // Calculate angle between player direction and platform normal
-    //    float dotProduct = myMath::DotProductVector2D(direction, -normal);
-    //    float angle = std::acos(dotProduct); // Angle in radians
-    //
-    //    // Calculate force factor based on angle (steeper angle = higher force)
-    //    float forceFactor = std::sin(angle); // Will be between 0 and 1
-    //
-    //    // Apply accumulated force based on angle
-    //    targetForce = Force.ResultantForce(direction, normal, maxAccForce);
-    //
-    //    if (isSliding) {
-    //        accForce.SetX(targetForce + gravity.GetX() * mass * GLFWFunctions::delta_time);
-    //        accForce.SetY(targetForce + gravity.GetY() * mass * GLFWFunctions::delta_time);
-    //    }
-    //
-    //    if (!alrJumped) {
-    //        //accForce.SetY(-jumpForce);
-    //
-    //        //ApplyForce(player, myMath::Vector2D(jumpForce, jumpForce) * GLFWFunctions::delta_time);
-    //        //ApplyForce(player, myMath::Vector2D(jumpForce, -jumpForce));
-    //        if(GLFWFunctions::keyState[Key::SPACE])
-    //        {
-    //            Force.ApplyForce(player, myMath::Vector2D(-jumpForce, -jumpForce));
-    //            //std::cout << "jumping ";
-    //            alrJumped = true;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        alrJumped = false;
-    //        //accForce.SetX(0);
-    //        accForce.SetY(0);
-    //    }
-    //
-    //}
-
     forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
 
     if (colliding) 
     {
-        //std::cout << -normal.GetX() << " " << direction.GetX() << " " << -normal.GetY() << " " << direction.GetY() << std::endl;
         if (-normal.GetX() == direction.GetX() && -normal.GetY() == direction.GetY()) 
         {
             forceManager.ClearForce(player);
@@ -627,10 +563,9 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
         targetForce = forceManager.ResultantForce(direction, normal, maxAccForce);
     }
 
-
     forceManager.ApplyForce(player, direction, targetForce);
     
-    test = targetForce;
+    prevForce = targetForce;
     
     if (colliding) 
     {
@@ -659,59 +594,45 @@ bool CollisionSystemECS::CollisionIntersection_RectRect(const AABB& aabb1,
     const myMath::Vector2D& vel2,
     float& firstTimeOfCollision)
 {
-    //if (aabb1.max.x < aabb2.min.x || aabb1.max.y < aabb2.min.y || aabb1.min.x > aabb2.max.x || aabb1.min.y > aabb2.max.y) { // if no overlap
     if (aabb1.max.GetX() < aabb2.min.GetX() || aabb1.max.GetY() < aabb2.min.GetY() || aabb1.min.GetX() > aabb2.max.GetX() || aabb1.min.GetY() > aabb2.max.GetY()) { // if no overlap
 
         float tFirst = 0;
         float tLast = GLFWFunctions::delta_time;
 
-        //glm::vec2 Vb = vel1 - vel2;
         myMath::Vector2D Vb = vel1 - vel2;
 
-        //if (Vb.x < 0) {
         if (Vb.GetX() < 0) {
             //case 1
-            //if (aabb1.min.x > aabb2.max.x) {
             if (aabb1.min.GetX() > aabb2.max.GetX()) {
                 return 0;
             }
             //case 4
-            //if (aabb1.max.x < aabb2.min.x) {
             if (aabb1.max.GetX() < aabb2.min.GetX()) {
                 //tFirst = fmax((aabb1.max.x - aabb2.min.x) / Vb.x, tFirst);
                 tFirst = fmax((aabb1.max.GetX() - aabb2.min.GetX()) / Vb.GetX(), tFirst);
             }
-            //if (aabb1.min.x < aabb2.max.x) {
             if (aabb1.min.GetX() < aabb2.max.GetX()) {
-                //tLast = fmin((aabb1.min.x - aabb2.max.x) / Vb.x, tLast);
                 tLast = fmin((aabb1.min.GetX() - aabb2.max.GetX()) / Vb.GetX(), tLast);
             }
         }
-        //else if (Vb.x > 0) {
         else if (Vb.GetX() > 0) {
             // case 2
-            //if (aabb1.min.x > aabb2.max.x) {
             if (aabb1.min.GetX() > aabb2.max.GetX()) {
-                //tFirst = fmax((aabb1.min.x - aabb2.max.x) / Vb.x, tFirst);
                 tFirst = fmax((aabb1.min.GetX() - aabb2.max.GetX()) / Vb.GetX(), tFirst);
             }
-            //if (aabb1.max.x > aabb2.min.x) {
             if (aabb1.max.GetX() > aabb2.min.GetX()) {
                 tLast = fmin((aabb1.max.GetX() - aabb2.min.GetX()) / Vb.GetX(), tLast);
             }
             //case 3
-            //if (aabb1.max.x < aabb2.min.x) {
             if (aabb1.max.GetX() < aabb2.min.GetX()) {
                 return 0;
             }
         }
         else {
             // case 5
-            //if (aabb1.max.x < aabb2.min.x) {
             if (aabb1.max.GetX() < aabb2.min.GetX()) {
                 return 0;
             }
-            //else if (aabb1.min.x > aabb2.max.x) {
             else if (aabb1.min.GetX() > aabb2.max.GetX()) {
                 return 0;
             }
@@ -723,51 +644,37 @@ bool CollisionSystemECS::CollisionIntersection_RectRect(const AABB& aabb1,
         }
 
         ////////////////////////////////////////////////////////////////////
-        //if (Vb.y < 0) {
         if (Vb.GetY() < 0) {
             //case 1
-            //if (aabb1.min.y > aabb2.max.y) {
             if (aabb1.min.GetY() > aabb2.max.GetY()) {
                 return 0;
             }
             //case 4
-            //if (aabb1.max.y < aabb2.min.y) {
             if (aabb1.max.GetY() < aabb2.min.GetY()) {
-                //tFirst = fmax((aabb1.max.y - aabb2.min.y) / Vb.y, tFirst);
                 tFirst = fmax((aabb1.max.GetY() - aabb2.min.GetY()) / Vb.GetY(), tFirst);
             }
-            //if (aabb1.min.y < aabb2.max.y) {
             if (aabb1.min.GetY() < aabb2.max.GetY()) {
-                //tLast = fmin((aabb1.min.y - aabb2.max.y) / Vb.y, tLast);
                 tLast = fmin((aabb1.min.GetY() - aabb2.max.GetY()) / Vb.GetY(), tLast);
             }
         }
-        //else if (Vb.y > 0) {
         else if (Vb.GetY() > 0) {
             // case 2
-            //if (aabb1.min.y > aabb2.max.y) {
             if (aabb1.min.GetY() > aabb2.max.GetY()) {
-                //tFirst = fmax((aabb1.min.y - aabb2.max.y) / Vb.y, tFirst);
                 tFirst = fmax((aabb1.min.GetY() - aabb2.max.GetY()) / Vb.GetY(), tFirst);
             }
-            //if (aabb1.max.y > aabb2.min.y) {
             if (aabb1.max.GetY() > aabb2.min.GetY()) {
-                //tLast = fmin((aabb1.max.y - aabb2.min.y) / Vb.y, tLast);
                 tLast = fmin((aabb1.max.GetY() - aabb2.min.GetY()) / Vb.GetY(), tLast);
             }
             //case 3
-            //if (aabb1.max.y < aabb2.min.y) {
             if (aabb1.max.GetY() < aabb2.min.GetY()) {
                 return 0;
             }
         }
         else {
             // case 5
-            //if (aabb1.max.y < aabb2.min.y) {
             if (aabb1.max.GetY() < aabb2.min.GetY()) {
                 return 0;
             }
-            //else if (aabb1.min.y > aabb2.max.y) {
             else if (aabb1.min.GetY() > aabb2.max.GetY()) {
                 return 0;
             }

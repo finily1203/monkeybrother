@@ -235,26 +235,27 @@
         "gravityScale": {
           "x": 9.8,
           "y": 9.8
-          },
-          "jump": 0.0,
-          "dampening": 0.9,
-          "velocity": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "force": {
-            "x": 0.05,
-            "y": 0.05
-          },
-          "accumulatedForce": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "prevForce": 0.0
+        },
+        "jump": 0.0,
+        "dampening": 0.9,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "x": 0.05,
+          "y": 0.05
+        },
+        "accumulatedForce": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "prevForce": 0.0,
+        "targetForce": 0.0
       },
       "animation": {
         "isAnimated": true
@@ -318,7 +319,10 @@
       },
       "forces": {
         "mass": 1.0,
-        "gravityScale": -0.98,
+        "gravityScale": {
+          "x": -0.98,
+          "y": -0.98
+        },
         "jump": 0.8,
         "dampening": 0.9,
         "velocity": {
@@ -336,7 +340,9 @@
         "accumulatedForce": {
           "x": 0.0,
           "y": 0.0
-        }
+        },
+        "prevForce": 0.0,
+        "targetForce": 0.0
       },
       "enemy": {
         "isEnemy": true
