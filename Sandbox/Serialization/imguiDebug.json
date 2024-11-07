@@ -56,7 +56,7 @@
     "orientationMaxLimit": 360.0,
     "orientationMinLimit": 0.0,
     "paddingPV": 260.0,
-    "saveCount": 1,
+    "saveCount": 2,
     "saveLimit": 2,
     "saveWindowHeight": 200,
     "saveWindowWidth": 300,

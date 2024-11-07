@@ -54,11 +54,15 @@ void GraphicSystemECS::update(float dt) {
         //if (GLFWFunctions::testMode == 0) {
         bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
         bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+		if (ecsCoordinator.getEntityID(entity) == "background") {
+            transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
+            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);
+        }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
 
         // Use hasMovement for the update parameter
         graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
-        transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
+        transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -80,9 +84,12 @@ void GraphicSystemECS::update(float dt) {
 
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity)) {
+        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) != "player") {
             graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
-        }
+		}
+		else if (GLFWFunctions::debug_flag && ecsCoordinator.getEntityID(entity) == "player") {
+			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
+		}
 
         // Drawing based on entity components
         if (hasMovement && hasEnemy) {

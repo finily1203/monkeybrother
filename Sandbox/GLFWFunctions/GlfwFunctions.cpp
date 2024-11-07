@@ -128,133 +128,10 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
-#if 0
-    if (GLFW_PRESS == action) {
-#ifdef _DEBUG
-        std::cout << "Key pressed" << std::endl;
-#endif
-        if (GLFW_KEY_F2 == key)
-        {
-            GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
-        }
-    }
-    else if (GLFW_REPEAT == action) {
-#ifdef _DEBUG
-        std::cout << "Key repeatedly pressed" << std::endl;
-#endif
-    }
-    else if (GLFW_RELEASE == action) {
-#ifdef _DEBUG
-        std::cout << "Key released" << std::endl;
-#endif
-    }
+	// unused parameters
+	(void)scancode;
+	(void)mods;
 
-    if (GLFW_KEY_F1 == key && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == false) {
-        GLFWFunctions::isGuiOpen = true;
-        GLFWFunctions::debug_flag = true;
-    }
-    else if (GLFW_KEY_F1 == key && GLFW_PRESS == action && GLFWFunctions::isGuiOpen == true) {
-        GLFWFunctions::isGuiOpen = false;
-        GLFWFunctions::debug_flag = false;
-    }
-
-    if (GLFW_MOUSE_BUTTON_LEFT == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == false) {
-        GLFWFunctions::isAKeyPressed = true;
-    }
-    else if (GLFW_KEY_A == key && GLFW_PRESS == action && GLFWFunctions::isAKeyPressed == true) {
-        GLFWFunctions::isAKeyPressed = false;
-    }
-
-    if (GLFW_KEY_P == key && GLFW_PRESS == action && GLFWFunctions::audioPaused == false) {
-        GLFWFunctions::audioPaused = true;
-    }
-    else if (GLFW_KEY_P == key && GLFW_PRESS == action && GLFWFunctions::audioPaused == true) {
-        GLFWFunctions::audioPaused = false;
-    }
-
-    if (GLFW_KEY_N == key && GLFW_PRESS == action && GLFWFunctions::audioNext == false) {
-        GLFWFunctions::audioNext = true;
-        GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
-    }
-
-    if (GLFW_KEY_O == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == false) {
-        GLFWFunctions::audioStopped = true;
-    }
-    else if (GLFW_KEY_O == key && GLFW_PRESS == action && GLFWFunctions::audioStopped == true) {
-        GLFWFunctions::audioStopped = false;
-    }
-
-    if (GLFW_KEY_COMMA == key && GLFW_PRESS == action) {
-        volume = std::max(0.1f, volume - 0.1f);
-        std::cout << "Volume: " << volume << std::endl;
-    }
-
-    if (GLFW_KEY_PERIOD == key && GLFW_PRESS == action) {
-        volume = std::min(1.f, volume + 0.1f);
-        std::cout << "Volume: " << volume << std::endl;
-    }
-
-    if (GLFW_KEY_C == key && GLFW_PRESS == action && GLFWFunctions::cloneObject == false) {
-        GLFWFunctions::cloneObject = true;
-    }
-
-    if (GLFW_KEY_M == key && GLFW_PRESS == action) {
-        GLFWFunctions::testMode = (GLFWFunctions::testMode + 1) % 2;
-        GLFWFunctions::goNextMode = true;
-    }
-
-    if (GLFW_KEY_0 == key && GLFW_PRESS == action) {
-        bubblePopping = true;
-    }
-
-    if (GLFW_KEY_J == key && GLFW_PRESS == action) {
-        enemyMoveLeft = true;
-    }
-    if (GLFW_KEY_J == key && GLFW_RELEASE == action) {
-        enemyMoveLeft = false;
-    }
-
-    if (GLFW_KEY_L == key && GLFW_PRESS == action) {
-        enemyMoveRight = true;
-    }
-    if (GLFW_KEY_L == key && GLFW_RELEASE == action) {
-        enemyMoveRight = false;
-    }
-
-    if (GLFW_KEY_I == key && GLFW_PRESS == action) {
-        enemyMoveUp = true;
-    }
-    if (GLFW_KEY_I == key && GLFW_RELEASE == action) {
-        enemyMoveUp = false;
-    }
-
-    if (GLFW_KEY_K == key && GLFW_PRESS == action) {
-        enemyMoveDown = true;
-    }
-    if (GLFW_KEY_K == key && GLFW_RELEASE == action) {
-        enemyMoveDown = false;
-    }
-
-    GLFWFunctions::left_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_LEFT) != 0;
-    GLFWFunctions::right_turn_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_RIGHT) != 0;
-    GLFWFunctions::scale_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_UP) != 0;
-    GLFWFunctions::scale_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_DOWN) != 0;
-    GLFWFunctions::move_up_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_W) != 0;
-    GLFWFunctions::move_down_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_S) != 0;
-    GLFWFunctions::move_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_A) != 0;
-    GLFWFunctions::move_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_D) != 0;
-    GLFWFunctions::move_jump_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_SPACE) != 0;
-    GLFWFunctions::camera_zoom_in_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_Z) != 0;
-    GLFWFunctions::camera_zoom_out_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_X) != 0;
-    GLFWFunctions::camera_rotate_left_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_Q) != 0;
-    GLFWFunctions::camera_rotate_right_flag = glfwGetKey(GLFWFunctions::pWindow, GLFW_KEY_E) != 0;
-
-
-    if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
-#endif
     Key mappedKey;
     switch (key) {
         // Alphabet keys
@@ -361,45 +238,12 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-
+	(void)window;
 }
 
 //Handle mouse button events
 void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
-#if 0
-    MouseButton mappedButton;
-    switch (button) {
-    case GLFW_MOUSE_BUTTON_LEFT:mappedButton = MouseButton::left;
-#ifdef _DEBUG
-        std::cout << "Left mouse button ";
-#endif
-        break;
-    case GLFW_MOUSE_BUTTON_RIGHT:mappedButton = MouseButton::right;
-#ifdef _DEBUG
-        std::cout << "Right mouse button ";
-#endif
-        break;
-    case GLFW_MOUSE_BUTTON_MIDDLE:mappedButton = MouseButton::middle;
-#ifdef _DEBUG
-        std::cout << "Middle mouse button ";
-#endif
-        break;
-    }
-
-    switch (action) {
-    case GLFW_PRESS:
-#ifdef _DEBUG
-        std::cout << "pressed" << std::endl;
-#endif
-        break;
-    case GLFW_RELEASE:
-#ifdef _DEBUG
-        std::cout << "released" << std::endl;
-#endif
-        break;
-    }
-#endif
-
+    (void)mods;
     MouseButton mappedButton;
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT: mappedButton = MouseButton::left; break;
@@ -414,10 +258,13 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
     else if (action == GLFW_RELEASE) {
         mouseButtonState[mappedButton] = false;
     }
+
+	(void)window;
 }
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
+	(void)window;
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
 #endif
@@ -425,6 +272,7 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
+	(void)window;
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
