@@ -84,7 +84,7 @@ void GraphicSystemECS::update(float dt) {
 
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity)) {
+        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) != "player") {
             graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
 		else if (GLFWFunctions::debug_flag && ecsCoordinator.getEntityID(entity) == "player") {
