@@ -58,6 +58,7 @@ void FontSystemECS::initialise() {
 }
 
 void FontSystemECS::update(float dt) {
+	(void)dt; // Unused parameter
     if (!fontSystem || !fontSystem->isInitialized) {
         std::cerr << "ERROR: FontSystem is null or not initialized. Cannot update font entities." << std::endl;
         return;

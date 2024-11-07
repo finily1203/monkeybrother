@@ -152,7 +152,6 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
 
     float xpos = x;
     float ypos = y;
-    float lineHeight = 0.0f;
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);

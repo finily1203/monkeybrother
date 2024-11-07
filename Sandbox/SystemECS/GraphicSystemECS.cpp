@@ -55,14 +55,14 @@ void GraphicSystemECS::update(float dt) {
         bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
         bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 		if (ecsCoordinator.getEntityID(entity) == "background") {
-			transform.scale.SetX(GLFWFunctions::windowWidth*4);
-			transform.scale.SetY(GLFWFunctions::windowHeight*4);
+            transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
+            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);
         }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
 
         // Use hasMovement for the update parameter
         graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
-        transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
+        transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 

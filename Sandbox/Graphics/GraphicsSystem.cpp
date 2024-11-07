@@ -55,7 +55,6 @@ GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
     m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
-    //std::vector<GraphicsSystem::GLViewport> vps;
     vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
     glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 
@@ -76,95 +75,8 @@ void GraphicsSystem::initialise() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //ShaderProgramSource source = Shader::ParseShader("./Graphics/Basic.shader");
-    //m_Shader = std::make_unique<Shader>(source.VertexSource, source.FragmentSource);
-    //if (!m_Shader->IsCompiled()) {
-    //    std::cerr << "Shader compilation failed." << std::endl;
-    //    return;
-    //}
-
-    //ShaderProgramSource source2 = Shader::ParseShader("./Graphics/Basic1.shader");
-    //m_Shader2 = std::make_unique<Shader>(source2.VertexSource, source2.FragmentSource);
-    //if (!m_Shader2->IsCompiled()) {
-    //    std::cerr << "Shader compilation failed." << std::endl;
-    //    return;
-    //}
-
-    //loadShaderAssets();
-    //loadTextureAssets();
-
     int width = assetsManager.texWidthGet();
     int height = assetsManager.texHeightGet();
-
-    //// Load texture 1
-    //int width, height, nrChannels;
-    //stbi_set_flip_vertically_on_load(true);
-    //unsigned char* data = stbi_load("./Graphics/Assets/player.png", &width, &height, &nrChannels, 0);
-
-    //if (data) {
-    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-
-    //    // Load texture into OpenGL
-    //    glGenTextures(1, &m_Texture);
-    //    glBindTexture(GL_TEXTURE_2D, m_Texture);
-    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    //    glGenerateMipmap(GL_TEXTURE_2D);
-
-    //    // Set texture parameters to prevent bleeding
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use nearest filtering
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest filtering
-
-    //    stbi_image_free(data);
-    //}
-    //else {
-    //    std::cerr << "Failed to load texture!" << std::endl;
-    //    stbi_image_free(data);
-    //    return;
-    //}
-
-    //// Loat texture 2
-    //glGenTextures(1, &m_Texture2);
-    //glBindTexture(GL_TEXTURE_2D, m_Texture2);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //data = stbi_load("./Graphics/Assets/image.png", &width, &height, &nrChannels, 0);
-    //if (data) {
-    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    //    glGenerateMipmap(GL_TEXTURE_2D);
-    //    stbi_image_free(data);
-    //}
-    //else {
-    //    std::cerr << "Failed to load texture!" << std::endl;
-    //    stbi_image_free(data);
-    //    return;
-    //}
-
-    //// Load texture 3
-    //glGenTextures(1, &m_Texture3);
-    //glBindTexture(GL_TEXTURE_2D, m_Texture3);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //data = stbi_load("./Graphics/Assets/image1.jpg", &width, &height, &nrChannels, 0);
-    //if (data) {
-    //    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-    //    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    //    glGenerateMipmap(GL_TEXTURE_2D);
-    //    stbi_image_free(data);
-    //}
-    //else {
-    //    std::cerr << "Failed to load texture!" << std::endl;
-    //    stbi_image_free(data);
-    //    return;
-    //}
-
-
 
     // Calculate the frame width and height based on the number of columns
     int columns = 1;  // Adjust to match your spritesheet
@@ -221,16 +133,12 @@ void GraphicsSystem::initialise() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // get the location of the uniform variable in the shader
-    //m_Shader2->Bind();
     assetsManager.GetShader("shader2")->Bind();
 
-    //int location = m_Shader2->GetUniformLocation("u_Color");
     int location = assetsManager.GetShader("shader2")->GetUniformLocation("u_Color");
     ASSERT(location != -1);
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
-    //m_Shader2->Unbind();
     assetsManager.GetShader("shader2")->Unbind();
 }
 
@@ -270,8 +178,8 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
 }
 
 void GraphicsSystem::Render(float deltaTime) {
+    (void)deltaTime;
     glClear(GL_COLOR_BUFFER_BIT);
-    //glViewport(0, 0, 1600, 900);
 }
 
 void GraphicsSystem::cleanup() {
@@ -286,78 +194,8 @@ void GraphicsSystem::ReleaseResources() {
     glDeleteVertexArrays(1, &m_VAO);
 }
 
-void GraphicsSystem::GLObject::init(glm::vec2 rhsOrientation, glm::vec2 rhsScaling, glm::vec2 rhsPosition) {
-    orientation = rhsOrientation;
-    scaling = rhsScaling;
-    position = rhsPosition;
-    mdl_xform = glm::mat3{ 1.0 };
-    mdl_to_ndc_xform = glm::mat3{ 1.0 };
-    color = glm::vec3{ 1.0, 1.0, 1.0 };
-    GLboolean isAnimated = GL_FALSE;
-}
-
-void GraphicsSystem::GLObject::update(GLdouble time_per_frame) {
-    glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, NDC{ 0 };
-    GLfloat aspect_ratio = 1600.f / 900.f;// TODO::change this to be calculated based on the window size
-
-    Scaling =
-    {
-        scaling.x, 0		 , 0,
-        0        , scaling.y , 0,
-        0        , 0         , 1
-    };
-
-    orientation.x += static_cast<GLfloat>(orientation.y * time_per_frame * 100.0f);
-
-    Rotating =
-    {
-         glm::cos(glm::radians(orientation.x)), glm::sin(glm::radians(orientation.x)), 0,
-        -glm::sin(glm::radians(orientation.x)), glm::cos(glm::radians(orientation.x)), 0,
-         0, 0, 1
-    };
-    Translating =
-    {
-        1,		    0 ,		     0,
-        0,		    1 ,		     0,
-        position.x, position.y , 1
-    };
-    // TODO:: change the NDC matrix to be calculated based on the window size
-    NDC =
-    {
-        2.0f / 1600.0f,  0,              0,
-        0,               2.0f / 900.0f,  0,
-        0,               0,              1 };
-
-    mdl_xform = Translating * (Rotating * Scaling);
-    mdl_to_ndc_xform = NDC * mdl_xform;
-}
-
-void GraphicsSystem::GLObject::draw(Shader* shader, const GLuint vao, const GLuint tex) const {
-    // load shader program in use by this object
-    shader->Bind();
-    // bind VAO of this object
-    glBindVertexArray(vao);
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
-    if (uniformLoc != -1) {
-        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
-    }
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-
-    // unbind VAO
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    // unbind shader program
-    shader->Unbind();
-}
-
-
-
-myMath::Matrix3x3 GraphicsSystem::UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMatrix) {
+myMath::Matrix3x3 GraphicsSystem::UpdateObject(myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMatrix) {
     glm::mat3 Scaling{ 1.0 }, Rotating{ 1.0 }, Translating{ 1.0 }, projMat{ 1.0 }, mdl_xform{ 1.0 }, mdl_to_ndc_xform{ 0 };
-
     Translating =
     {
         1,      0 ,       0,
@@ -408,7 +246,6 @@ void GraphicsSystem::drawDebugOBB(TransformComponent transform, myMath::Matrix3x
     right = transform.scale.GetX() / 2.0f;
     top = transform.scale.GetY() / 2.0f;
     bottom = -transform.scale.GetY() / 2.0f;
-
 
     // Define the corners of the AABB in homogeneous coordinates
     glm::vec4 bottomLeft(left, bottom, 0.0f, 1.0f);
@@ -528,18 +365,14 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
     // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
-        //m_Shader->Bind();
         assetsManager.GetShader("shader1")->Bind();
     else
-        //m_Shader2->Bind();
         assetsManager.GetShader("shader2")->Bind();
-    // bind VAO of this object
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
     glm::mat3 mdl_xform(1.0f);
     mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
-    //GLint uniformLoc = m_Shader2->GetUniformLocation("uModel_to_NDC");
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
         glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
@@ -550,51 +383,7 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
     // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    // unbind shader program
-    //m_Shader2->Unbind();
     assetsManager.GetShader("shader2")->Unbind();
-}
-
-void GraphicsSystem::loadShaderAssets() const {
-    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    //std::ifstream file(jsonFilePath);
-    //nlohmann::json jsonObj;
-
-    //if (file.is_open())
-    //{
-    //    file >> jsonObj;
-    //    file.close();
-    //}
-
-    //for (const auto& shaderAsset : jsonObj["shaderAssets"])
-    //{
-    //    std::string shaderName = shaderAsset["id"].get<std::string>();
-    //    std::string relativePath = shaderAsset["filePath"].get<std::string>();
-
-    //    std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-    //    assetsManager.LoadShader(shaderName, shaderFilePath);
-    //}
-}
-
-void GraphicsSystem::loadTextureAssets() const {
-    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    //std::ifstream file(jsonFilePath);
-    //nlohmann::json jsonObj;
-
-    //if (file.is_open())
-    //{
-    //    file >> jsonObj;
-    //    file.close();
-    //}
-
-    //for (const auto& textureAsset : jsonObj["textureAssets"])
-    //{
-    //    std::string textureName = textureAsset["id"].get<std::string>();
-    //    std::string relativePath = textureAsset["filePath"].get<std::string>();
-
-    //    std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-    //    assetsManager.LoadTexture(textureName, textureFilePath);
-    //}
 }
 
 

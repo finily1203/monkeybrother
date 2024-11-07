@@ -58,19 +58,10 @@ public:
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
-    myMath::Matrix3x3 UpdateObject(GLdouble deltaTime, myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
+    myMath::Matrix3x3 UpdateObject(myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
-    //Shader* GetShader() const{ return m_Shader.get(); }
-    //Shader* GetShader2() const{ return m_Shader2.get(); }
-    //GLuint GetTexture() const { return m_Texture; }
-    //GLuint GetTexture2() const { return m_Texture2; }
-    //GLuint GetTexture3() const { return m_Texture3; }
     GLuint GetVAO() const { return m_VAO; }
-    void SetCurrentAction(int actionRow);
-
-    void loadShaderAssets() const;
-    void loadTextureAssets() const;
 
     struct GLViewport {
         GLint x, y;
@@ -78,21 +69,6 @@ public:
     };
 
     static std::vector<GLViewport> vps; // container for viewports
-
-    struct GLObject {
-        glm::vec2 orientation;
-        glm::vec2 scaling;
-        glm::vec2 position;
-        glm::vec3 color;
-        glm::mat3 mdl_xform;
-        glm::mat3 mdl_to_ndc_xform;
-        GLboolean is_animated;
-
-        void init(glm::vec2 orientation, glm::vec2 scaling, glm::vec2 position);
-        void update(GLdouble time_per_frame);
-        void draw(Shader* shader, const GLuint vao, const GLuint tex) const;
-
-    };
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 	void drawDebugCircle(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 
@@ -102,6 +78,7 @@ private:
     GLuint m_UVBO;      // Separate VBO for texture coordinates (UVs)
     GLuint m_EBO;       // Element Buffer Object
     GLuint m_Texture, m_Texture2, m_Texture3;
+    GLboolean is_animated;
     std::unique_ptr<Shader> m_Shader, m_Shader2;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
     std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
