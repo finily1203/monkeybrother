@@ -142,6 +142,7 @@ void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohman
 
 void JSONSerializer::WriteSpecificObject(myMath::Vector3D const& object, nlohmann::json& jsonObj)
 {
+	std::cout << "JSONSerialization.cpp [R: " << object.GetX() << " G: " << object.GetY() << " B: " << object.GetZ() << "]" << std::endl;
 	jsonObj["x"] = object.GetX();
 	jsonObj["y"] = object.GetY();
 	jsonObj["z"] = object.GetZ();
@@ -171,6 +172,11 @@ void JSONSerializer::WriteSpecificObject(float const& object, nlohmann::json& js
 }
 
 void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jsonObj)
+{
+	jsonObj = object;
+}
+
+void JSONSerializer::WriteSpecificObject(std::string const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
 }

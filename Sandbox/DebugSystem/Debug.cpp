@@ -4,18 +4,29 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @team   :  MonkeHood
 @course :  CSD2401
 @file   :  Debug.cpp
-@brief  :  This file contains the function definition of ImGui GUI debugging features which include the debug
-		   window, game viewport window, console window, and crash logging system.
+@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the 
+		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's 
+		   level editor systems such as game viewport camera controls, object creation, hierarchy list, and save
+		   and load feature
 
 *Lew Zong Han Owen (z.lew) : 
 		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
 		  indication
-		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
-		- Integrated ImGui console window to allow direct custom debugging output in debugging mode
-		- Integrated a crash logging system to detect and log custom and standard exceptions into a crash-log 
-		  text file
+		- Designed the display synergy between all of ImGui's sub systems in the main debugging window
+		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
+		  properties' data
+		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to 
+		  them
+		- Integrated ImGui game viewport camera controls to zoom and pan current game scene
+		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level 
+		  editor
+
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables from json file, which allows 
+		  saving and loading feature in the level editor
 	
-File Contributions: Lew Zong Han Owen (100%)
+File Contributions: Lew Zong Han Owen (80%)
+					Ian Loi           (20%)
 
 /*_______________________________________________________________________________________________________________*/
 #define FULL_PERCENTAGE 100
@@ -494,6 +505,8 @@ void DebugSystem::update() {
 
 			if (ImGui::Button("Remove All Entity")) {
 				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+					if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {}
+					else
 					ecsCoordinator.destroyEntity(entity);
 				}
 			}
@@ -557,6 +570,9 @@ void DebugSystem::update() {
 						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
 						if (ImGui::SliderFloat("Text Box", &textBoxSlide, textBoxMinLimit, textBoxMaxLimit, "%.1f")) {
 							fontComp.textBoxWidth = textBoxSlide;
+						}
+						if (ImGui::Button("Remove")) {
+							ecsCoordinator.destroyEntity(entity);
 						}
 						ImGui::TreePop();
 
@@ -690,9 +706,15 @@ void DebugSystem::update() {
 						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 						std::string entityId = ecsCoordinator.getEntityID(entity);
 
+						std::cout << "Before AddNewEntityToJSON for " << entityId << ": " << jsonData.dump(2) << std::endl;
+
+
 						nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
 
+						std::cout << "New entity JSON for " << entityId << ": " << newEntityJSON.dump(2) << std::endl;
+
 						jsonData["entities"].push_back(newEntityJSON);
+						std::cout << "After push_back: " << jsonData.dump(2) << std::endl;
 					}
 
 					std::ofstream outputFile(saveFile);
@@ -725,10 +747,11 @@ void DebugSystem::update() {
 
 			// Create popup modal window
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-				// Your content goes here
+	
 				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 				if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
+
 					for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 						ecsCoordinator.destroyEntity(entity);
 					}
@@ -1090,10 +1113,10 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadInt(saveLimit, "Debug.saveLimit");
 	serializer.ReadInt(saveCount, "Debug.saveCount");
 	serializer.ReadFloat(lastPosX, "Debug.lastPosX");
-	serializer.ReadFloat(fileWindowWidth, "Debug.fileWindoWidth");
-	serializer.ReadFloat(saveWindowHeight, "Debug.saveWindoHeight");
+	serializer.ReadFloat(fileWindowWidth, "Debug.fileWindowWidth");
+	serializer.ReadFloat(saveWindowHeight, "Debug.saveWindowHeight");
 	serializer.ReadFloat(fileWindowHeight, "Debug.fileWindowHeight");
-	serializer.ReadFloat(saveWindowWidth, "Debug.saveWindoWidth");
+	serializer.ReadFloat(saveWindowWidth, "Debug.saveWindowWidth");
 
 	serializer.ReadFloat(fontScaleMaxLimit, "Debug.fontScaleMaxLimit");
 	serializer.ReadFloat(fontScaleMinLimit, "Debug.fontScaleMinLimit");

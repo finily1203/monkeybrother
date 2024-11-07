@@ -1,3 +1,23 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIGameViewport.cpp
+@brief  :  This file contains the function definition of ImGui game viewport system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui game viewport window to capture game scene in real time during debug mode
+		- Integrated game viewport camera controls for zooming and panning current game scene in real time
+
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables from json file, which 
+		  allows saving and loading feature in the level editor
+
+File Contributions: Lew Zong Han Owen (90%)
+					Ian Loi           (10%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "GUIGameViewport.h"
 #include "GlfwFunctions.h"
 #include "GUIConsole.h"
@@ -13,8 +33,13 @@ bool insideViewport = false;
 bool zoomTestFlag = false;
 bool GameViewWindow::clickedZoom = false;
 float GameViewWindow::zoomLevel; 
-float GameViewWindow::MIN_ZOOM;  // minimum zoom constant
-float GameViewWindow::MAX_ZOOM;  //  maximum zoom constant
+float GameViewWindow::newZoomLevel;
+float GameViewWindow::zoomDelta;
+float GameViewWindow::MIN_ZOOM;  
+float GameViewWindow::MAX_ZOOM;
+
+ImVec2 GameViewWindow::currentMousePos;
+float GameViewWindow::scrollY;
 
 bool GameViewWindow::clickedScreenPan = false;
 bool GameViewWindow::isDragging = false;
@@ -42,23 +67,22 @@ void GameViewWindow::Update() {
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	viewportPos = ImGui::GetWindowPos();
-	ImVec2 textMouse = ImGui::GetMousePos();
-	ImVec2 testTest = ImGui::GetContentRegionAvail();
-	Console::GetLog() << textMouse.x - viewportPos.x << "," << viewportPos.x << "," << testTest.x
-		<< std::endl;
-	if (GameViewWindow::IsPointInViewport(textMouse.x, textMouse.y))
+	currentMousePos = ImGui::GetMousePos();
+	
+	if (GameViewWindow::IsPointInViewport(currentMousePos.x, currentMousePos.y))
 		insideViewport = true;
 	else
 		insideViewport = false;
-	ImGuiIO& io = ImGui::GetIO();
-	float scrollY = io.MouseWheel;
-	float zoomDelta = scrollY * 0.1f;
-	float newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
-	if(insideViewport && clickedZoom)
-	zoomLevel = std::min(GameViewWindow::MAX_ZOOM,
-		std::max(GameViewWindow::MIN_ZOOM,
-		    newZoomLevel));
 
+	ImGuiIO& io = ImGui::GetIO();
+	scrollY = io.MouseWheel;
+	zoomDelta = scrollY * 0.1f;
+	newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
+
+	if (insideViewport && clickedZoom) {
+		zoomLevel = std::min(GameViewWindow::MAX_ZOOM,std::max(GameViewWindow::MIN_ZOOM,newZoomLevel));
+	}
+	
 	Console::GetLog() << "zoomLevel " << GameViewWindow::zoomLevel << " MAX_ZOOM " << GameViewWindow::MAX_ZOOM
 		<< std::endl;
 	CaptureMainWindow();
@@ -197,6 +221,14 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	// this is for the minimum and maximum zoom
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+
+	serializer.ReadFloat(zoomDelta, "GUIViewport.zoomDelta");
+	serializer.ReadFloat(newZoomLevel, "GUIViewport.newZoomLevel");
+
+	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
+
+	serializer.ReadFloat(currentMousePos.x, "GUIViewport.currentMousePosX");
+	serializer.ReadFloat(currentMousePos.y, "GUIViewport.currentMousePosY");
 
 	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
 	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");

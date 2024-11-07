@@ -7,9 +7,14 @@
       "y": 0.0
     },
     "viewportTexture": 0,
+    "zoomDelta": 0.0,
+    "newZoomLevel": 0.0,
+    "scrollY": 0.0,
     "zoomLevel": 1.0,
     "minZoom": 1.0,
     "maxZoom": 5.0,
+    "currentMousePosX": 0.0,
+    "currentMousePosY": 0.0,
     "accumulatedMouseDragDist": {
       "x": 0.0,
       "y": 0.0

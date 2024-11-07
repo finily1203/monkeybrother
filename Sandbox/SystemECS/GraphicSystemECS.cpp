@@ -58,6 +58,8 @@ void GraphicSystemECS::update(float dt) {
 			transform.scale.SetX(GLFWFunctions::windowWidth*4);
 			transform.scale.SetY(GLFWFunctions::windowHeight*4);
         }
+        bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
+
         // Use hasMovement for the update parameter
         graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
         transform.mdl_xform = graphicsSystem.UpdateObject(dt, transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
@@ -82,7 +84,7 @@ void GraphicSystemECS::update(float dt) {
 
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && ecsCoordinator.getEntityID(entity) != "player") {
+        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity)) {
             graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
 		else if (GLFWFunctions::debug_flag && ecsCoordinator.getEntityID(entity) == "player") {
@@ -99,7 +101,7 @@ void GraphicSystemECS::update(float dt) {
         else if (entitySig.test(0) && entitySig.count() == 1) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
-        else {
+        else if(isPlatform){
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
         //}
