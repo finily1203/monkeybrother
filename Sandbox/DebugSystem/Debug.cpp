@@ -1109,10 +1109,12 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
 		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
 		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
 		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
 		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
 		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
 		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
 		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
 		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
 
@@ -1148,10 +1150,12 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
 		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
 		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
 		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
 		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
 		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
 		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
 		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
 		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
 

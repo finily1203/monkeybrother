@@ -21,8 +21,11 @@ private:
 class ForceManager
 {
 public:
+
 	void AddForce(Entity player, const myMath::Vector2D& appliedForce);
+	
 	void ClearForce(Entity player);
+	
 	void ApplyForce(Entity player, myMath::Vector2D direction, float magnitude);
 
 	float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);

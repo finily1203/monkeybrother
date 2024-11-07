@@ -31,13 +31,6 @@ bool PhysicsSystemECS::alrJumped;
 bool PhysicsSystemECS::isFalling;
 bool PhysicsSystemECS::isSliding;
 
-//bool CollisionSystemECS::checkCollisionFirstTime;
-//bool CollisionSystemECS::checkSlanted;
-//bool CollisionSystemECS::slantedPlatformFirstTime;
-
-bool checkCollisionFirstTime = true;
-bool checkSlanted = true;
-bool slantedPlatformFirstTime = false;
 // PHYSICS SYSTEM
 
 // Constructor for Physics System
@@ -54,26 +47,6 @@ void PhysicsSystemECS::initialise()
 }
 
 void PhysicsSystemECS::cleanup() {}
-
-
-
-// Applying gravity to player when no collision detected (jumping, falling)
-//void PhysicsSystemECS::ApplyGravity(Entity player, float dt)
-//{
-//    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-//
-//    myMath::Vector2D& vel = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
-//    myMath::Vector2D& gravity = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
-//    // Get the directional gravity vector based on the player's orientation
-//    myMath::Vector2D direction = directionalVector(ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX());
-//
-//    // Apply gravity along the rotated gravity vector
-//    vel.SetX(vel.GetX() + direction.GetX() * gravity.GetX());
-//    vel.SetY(vel.GetY() + direction.GetY() * gravity.GetY());
-//
-//    playerPos.SetX(playerPos.GetX() + (vel.GetX() * dt));
-//    playerPos.SetY(playerPos.GetY() + (vel.GetY() * dt));
-//}
 
 // Find the closest platform to the player
 Entity PhysicsSystemECS::FindClosestPlatform(Entity player) 
@@ -120,192 +93,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
     return closestPlatform;
 }
 
-// Handling slope collision for the player
-//void PhysicsSystemECS::HandleSlopeCollision(Entity closestPlatform, Entity player) {
-//    //float angleRad = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.x * (M_PI / 180.f);
-//    float angleRad = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.GetX() * (M_PI / 180.f);
-//    float slopeSin = std::sin(angleRad);
-//    float slopeCos = std::cos(angleRad);
-//
-//    // Calculate the gravity force along the slope (parallel to the surface)
-//    float gravityAlongSlope = gravity * slopeSin;
-//    float gravityPerpendicularSlope = gravity * slopeCos;
-//
-//    // Update velocity along the slope (X direction)
-//    //float velocityX = GetVelocity().x + gravityAlongSlope * GLFWFunctions::delta_time;
-//    //float velocityY = GetVelocity().y + gravityPerpendicularSlope * GLFWFunctions::delta_time;    
-//    float velocityX = GetVelocity().GetX() + gravityAlongSlope * GLFWFunctions::delta_time;
-//    float velocityY = GetVelocity().GetY() + gravityPerpendicularSlope * GLFWFunctions::delta_time;
-//
-//    // Apply friction along the slope to reduce sliding speed gradually
-//    velocityX *= (1 - friction * GLFWFunctions::delta_time);
-//
-//    // Update the player's X position based on velocity along the slope
-//    //float playerX = ecsCoordinator.getComponent<TransformComponent>(player).position.x;
-//    //float playerY = ecsCoordinator.getComponent<TransformComponent>(player).position.y;
-//
-//    float playerX = ecsCoordinator.getComponent<TransformComponent>(player).position.GetX();
-//    float playerY = ecsCoordinator.getComponent<TransformComponent>(player).position.GetY();
-//
-//    //ecsCoordinator.getComponent<TransformComponent>(player).position.x = playerX + velocityX * GLFWFunctions::delta_time;
-//    ecsCoordinator.getComponent<TransformComponent>(player).position.SetX(playerX + velocityX * GLFWFunctions::delta_time);
-//
-//    //float halfOfLength = ecsCoordinator.getComponent<TransformComponent>(player).scale.x * 0.5f;
-//    float halfOfLength = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-//    //glm::vec2 collisionPoint = collisionSystem.GetCollisionPoint();
-//    myMath::Vector2D collisionPoint = collisionSystem.GetCollisionPoint();
-//    //float expectedPlayerX = collisionPoint.x + halfOfLength + (playerY - collisionPoint.y) * slopeCos;
-//    float expectedPlayerX = collisionPoint.GetX() + halfOfLength + (playerY - collisionPoint.GetY()) * slopeCos;
-//
-//    // Only adjust Y if the player is below the slope surface
-//    if (playerX <= expectedPlayerX) {
-//        // Gently adjust Y position and reset Y velocity
-//        //ecsCoordinator.getComponent<TransformComponent>(player).position.x = expectedPlayerX;
-//        ecsCoordinator.getComponent<TransformComponent>(player).position.SetX(expectedPlayerX);
-//    }
-//    else {
-//        // Apply gravity perpendicular to the slope to prevent floating up
-//        SetVelocity({ velocityX, velocityY });
-//    }
-//
-//    if (GLFWFunctions::move_jump_flag) {
-//        SetVelocity({ velocityX, jumpForce });
-//    }
-//}
-
-// Collision detection and handling (physics) for the player
-//void PhysicsSystemECS::HandleAABBCollision(Entity player, Entity closestPlatform)
-//{
-//    //CollisionSystemECS::AABB playerAABB = {
-//    //{ ecsCoordinator.getComponent<TransformComponent>(player).position.x - ecsCoordinator.getComponent<TransformComponent>(player).scale.x * 0.5f,
-//    //  ecsCoordinator.getComponent<TransformComponent>(player).position.y - ecsCoordinator.getComponent<TransformComponent>(player).scale.y * 0.5f },
-//    //{ ecsCoordinator.getComponent<TransformComponent>(player).position.x + ecsCoordinator.getComponent<TransformComponent>(player).scale.x * 0.5f,
-//    //  ecsCoordinator.getComponent<TransformComponent>(player).position.y + ecsCoordinator.getComponent<TransformComponent>(player).scale.y * 0.5f }
-//    //};
-//    CollisionSystemECS::AABB playerAABB = {
-//    { ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() - ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f,
-//      ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() - ecsCoordinator.getComponent<TransformComponent>(player).scale.GetY() * 0.5f},
-//    { ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() + ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f,
-//      ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() + ecsCoordinator.getComponent<TransformComponent>(player).scale.GetY() * 0.5f }
-//    };
-//
-//    CollisionSystemECS::AABB platformAABB = {
-//    { ecsCoordinator.getComponent<AABBComponent>(closestPlatform).left, ecsCoordinator.getComponent<AABBComponent>(closestPlatform).bottom },
-//    { ecsCoordinator.getComponent<AABBComponent>(closestPlatform).right, ecsCoordinator.getComponent<AABBComponent>(closestPlatform).top }
-//    };
-//
-//    float firstTimeOfCollision{};
-//
-//    //float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.x * (M_PI / 180.f);
-//    float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).orientation.GetX() * (M_PI / 180.f);
-//    if (slopeAngle == 0) {
-//        if (collisionSystem.CollisionIntersection_RectRect(platformAABB, { 0, 0 }, playerAABB, GetVelocity(), firstTimeOfCollision)) {
-//            if (GLFWFunctions::hasBumped == false) {
-//                GLFWFunctions::bumpAudio = true;
-//                GLFWFunctions::hasBumped = true;
-//            }
-//
-//            //float overlapX = std::min(playerAABB.max.x - platformAABB.min.x, platformAABB.max.x - playerAABB.min.x);
-//            //float overlapY = std::min(playerAABB.max.y - platformAABB.min.y, platformAABB.max.y - playerAABB.min.y);            
-//            float overlapX = std::min(playerAABB.max.GetX() - platformAABB.min.GetX(), platformAABB.max.GetX() - playerAABB.min.GetX());
-//            float overlapY = std::min(playerAABB.max.GetY() - platformAABB.min.GetY(), platformAABB.max.GetY() - playerAABB.min.GetY());
-//            myMath::Vector2D playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-//            myMath::Vector2D playerScl = ecsCoordinator.getComponent<TransformComponent>(player).scale;
-//            myMath::Vector2D platformPos = ecsCoordinator.getComponent<TransformComponent>(closestPlatform).position;
-//
-//            // order for checking: left, right, top, bottom
-//            if (overlapX < overlapY) {
-//
-//                //if (playerAABB.max.x > platformAABB.min.x &&
-//                //    playerPos.x < platformPos.x &&
-//                //    GetVelocity().y != 0 &&
-//                //    GetVelocity().x > 0) {
-//                //    playerPos.x = platformAABB.min.x - playerScl.x * 0.5f;
-//                //    SetVelocity({ 0, GetVelocity().y });
-//                //}            
-//                if (playerAABB.max.GetX() > platformAABB.min.GetX() &&
-//                    playerPos.GetX() < platformPos.GetX() &&
-//                    GetVelocity().GetY() != 0 &&
-//                    GetVelocity().GetX() > 0) {
-//                    playerPos.SetX(platformAABB.min.GetX() - playerScl.GetX() * 0.5f);
-//                    SetVelocity({ 0, GetVelocity().GetY() });
-//                }
-//                //else if (playerAABB.min.x < platformAABB.max.x &&
-//                //    playerPos.x > platformPos.x &&
-//                //    GetVelocity().y != 0 &&
-//                //    GetVelocity().x < 0) { // Collision from the right
-//                //    playerPos.x = platformAABB.max.x + playerScl.x * 0.5f;
-//                //
-//                //    SetVelocity({ 0, GetVelocity().y });
-//                //
-//                //}
-//                else if (playerAABB.min.GetX() < platformAABB.max.GetX() &&
-//                    playerPos.GetX() > platformPos.GetX() &&
-//                    GetVelocity().GetY() != 0 &&
-//                    GetVelocity().GetX() < 0) { // Collision from the right
-//                    playerPos.SetX(platformAABB.max.GetX() + playerScl.GetX() * 0.5f);
-//                
-//                    SetVelocity({ 0, GetVelocity().GetY() });
-//                
-//                }
-//            }
-//            else {
-//                //if (playerAABB.min.y < platformAABB.max.y &&
-//                //    playerPos.y > platformPos.y) { // Collision from above
-//                //    playerPos.y = platformAABB.max.y + playerScl.y * 0.5f;
-//                //    SetVelocity({ GetVelocity().x, 0 });
-//
-//                //    // Allow jumping when on surface of platform
-//                //    if (GLFWFunctions::move_jump_flag) {
-//                //        SetVelocity({ GetVelocity().x, jumpForce });
-//                //    }
-//                //}
-//                if (playerAABB.min.GetY() < platformAABB.max.GetY() &&
-//                    playerPos.GetY() > platformPos.GetY()) { // Collision from above
-//                    playerPos.SetY(platformAABB.max.GetY() + playerScl.GetY() * 0.5f);
-//                    SetVelocity({ GetVelocity().GetX(), 0});
-//
-//                    // Allow jumping when on surface of platform
-//                    if (GLFWFunctions::move_jump_flag) {
-//                        SetVelocity({ GetVelocity().GetX(), jumpForce});
-//                    }
-//                }
-//                //else if (playerAABB.max.y > platformAABB.min.y &&
-//                //    playerPos.y < platformPos.y &&
-//                //    GetVelocity().y > 0 &&
-//                //    GetVelocity().x != 0) { // Collision from below
-//                //    playerPos.y = platformAABB.min.y - playerScl.y * 0.5f;
-//                //    SetVelocity({ GetVelocity().x, -GetVelocity().y * GLFWFunctions::delta_time });
-//                //}                
-//                else if (playerAABB.max.GetY() > platformAABB.min.GetY() &&
-//                    playerPos.GetY() < platformPos.GetY() &&
-//                    GetVelocity().GetY() > 0 &&
-//                    GetVelocity().GetX() != 0) { // Collision from below
-//                    playerPos.SetY(platformAABB.min.GetY() - playerScl.GetY() * 0.5f);
-//                    SetVelocity({ GetVelocity().GetX(), -GetVelocity().GetY() * GLFWFunctions::delta_time});
-//                }
-//
-//            }
-//        }
-//        else {
-//            //SetVelocity({ GetVelocity().x, GetVelocity().y });
-//            SetVelocity({ GetVelocity().GetX(), GetVelocity().GetY()});
-//            GLFWFunctions::hasBumped = false;
-//        }
-//    }
-//    else {
-//        if (collisionSystem.AABBSlopeCollision(closestPlatform, player, GetVelocity())) {
-//            HandleSlopeCollision(closestPlatform, player);
-//
-//            GLFWFunctions::slideAudio = true;
-//        }
-//    }
-//
-//    ApplyGravity(player, GLFWFunctions::delta_time);
-//}
-
 // COLLISION SYSTEM
-
 // OBB collision detection
 // SAT for OBB vs Circle
 CollisionSystemECS::OBB CollisionSystemECS::createOBBFromEntity(Entity entity) 
@@ -394,8 +182,6 @@ bool CollisionSystemECS::checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, 
         &obb2.axes[0], &obb2.axes[1]
     };
 
-    //penetration = std::numeric_limits<float>::infinity();
-
     for (int i = 0; i < 4; i++) 
     {
         float min1, max1, min2, max2;
@@ -425,15 +211,16 @@ bool CollisionSystemECS::checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, 
     return true;
 }
 
-//myMath::Vector2D PhysicsSystemECS::clampVelocity(myMath::Vector2D velocity, float maxVelocity) {
-//    float speed = myMath::LengthVector2D(velocity);
-//    if (speed > maxVelocity) {
-//        myMath::NormalizeVector2D(velocity, velocity);
-//        return velocity * maxVelocity;
-//	}
-//	return velocity;
-//
-//}
+void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
+    myMath::Vector2D& velocity = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
+    float speed = myMath::LengthVector2D(velocity);
+    
+    if (speed > maxVelocity) 
+    {
+        myMath::NormalizeVector2D(velocity, velocity);
+        velocity = velocity * maxVelocity;
+	}
+}
 
 
 myMath::Vector2D PhysicsSystemECS::directionalVector(float angle) 
@@ -452,7 +239,6 @@ myMath::Vector2D PhysicsSystemECS::directionalVector(float angle)
     vector.SetX(cosValue);
     vector.SetY(sinValue);
 
-
     return vector;
 }
 
@@ -470,10 +256,8 @@ float ForceManager::ResultantForce(myMath::Vector2D direction, myMath::Vector2D 
 	float dotProduct = myMath::DotProductVector2D(direction, -normal);
 	float angle = std::acos(dotProduct); // Angle in radians
 
-	// Calculate force factor based on angle (steeper angle = higher force)
 	float forceFactor = std::sin(angle); // Will be between 0 and 1
 
-	// Apply accumulated force based on angle
 	return maxAccForce * forceFactor;
 }
 
@@ -483,7 +267,7 @@ void ForceManager::ClearForce(Entity player) {
 	accForce.SetY(0.f);
 }
 
-void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float magnitude)
+void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float targetForce)
 {
     myMath::Vector2D& playerPos     = ecsCoordinator.getComponent<TransformComponent>(player).position;
 
@@ -494,13 +278,12 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float m
     myMath::Vector2D& gravity       = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
     float mass                      = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
     float dampen                    = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
-    float maxVelocity               = 200.f; // need create clamp velocity function
-    float& targetForce              = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
+    float maxVelocity               = ecsCoordinator.getComponent<PhysicsComponent>(player).maxVelocity;
     float& prevForce				= ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
 
-    if (prevForce != magnitude) {
-        accForce.SetX(magnitude);
-        accForce.SetY(magnitude);
+    if (prevForce != targetForce) {
+        accForce.SetX(targetForce);
+        accForce.SetY(targetForce);
     }
 
     float invMass = mass > 0.f ? 1.f / mass : 0.f;
@@ -509,19 +292,21 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float m
     vel.SetX(vel.GetX() + direction.GetX() * acceleration.GetX());
     vel.SetY(vel.GetY() + direction.GetY() * acceleration.GetY());
 
-
     Console::GetLog() << "force:" << acceleration.GetX() << " " << acceleration.GetY() << std::endl;
+
     //Dampening
     vel.SetX(vel.GetX() * dampen);
     vel.SetY(vel.GetY() * dampen);
 
-    //clampVelocity(vel, maxVelocity);
+    float speed = myMath::LengthVector2D(vel);
+    if (speed > maxVelocity) {
+        myMath::NormalizeVector2D(vel, vel);
+        vel = vel * maxVelocity;
+    }
 
-    //if (vel.GetX() > maxVelocity) ClearForce(player);
-    //if (vel.GetX() < -maxVelocity) ClearForce(player);
-    //if (vel.GetY() > maxVelocity) ClearForce(player);
-    //if (vel.GetY() < -maxVelocity) ClearForce(player);
-    //Console::GetLog() << "vel: "<< vel.GetX() << " " << vel.GetY() << std::endl;
+    ecsCoordinator.getSpecificSystem<PhysicsSystemECS>()->clampVelocity(player, maxVelocity);
+
+    Console::GetLog() << "vel: "<< vel.GetX() << " " << vel.GetY() << std::endl;
 
     playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
     playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
@@ -537,15 +322,17 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     myMath::Vector2D direction          = directionalVector(rotation);
     myMath::Vector2D gravity            = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
     float mass                          = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
-    float maxAccForce                   = 40.f;
+    float maxAccForce                   = ecsCoordinator.getComponent<PhysicsComponent>(player).maxAccumulatedForce;
     float& targetForce                  = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
     float& prevForce                    = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
-
+    Force force                         = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
     CollisionSystemECS::OBB playerOBB   = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
 
     myMath::Vector2D normal{};
     float penetration{};
+
+    force.SetDirection(direction);
 
     bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
     
@@ -553,15 +340,15 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 
     if (colliding) 
     {
-        if (-normal.GetX() == direction.GetX() && -normal.GetY() == direction.GetY()) 
+        if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
         {
             forceManager.ClearForce(player);
         }
 
-        targetForce = forceManager.ResultantForce(direction, normal, maxAccForce);
+        targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
     }
 
-    forceManager.ApplyForce(player, direction, targetForce);
+    forceManager.ApplyForce(player, force.GetDirection(), targetForce);
     
     prevForce = targetForce;
     
@@ -585,237 +372,6 @@ void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D norma
     playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
 }
 
-// AABB collision detection
-bool CollisionSystemECS::CollisionIntersection_RectRect(const AABB& aabb1,
-    const myMath::Vector2D& vel1,
-    const AABB& aabb2,
-    const myMath::Vector2D& vel2,
-    float& firstTimeOfCollision)
-{
-    if (aabb1.max.GetX() < aabb2.min.GetX() || aabb1.max.GetY() < aabb2.min.GetY() || aabb1.min.GetX() > aabb2.max.GetX() || aabb1.min.GetY() > aabb2.max.GetY()) { // if no overlap
-
-        float tFirst = 0;
-        float tLast = GLFWFunctions::delta_time;
-
-        myMath::Vector2D Vb = vel1 - vel2;
-
-        if (Vb.GetX() < 0) {
-            //case 1
-            if (aabb1.min.GetX() > aabb2.max.GetX()) {
-                return 0;
-            }
-            //case 4
-            if (aabb1.max.GetX() < aabb2.min.GetX()) {
-                //tFirst = fmax((aabb1.max.x - aabb2.min.x) / Vb.x, tFirst);
-                tFirst = fmax((aabb1.max.GetX() - aabb2.min.GetX()) / Vb.GetX(), tFirst);
-            }
-            if (aabb1.min.GetX() < aabb2.max.GetX()) {
-                tLast = fmin((aabb1.min.GetX() - aabb2.max.GetX()) / Vb.GetX(), tLast);
-            }
-        }
-        else if (Vb.GetX() > 0) {
-            // case 2
-            if (aabb1.min.GetX() > aabb2.max.GetX()) {
-                tFirst = fmax((aabb1.min.GetX() - aabb2.max.GetX()) / Vb.GetX(), tFirst);
-            }
-            if (aabb1.max.GetX() > aabb2.min.GetX()) {
-                tLast = fmin((aabb1.max.GetX() - aabb2.min.GetX()) / Vb.GetX(), tLast);
-            }
-            //case 3
-            if (aabb1.max.GetX() < aabb2.min.GetX()) {
-                return 0;
-            }
-        }
-        else {
-            // case 5
-            if (aabb1.max.GetX() < aabb2.min.GetX()) {
-                return 0;
-            }
-            else if (aabb1.min.GetX() > aabb2.max.GetX()) {
-                return 0;
-            }
-        }
-
-        // case 6
-        if (tFirst > tLast) {
-            return 0;
-        }
-
-        ////////////////////////////////////////////////////////////////////
-        if (Vb.GetY() < 0) {
-            //case 1
-            if (aabb1.min.GetY() > aabb2.max.GetY()) {
-                return 0;
-            }
-            //case 4
-            if (aabb1.max.GetY() < aabb2.min.GetY()) {
-                tFirst = fmax((aabb1.max.GetY() - aabb2.min.GetY()) / Vb.GetY(), tFirst);
-            }
-            if (aabb1.min.GetY() < aabb2.max.GetY()) {
-                tLast = fmin((aabb1.min.GetY() - aabb2.max.GetY()) / Vb.GetY(), tLast);
-            }
-        }
-        else if (Vb.GetY() > 0) {
-            // case 2
-            if (aabb1.min.GetY() > aabb2.max.GetY()) {
-                tFirst = fmax((aabb1.min.GetY() - aabb2.max.GetY()) / Vb.GetY(), tFirst);
-            }
-            if (aabb1.max.GetY() > aabb2.min.GetY()) {
-                tLast = fmin((aabb1.max.GetY() - aabb2.min.GetY()) / Vb.GetY(), tLast);
-            }
-            //case 3
-            if (aabb1.max.GetY() < aabb2.min.GetY()) {
-                return 0;
-            }
-        }
-        else {
-            // case 5
-            if (aabb1.max.GetY() < aabb2.min.GetY()) {
-                return 0;
-            }
-            else if (aabb1.min.GetY() > aabb2.max.GetY()) {
-                return 0;
-            }
-        }
-        // case 6
-        if (tFirst > tLast) {
-            return 0;
-        }
-        firstTimeOfCollision = tFirst;
-
-        return 1;
-    }
-    else {
-        return 1;
-    }
-}
-
-// AABB slope collision detection
-//bool CollisionSystemECS::AABBSlopeCollision(Entity platform, Entity player, myMath::Vector2D velocity)
-//{
-//    //CollisionSystemECS::AABB playerAABB = {
-//    //    { ecsCoordinator.getComponent<TransformComponent>(player).position.x - ecsCoordinator.getComponent<TransformComponent>(player).scale.x * 0.5f,
-//    //      ecsCoordinator.getComponent<TransformComponent>(player).position.y - ecsCoordinator.getComponent<TransformComponent>(player).scale.y * 0.5f },
-//    //    { ecsCoordinator.getComponent<TransformComponent>(player).position.x + ecsCoordinator.getComponent<TransformComponent>(player).scale.x * 0.5f,
-//    //      ecsCoordinator.getComponent<TransformComponent>(player).position.y + ecsCoordinator.getComponent<TransformComponent>(player).scale.y * 0.5f }
-//    //};
-//
-//    CollisionSystemECS::AABB playerAABB = {
-//    { ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() - ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f,
-//      ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() - ecsCoordinator.getComponent<TransformComponent>(player).scale.GetY() * 0.5f},
-//    { ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() + ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f,
-//      ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() + ecsCoordinator.getComponent<TransformComponent>(player).scale.GetY() * 0.5f }
-//    };
-//
-//    // Define platform's AABB (before rotation)
-//    CollisionSystemECS::AABB platformAABB = {
-//        { ecsCoordinator.getComponent<AABBComponent>(platform).left, ecsCoordinator.getComponent<AABBComponent>(platform).bottom },
-//        { ecsCoordinator.getComponent<AABBComponent>(platform).right, ecsCoordinator.getComponent<AABBComponent>(platform).top }
-//    };
-//
-//    // Compute the sine and cosine of the platform's rotation angle
-//    //float radians = ecsCoordinator.getComponent<TransformComponent>(platform).orientation.x * (M_PI / 180.f);
-//    float radians = ecsCoordinator.getComponent<TransformComponent>(platform).orientation.GetX() * (M_PI / 180.f);
-//    float s = sin(-radians);
-//    float c = cos(-radians);
-//
-//    // Translate the player's AABB to the platform's local space (relative to platform's origin)
-//    glm::vec2 translatedMin = { playerAABB.min.x - ecsCoordinator.getComponent<TransformComponent>(platform).position.x,
-//                                playerAABB.min.y - ecsCoordinator.getComponent<TransformComponent>(platform).position.y }; */   
-//    myMath::Vector2D translatedMin = { playerAABB.min.GetX() - ecsCoordinator.getComponent<TransformComponent>(platform).position.GetX(),
-//                                       playerAABB.min.GetY() - ecsCoordinator.getComponent<TransformComponent>(platform).position.GetY()};
-//
-//    //glm::vec2 translatedMax = { playerAABB.max.x - ecsCoordinator.getComponent<TransformComponent>(platform).position.x,
-//    //                            playerAABB.max.y - ecsCoordinator.getComponent<TransformComponent>(platform).position.y };
-//    myMath::Vector2D translatedMax = { playerAABB.max.GetX() - ecsCoordinator.getComponent<TransformComponent>(platform).position.GetX(),
-//                                       playerAABB.max.GetY() - ecsCoordinator.getComponent<TransformComponent>(platform).position.GetY()};
-//
-//    // Rotate the translated AABB points (counter-clockwise to match platform rotation)
-//    //glm::vec2 rotatedMin = {
-//    //    translatedMin.x * c - translatedMin.y * s,
-//    //    translatedMin.x * s + translatedMin.y * c
-//    //};    
-//    myMath::Vector2D rotatedMin = {
-//        translatedMin.GetX() * c - translatedMin.GetY() * s,
-//        translatedMin.GetX() * s + translatedMin.GetY() * c
-//    };
-//    //glm::vec2 rotatedMax = {
-//    //    translatedMax.x * c - translatedMax.y * s,
-//    //    translatedMax.x * s + translatedMax.y * c
-//    //};    
-//    myMath::Vector2D rotatedMax = {
-//        translatedMax.GetX() * c - translatedMax.GetY() * s,
-//        translatedMax.GetX() * s + translatedMax.GetY() * c
-//    };
-//
-//    // Translate the rotated AABB back to world coordinates
-//    //rotatedMin.x += ecsCoordinator.getComponent<TransformComponent>(platform).position.x;
-//    //rotatedMin.y += ecsCoordinator.getComponent<TransformComponent>(platform).position.y;
-//    //rotatedMax.x += ecsCoordinator.getComponent<TransformComponent>(platform).position.x;
-//    //rotatedMax.y += ecsCoordinator.getComponent<TransformComponent>(platform).position.y;
-//    rotatedMin.SetX(rotatedMin.GetX() + ecsCoordinator.getComponent<TransformComponent>(platform).position.GetX());
-//    rotatedMin.SetY(rotatedMin.GetY() + ecsCoordinator.getComponent<TransformComponent>(platform).position.GetY());
-//    rotatedMax.SetX(rotatedMax.GetX() + ecsCoordinator.getComponent<TransformComponent>(platform).position.GetX());
-//    rotatedMax.SetY(rotatedMax.GetY() + ecsCoordinator.getComponent<TransformComponent>(platform).position.GetY());
-//
-//    // Create a rotated AABB for the player
-//    //CollisionSystemECS::AABB rotatedPlayerAABB = {
-//    //    { rotatedMin.x, rotatedMin.y },
-//    //    { rotatedMax.x, rotatedMax.y }
-//    //};    
-//    CollisionSystemECS::AABB rotatedPlayerAABB = {
-//        { rotatedMin.GetX(), rotatedMin.GetY()},
-//        { rotatedMax.GetX(), rotatedMax.GetY()}
-//    };
-//
-//    // Check for collision between the rotated player's AABB and the platform's AABB
-//    float firstTimeOfCollision = 0;
-//    bool collisionDetected = CollisionIntersection_RectRect(platformAABB, { 0, 0 }, rotatedPlayerAABB, velocity, firstTimeOfCollision);
-//
-//    //float angleRad = ecsCoordinator.getComponent<TransformComponent>(platform).orientation.x * (M_PI / 180.f);
-//    float angleRad = ecsCoordinator.getComponent<TransformComponent>(platform).orientation.GetX() * (M_PI / 180.f);
-//    myMath::Vector2D platformPos = ecsCoordinator.getComponent<TransformComponent>(platform).position;
-//
-//    // Rotate the circle's center relative to the platform
-//    //float rotatedX = std::cos(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.x - platformPos.x) + std::sin(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.y - platformPos.y);
-//    //float rotatedY = -std::sin(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.x - platformPos.x) + std::cos(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.y - platformPos.y);
-//
-//    float rotatedX = std::cos(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() - platformPos.GetX()) + std::sin(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() - platformPos.GetY());
-//    float rotatedY = -std::sin(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.GetX() - platformPos.GetX()) + std::cos(angleRad) * (ecsCoordinator.getComponent<TransformComponent>(player).position.GetY() - platformPos.GetY());
-//
-//    // Compute half extents of the platform along each axis (for AABB collision)
-//    //glm::vec2 platformScl = ecsCoordinator.getComponent<TransformComponent>(platform).scale;
-//    myMath::Vector2D platformScl = ecsCoordinator.getComponent<TransformComponent>(platform).scale;
-//    float halfExtentX = platformScl.GetX() / 2.f;
-//    float halfExtentY = platformScl.GetY() / 2.f;
-//
-//    float closestX = std::max(-halfExtentX, std::min(rotatedX, halfExtentX));
-//    float closestY = std::max(-halfExtentY, std::min(rotatedY, halfExtentY));
-//
-//    float distanceX = rotatedX - closestX;
-//    float distanceY = rotatedY - closestY;
-//    float distanceSquared = distanceX * distanceX + distanceY * distanceY;
-//
-//    // Compute the distance from the circle center to the rectangle's center along each axis
-//    float distX = std::abs(rotatedX) - halfExtentX;
-//    float distY = std::abs(rotatedY) - halfExtentY;
-//
-//    if (distanceSquared <= 50 * 50) {
-//        // Intersection detected, transform point back to world coordinates
-//        //glm::vec2 intersectionPoint = {
-//        //    platformPos.x + std::cos(-angleRad) * closestX - std::sin(-angleRad) * closestY,
-//        //    platformPos.y + std::sin(angleRad) * closestX + std::cos(angleRad) * closestY
-//        //};        
-//        myMath::Vector2D intersectionPoint = {
-//            platformPos.GetX() + std::cos(-angleRad) * closestX - std::sin(-angleRad) * closestY,
-//            platformPos.GetY() + std::sin(angleRad) * closestX + std::cos(angleRad) * closestY
-//        };
-//
-//        SetCollisionPoint(intersectionPoint);
-//    }
-//    return collisionDetected;
-//}
-
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt) 
 {
@@ -825,53 +381,9 @@ void PhysicsSystemECS::update(float dt)
 
     playerEntity = ecsCoordinator.getEntityFromID("player");
 
-    //myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).velocity;
-
-    //if (GetVelocity().y < 0 && !isFalling)
-    //if (velocity.GetY() < 0 && !isFalling)
-    //{
-    //    isFalling = true;
-    //    eventSource.NotifyFall(playerEntity);
-    //}
-
-    ////if (GetVelocity().y >= 0 && isFalling)
-    //if (velocity.GetY() >= 0 && isFalling)
-    //{
-    //    isFalling = false;
-    //}
-
-    ////if (GetVelocity().y > 0 && !alrJumped)
-    //if (velocity.GetY() > 0 && !alrJumped)
-    //{
-    //    alrJumped = true;
-    //    eventSource.NotifyJump(playerEntity);
-    //}
-
-    ////if (GetVelocity().y <= 0 && alrJumped)
-    //if (velocity.GetY() <= 0 && alrJumped)
-    //{
-    //    alrJumped = false;
-    //}
-    //HandlePlayerInput(playerEntity);
-
     closestPlatformEntity = FindClosestPlatform(playerEntity);
-    //float slopeAngle = ecsCoordinator.getComponent<TransformComponent>(closestPlatformEntity).orientation.x;
-    //if (slopeAngle != 0) {
-    //    HandleOBBCircleCollision(closestPlatformEntity, playerEntity);
-    //}
-    //else {
-    //    HandleAABBCollision(playerEntity, closestPlatformEntity);  // Use AABB for horizontal platforms
-    //}
-    //HandleOBBCircleCollision(closestPlatformEntity, playerEntity);
+
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
-    //HandleAABBCollision(playerEntity, closestPlatformEntity);
-
-
-
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.x += GetVelocity().x;
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.y += GetVelocity().y;    
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetX(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetX() + velocity.GetX());
-    //ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.SetY(ecsCoordinator.getComponent<TransformComponent>(playerEntity).position.GetY() + velocity.GetY());
 
 }
 
@@ -897,12 +409,6 @@ void PhysicsSystemECS::LoadPhysicsConfigFromJSON(std::string const& filename)
     serializer.ReadBool(isFalling, "physics.isFalling");
     serializer.ReadBool(isSliding, "physics.isSliding");
 
-    serializer.ReadBool(checkCollisionFirstTime, "collision.checkCollisionFirstTime");
-    serializer.ReadBool(checkSlanted, "collision.checkSlanted");
-    serializer.ReadBool(slantedPlatformFirstTime, "collision.slantedPlatformFirstTime");
-
-
-    //std::cout << friction << " hello" << std::endl;
 }
 
 void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename) 
@@ -927,9 +433,6 @@ void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename)
     serializer.WriteBool(isFalling, "physics.isFalling", filename);
     serializer.WriteBool(isSliding, "physics.isSliding", filename);
 
-    serializer.WriteBool(checkCollisionFirstTime, "collision.checkCollisionFirstTime", filename);
-    serializer.WriteBool(checkSlanted, "collision.checkSlanted", filename);
-    serializer.WriteBool(slantedPlatformFirstTime, "collision.slantedPlatformFirstTime", filename);
 }
 
 
