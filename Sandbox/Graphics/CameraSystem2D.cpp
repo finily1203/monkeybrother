@@ -1,5 +1,7 @@
 #include "CameraSystem2D.h"
 #include "GlobalCoordinator.h"
+
+#define M_PI   3.14159265358979323846264338327950288f
 CameraSystem2D::CameraSystem2D()
 	: m_CameraPosition(0.0f, 0.0f), m_CameraRotation(0.0f), m_CameraZoom(1.0f), ecsCoordinator(ecsCoordinator), m_LockedComponent(nullptr), m_ViewMatrix(), m_ProjectionMatrix()
 {
@@ -74,8 +76,18 @@ void CameraSystem2D::update()
     translationMatrix.SetMatrixValue(2, 1, -m_CameraPosition.GetY());
 
     myMath::Matrix3x3 rotationMatrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-    float cosTheta = cos(m_CameraRotation);
-    float sinTheta = sin(m_CameraRotation);
+    float cosTheta = 0.0f;
+    float sinTheta = 0.0f;
+    //std::cout << "m_LockedComponent->orientation.GetX(): " << m_LockedComponent->orientation.GetX() << std::endl;
+    if (m_LockedComponent && GLFWFunctions::allow_camera_movement == false) {
+        cosTheta = cos(-m_LockedComponent->orientation.GetX() * M_PI / 180.0f);
+        sinTheta = sin(-m_LockedComponent->orientation.GetX() * M_PI / 180.0f);
+    }
+    else {
+		cosTheta = cos(-m_CameraRotation);
+		sinTheta = sin(-m_CameraRotation);
+	}
+    
     //rotationMatrix[0][0] = cosTheta;
     //rotationMatrix[0][1] = sinTheta;
     //rotationMatrix[1][0] = -sinTheta;
