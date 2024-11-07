@@ -69,6 +69,10 @@
     {
       "id": "Antonio",
       "filePath": "assets/fonts/Antonio.ttf"
+    },
+    {
+      "id": "Mono",
+      "filePath": "assets/fonts/liberation-mono.ttf"
     }
   ]
 }
