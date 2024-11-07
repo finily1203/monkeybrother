@@ -247,8 +247,11 @@
           "y": 0.0
         },
         "force": {
-          "x": 0.05,
-          "y": 0.05
+          "direction": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "magnitude": 0.05
         },
         "accumulatedForce": {
           "x": 0.0,
@@ -256,11 +259,11 @@
         },
         "prevForce": 0.0,
         "targetForce": 0.0
+        },
+        "animation": {
+          "isAnimated": true
+        }
       },
-      "animation": {
-        "isAnimated": true
-      }
-    },
     {
       "id": "enemy",
       "transform": {
@@ -334,8 +337,11 @@
           "y": 0.0
         },
         "force": {
-          "x": 0.05,
-          "y": 0.05
+          "direction": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "magnitude": 0.0
         },
         "accumulatedForce": {
           "x": 0.0,

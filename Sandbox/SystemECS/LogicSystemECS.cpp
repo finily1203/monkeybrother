@@ -1,5 +1,6 @@
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
+#include "PhyColliSystemECS.h"
 
 #include "Debug.h"
 #include "GUIConsole.h"
@@ -13,6 +14,7 @@ void LogicSystemECS::update(float dt) {
 	//------------------------------------PLAYER MOVEMENT-----------------------------------//
 	//Entity playerEntity = ecsCoordinator.getFirstEntity();
 	Entity playerEntity = ecsCoordinator.getEntityFromID("player");
+	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 
 	const float maxSpeed = 0.6f;
 
@@ -20,7 +22,7 @@ void LogicSystemECS::update(float dt) {
 
 	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
 	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).acceleration;
-	myMath::Vector2D force =		ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+	//myMath::Vector2D force =		ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
 	myMath::Vector2D& vel =			ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).velocity;
 	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).accumulatedForce;
 	float mass =					ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
@@ -114,81 +116,81 @@ void LogicSystemECS::update(float dt) {
 				}
 			}
 
-			myMath::Vector2D& ePos		   = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-			myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
-			myMath::Vector2D eForce		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
-			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
-			float eMass					   = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
-			//float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
+			//myMath::Vector2D& ePos		   = ecsCoordinator.getComponent<TransformComponent>(entity).position;
+			//myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
+			//myMath::Vector2D eForce		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
+			//myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
+			//myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
+			//float eMass					   = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
+			////float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
+			////float magnitude = ecsCoordinator.getComponent<PhysicsComponent>(entity).jump;
 
-			if (GLFWFunctions::keyState[Key::I]) {
-				eForce.SetX(0.0f);
-				ApplyForce(entity, eForce);
-			}
-			else if (GLFWFunctions::keyState[Key::K]) {
-				eForce.SetX(0.0f);
-				ApplyForce(entity, -eForce);
-			}
-			else if (GLFWFunctions::keyState[Key::J]) {
-				eForce.SetY(0.0f);
-				ApplyForce(entity, -eForce);
-			}
-			else if (GLFWFunctions::keyState[Key::L]) {
-				eForce.SetY(0.0f);
-				ApplyForce(entity, eForce);
-			}
-			else {
+			//if (GLFWFunctions::keyState[Key::I]) {
+			//	//PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, magnitude);
+			//}
+			//else if (GLFWFunctions::keyState[Key::K]) {
+			//	eForce.SetX(0.0f);
+			//	ApplyForce(entity, -eForce);
+			//}
+			//else if (GLFWFunctions::keyState[Key::J]) {
+			//	eForce.SetY(0.0f);
+			//	ApplyForce(entity, -eForce);
+			//}
+			//else if (GLFWFunctions::keyState[Key::L]) {
+			//	eForce.SetY(0.0f);
+			//	ApplyForce(entity, eForce);
+			//}
+			//else {
 
-				// Apply friction to gradually slow down
-				if (eAccForce.GetX() > 0) { 
-					eForce.SetY(0.0f);
-					ApplyForce(entity, -eForce);
-				}
-				else if (eAccForce.GetX() < 0) {
-					eForce.SetY(0.0f);
-					ApplyForce(entity, eForce);
-				}
-				else if (eAccForce.GetY() > 0) {
-					eForce.SetX(0.0f);
-					ApplyForce(entity, -eForce);
-				}
-				else if (eAccForce.GetY() < 0) {
-					eForce.SetX(0.0f);
-					ApplyForce(entity, eForce);
-				}
+			//	// Apply friction to gradually slow down
+			//	if (eAccForce.GetX() > 0) { 
+			//		eForce.SetY(0.0f);
+			//		ApplyForce(entity, -eForce);
+			//	}
+			//	else if (eAccForce.GetX() < 0) {
+			//		eForce.SetY(0.0f);
+			//		ApplyForce(entity, eForce);
+			//	}
+			//	else if (eAccForce.GetY() > 0) {
+			//		eForce.SetX(0.0f);
+			//		ApplyForce(entity, -eForce);
+			//	}
+			//	else if (eAccForce.GetY() < 0) {
+			//		eForce.SetX(0.0f);
+			//		ApplyForce(entity, eForce);
+			//	}
 
-				if (std::abs(eAccForce.GetX()) < 0.01f) { // threshold
-					eVel.SetX(0.f);
-					eAccForce.SetX(0.f);
-				}
-				if (std::abs(eAccForce.GetY()) < 0.01f) { // threshold
-					eVel.SetY(0.f);
-					eAccForce.SetY(0.f);
-				}
-			}
+			//	if (std::abs(eAccForce.GetX()) < 0.01f) { // threshold
+			//		eVel.SetX(0.f);
+			//		eAccForce.SetX(0.f);
+			//	}
+			//	if (std::abs(eAccForce.GetY()) < 0.01f) { // threshold
+			//		eVel.SetY(0.f);
+			//		eAccForce.SetY(0.f);
+			//	}
+			//}
 
-			invMass = eMass > 0.f ? 1.f / eMass : 0.f;
-			eAcceleration = eAccForce * invMass;
+			//invMass = eMass > 0.f ? 1.f / eMass : 0.f;
+			//eAcceleration = eAccForce * invMass;
 
-			// Clamp speed without interfering with velocity
-			if (eVel.GetX() > maxSpeed) {
-				eAcceleration.SetX(0);
-			}
-			else if (eVel.GetX() < -maxSpeed) {
-				eAcceleration.SetX(0);
-			}
+			//// Clamp speed without interfering with velocity
+			//if (eVel.GetX() > maxSpeed) {
+			//	eAcceleration.SetX(0);
+			//}
+			//else if (eVel.GetX() < -maxSpeed) {
+			//	eAcceleration.SetX(0);
+			//}
 
-			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
-			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
+			//eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
+			//eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
 
-			// 
-			// ing
-			eVel.SetX(eVel.GetX() * 0.9f);
-			eVel.SetY(eVel.GetY() * 0.9f);
+			//// 
+			//// ing
+			//eVel.SetX(eVel.GetX() * 0.9f);
+			//eVel.SetY(eVel.GetY() * 0.9f);
 
-			ePos.SetX(ePos.GetX() + eVel.GetX());
-			ePos.SetY(ePos.GetY() + eVel.GetY());
+			//ePos.SetX(ePos.GetX() + eVel.GetX());
+			//ePos.SetY(ePos.GetY() + eVel.GetY());
 		}
 		//--------------------------------END OF ENEMY MOVEMENT--------------------------------//
 				//------------------------------------CAMERA MOVEMENT-----------------------------------//

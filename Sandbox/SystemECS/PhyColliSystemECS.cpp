@@ -490,7 +490,6 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float m
     myMath::Vector2D& vel           = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
     myMath::Vector2D& acceleration  = ecsCoordinator.getComponent<PhysicsComponent>(player).acceleration;
     myMath::Vector2D& accForce      = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-    myMath::Vector2D& force         = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
 
     myMath::Vector2D& gravity       = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
     float mass                      = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
@@ -533,7 +532,6 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 {
     myMath::Vector2D& playerPos         = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-    myMath::Vector2D& force             = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
     float radius                        = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
     float rotation                      = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
     myMath::Vector2D direction          = directionalVector(rotation);

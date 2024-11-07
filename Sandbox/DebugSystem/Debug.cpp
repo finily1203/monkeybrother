@@ -1099,14 +1099,24 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
 
 		PhysicsComponent forces{};
+
+		myMath::Vector2D direction = forces.force.GetDirection();
+		float magnitude = forces.force.GetMagnitude();
+
 		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
 		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
 		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
 		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
 		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
 		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
-		serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
+		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
 		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
+		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
+
+		forces.force.SetDirection(direction);
+		forces.force.SetMagnitude(magnitude);
 
 		ecsCoordinator.addComponent(entityObj, enemy);
 		ecsCoordinator.addComponent(entityObj, movement);
@@ -1128,14 +1138,24 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int current_item,
 		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
 		PhysicsComponent forces{};
+
+		myMath::Vector2D direction = forces.force.GetDirection();
+		float magnitude = forces.force.GetMagnitude();
+
 		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
 		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
 		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
 		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
 		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
 		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
-		serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
+		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
 		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
+		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
+
+		forces.force.SetDirection(direction);
+		forces.force.SetMagnitude(magnitude);
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, movement);

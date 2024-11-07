@@ -90,21 +90,22 @@ private:
     //static bool slantedPlatformFirstTime;
 };
 
-//class Force
-//{
-//public:
-//
-//    Force(myMath::Vector2D direction, float magnitude) : direction(direction), magnitude(magnitude) {}
-//
-//	myMath::Vector2D GetDirection() const { return direction; }
-//	void SetDirection(myMath::Vector2D newDirection) { direction = newDirection; }
-//
-//	float GetMagnitude() const { return magnitude; }
-//	void SetMagnitude(float newMagnitude) { magnitude = newMagnitude; }
-//private:
-//    myMath::Vector2D direction;
-//    float magnitude;
-//};
+class Force
+{
+public:
+
+    Force(myMath::Vector2D direction, float magnitude) : direction(direction), magnitude(magnitude) {}
+
+	myMath::Vector2D GetDirection() const { return direction; }
+	void SetDirection(myMath::Vector2D newDirection) { direction = newDirection; }
+
+	float GetMagnitude() const { return magnitude; }
+	void SetMagnitude(float newMagnitude) { magnitude = newMagnitude; }
+
+private:
+    myMath::Vector2D direction;
+    float magnitude;
+};
 
 class ForceManager
 {
@@ -139,6 +140,8 @@ public:
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
 
+    ForceManager getForceManager() const { return forceManager; }
+
     // MILESTONE 1
     //// Handling slope collision for the player
     //void HandleSlopeCollision(Entity closestPlatform, Entity player);
@@ -160,5 +163,5 @@ private:
 
     CollisionSystemECS collisionSystem;
     ForceManager forceManager;
-    //Force Force;
+    Force Force;
 };

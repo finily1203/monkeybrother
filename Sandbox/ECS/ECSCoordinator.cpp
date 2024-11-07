@@ -230,15 +230,24 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("forces"))
 		{
 			PhysicsComponent forces{};
+
+			myMath::Vector2D direction = forces.force.GetDirection(); 
+			float magnitude = forces.force.GetMagnitude();
+
 			serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
 			serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
 			serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
 			serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
 			serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
 			serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
-			serializer.ReadObject(forces.force, entityId, "entities.forces.force");
+			serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
+			serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
 			serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
 			serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForce");
+			serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
+
+			forces.force.SetDirection(direction);
+			forces.force.SetMagnitude(magnitude);
 
 			ecs.addComponent(entityObj, forces);
 		}

@@ -118,6 +118,9 @@ public:
 	// update the entity's data
 	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
 
+	template <typename T>
+	std::shared_ptr<T> getSpecificSystem();
+
 
 	//System Manager Functions
 	//Register the system
@@ -219,4 +222,10 @@ template <typename T>
 bool ECSCoordinator::hasComponent(Entity entity)
 {
 	return componentManager->hasComponent<T>(entity);
+}
+
+template <typename T>
+std::shared_ptr<T> ECSCoordinator::getSpecificSystem()
+{
+	return systemManager->getSpecificSystem<T>();
 }
