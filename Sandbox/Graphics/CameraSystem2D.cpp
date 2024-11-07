@@ -42,36 +42,10 @@ void CameraSystem2D::update()
         //translationMatrix.SetMatrixValue(2, 0, -m_CameraPosition.GetX());
         //translationMatrix.SetMatrixValue(2, 1, -m_CameraPosition.GetY());
     }
-  //  else {
-		//// Update the camera position based on user input or other logic
-  //      if (GLFWFunctions::keyState[Key::W])
-  //          m_CameraPosition.SetY(m_CameraPosition.GetY() + 20 * GLFWFunctions::delta_time);
-  //      if (GLFWFunctions::keyState[Key::S])
-  //          m_CameraPosition.SetY(m_CameraPosition.GetY() - 20 * GLFWFunctions::delta_time);
-  //      if (GLFWFunctions::keyState[Key::A])
-  //          m_CameraPosition.SetX(m_CameraPosition.GetX() - 20 * GLFWFunctions::delta_time);
-  //      if (GLFWFunctions::keyState[Key::D])
-  //          m_CameraPosition.SetX(m_CameraPosition.GetX() + 20 * GLFWFunctions::delta_time);
-  //      //------------------------------------------------------------//
-		//if (GLFWFunctions::keyState[Key::Z])
-		//	m_CameraZoom += 0.1f * GLFWFunctions::delta_time;
-		//if (GLFWFunctions::keyState[Key::X])
-		//	m_CameraZoom -= 0.1f * GLFWFunctions::delta_time;
-		////------------------------------------------------------------//
-		//if (GLFWFunctions::keyState[Key::Q])
-		//	m_CameraRotation += 0.1f * GLFWFunctions::delta_time;
-		//if (GLFWFunctions::keyState[Key::E])
-		//	m_CameraRotation -= 0.1f * GLFWFunctions::delta_time;
-  //      
-  //      // Update the view matrix based on the camera's position, rotation, and zoom
-  //      translationMatrix.SetMatrixValue(2, 0, -m_CameraPosition.GetX());
-  //      translationMatrix.SetMatrixValue(2, 1, -m_CameraPosition.GetY());
-  //  }
-
-    //// Update the view matrix based on the camera's position, rotation, and zoom
-    //glm::mat3 translationMatrix = glm::mat3(1.0f);
-    //translationMatrix[2][0] = -m_CameraPosition.x;
-    //translationMatrix[2][1] = -m_CameraPosition.y;
+    else {
+		// Currently fixed camera position
+    }
+  
     translationMatrix.SetMatrixValue(2, 0, -m_CameraPosition.GetX());
     translationMatrix.SetMatrixValue(2, 1, -m_CameraPosition.GetY());
 

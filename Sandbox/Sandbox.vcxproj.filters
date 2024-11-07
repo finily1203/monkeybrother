@@ -35,7 +35,6 @@
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
-    <ClCompile Include="Graphics\FontSystem.h" />
     <ClCompile Include="Graphics\FontSystem.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="Graphics\CameraSystem2D.cpp" />
@@ -87,6 +86,7 @@
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="Engine\EngineDefinitions.h" />
+    <ClInclude Include="Graphics\FontSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

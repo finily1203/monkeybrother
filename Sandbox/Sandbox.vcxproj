@@ -123,7 +123,6 @@
     <ClCompile Include="GlobalCoordinator\GlobalCoordinator.cpp" />
     <ClCompile Include="Graphics\AnimationData.cpp" />
     <ClCompile Include="Graphics\FontSystem.cpp" />
-    <ClCompile Include="Graphics\FontSystem.h" />
     <ClCompile Include="Graphics\CameraSystem2D.cpp" />
     <ClCompile Include="Graphics\GraphicsSystem.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
@@ -178,6 +177,7 @@
     <ClInclude Include="GlobalCoordinator\GlobalCoordinator.h" />
     <ClInclude Include="Graphics\AnimationData.h" />
     <ClInclude Include="Graphics\CameraSystem2D.h" />
+    <ClInclude Include="Graphics\FontSystem.h" />
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />

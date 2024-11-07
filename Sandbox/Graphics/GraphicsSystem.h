@@ -94,6 +94,7 @@ public:
 
     };
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
+	void drawDebugCircle(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 
 private:
     GLuint m_VAO;

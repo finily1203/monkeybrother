@@ -55,7 +55,7 @@ GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
     m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
-    std::vector<GraphicsSystem::GLViewport> vps;
+    //std::vector<GraphicsSystem::GLViewport> vps;
     vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
     glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 
@@ -255,11 +255,23 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
     }
+
+    GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
+	std::cout << "Window width: " << w << " Window height: " << h << std::endl;
+    static GLint old_w{}, old_h{};
+    // update viewport settings in vps only if window's dimension change
+    if (w != old_w || h != old_h)
+    {
+        vps[0] = { 0, 0, w , h };
+        old_w = w;
+        old_h = h;
+    }
+	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
 }
 
 void GraphicsSystem::Render(float deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, 1600, 900);
+    //glViewport(0, 0, 1600, 900);
 }
 
 void GraphicsSystem::cleanup() {
@@ -453,6 +465,66 @@ void GraphicsSystem::drawDebugOBB(TransformComponent transform, myMath::Matrix3x
     glEnd();
 }
 
+void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matrix3x3 viewMatrix) {
+
+    glBegin(GL_LINE_LOOP); // Use GL_LINE_LOOP to connect the points in a circular loop
+
+    // Set color for debug circle
+    glColor3f(1.0f, 0.0f, 0.0f); // Green color for debug circle
+
+    // Define the radius of the circle (assuming scale's X represents the diameter)
+    float radius = transform.scale.GetX() / 2.0f;
+
+    // Define the number of segments for the circle approximation
+    int numSegments = 100; // Higher value gives smoother circle
+
+    // Define the rotation angle (in radians)
+    float angle = glm::radians(transform.orientation.GetX());
+
+    // Create the rotation matrix
+    glm::mat4 rotationMat = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    // Define the translation vector using transform.position
+    glm::vec3 translationVec(transform.position.GetX(), transform.position.GetY(), 0.0f);
+
+    // Create the translation matrix
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translationVec);
+
+    // Convert the view matrix
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+    glm::mat4 viewMat4 = {
+        viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
+        viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
+        0,             0,             viewMat[2][2], 0,
+        viewMat[2][0], viewMat[2][1], 1,             1
+    };
+
+    // Create the projection matrix
+    glm::mat4 projMat = glm::ortho(
+        -GLFWFunctions::windowWidth / 2.0f,  // left
+        GLFWFunctions::windowWidth / 2.0f,   // right
+        -GLFWFunctions::windowHeight / 2.0f, // bottom
+        GLFWFunctions::windowHeight / 2.0f   // top
+    );
+
+    // Iterate over each segment to compute the vertices of the circle
+    for (int i = 0; i < numSegments; ++i) {
+        float theta = 2.0f * glm::pi<float>() * float(i) / float(numSegments); // Current angle
+
+        // Calculate the position of each point on the circle in local coordinates
+        glm::vec4 point(radius * cos(theta), radius * sin(theta), 0.0f, 1.0f);
+
+        // Apply transformation matrices
+        point = projMat * viewMat4 * translationMat * rotationMat * point;
+
+        // Render the vertex
+        glVertex2f(point.x, point.y);
+    }
+
+    glEnd();
+}
+
+
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
     // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
@@ -524,3 +596,5 @@ void GraphicsSystem::loadTextureAssets() const {
     //    assetsManager.LoadTexture(textureName, textureFilePath);
     //}
 }
+
+

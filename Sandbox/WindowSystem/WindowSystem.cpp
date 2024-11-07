@@ -27,7 +27,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 //Shader* shader = nullptr;
 //Shader* shader2 = nullptr;
-std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
+std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps(10);
 
 //void WindowSystem::logicUpdate() {
 //
@@ -145,6 +145,8 @@ void WindowSystem::update() {
 	if (glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 		glfwSetWindowShouldClose(GLFWFunctions::pWindow, GLFW_TRUE);
 	}
+
+	glfwGetFramebufferSize(GLFWFunctions::pWindow, &GLFWFunctions::windowWidth, &GLFWFunctions::windowHeight);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
