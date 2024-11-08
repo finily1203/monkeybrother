@@ -1,3 +1,21 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   LogicSystemECS.cpp
+@brief:  The source file includes all the implementation of the Logic for all entities.
+		 Logic System is part of the ECS system, which handles the logic / scripts for
+		 all entities in the game. Currently, it handles the jumping of player since our
+		 current game demo is rotational based, there is no movement keys for the player.
+		 Logic system also takes care of the enemy movement as well as camera movement.
+		 Interacts with other ECS systems such as PhyColliSystemECS.
+
+		 Joel Chu (c.weiyuan): Implemented all of the functions that belongs to
+							   the LogicSystemECS.
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
@@ -24,11 +42,9 @@ void LogicSystemECS::update(float dt) {
 
 
 	if (GLFWFunctions::keyState[Key::Q]) {
-		//ApplyForce(playerEntity, -force);
 		rotation.SetX(rotation.GetX() + (180.f * dt));
 	}
 	else if (GLFWFunctions::keyState[Key::E]) {
-		//ApplyForce(playerEntity, force);
 		rotation.SetX(rotation.GetX() - (180.f * dt));
 
 	}

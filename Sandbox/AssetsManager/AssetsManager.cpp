@@ -1,3 +1,18 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   AssetsManager.cpp
+@brief:  This source file includes all the implementation of the AssetsManager class.
+         AssetsManager class is a child class of GameSystems, which is responsible for
+         the all the assets of the game. It uses serialization to load all the assets.
+		 Currently the assets that are loaded are: textures, shaders, fonts and audio.
+
+         Joel Chu (c.weiyuan): Implemented all of the functions that belongs to
+                               the AssetsManager class.
+                               100%
+*//*___________________________________________________________________________-*/
 #include "AssetsManager.h"
 #include "stb_image.h"
 #include "fmod.hpp"
