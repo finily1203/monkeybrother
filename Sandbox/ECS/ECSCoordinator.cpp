@@ -279,34 +279,34 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 {
 	JSONSerializer serializer;
 
-	// checks if JSON file could be opened
+	// checks if JSON file could be opened 
 	if (!serializer.Open(filename))
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
 		return;
 	}
 
-	// returns the JSON object from the file
+	// returns the JSON object from the file 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	// loop through every entities in the array of the JSON object
+	// loop through every entities in the array of the JSON object 
 	for (const auto& entityData : jsonObj["entities"])
 	{
-		// getting the id of the data in the entities array of
-		// the JSON object
+		// getting the id of the data in the entities array of 
+		// the JSON object 
 		std::string entityId = entityData["id"].get<std::string>();
 
-		// this if statement is to change the particular entity data based on
-		// the entityId. This will not change all data but just one
+		// this if statement is to change the particular entity data based on 
+		// the entityId. This will not change all data but just one 
 		if (ecs.entityManager->getEntityById(entityId) == entity)
 		{
-			// ensuring that entity has TransformComponent
+			// ensuring that entity has TransformComponent 
 			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 			{
 				TransformComponent transform = getComponent<TransformComponent>(entity);
 
-				// change the data in the JSON object based on the entity's
-				// data
+				// change the data in the JSON object based on the entity's 
+				// data 
 				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
 				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
 				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
@@ -366,32 +366,12 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 		}
 	}
 
-	// checks if the JSON object is able to be saved to the JSON file
+	// checks if the JSON object is able to be saved to the JSON file 
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
 	}
 }
-// this function handles the updating of the entity's data
-//void ECSCoordinator::UpdateEntity(Entity& entity, TransformComponent& transUpdate, GraphicsComponent& graphicsUpdate, FontComponent& fontUpdate)
-//{
-//	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
-//	{
-//		TransformComponent& transform = getComponent<TransformComponent>(entity);
-//		// assign the new data of the transform component to the entity's transform component
-//		transform.orientation = transUpdate.orientation;
-//		transform.position = transUpdate.position;
-//		transform.scale = transUpdate.scale;
-//	}
-//	if (entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
-//	{
-//		FontComponent& font = getComponent<FontComponent>(entity);
-//		font.text = fontUpdate.text; 
-//		//font.position = fontUpdate.position; 
-//		//font.scale = fontUpdate.scale; 
-//		font.color = fontUpdate.color; 
-//	}
-//}
 
 //clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
