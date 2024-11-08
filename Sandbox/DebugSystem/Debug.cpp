@@ -940,22 +940,29 @@ nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, st
 	}
 
 	// RigidBody Component
-	if (ecs.hasComponent<RigidBodyComponent>(entity))
+	if (ecs.hasComponent<PhysicsComponent>(entity))
 	{
-		RigidBodyComponent& rb = ecs.getComponent<RigidBodyComponent>(entity);
-		entityJSON["rigidBody"]["mass"] = rb.mass;
-		entityJSON["rigidBody"]["gravityScale"]["x"] = rb.gravityScale.GetX();
-		entityJSON["rigidBody"]["gravityScale"]["y"] = rb.gravityScale.GetY();
-		entityJSON["rigidBody"]["jump"] = rb.jump;
-		entityJSON["rigidBody"]["dampening"] = rb.dampening;
-		entityJSON["rigidBody"]["velocity"]["x"] = rb.velocity.GetX();
-		entityJSON["rigidBody"]["velocity"]["y"] = rb.velocity.GetY();
-		entityJSON["rigidBody"]["acceleration"]["x"] = rb.acceleration.GetX();
-		entityJSON["rigidBody"]["acceleration"]["y"] = rb.acceleration.GetY();
-		entityJSON["rigidBody"]["force"]["x"] = rb.force.GetX();
-		entityJSON["rigidBody"]["force"]["y"] = rb.force.GetY();
-		entityJSON["rigidBody"]["accumulatedForce"]["x"] = rb.accumulatedForce.GetX();
-		entityJSON["rigidBody"]["accumulatedForce"]["y"] = rb.accumulatedForce.GetY();
+		PhysicsComponent& rb = ecs.getComponent<PhysicsComponent>(entity);
+
+		entityJSON["PhysicsComponent"]["mass"] = rb.mass;
+		entityJSON["PhysicsComponent"]["gravityScale"]["x"] = rb.gravityScale.GetX();
+		entityJSON["PhysicsComponent"]["gravityScale"]["y"] = rb.gravityScale.GetY();
+		entityJSON["PhysicsComponent"]["jump"] = rb.jump;
+		entityJSON["PhysicsComponent"]["dampening"] = rb.dampening;
+		entityJSON["PhysicsComponent"]["velocity"]["x"] = rb.velocity.GetX();
+		entityJSON["PhysicsComponent"]["velocity"]["y"] = rb.velocity.GetY();
+		entityJSON["PhysicsComponent"]["acceleration"]["x"] = rb.acceleration.GetX();
+		entityJSON["PhysicsComponent"]["acceleration"]["y"] = rb.acceleration.GetY();
+		entityJSON["PhysicsComponent"]["force"]["magnitude"] = rb.force.GetMagnitude();
+		entityJSON["PhysicsComponent"]["force"]["direction"]["x"] = rb.force.GetDirection().GetX();
+		entityJSON["PhysicsComponent"]["force"]["direction"]["y"] = rb.force.GetDirection().GetY();
+		entityJSON["PhysicsComponent"]["accumulatedForce"]["x"] = rb.accumulatedForce.GetX();
+		entityJSON["PhysicsComponent"]["accumulatedForce"]["y"] = rb.accumulatedForce.GetY();
+		entityJSON["PhysicsComponent"]["maxVelocity"] = rb.maxVelocity;
+		entityJSON["PhysicsComponent"]["maxAccumulatedForce"] = rb.maxAccumulatedForce;
+		entityJSON["PhysicsComponent"]["prevForce"] = rb.prevForce;
+		entityJSON["PhysicsComponent"]["targetForce"] = rb.targetForce;
+
 	}
 
 	// Enemy Component

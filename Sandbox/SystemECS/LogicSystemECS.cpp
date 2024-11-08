@@ -20,6 +20,7 @@ void LogicSystemECS::update(float dt) {
 	Force playerForce =				 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
 	myMath::Vector2D gravityScale =  ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
 	myMath::Vector2D& rotation =	 ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
+	float mag =						 playerForce.GetMagnitude();
 
 
 	if (GLFWFunctions::keyState[Key::Q]) {
@@ -37,7 +38,7 @@ void LogicSystemECS::update(float dt) {
 	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
 		if (GLFWFunctions::keyState[Key::SPACE]) {
 			PhysicsSystemRef->SetAlrJumped(false);  // Set jump state to prevent multiple jumps
-			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-10.0f, -10.f));
+			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-mag, -mag));
 		}
 	}
 
