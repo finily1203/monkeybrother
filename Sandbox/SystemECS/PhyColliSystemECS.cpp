@@ -11,7 +11,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
                                      (OBB), handling collision and integration
                                      with ECS. Loading of physics config from JSON.
                                      100%
-//__-*/
+*//*____________________________________________________________________________-*/
 
 
 #include "ECSCoordinator.h"
@@ -59,7 +59,6 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
 {
     float closestDistance = 100000.f;  // Initialize to a large number
 
-    //glm::vec2 playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     int count = 0;
     int isClosest = 0;
@@ -75,12 +74,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
         if (hasClosestPlatform)
         {
             count++;
-            //glm::vec2 platformPos = ecsCoordinator.getComponent<TransformComponent>(platform).position;
-            myMath::Vector2D platformPos = ecsCoordinator.getComponent<TransformComponent>(platform).position;
-            //float distance = std::sqrt(
-            //    std::pow(playerPos.x - platformPos.x, 2.f) +
-            //    std::pow(playerPos.y - platformPos.y, 2.f)
-            //);            
+            myMath::Vector2D platformPos = ecsCoordinator.getComponent<TransformComponent>(platform).position;           
             float distance = std::sqrt(
                 std::pow(playerPos.GetX() - platformPos.GetX(), 2.f) +
                 std::pow(playerPos.GetY() - platformPos.GetY(), 2.f)
@@ -98,6 +92,171 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
 
     return closestPlatform;
 }
+
+// Clamp the player's velocity
+void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
+    myMath::Vector2D& velocity = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
+    float speed = myMath::LengthVector2D(velocity);
+
+    if (speed > maxVelocity)
+    {
+        myMath::NormalizeVector2D(velocity, velocity);
+        velocity = velocity * maxVelocity;
+    }
+}
+
+// Calculate the directional vector based on the orientation of player
+myMath::Vector2D PhysicsSystemECS::directionalVector(float angle)
+{
+    myMath::Vector2D vector;
+    float adjustedAngle = (angle - 90.0f) * (M_PI / 180.0f);
+
+    float cosValue = cos(adjustedAngle);
+    float sinValue = sin(adjustedAngle);
+
+    if (adjustedAngle == M_PI / 2.f || adjustedAngle == -M_PI / 2.f)
+    {
+        cosValue = 0;
+    }
+
+    vector.SetX(cosValue);
+    vector.SetY(sinValue);
+
+    return vector;
+}
+
+// Add applied force to accumulatedForce
+void ForceManager::AddForce(Entity player, const myMath::Vector2D& appliedForce)
+{
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+
+    accForce.SetX(accForce.GetX() + appliedForce.GetX());
+    accForce.SetY(accForce.GetY() + appliedForce.GetY());
+
+}
+
+// Calculate the resultant force
+float ForceManager::ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce)
+{
+    float dotProduct = myMath::DotProductVector2D(direction, -normal);
+    float angle = std::acos(dotProduct); // Angle in radians
+
+    float forceFactor = std::sin(angle); // Will be between 0 and 1
+
+    return maxAccForce * forceFactor;
+}
+
+// Clear the force (Reset to 0
+void ForceManager::ClearForce(Entity player) {
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+    accForce.SetX(0.f);
+    accForce.SetY(0.f);
+}
+
+// Apply force to the player
+void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float targetForce)
+{
+    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
+
+    myMath::Vector2D& vel = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
+    myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(player).acceleration;
+    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+
+    float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
+    float dampen = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
+    float maxVelocity = ecsCoordinator.getComponent<PhysicsComponent>(player).maxVelocity;
+    float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
+
+    if (prevForce != targetForce) {
+        accForce.SetX(targetForce);
+        accForce.SetY(targetForce);
+    }
+
+    float invMass = mass > 0.f ? 1.f / mass : 0.f;
+    acceleration = accForce * invMass;
+
+    vel.SetX(vel.GetX() + direction.GetX() * acceleration.GetX());
+    vel.SetY(vel.GetY() + direction.GetY() * acceleration.GetY());
+
+    Console::GetLog() << "force:" << acceleration.GetX() << " " << acceleration.GetY() << std::endl;
+
+    //Dampening
+    vel.SetX(vel.GetX() * dampen);
+    vel.SetY(vel.GetY() * dampen);
+
+    float speed = myMath::LengthVector2D(vel);
+    if (speed > maxVelocity) {
+        myMath::NormalizeVector2D(vel, vel);
+        vel = vel * maxVelocity;
+    }
+
+    ecsCoordinator.getSpecificSystem<PhysicsSystemECS>()->clampVelocity(player, maxVelocity);
+
+    Console::GetLog() << "vel: " << vel.GetX() << " " << vel.GetY() << std::endl;
+
+    playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
+    playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
+}
+
+// Handle OBB collision
+void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
+{
+    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
+    //myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+    float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
+    float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
+    myMath::Vector2D direction = directionalVector(rotation);
+    myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
+    float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
+    float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(player).maxAccumulatedForce;
+    float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
+    float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
+    Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
+    CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
+    CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
+
+    myMath::Vector2D normal{};
+    float penetration{};
+
+    force.SetDirection(direction);
+
+    isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
+
+    forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
+
+    if (isColliding)
+    {
+        alrJumped = true;
+        if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
+        {
+            forceManager.ClearForce(player);
+        }
+
+        targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
+    }
+
+    forceManager.ApplyForce(player, force.GetDirection(), targetForce);
+
+    prevForce = targetForce;
+
+    if (isColliding)
+    {
+        if (GLFWFunctions::firstCollision == false)
+        {
+            GLFWFunctions::bumpAudio = true;
+            GLFWFunctions::firstCollision = true;
+            std::cout << "First time collide with platform" << std::endl;
+        }
+        collisionSystem.CollisionResponse(player, normal, penetration);
+    }
+    else
+    {
+        GLFWFunctions::firstCollision = false;
+    }
+
+
+}
+
 
 // COLLISION SYSTEM
 // OBB collision detection
@@ -217,156 +376,7 @@ bool CollisionSystemECS::checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, 
     return true;
 }
 
-void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
-    myMath::Vector2D& velocity = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
-    float speed = myMath::LengthVector2D(velocity);
-
-    if (speed > maxVelocity)
-    {
-        myMath::NormalizeVector2D(velocity, velocity);
-        velocity = velocity * maxVelocity;
-    }
-}
-
-
-myMath::Vector2D PhysicsSystemECS::directionalVector(float angle)
-{
-    myMath::Vector2D vector;
-    float adjustedAngle = (angle - 90.0f) * (M_PI / 180.0f);
-
-    float cosValue = cos(adjustedAngle);
-    float sinValue = sin(adjustedAngle);
-
-    if (adjustedAngle == M_PI / 2.f || adjustedAngle == -M_PI / 2.f)
-    {
-        cosValue = 0;
-    }
-
-    vector.SetX(cosValue);
-    vector.SetY(sinValue);
-
-    return vector;
-}
-
-void ForceManager::AddForce(Entity player, const myMath::Vector2D& appliedForce)
-{
-    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-
-    accForce.SetX(accForce.GetX() + appliedForce.GetX());
-    accForce.SetY(accForce.GetY() + appliedForce.GetY());
-
-}
-
-float ForceManager::ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce)
-{
-    float dotProduct = myMath::DotProductVector2D(direction, -normal);
-    float angle = std::acos(dotProduct); // Angle in radians
-
-    float forceFactor = std::sin(angle); // Will be between 0 and 1
-
-    return maxAccForce * forceFactor;
-}
-
-void ForceManager::ClearForce(Entity player) {
-    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-    accForce.SetX(0.f);
-    accForce.SetY(0.f);
-}
-
-void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float targetForce)
-{
-    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-
-    myMath::Vector2D& vel = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
-    myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(player).acceleration;
-    myMath::Vector2D& accForce = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-
-    //myMath::Vector2D& gravity       = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
-    float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
-    float dampen = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
-    float maxVelocity = ecsCoordinator.getComponent<PhysicsComponent>(player).maxVelocity;
-    float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
-
-    if (prevForce != targetForce) {
-        accForce.SetX(targetForce);
-        accForce.SetY(targetForce);
-    }
-
-    float invMass = mass > 0.f ? 1.f / mass : 0.f;
-    acceleration = accForce * invMass;
-
-    vel.SetX(vel.GetX() + direction.GetX() * acceleration.GetX());
-    vel.SetY(vel.GetY() + direction.GetY() * acceleration.GetY());
-
-    Console::GetLog() << "force:" << acceleration.GetX() << " " << acceleration.GetY() << std::endl;
-
-    //Dampening
-    vel.SetX(vel.GetX() * dampen);
-    vel.SetY(vel.GetY() * dampen);
-
-    float speed = myMath::LengthVector2D(vel);
-    if (speed > maxVelocity) {
-        myMath::NormalizeVector2D(vel, vel);
-        vel = vel * maxVelocity;
-    }
-
-    ecsCoordinator.getSpecificSystem<PhysicsSystemECS>()->clampVelocity(player, maxVelocity);
-
-    Console::GetLog() << "vel: " << vel.GetX() << " " << vel.GetY() << std::endl;
-
-    playerPos.SetX(playerPos.GetX() + (vel.GetX() * GLFWFunctions::delta_time));
-    playerPos.SetY(playerPos.GetY() + (vel.GetY() * GLFWFunctions::delta_time));
-}
-
-
-void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
-{
-    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-    //myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-    float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-    float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
-    myMath::Vector2D direction = directionalVector(rotation);
-    myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
-    float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
-    float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(player).maxAccumulatedForce;
-    float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
-    float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
-    Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
-    CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
-    CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
-
-    myMath::Vector2D normal{};
-    float penetration{};
-
-    force.SetDirection(direction);
-
-    isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
-
-    forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
-
-    if (isColliding)
-    {
-        alrJumped = true;
-        if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
-        {
-            forceManager.ClearForce(player);
-        }
-
-        targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
-    }
-
-    forceManager.ApplyForce(player, force.GetDirection(), targetForce);
-
-    prevForce = targetForce;
-
-    if (isColliding)
-    {
-        collisionSystem.CollisionResponse(player, normal, penetration);
-    }
-
-
-}
-
+// Collision response for OBB
 void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D normal, float penetration)
 {
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
@@ -396,6 +406,7 @@ void PhysicsSystemECS::update(float dt)
 
 }
 
+// Load physics config from JSON
 void PhysicsSystemECS::LoadPhysicsConfigFromJSON(std::string const& filename)
 {
     JSONSerializer serializer;
@@ -420,6 +431,7 @@ void PhysicsSystemECS::LoadPhysicsConfigFromJSON(std::string const& filename)
 
 }
 
+// Save physics config to JSON
 void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename)
 {
     JSONSerializer serializer;
@@ -445,7 +457,7 @@ void PhysicsSystemECS::SavePhysicsConfigFromJSON(std::string const& filename)
 }
 
 
-
+// Get the system ECS
 std::string PhysicsSystemECS::getSystemECS()
 {
     return "PhysicsColliSystemECS";

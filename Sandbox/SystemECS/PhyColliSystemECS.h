@@ -8,7 +8,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
          System for ECS.
          Lee Jing Wen (jingwen.lee): Physics System, Collision System, OBB struct
                                      100%
-//__-*/
+*//*____________________________________________________________________________-*/
 #pragma once
 #include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
@@ -27,6 +27,7 @@ public:
         myMath::Vector2D axes[2];     // Local axes (normalized)
     };
 
+	// Create OBB from entity
     OBB createOBBFromEntity(Entity entity);
 
     // Project point onto axis
@@ -40,10 +41,12 @@ public:
     
     // Circle vs OBB collision detection using SAT
     bool checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration);
-    
-    //bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2);
+
+    // OBB vs OBB collision detection using SAT (CAN DETECT OBB COLLISION)
+
     bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, myMath::Vector2D& normal, float& penetration);
 
+    // Collision response for OBB
     void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
 };
 
@@ -58,21 +61,30 @@ public:
 
     std::string getSystemECS() override;
 
+    // Getters and Setters
     bool GetAlrJumped() const { return alrJumped; }
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
+    ForceManager getForceManager() const { return forceManager; }
+
+    bool getIsColliding() const { return isColliding; }
+
+	// Find closest platform to player
     Entity FindClosestPlatform(Entity player);
+
+    // Handle OBB collision
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
+    // Calculate the directional vector based on the orientation of player
     myMath::Vector2D directionalVector(float angle);
+
+    // Clamp the player's velocity
     void clampVelocity(Entity player, float maxVelocity);
 
+	// Load and save physics config from JSON
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
 
-    ForceManager getForceManager() const { return forceManager; }
-
-    bool getIsColliding() const { return isColliding; } 
 
 private:
     static float friction;
