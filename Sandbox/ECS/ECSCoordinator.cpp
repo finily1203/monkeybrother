@@ -381,140 +381,17 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 	if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
 	{
 		TransformComponent transform = getComponent<TransformComponent>(entity);
-		//transform.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
+		
 		transform.position += myMath::Vector2D(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
 		addComponent(newEntity, transform);
 	}
 
-	//if (entityManager->getSignature(entity).test(getComponentType<GraphicsComponent>()))
-	//{
-	//	GraphicsComponent graphics = getComponent<GraphicsComponent>(entity);
-	//	graphics.glObject.position += glm::vec2(getRandomVal(-200.f, 800.f), getRandomVal(-200.f, 300.f));
-	//	addComponent(newEntity, graphics);
-	//}
-
 	return newEntity;
-}
-
-//Test 3 tests for the creation of platforms and works with the physics and collision system
-void ECSCoordinator::test3() {
-	//std::cout << "Create Platforms" << std::endl;
-	//Entity platform1 = createEntity();
-	//addComponent(platform1, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.0f), glm::vec2(0.0f, -150.f) });
-	//GraphicsComponent gfxComp1{};
-	//gfxComp1.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(0.0f, -150.0f));
-	//addComponent(platform1, gfxComp1);
-	//addComponent(platform1, AABBComponent{ -250.f, 250.f,-125.f, -175.f });
-	//addComponent(platform1, ClosestPlatform{ false });
-
-	//Entity platform2 = createEntity();
-	//addComponent(platform2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.f) });
-	//GraphicsComponent gfxComp2{};
-	//gfxComp2.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(500.f, 50.f), glm::vec2(400.f, 200.0f));
-	//addComponent(platform2, gfxComp2);
-	//addComponent(platform2, AABBComponent{ 150.0f, 650.f, 225.f, 175.f });
-	//addComponent(platform2, ClosestPlatform{ false });
-
-	//Entity platform3 = createEntity();
-	//addComponent(platform3, TransformComponent{ glm::vec2(315.f, 0.f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.f) });
-	//GraphicsComponent gfxComp3{};
-	//gfxComp3.glObject.init(glm::vec2(315.0f, 0.0f), glm::vec2(300.f, 50.f), glm::vec2(-500.f, -200.0f));
-	//addComponent(platform3, gfxComp3);
-	////addComponent(platform3, AABBComponent{ -350.0f, -650.f, -175.f, -225.f });
-	//glm::vec2 platformPos = gfxComp3.glObject.position;
-	//glm::vec2 platformScl = gfxComp3.glObject.scaling;
-	//addComponent(platform3, AABBComponent{ platformPos.x - platformScl.x / 2, platformPos.x + platformScl.x / 2,
-	//									   platformPos.y + platformScl.y / 2, platformPos.y - platformScl.y / 2 });
-	//addComponent(platform3, ClosestPlatform{ false });
-
-	//std::cout << "Create Player" << std::endl;
-	//Entity player = createEntity();
-	//addComponent(player, TransformComponent{ glm::vec2(0.0f, 0.f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f) });
-	//GraphicsComponent gfxComp4{};
-	//gfxComp4.glObject.init(glm::vec2(0.0f, 0.0f), glm::vec2(100.f, 100.f), glm::vec2(0.0f, 300.0f));
-	//addComponent(player, gfxComp4);
-	//addComponent(player, AABBComponent{ 1.f, 1.f, 1.f, 1.f });
-	//addComponent(player, MovementComponent{ .02f });
 }
 
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
-	//LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-
-	/*int saveNum = DebugSystem::GetSaveCount();
-	if (saveNum == 1)
-	{
-		LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-	}
-	 
-	else
-	{
-		saveNum -= 1;
-		LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(saveNum));
-	}*/
-
-	//std::string entityId = "player";
-	//Entity entity = entityManager->getEntityById(entityId);
-
-	//if (entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
-	//{
-	//	TransformComponent& transform = getComponent<TransformComponent>(entity);
-	//	// assign the new data of the transform component to the entity's transform component
-	//	transform.position.SetX(120.f);
-	//	transform.scale.SetY(45.f);
-	//}
-
-	//if (entityManager->getSignature(entity).test(getComponentType<MovementComponent>()))
-	//{
-	//	MovementComponent& movement = getComponent<MovementComponent>(entity);
-
-	//	movement.speed = 0.1f;
-	//}
-
-	//SaveEntityToJSON(*this, entity, FilePathManager::GetEntitiesJSONPath());
-
-
-	//create text entity
-	//std::cout << "Create Text Entity 1" << std::endl;
-	//Entity textEntity = createEntity();
-	//addComponent(textEntity, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
-
-	//FontComponent fontComp{};
-	//fontComp.fontId = "Antonio";
-	//fontComp.text = "Hello World!";
-	//fontComp.textScale = 1.0f;
-	//fontComp.color = MyMath::Vector3D(0.0f, 0.0f, 255.0f);
-
-	////float screenWidth = 1600.0f;
-	////float screenHeight = 900.0f;
-
-	////float textScale = 1.0f;
-	////glm::vec2 textSize = glm::vec2(200.0f * textScale, 50.0f * textScale);
-	////fontComp.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 + 200); // Centered
-	////fontComp.scale = textScale;
-	////fontComp.color = glm::vec3(0.0f, 0.0f, 255.0f);
-
-	//addComponent(textEntity, fontComp);
-
-	//// Create another text entity
-	//std::cout << "Create Text Entity 2" << std::endl;
-	//Entity textEntity2 = createEntity();
-	//addComponent(textEntity2, TransformComponent{ myMath::Vector2D(0.0f, 0.f), myMath::Vector2D(0.f, 0.f), myMath::Vector2D(0.0f, 0.0f) });
-
-	//FontComponent fontComp2{};
-	//fontComp2.fontPath = "Graphics/Assets/SS Journey.ttf";
-	//fontComp2.text = "Hello this is another text with SS Journey.ttf. This is to check that text wrapping functionality works";
-
-	//float textScale2 = 1.0f;
-	//glm::vec2 textSize2 = glm::vec2(200.0f * textScale2, 50.0f * textScale2);
-
-	//
-	//fontComp2.position = glm::vec2((screenWidth - textSize.x) / 2, (screenHeight - textSize.y) / 2 - textSize2.y + 160); 
-	//fontComp2.scale = textScale2;
-	//fontComp2.color = glm::vec3(0.0f, 0.0f, 255.0f);
-
-	//addComponent(textEntity2, fontComp2);
 
 }
 
@@ -589,37 +466,6 @@ float ECSCoordinator::getRandomVal(float min = -100.0f, float max = 100.0f) {
 	std::mt19937 gen(rd()); 
 	std::uniform_real_distribution<float> dis(min, max); 
 	return dis(gen); 
-}
-
-//test new graphics System function
-void ECSCoordinator::test4() {
-	//Entity entObjGraphics = createEntity();
-	////addComponent(entObjGraphics, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(50.f, 50.0f), glm::vec2(0.0f, -150.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
-	//
-	//LoadEntityFromJSON(*this, entObjGraphics, GetPlayerJSONPath());
-
-	//Entity entObjGraphics2 = createEntity();
-	//addComponent(entObjGraphics2, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
-
-	//Entity entObjGraphics3 = createEntity();
-	//addComponent(entObjGraphics3, TransformComponent{ glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.0f), glm::vec2(-300.0f, 0.f), glm::mat3x3(1.0f), glm::mat3x3(1.0f) });
-
-	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-	
-	//Iterate through the entities to find Object1 and Object2
-	//for (auto entity : entityManager->getLiveEntities()) {
-	//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-
-	//	float left = transform.position.GetX() - transform.scale.GetX() / 2;
-	//	float right = transform.position.GetX() + transform.scale.GetX() / 2;
-	//	float top = transform.position.GetY() + transform.scale.GetY() / 2;
-	//	float bottom = transform.position.GetY() - transform.scale.GetY() / 2;
-
-	//	addComponent(entity, AABBComponent{left, right, top, bottom});
-	//	if (entityManager->getEntityId(entity) == "Player") {
-	//		addComponent(entity, MovementComponent{.1f});
-	//	}
-	//}
 }
 
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {

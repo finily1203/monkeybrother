@@ -27,7 +27,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
 //Shader* shader = nullptr;
 //Shader* shader2 = nullptr;
-std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps(10);
+//std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
 
 //void WindowSystem::logicUpdate() {
 //
@@ -120,22 +120,7 @@ void WindowSystem::initialise() {
 	std::cout << "GLEW initialized successfully" << std::endl;
 
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
-	glViewport(0, 0, width, height);
-
-
-	/*graphicsSystem.initialise();*/
-
-
-	//gameObject.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ -200.f, 0.0f });
-	//gameObject2.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 400.f, 400.0f }, glm::vec2{ 200.f, 0.0f });
-	//background.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 1600.f, 900.f }, glm::vec2{ 0.0f, 0.0f });
-	//blackBox.init(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ 0.5f, 0.2f }, glm::vec2{ 0.0f, 0.0f });
-	//gameObject.is_animated = GL_TRUE;
-	//gameObject2.is_animated = GL_TRUE;
-	//background.is_animated = GL_FALSE;
-
-	//shader = graphicsSystem.GetShader();
-	//shader2 = graphicsSystem.GetShader2();
+	
 }
 
 void WindowSystem::update() {

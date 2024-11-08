@@ -165,7 +165,6 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     }
 
     GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
-	std::cout << "Window width: " << w << " Window height: " << h << std::endl;
     static GLint old_w{}, old_h{};
     // update viewport settings in vps only if window's dimension change
     if (w != old_w || h != old_h)

@@ -365,7 +365,7 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
     }
 
     if (fontLoaded) {
-        //Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
+       
         m_Fonts[fontName] = std::move(tempCharacters);
         m_FontPaths[fontName] = fontPath;
     }
