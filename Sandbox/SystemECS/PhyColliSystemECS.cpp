@@ -36,6 +36,7 @@ bool PhysicsSystemECS::isSliding;
 // Constructor for Physics System
 PhysicsSystemECS::PhysicsSystemECS() : eventSource("PlayerEventSource"), eventObserver(std::make_shared<PlayerActionListener>())
 {
+    isColliding = false;
     eventSource.Register(MessageId::FALL, eventObserver);
     eventSource.Register(MessageId::JUMP, eventObserver);
 }
@@ -275,7 +276,7 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
     myMath::Vector2D& acceleration  = ecsCoordinator.getComponent<PhysicsComponent>(player).acceleration;
     myMath::Vector2D& accForce      = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
 
-    myMath::Vector2D& gravity       = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
+    //myMath::Vector2D& gravity       = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
     float mass                      = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
     float dampen                    = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
     float maxVelocity               = ecsCoordinator.getComponent<PhysicsComponent>(player).maxVelocity;
@@ -316,7 +317,7 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
 void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform) 
 {
     myMath::Vector2D& playerPos         = ecsCoordinator.getComponent<TransformComponent>(player).position;
-    myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+    //myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
     float radius                        = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
     float rotation                      = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
     myMath::Vector2D direction          = directionalVector(rotation);
@@ -334,12 +335,13 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 
     force.SetDirection(direction);
 
-    bool colliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
+    isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
     
     forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
 
-    if (colliding) 
+    if (isColliding)
     {
+        alrJumped = true;
         if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
         {
             forceManager.ClearForce(player);
@@ -349,13 +351,14 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     }
 
     forceManager.ApplyForce(player, force.GetDirection(), targetForce);
-    
+
     prevForce = targetForce;
-    
-    if (colliding) 
+
+    if (isColliding)
     {
         collisionSystem.CollisionResponse(player, normal, penetration);
     }
+    
 
 }
 
@@ -375,6 +378,7 @@ void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D norma
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt) 
 {
+    (void)dt;
     //let it be the first entity
     Entity playerEntity = ecsCoordinator.getFirstEntity();
     Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();

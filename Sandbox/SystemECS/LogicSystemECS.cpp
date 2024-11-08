@@ -12,23 +12,16 @@ void LogicSystemECS::cleanup() {}
 void LogicSystemECS::update(float dt) {
 
 	//------------------------------------PLAYER MOVEMENT-----------------------------------//
-	//Entity playerEntity = ecsCoordinator.getFirstEntity();
 	Entity playerEntity = ecsCoordinator.getEntityFromID("player");
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 
 	const float maxSpeed = 0.6f;
-
-	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
-
-	myMath::Vector2D& position =	ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
-	myMath::Vector2D& acceleration = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).acceleration;
-	//myMath::Vector2D force =		ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
-	myMath::Vector2D& vel =			ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).velocity;
-	myMath::Vector2D& accForce =	ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).accumulatedForce;
-	float mass =					ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
-	myMath::Vector2D gravityScale = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
-	myMath::Vector2D& rotation =		ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
 	float invMass;
+	Force playerForce =				 ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+	myMath::Vector2D gravityScale =  ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
+	myMath::Vector2D& rotation =	 ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation;
+
+
 	if (GLFWFunctions::keyState[Key::Q]) {
 		//ApplyForce(playerEntity, -force);
 		rotation.SetX(rotation.GetX() + (180.f * dt));
@@ -41,47 +34,12 @@ void LogicSystemECS::update(float dt) {
 
 	}
 
-	else {
-
-		// Apply friction to gradually slow down
-		//if (accForce.GetX() > 0) {
-		//	ApplyForce(playerEntity, -force);
-		//}
-		//else if (accForce.GetX() < 0) {
-		//	ApplyForce(playerEntity, force);
-		//}
-
-		//if (std::abs(accForce.GetX()) < 0.01f) { // threshold
-		//	vel.SetX(0.f);
-		//	accForce.SetX(0.f);
-		//}
-
+	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
+		if (GLFWFunctions::keyState[Key::SPACE]) {
+			PhysicsSystemRef->SetAlrJumped(false);  // Set jump state to prevent multiple jumps
+			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-10.0f, -10.f));
+		}
 	}
-	
-	//invMass = mass > 0.f ? 1.f / mass : 0.f;
-	//acceleration = accForce * invMass;
-	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
-	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
-	//position.SetX(position.GetX() + vel.GetX());
-	//position.SetY(position.GetY() + vel.GetY());
-
-	 //Clamp speed without interfering with velocity
-	//if (vel.GetX() > maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
-	//else if (vel.GetX() < -maxSpeed) {
-	//	acceleration.SetX(0);
-	//}
-
-	//vel.SetX(vel.GetX() + acceleration.GetX() * dt);
-	//vel.SetY(vel.GetY() + acceleration.GetY() * dt);
-
-	//// Dampening
-	//vel.SetX(vel.GetX() * 0.9f);
-	//vel.SetY(vel.GetY() * 0.9f);
-
-	//position.SetX(position.GetX() + vel.GetX());
-	//position.SetY(position.GetY() + vel.GetY());
 
 	//--------------------------------END OF PLAYER MOVEMENT--------------------------------//
 
@@ -116,84 +74,75 @@ void LogicSystemECS::update(float dt) {
 				}
 			}
 
-			//myMath::Vector2D& ePos		   = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-			//myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
+			myMath::Vector2D& ePos		   = ecsCoordinator.getComponent<TransformComponent>(entity).position;
+			myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
 			//myMath::Vector2D eForce		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-			//myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
-			//myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
-			//float eMass					   = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
-			////float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
-			////float magnitude = ecsCoordinator.getComponent<PhysicsComponent>(entity).jump;
+			myMath::Vector2D& eVel		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
+			myMath::Vector2D& eAccForce	   = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
+			float eMass					   = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
+			//float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
+			float eMagnitude				   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force.GetMagnitude();
 
-			//if (GLFWFunctions::keyState[Key::I]) {
-			//	//PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, magnitude);
-			//}
-			//else if (GLFWFunctions::keyState[Key::K]) {
-			//	eForce.SetX(0.0f);
-			//	ApplyForce(entity, -eForce);
-			//}
-			//else if (GLFWFunctions::keyState[Key::J]) {
-			//	eForce.SetY(0.0f);
-			//	ApplyForce(entity, -eForce);
-			//}
-			//else if (GLFWFunctions::keyState[Key::L]) {
-			//	eForce.SetY(0.0f);
-			//	ApplyForce(entity, eForce);
-			//}
-			//else {
+			if (GLFWFunctions::keyState[Key::I]) {
+				PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, eMagnitude));
+			}
+			else if (GLFWFunctions::keyState[Key::K]) {
+				PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, -eMagnitude));
+			}
+			else if (GLFWFunctions::keyState[Key::J]) {
+				PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(-eMagnitude, 0.0f));
+			}
+			else if (GLFWFunctions::keyState[Key::L]) {
+				PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(eMagnitude, 0.0f));
+			}
+			else {
 
-			//	// Apply friction to gradually slow down
-			//	if (eAccForce.GetX() > 0) { 
-			//		eForce.SetY(0.0f);
-			//		ApplyForce(entity, -eForce);
-			//	}
-			//	else if (eAccForce.GetX() < 0) {
-			//		eForce.SetY(0.0f);
-			//		ApplyForce(entity, eForce);
-			//	}
-			//	else if (eAccForce.GetY() > 0) {
-			//		eForce.SetX(0.0f);
-			//		ApplyForce(entity, -eForce);
-			//	}
-			//	else if (eAccForce.GetY() < 0) {
-			//		eForce.SetX(0.0f);
-			//		ApplyForce(entity, eForce);
-			//	}
+				//Apply friction to gradually slow down
+				if (eAccForce.GetX() > 0) { 
+					PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(-eMagnitude, 0.0f));
+				}
+				else if (eAccForce.GetX() < 0) {
+					PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(eMagnitude, 0.0f));
+				}
+				else if (eAccForce.GetY() > 0) {
+					PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, -eMagnitude));
+				}
+				else if (eAccForce.GetY() < 0) {
+					PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, eMagnitude));
+				}
 
-			//	if (std::abs(eAccForce.GetX()) < 0.01f) { // threshold
-			//		eVel.SetX(0.f);
-			//		eAccForce.SetX(0.f);
-			//	}
-			//	if (std::abs(eAccForce.GetY()) < 0.01f) { // threshold
-			//		eVel.SetY(0.f);
-			//		eAccForce.SetY(0.f);
-			//	}
-			//}
+				if (std::abs(eAccForce.GetX()) < 0.01f) { // threshold
+					eVel.SetX(0.f);
+					eAccForce.SetX(0.f);
+				}
+				if (std::abs(eAccForce.GetY()) < 0.01f) { // threshold
+					eVel.SetY(0.f);
+					eAccForce.SetY(0.f);
+				}
+			}
 
-			//invMass = eMass > 0.f ? 1.f / eMass : 0.f;
-			//eAcceleration = eAccForce * invMass;
+			invMass = eMass > 0.f ? 1.f / eMass : 0.f;
+			eAcceleration = eAccForce * invMass;
 
-			//// Clamp speed without interfering with velocity
-			//if (eVel.GetX() > maxSpeed) {
-			//	eAcceleration.SetX(0);
-			//}
-			//else if (eVel.GetX() < -maxSpeed) {
-			//	eAcceleration.SetX(0);
-			//}
+			// Clamp speed without interfering with velocity
+			if (eVel.GetX() > maxSpeed) {
+				eAcceleration.SetX(0);
+			}
+			else if (eVel.GetX() < -maxSpeed) {
+				eAcceleration.SetX(0);
+			}
 
-			//eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
-			//eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
+			eVel.SetX(eVel.GetX() + eAcceleration.GetX() * dt);
+			eVel.SetY(eVel.GetY() + eAcceleration.GetY() * dt);
 
-			//// 
-			//// ing
-			//eVel.SetX(eVel.GetX() * 0.9f);
-			//eVel.SetY(eVel.GetY() * 0.9f);
+			eVel.SetX(eVel.GetX() * 0.9f);
+			eVel.SetY(eVel.GetY() * 0.9f);
 
-			//ePos.SetX(ePos.GetX() + eVel.GetX());
-			//ePos.SetY(ePos.GetY() + eVel.GetY());
+			ePos.SetX(ePos.GetX() + eVel.GetX());
+			ePos.SetY(ePos.GetY() + eVel.GetY());
 		}
 		//--------------------------------END OF ENEMY MOVEMENT--------------------------------//
-				//------------------------------------CAMERA MOVEMENT-----------------------------------//
+		//------------------------------------CAMERA MOVEMENT-----------------------------------//
 		auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
 		cameraSystem.lockToComponent(playerTransform);
 
@@ -229,12 +178,10 @@ void LogicSystemECS::update(float dt) {
 
 			if (GLFWFunctions::keyState[Key::Q]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() + 0.1f * GLFWFunctions::delta_time);
-				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() - 0.1f * GLFWFunctions::delta_time);
 			}
 				
 			if (GLFWFunctions::keyState[Key::E]) {
 				cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
-				//playerTransform.orientation.SetX(playerTransform.orientation.GetX() + 0.1f * GLFWFunctions::delta_time);
 			}
 				
 		}
