@@ -74,6 +74,7 @@ private:
 	std::ifstream fileStream;
 };
 
+// function template for read object so this function can take in any object types
 template <typename T>
 void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::string const& parentKey)
 {
@@ -141,6 +142,8 @@ void JSONSerializer::ReadObject(T& gameObj, std::string const& entityId, std::st
 	ReadSpecificObject(gameObj, currentObj);
 }
 
+// function template for write object, so this function can be called for to write for 
+// any object type
 template <typename T>
 void JSONSerializer::WriteObject(T& gameObj, std::string const& entityId, std::string const& parentKey)
 {

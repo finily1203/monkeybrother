@@ -1,14 +1,14 @@
 /*!
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
 @author: Lee Jing Wen (jingwen.lee)
-@team: MonkeHood
+@team:   MonkeHood
 @course: CSD2401
-@file: PhyColliSystemECS.h
-@brief: This header file contains the declaration of the Physics System and Collision System for ECS.
-    Lee Jing Wen (jingwen.lee): Physics System, Collision System, AABB struct, enum CollisionSide
-                  for identifying.
-                  100%
-*//*    _________________________________________________________________-*/
+@file:   PhyColliSystemECS.h
+@brief:  This source file contains the definition of the Physics System and Collision
+         System for ECS.
+         Lee Jing Wen (jingwen.lee): Physics System, Collision System, OBB struct
+                                     100%
+//__-*/
 #pragma once
 #include "EngineDefinitions.h"
 #include "ECSCoordinator.h"

@@ -1,3 +1,20 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Ian Loi (ian.loi)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  filePath.h
+@brief  :  filePath.h contains the FilePathManager class, this class handles all the different
+		   files that we need to load dynamically. The files include from the executable path and
+		   all the JSON files.
+
+*Ian Loi (ian.loi) :
+		- Created the FilePathManager class with its member functions to load all the file paths
+		  dynamically.
+
+File Contributions: Ian Loi (100%)
+
+*//*__________________________________________________________________________________________________*/
 #pragma once
 
 #define NOMINMAX

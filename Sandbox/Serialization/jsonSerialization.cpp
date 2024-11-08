@@ -18,6 +18,7 @@ File Contributions: Ian Loi (100%)
 #include "jsonSerialization.h"
 
 
+// this checks if the file can be opened successfully or not
 bool JSONSerializer::Open(std::string const& filename)
 {
 	// opening the JSON file
@@ -40,6 +41,7 @@ bool JSONSerializer::Open(std::string const& filename)
 	return false;
 }
 
+// this saves the data into the JSON file
 bool JSONSerializer::Save(std::string const& filename)
 {
 	// create an output file stream for the JSON file (filename)
@@ -62,33 +64,35 @@ bool JSONSerializer::Save(std::string const& filename)
 	return false;
 }
 
+// ensures that the JSON object is not empty
 bool JSONSerializer::IsGood()
 {
 	// returns true if the JSON object is not empty
 	return !jsonObject.empty();
 }
 
+// read a Vector2D object from the JSON file
 void JSONSerializer::ReadSpecificObject(myMath::Vector2D& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_object() && jsonObj.contains("x") && jsonObj.contains("y"))
 	{
-		//object.x = jsonObj["x"].get<float>();
-		//object.y = jsonObj["y"].get<float>();		
 		object.SetX(jsonObj["x"].get<float>());
 		object.SetY(jsonObj["y"].get<float>());
 	}
 }
 
+// read a Vector3D object from the JSON file
 void JSONSerializer::ReadSpecificObject(myMath::Vector3D& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_object() && jsonObj.contains("x") && jsonObj.contains("y") && jsonObj.contains("z"))
-	{	
+	{
 		object.SetX(jsonObj["x"].get<float>());
 		object.SetY(jsonObj["y"].get<float>());
 		object.SetZ(jsonObj["z"].get<float>());
 	}
 }
 
+// read a Matrix3x3 object from the JSON file
 void JSONSerializer::ReadSpecificObject(myMath::Matrix3x3& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_array() && jsonObj.size() == 3)
@@ -108,6 +112,7 @@ void JSONSerializer::ReadSpecificObject(myMath::Matrix3x3& object, nlohmann::jso
 	}
 }
 
+// read a float object from the JSON file
 void JSONSerializer::ReadSpecificObject(float& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_number_float())
@@ -116,6 +121,7 @@ void JSONSerializer::ReadSpecificObject(float& object, nlohmann::json const& jso
 	}
 }
 
+// read a bool object from the JSON file
 void JSONSerializer::ReadSpecificObject(bool& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_boolean())
@@ -124,6 +130,7 @@ void JSONSerializer::ReadSpecificObject(bool& object, nlohmann::json const& json
 	}
 }
 
+// read a string object from the JSON file
 void JSONSerializer::ReadSpecificObject(std::string& object, nlohmann::json const& jsonObj)
 {
 	if (jsonObj.is_string())
@@ -132,22 +139,22 @@ void JSONSerializer::ReadSpecificObject(std::string& object, nlohmann::json cons
 	}
 }
 
+// write a Vector2D data to the JSON file
 void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohmann::json& jsonObj)
 {
-	//jsonObj["x"] = object.x;
-	//jsonObj["y"] = object.y;
 	jsonObj["x"] = object.GetX();
 	jsonObj["y"] = object.GetY();
 }
 
+// write a Vector3D data to the JSON file
 void JSONSerializer::WriteSpecificObject(myMath::Vector3D const& object, nlohmann::json& jsonObj)
 {
-	std::cout << "JSONSerialization.cpp [R: " << object.GetX() << " G: " << object.GetY() << " B: " << object.GetZ() << "]" << std::endl;
 	jsonObj["x"] = object.GetX();
 	jsonObj["y"] = object.GetY();
 	jsonObj["z"] = object.GetZ();
 }
 
+// write a Matrix3x3 data to the JSON file
 void JSONSerializer::WriteSpecificObject(myMath::Matrix3x3 const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = nlohmann::json::array();
@@ -166,21 +173,25 @@ void JSONSerializer::WriteSpecificObject(myMath::Matrix3x3 const& object, nlohma
 	}
 }
 
+// write a float object to the JSON file
 void JSONSerializer::WriteSpecificObject(float const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
 }
 
+// write a bool object to the JSON file
 void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
 }
 
+// write a string object to the JSON file
 void JSONSerializer::WriteSpecificObject(std::string const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
 }
 
+// read bool object
 void JSONSerializer::ReadBool(bool& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -217,6 +228,7 @@ void JSONSerializer::ReadBool(bool& data, std::string const& jsonKey)
 	data = currentObj.get<bool>();
 }
 
+// read an integer object
 void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -253,6 +265,7 @@ void JSONSerializer::ReadInt(int& data, std::string const& jsonKey)
 	data = currentObj.get<int>();
 }
 
+// read unsigned int object
 void JSONSerializer::ReadUnsignedInt(unsigned int& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -285,6 +298,7 @@ void JSONSerializer::ReadUnsignedInt(unsigned int& data, std::string const& json
 	data = currentObj.get<unsigned int>();
 }
 
+// read unsigned long long object
 void JSONSerializer::ReadUnsignedLongLong(unsigned long long& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -317,6 +331,7 @@ void JSONSerializer::ReadUnsignedLongLong(unsigned long long& data, std::string 
 	data = currentObj.get<unsigned long long>();
 }
 
+// read float object
 void JSONSerializer::ReadFloat(float& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -350,6 +365,7 @@ void JSONSerializer::ReadFloat(float& data, std::string const& jsonKey)
 	data = currentObj.get<float>();
 }
 
+// read double object
 void JSONSerializer::ReadDouble(double& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -383,6 +399,7 @@ void JSONSerializer::ReadDouble(double& data, std::string const& jsonKey)
 	data = currentObj.get<double>();
 }
 
+// read string object
 void JSONSerializer::ReadString(std::string& data, std::string const& jsonKey)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -416,6 +433,7 @@ void JSONSerializer::ReadString(std::string& data, std::string const& jsonKey)
 	data = currentObj.get<std::string>();
 }
 
+// read a character array
 void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const& jsonKey)
 {
 	std::istringstream keyStream(jsonKey);
@@ -445,6 +463,7 @@ void JSONSerializer::ReadCharArray(char* data, size_t maxSize, std::string const
 	}
 }
 
+// write bool object to JSON file
 void JSONSerializer::WriteBool(bool& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -480,6 +499,7 @@ void JSONSerializer::WriteBool(bool& data, std::string const& jsonKey, std::stri
 	}
 }
 
+// write an int object to JSON file
 void JSONSerializer::WriteInt(int& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -515,6 +535,7 @@ void JSONSerializer::WriteInt(int& data, std::string const& jsonKey, std::string
 	}
 }
 
+// write unsigned int object JSON file
 void JSONSerializer::WriteUnsignedInt(unsigned int& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -549,6 +570,7 @@ void JSONSerializer::WriteUnsignedInt(unsigned int& data, std::string const& jso
 	}
 }
 
+// write unsigned long long object to JSON file
 void JSONSerializer::WriteUnsignedLongLong(unsigned long long& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -582,6 +604,7 @@ void JSONSerializer::WriteUnsignedLongLong(unsigned long long& data, std::string
 	}
 }
 
+// write float object to JSON file
 void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -615,6 +638,7 @@ void JSONSerializer::WriteFloat(float& data, std::string const& jsonKey, std::st
 	}
 }
 
+// write double object to JSON file
 void JSONSerializer::WriteDouble(double& data, std::string const& jsonKey, std::string const& filename)
 {
 	// string buffer that contains the sequence of characters of jsonKey
@@ -648,6 +672,7 @@ void JSONSerializer::WriteDouble(double& data, std::string const& jsonKey, std::
 	}
 }
 
+// write string to JSON file
 void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey, std::string const& filename)
 {
 	// holds each different key from the keyStream
@@ -681,6 +706,7 @@ void JSONSerializer::WriteString(std::string& data, std::string const& jsonKey, 
 	}
 }
 
+// write character array to JSON file
 void JSONSerializer::WriteCharArray(char* data, size_t maxSize, std::string const& jsonKey, std::string const& filename)
 {
 	// holds each different key from the keyStream
@@ -716,6 +742,7 @@ void JSONSerializer::WriteCharArray(char* data, size_t maxSize, std::string cons
 	}
 }
 
+// return the JSON object 
 nlohmann::json JSONSerializer::GetJSONObject() const
 {
 	return jsonObject;

@@ -1,3 +1,19 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Ian Loi (ian.loi)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  filePath.cpp
+@brief  :  filePath.cpp contains all the definitions of the member functions of FilePathManager. The
+           functions here will retrieve the executable file path and all the different JSON file paths.
+
+*Ian Loi (ian.loi) :
+        - Created the definitions of FilePathManager class member functions that will retrieve the executable
+          file path and JSON file paths.
+
+File Contributions: Ian Loi (100%)
+
+*//*__________________________________________________________________________________________________*/
 #include "filePath.h"
 
 
