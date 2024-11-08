@@ -216,7 +216,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         keyState[mappedKey] = true;
     }
 
-    if (keyState[Key::F2])
+    if (keyState[Key::NUM_2])
         allow_camera_movement = ~allow_camera_movement;
 
     if (keyState[Key::NUM_1]) {
