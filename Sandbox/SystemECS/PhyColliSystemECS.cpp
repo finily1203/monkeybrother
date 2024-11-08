@@ -350,13 +350,24 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
         targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
     }
 
+
     forceManager.ApplyForce(player, force.GetDirection(), targetForce);
 
     prevForce = targetForce;
 
     if (isColliding)
     {
+        if (GLFWFunctions::firstCollision == false) 
+        {
+            GLFWFunctions::bumpAudio = true;
+            GLFWFunctions::firstCollision = true;
+            std::cout << "First time collide with platform" << std::endl;
+        }
         collisionSystem.CollisionResponse(player, normal, penetration);
+    }
+    else
+    {
+        GLFWFunctions::firstCollision = false;
     }
     
 

@@ -80,7 +80,7 @@ int GLFWFunctions::audioNum = 0;
 int GLFWFunctions::windowWidth = 0;
 int GLFWFunctions::windowHeight = 0;
 bool GLFWFunctions::bumpAudio = false;
-bool GLFWFunctions::hasBumped = false;
+bool GLFWFunctions::firstCollision = false;
 
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;

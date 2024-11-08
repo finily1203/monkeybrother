@@ -26,12 +26,10 @@ void LogicSystemECS::update(float dt) {
 	if (GLFWFunctions::keyState[Key::Q]) {
 		//ApplyForce(playerEntity, -force);
 		rotation.SetX(rotation.GetX() + (180.f * dt));
-		std::cout << "current rotation: " << rotation.GetX() << std::endl;
 	}
 	else if (GLFWFunctions::keyState[Key::E]) {
 		//ApplyForce(playerEntity, force);
 		rotation.SetX(rotation.GetX() - (180.f * dt));
-		std::cout << "current rotation: " << rotation.GetX() << std::endl;
 
 	}
 

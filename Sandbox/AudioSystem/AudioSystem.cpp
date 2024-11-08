@@ -132,18 +132,19 @@ void AudioSystem::update() {
         }
     }
 
+
     if (GLFWFunctions::bumpAudio) {
-        playSoundEffect("splashSound1");
+        playSoundEffect("splashSound");
         GLFWFunctions::bumpAudio = false;
     }
 
     if (GLFWFunctions::keyState[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
-        playSoundEffect("splashSound2");
+        playSoundEffect("bubbleButton");
         GLFWFunctions::keyState[Key::NUM_9] = false;
     }
 
     if (GLFWFunctions::keyState[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
-        playSoundEffect("bubbleForm");
+        playSoundEffect("bubbleSingle");
         GLFWFunctions::keyState[Key::NUM_0] = false;
     }
 

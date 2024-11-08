@@ -125,7 +125,8 @@ struct GLFWFunctions {
 	static int windowWidth;
 	static int windowHeight;
 	static bool bumpAudio;
-	static bool hasBumped;
+	static bool firstCollision;
+
 
 	static std::unordered_map<Key, bool> keyState;
 	static std::unordered_map<MouseButton, bool> mouseButtonState;

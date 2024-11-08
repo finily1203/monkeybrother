@@ -9,16 +9,16 @@
       "filePath": "assets/audio/WATER-BUBBLE_GEN-HDF-25446.wav"
     },
     {
-      "audioName": "splashSound1",
-      "filePath": "assets/audio/Splash_1.wav"
+      "audioName": "splashSound",
+      "filePath": "assets/audio/WaterSplashSFX.wav"
     },
     {
-      "audioName": "bubbleForm",
-      "filePath": "assets/audio/Bubbles.wav"
+      "audioName": "bubbleSingle",
+      "filePath": "assets/audio/Bubble_Single.wav"
     },
     {
-      "audioName": "splashSound2",
-      "filePath": "assets/audio/Splash_2.wav"
+      "audioName": "bubbleButton",
+      "filePath": "assets/audio/bubble-sound_button-press.wav"
     }
   ],
   "textureAssets": [
