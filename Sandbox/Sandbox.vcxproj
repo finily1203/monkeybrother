@@ -203,9 +203,6 @@
     <None Include="Graphics\font.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="DebugSystem\Assets\liberation-mono.ttf" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="Graphics\Assets\moss.png" />
     <Image Include="Graphics\Assets\tomatohead1.png" />
   </ItemGroup>
