@@ -30,14 +30,14 @@ namespace monkeybrother {
 
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetBreakAlloc(183);
+	//_CrtSetBreakAlloc(149890);
 
 
 	try {
 		CrashLog::SignalChecks();
 		CrashLog::Initialise();
 		Engine* engine = new Engine();
-		
+
 		WindowSystem* windowSystem = new WindowSystem();
 		engine->addSystem(windowSystem);
 
@@ -57,10 +57,9 @@ int main() {
 		engine->addSystem(&cameraSystem);
 
 		engine->initialiseSystem();
-	
 		ecsCoordinator.initialiseSystemsAndComponents();
 		//ecsCoordinator.test3();
-		
+
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 			//DebugSystem::StartLoop(); //Get time for start of gameloop
 

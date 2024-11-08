@@ -264,15 +264,32 @@ void FontSystem::draw(const std::string& text, const std::string& fontId, float 
 }
 
 void FontSystem::cleanup() {
-    if (!isInitialized) return;
+    std::cout << "FontSystem cleanup start" << std::endl;
+    if (!isInitialized) {
+        std::cout << "FontSystem not initialized, skipping cleanup" << std::endl;
+        return;
+    }
+
+    std::cout << "Before cleanup:\n"
+        << "Fonts map size: " << Fonts.size() << "\n"
+        << "Characters map size: " << Characters.size() << std::endl;
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //textShader.reset(); 
 
+    // Clear our own maps before calling AssetsManager
+    Fonts.clear();
+    Characters.clear();
+
+    std::cout << "Before AssetsManager ClearFonts" << std::endl;
     assetsManager.ClearFonts();
 
+    std::cout << "After cleanup:\n"
+        << "Fonts map size: " << Fonts.size() << "\n"
+        << "Characters map size: " << Characters.size() << std::endl;
+
     isInitialized = false;
+    std::cout << "FontSystem cleanup complete" << std::endl;
 
 }
 

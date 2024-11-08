@@ -402,12 +402,17 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
 }
 
 void AssetsManager::ClearFonts() {
+    std::cout << "AssetsManager ClearFonts start - fonts size: "
+        << m_Fonts.size() << std::endl;
+
     for (auto& font : m_Fonts) {
+        std::cout << "Clearing font: " << font.first
+            << " with " << font.second.size() << " characters" << std::endl;
         for (auto& character : font.second) {
-			glDeleteTextures(1, &character.second.TextureID);
-		}
-	}
-	m_Fonts.clear();
-	std::cout << "All fonts cleared!" << std::endl;
+            glDeleteTextures(1, &character.second.TextureID);
+        }
+    }
+    m_Fonts.clear();
+    std::cout << "AssetsManager ClearFonts complete" << std::endl;
 }
 
