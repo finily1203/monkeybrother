@@ -28,32 +28,35 @@ enum class Direction {
 };
 class AnimationData {
 public:
+	// Constructor
     AnimationData(int totalFrames, float frameDuration, int columns, int rows);
-
+	// Update function
     void Update(float deltaTime);
-
+	// Update UV coordinates
     void UpdateUVCoordinates();
-
-
+	// Get current UVs
     inline const std::vector<glm::vec2>& GetCurrentUVs() const {
         return currentUVs;
     }
-
+	// Get current frame
     inline int GetCurrentFrame() const {
         return currentFrame;
     }
-
+	// Get current action
     inline int GetCurrentAction() const {
         return currentAction;
     }
-
+	// Set current action
     void ResetAnimation();
-
+	// Set current action
     void SetFrameDuration(float duration);
+	// Set current action
     void SetSpeedMultiplier(float multiplier);
+	// Set current action
     void SetLooping(bool shouldLoop);
-
+	// Set current action
     void AddFrameEvent(int frame, const std::string& eventName);
+	// Set current action
     void TriggerFrameEvents();
 
 private:

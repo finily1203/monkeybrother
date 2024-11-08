@@ -24,7 +24,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <map>
 #include "GlobalCoordinator.h"
 
-
+// Constructor implementation
 AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, int rows)
     : totalFrames(totalFrames), frameDuration(frameDuration), columns(columns), rows(rows),
     currentFrame(0), timeAccumulator(0.0f), uvDirty(true),
@@ -43,6 +43,7 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     UpdateUVCoordinates();
 }
 
+// Update function implementation
 void AnimationData::Update(float deltaTime) {
     if (deltaTime < 0.0f) {
         throw std::invalid_argument("Delta time cannot be negative.");
@@ -80,9 +81,7 @@ void AnimationData::Update(float deltaTime) {
     }
 }
 
-
-
-
+// pdate UV coordinates function implementation
 void AnimationData::UpdateUVCoordinates() {
 
     float uMin = frameWidth * (currentFrame % columns);
@@ -96,6 +95,7 @@ void AnimationData::UpdateUVCoordinates() {
     currentUVs[3] = glm::vec2(uMin, vMax);  // Top left
 }
 
+// Reset animation function implementation
 void AnimationData::ResetAnimation() {
     currentFrame = 0;
     timeAccumulator = 0.0f;
@@ -103,6 +103,7 @@ void AnimationData::ResetAnimation() {
     UpdateUVCoordinates();
 }
 
+// Set frame duration function implementation
 void AnimationData::SetFrameDuration(float duration) {
     if (duration <= 0.0f) {
         throw std::invalid_argument("Frame duration must be greater than zero.");
@@ -110,6 +111,7 @@ void AnimationData::SetFrameDuration(float duration) {
     frameDuration = duration;
 }
 
+// Set speed multiplier function implementation
 void AnimationData::SetSpeedMultiplier(float multiplier) {
     if (multiplier <= 0.0f) {
         throw std::invalid_argument("Speed multiplier must be greater than zero.");
@@ -117,10 +119,12 @@ void AnimationData::SetSpeedMultiplier(float multiplier) {
     speedMultiplier = multiplier;
 }
 
+// Set looping function implementation
 void AnimationData::SetLooping(bool shouldLoop) {
     looping = shouldLoop;
 }
 
+// Add frame event function implementation
 void AnimationData::AddFrameEvent(int frame, const std::string& eventName) {
     if (frame < 0 || frame >= totalFrames) {
         throw std::out_of_range("Frame index out of range.");
@@ -128,6 +132,7 @@ void AnimationData::AddFrameEvent(int frame, const std::string& eventName) {
     frameEvents[frame].push_back(eventName);  
 }
 
+// Trigger frame events function implementation
 void AnimationData::TriggerFrameEvents() {
     auto eventsIt = frameEvents.find(currentFrame);
     if (eventsIt != frameEvents.end()) {

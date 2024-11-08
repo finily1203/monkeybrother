@@ -4,8 +4,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @team   :  MonkeHood
 @course :  CSD2401
 @file   :  Debug.h
-@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the 
-		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's 
+@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the
+		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's
 		   level editor systems such as game viewport camera controls, object creation, hierarchy list, and save
 		   and load feature
 
@@ -15,10 +15,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Designed the display synergy between all of ImGui's sub systems in the main debugging window
 		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
 		  properties' data
-		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to 
+		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to
 		  them
 		- Integrated ImGui game viewport camera controls to zoom and pan current game scene
-		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level 
+		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level
 		  editor
 
 *Ian Loi (ian.loi) :
@@ -81,18 +81,24 @@ public:
 
 	void UpdateSystemTimes(); //Update all system loop time
 
-	static int GetSaveCount();
+	static int GetSaveCount(); //Returns save count
 
+	//Serialize entity data to JSON file
 	nlohmann::json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
 
+	//Remove entity data from JSON save file
 	void RemoveEntityFromJSON(std::string const& entityId);
 
+	//Load debug system configuration from JSON file
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
+	//Create appropriate components based on object type
 	void ObjectCreationCondition(const char* items[], int current_item, JSONSerializer& serializer, Entity entityObj, std::string entityId);
-	
+
+	//Save current debug save count configuration to JSON
 	void SaveDebugConfigFromJSON(std::string const& filename);
 
+	//Generate new JSON save file
 	std::string GenerateSaveJSONFile(int& saveNumber);
 
 private:
@@ -119,7 +125,7 @@ private:
 	static float initialZoomLevel;
 	static float initialDragDistX;
 	static float initialDragDistY;
-	
+
 	static float defaultObjScaleX;
 	static float defaultObjScaleY;
 

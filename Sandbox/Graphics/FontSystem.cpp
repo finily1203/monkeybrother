@@ -32,7 +32,7 @@ FontSystem::~FontSystem() {
 }
 
 
-
+// Initialize the FontSystem
 void FontSystem::initialise() {
     if (isInitialized) return;
     std::cout << "FontSystem initialized" << std::endl;
@@ -62,6 +62,7 @@ void FontSystem::initialise() {
     isInitialized = true;
 }
 
+// Load a font with the specified path and size
 void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
@@ -120,9 +121,7 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << Fonts[fontPath].size() << std::endl;
 }
 
-
-
-
+// Render text on the screen using the specified font
 void FontSystem::renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth, myMath::Matrix3x3 viewMat) {
     if (!isInitialized) {
         std::cerr << "ERROR: FontSystem not initialized!" << std::endl;

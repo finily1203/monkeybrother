@@ -38,11 +38,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define GLCall(x) GLClearError();\
 	x;\
 	ASSERT(GLLogCall(#x, __FILE__,__LINE__))
-
+// Function to clear OpenGL errors
 static void GLClearError() {
     while (glGetError() != GL_NO_ERROR);
 }
 
+// Function to log OpenGL errors
 static bool GLLogCall(const char* function, const char* file, int line) {
     while (GLenum error = glGetError()) {
         std::cout << "[OpenGL Error] (" << error << "): " << function << " " << file << ":" << line << std::endl;
@@ -51,6 +52,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
     return true;
 }
 
+// Function to load a texture from a file
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet

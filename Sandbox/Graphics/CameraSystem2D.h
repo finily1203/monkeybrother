@@ -28,9 +28,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 class CameraSystem2D : public GameSystems
 {
 public:
+	// Constructor
     CameraSystem2D();
+	// Destructor
     ~CameraSystem2D();
 
+	// GameSystems methods
     void initialise() override;
     void update() override;
     void cleanup() override;
@@ -39,17 +42,21 @@ public:
     // Camera-specific methods
     void setViewMatrix(const myMath::Matrix3x3& viewMatrix);
     myMath::Matrix3x3 getViewMatrix() const;
-
+	// Set the projection matrix
     void setProjectionMatrix(const myMath::Matrix3x3& projectionMatrix);
+	// Get the projection matrix
     myMath::Matrix3x3 getProjectionMatrix() const;
-
+	// Set the camera position
     void setCameraPosition(const myMath::Vector2D& position);
+	// Get the camera position
     myMath::Vector2D getCameraPosition() const;
-
+	// Set the camera rotation
     void setCameraRotation(const GLfloat& rotation);
+	// Get the camera rotation
     GLfloat getCameraRotation() const;
-
+	// Set the camera zoom
     void setCameraZoom(const GLfloat& zoom);
+	// Get the camera zoom
     GLfloat getCameraZoom() const;
 
     void lockToComponent(const TransformComponent& component); // Lock camera to an entity

@@ -1,3 +1,22 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIConsole.h
+@brief  :  This file contains the function declaration of ImGui console window
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui console to allow an alternative channel to output debug information
+
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables and save from and to
+		  json file
+
+File Contributions: Lew Zong Han Owen (90%)
+					Ian Loi           (10%)
+
+/*_______________________________________________________________________________________________________________*/
 #pragma once
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -44,11 +63,10 @@ public:
 		return *this;
 	}
 
-	void LoadConsoleConfigFromJSON(std::string const& filename);
-	void SaveConsoleConfigToJSON(std::string const& filename);
+	void LoadConsoleConfigFromJSON(std::string const& filename); //Load console configuration from JSON file
+	void SaveConsoleConfigToJSON(std::string const& filename);  //Saves console configuration to a JSON file
 
 private:
-	//static const size_t MAX_LOGS = 1000;
 	size_t MAX_LOGS;
 	static Console* instance;
 	static std::vector<std::string> items;

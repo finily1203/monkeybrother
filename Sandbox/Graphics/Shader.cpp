@@ -26,6 +26,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <sstream>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+
+// Parse the shader file to extract the vertex and fragment shader source code
 ShaderProgramSource Shader::ParseShader(const std::string& filepath) {
     std::ifstream stream(filepath);
     if (!stream.is_open()) {
@@ -56,7 +58,7 @@ ShaderProgramSource Shader::ParseShader(const std::string& filepath) {
     }
     return { ss[0].str(), ss[1].str() };
 }
-
+// Constructor implementation
 Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
     : m_IsCompiled(false) {
     GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexSrc);
@@ -110,7 +112,7 @@ void Shader::SetUniform1i(const std::string& name, int value) {
 void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2) {
     glUniform3f(glGetUniformLocation(m_ShaderID, name.c_str()), v0, v1, v2);
 }
-
+// Compile shader function implementation
 GLuint Shader::CompileShader(GLenum type, const std::string& source) {
     GLuint id = glCreateShader(type);
     const char* src = source.c_str();
@@ -134,7 +136,7 @@ GLuint Shader::CompileShader(GLenum type, const std::string& source) {
 
     return id;
 }
-
+// Get uniform location function implementation
 GLint Shader::GetUniformLocation(const std::string& name) {
     GLint location = glGetUniformLocation(m_ShaderID, name.c_str());
     if (location == -1) {

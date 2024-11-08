@@ -1,3 +1,22 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIConsole.cpp
+@brief  :  This file contains the function definition of ImGui console window
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui console to allow an alternative channel to output debug information
+
+*Ian Loi (ian.loi) :
+		- Integrated serialization & deserialization functions to initialize variables and save from and to
+		  json file
+
+File Contributions: Lew Zong Han Owen (80%)
+					Ian Loi           (20%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "GUIConsole.h"
 
 //Variables for Console
@@ -106,18 +125,18 @@ void Console::DrawImpl(const char* title) {
 
 	ImGui::End();
 }
-
+//Load console configuration from JSON file
 void Console::LoadConsoleConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
-	
+
 	// checks if the JSON file can be opened
 	if (!serializer.Open(filename))
 	{
 		Console::GetLog() << "Error: could not open file " << filename << std::endl;
 		return;
 	}
-	
+
 	// retrieve the JSON object from the JSON file
 	nlohmann::json currentObj = serializer.GetJSONObject();
 
@@ -126,7 +145,7 @@ void Console::LoadConsoleConfigFromJSON(std::string const& filename)
 	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
 	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
 }
-
+//Save current console configuration to JSON file
 void Console::SaveConsoleConfigToJSON(std::string const& filename)
 {
 	JSONSerializer serializer;

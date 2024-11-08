@@ -4,27 +4,27 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @team   :  MonkeHood
 @course :  CSD2401
 @file   :  Debug.cpp
-@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the 
-		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's 
+@brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the
+		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's
 		   level editor systems such as game viewport camera controls, object creation, hierarchy list, and save
 		   and load feature
 
-*Lew Zong Han Owen (z.lew) : 
+*Lew Zong Han Owen (z.lew) :
 		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
 		  indication
 		- Designed the display synergy between all of ImGui's sub systems in the main debugging window
 		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
 		  properties' data
-		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to 
+		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to
 		  them
 		- Integrated ImGui game viewport camera controls to zoom and pan current game scene
-		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level 
+		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level
 		  editor
 
 *Ian Loi (ian.loi) :
-		- Integrated serialization & deserialization functions to initialize variables from json file, which allows 
+		- Integrated serialization & deserialization functions to initialize variables from json file, which allows
 		  saving and loading feature in the level editor
-	
+
 File Contributions: Lew Zong Han Owen (80%)
 					Ian Loi           (20%)
 
@@ -51,12 +51,12 @@ File Contributions: Lew Zong Han Owen (80%)
 float DebugSystem::fontSize;
 ImVec4 DebugSystem::clearColor;
 float DebugSystem::textBorderSize;
-bool DebugSystem::isZooming; 
-bool DebugSystem::isPanning; 
-bool DebugSystem::isSliding; 
+bool DebugSystem::isZooming;
+bool DebugSystem::isPanning;
+bool DebugSystem::isSliding;
 bool DebugSystem::isRedToggled;
-bool DebugSystem::isGreenToggled; 
-bool DebugSystem::isBlueToggled; 
+bool DebugSystem::isGreenToggled;
+bool DebugSystem::isBlueToggled;
 bool DebugSystem::isSelectingFile;
 int DebugSystem::currentItem;
 
@@ -84,7 +84,7 @@ float DebugSystem::fontColorMaxLimit;
 float DebugSystem::fontColorMinLimit;
 float DebugSystem::textBoxMaxLimit;
 float DebugSystem::textBoxMinLimit;
-	  
+
 int DebugSystem::numEntitiesToCreate;
 int DebugSystem::minEntitesToCreate;
 char DebugSystem::numBuffer[MAXBUFFERSIZE];
@@ -143,16 +143,16 @@ DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
 //Destructor for DebugSystem class
 DebugSystem::~DebugSystem() {}
 
+//Initialize ImGui settings and configuration
 void DebugSystem::initialise() {
 	LoadDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext(); 
-	io = &ImGui::GetIO(); 
+	ImGui::CreateContext();
+	io = &ImGui::GetIO();
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multiple Viewport
-	//font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), fontSize);  // Load text font file
-	font = io->Fonts->AddFontFromFileTTF(assetsManager.GetFontPath("Mono").c_str(), fontSize);  // Load text font file
+	font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), fontSize);  // Load text font file
 
 	ImGui::StyleColorsDark();  // Set theme as dark
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -173,9 +173,10 @@ void DebugSystem::initialise() {
 
 }
 
+//Handle rendering of the debug and level editor features
 void DebugSystem::update() {
-	if (GLFWFunctions::debug_flag) { //F1 key to open imgui GUI
-		//std::cout << "GUI Open" << std::endl;
+	if (GLFWFunctions::debug_flag) { //1 key to open imgui GUI
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -198,7 +199,8 @@ void DebugSystem::update() {
 		ImGui::End();
 
 		ImGui::Begin("Debug");
-	
+
+		//Performance Data formatting
 		if (ImGui::CollapsingHeader("Performance Data")) {
 			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
@@ -211,7 +213,7 @@ void DebugSystem::update() {
 			ImGui::Text("Number of Systems: %d", systemCount);
 
 			if (ImGui::BeginTable("Performance Data", 2, flags)) {
-				
+
 				ImGui::TableSetupColumn("Systems");
 				ImGui::TableSetupColumn("Game Loop %");
 				ImGui::TableHeadersRow();
@@ -266,7 +268,7 @@ void DebugSystem::update() {
 				ImGui::EndTable();
 			}
 		}
-
+		//Input Data formatting
 		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
 			ImGui::SeparatorText("Mouse Coordinates");
 			if (ImGui::IsMousePosValid())
@@ -292,6 +294,7 @@ void DebugSystem::update() {
 			ImGui::NewLine();
 		}
 
+		//Game Viewport Controls formatting
 		if (ImGui::CollapsingHeader("Game Viewport Controls")) {
 			if (ImGui::Button("Reset Perspective")) {
 				GameViewWindow::setAccumulatedDragDistance(initialDragDistX, initialDragDistY);
@@ -327,6 +330,7 @@ void DebugSystem::update() {
 			}
 		}
 
+		//Object Creation formatting
 		if (ImGui::CollapsingHeader("Object Creation")) {
 
 			ImGui::AlignTextToFramePadding();
@@ -335,9 +339,9 @@ void DebugSystem::update() {
 
 			objCount = 0;
 
-			objCount += static_cast<int>(ecsCoordinator.getAllLiveEntities().size())-1;
+			objCount += static_cast<int>(ecsCoordinator.getAllLiveEntities().size()) - 1;
 
-			const char* items[] = { "Player", "Enemy", "Platform", "TextBox"};
+			const char* items[] = { "Player", "Enemy", "Platform", "TextBox" };
 
 			// Create the combo box
 			ImGui::SetNextItemWidth(objAttributeSliderMidLength);
@@ -353,7 +357,7 @@ void DebugSystem::update() {
 			ImGui::SameLine();
 			ImGui::Text("Object type");
 
-			if (!strcmp(items[currentItem], "TextBox")) {
+			if (!strcmp(items[currentItem], "TextBox")) { //Specifically for textbox
 				ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 				ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
 				ImGui::SameLine();
@@ -384,7 +388,7 @@ void DebugSystem::update() {
 				ImGui::SameLine();
 				ImGui::Text("Coordinates");
 			}
-			else {
+			else { //The remaining object types
 				ImGui::SetNextItemWidth(objAttributeSliderMidLength);  // Set width of input field
 				ImGui::InputText("##Signature", sigBuffer, IM_ARRAYSIZE(sigBuffer));
 				ImGui::SameLine();
@@ -411,7 +415,7 @@ void DebugSystem::update() {
 				ImGui::Text("Coordinates");
 			}
 
-			xCoordinates = std::max(coordinateMinLimitsX, strtof(xCoordinatesBuffer,nullptr));
+			xCoordinates = std::max(coordinateMinLimitsX, strtof(xCoordinatesBuffer, nullptr));
 			yCoordinates = std::max(coordinateMinLimitsY, strtof(yCoordinatesBuffer, nullptr));
 
 			JSONSerializer serializer;
@@ -423,17 +427,17 @@ void DebugSystem::update() {
 			std::string entityId;
 
 			nlohmann::json jsonObj = serializer.GetJSONObject();
-
+			//Entity creation button functionalities
 			if (ImGui::Button("Create Entity")) {
 
 				for (int i = 0; i < numEntitiesToCreate; i++) {
-			
+
 					entityObj = ecsCoordinator.createEntity();
 
 					entityId = sigBuffer;
 
 					TransformComponent transform{};
-					
+
 					if (!strcmp(items[currentItem], "TextBox")) {
 						FontComponent fontComp{};
 						fontComp.text = textBuffer;
@@ -449,10 +453,10 @@ void DebugSystem::update() {
 
 					}
 					else {
-					transform.position.SetX(xCoordinates);
-					transform.position.SetY(yCoordinates);
-					transform.scale.SetX(defaultObjScaleX);
-					transform.scale.SetY(defaultObjScaleX);
+						transform.position.SetX(xCoordinates);
+						transform.position.SetY(yCoordinates);
+						transform.scale.SetX(defaultObjScaleX);
+						transform.scale.SetY(defaultObjScaleX);
 					}
 
 					ecsCoordinator.addComponent(entityObj, transform);
@@ -461,13 +465,14 @@ void DebugSystem::update() {
 					newEntities.push_back(entityObj);
 					ecsCoordinator.setEntityID(entityObj, entityId);
 
-			
+
 				}
 
-				
+
 			}
 			ImGui::SameLine();
 
+			//For creating entity with random position
 			if (ImGui::Button("Random")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
 					entityObj = ecsCoordinator.createEntity();
@@ -495,7 +500,7 @@ void DebugSystem::update() {
 						transform.scale.SetX(defaultObjScaleX);
 						transform.scale.SetY(defaultObjScaleY);
 					}
-					
+
 					ecsCoordinator.addComponent(entityObj, transform);
 
 					ObjectCreationCondition(items, currentItem, serializer, entityObj, entityId);
@@ -504,187 +509,190 @@ void DebugSystem::update() {
 				}
 			}
 
+			//Button to destroy all existing entity
 			if (ImGui::Button("Remove All Entity")) {
 				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 					if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {}
 					else
-					ecsCoordinator.destroyEntity(entity);
+						ecsCoordinator.destroyEntity(entity);
 				}
 			}
 
 
 			ImGui::NewLine();
 		}
-		if (ImGui::CollapsingHeader("Hierachy List")) {
+		//Hierarchy List formating
+		if (ImGui::CollapsingHeader("Hierarchy List")) {
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {
-				}else
-				if (ecsCoordinator.hasComponent<FontComponent>(entity)) {
-					auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
-					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					auto signature = ecsCoordinator.getEntityID(entity);
-
-					float posXSlide = transform.position.GetX();
-					float posYSlide = transform.position.GetY();
-					
-					float fontScaleSlide = fontComp.textScale;
-					float textBoxSlide = fontComp.textBoxWidth;
-					float fontColorR = fontComp.color.GetX();
-					float fontColorG = fontComp.color.GetY();
-					float fontColorB = fontComp.color.GetZ();
-
-					Console::GetLog() << "string: " << fontComp.text << std::endl;
-
-					ImGui::PushID(entity);
-					if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-
-						ImGui::SetNextItemWidth(objAttributeSliderMidLength);
-						if (ImGui::SliderFloat("Red", &fontColorR, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
-							fontComp.color.SetX(fontColorR);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMidLength);
-						if (ImGui::SliderFloat("Green", &fontColorG, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
-							fontComp.color.SetY(fontColorG);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMidLength);
-						if (ImGui::SliderFloat("Blue", &fontColorB, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
-							fontComp.color.SetZ(fontColorB);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
-							transform.position.SetX(posXSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
-							transform.position.SetY(posYSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Scale", &fontScaleSlide, fontScaleMinLimit, fontScaleMaxLimit, "%.1f")) {
-							fontComp.textScale = fontScaleSlide;
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Text Box", &textBoxSlide, textBoxMinLimit, textBoxMaxLimit, "%.1f")) {
-							fontComp.textBoxWidth = textBoxSlide;
-						}
-						if (ImGui::Button("Remove")) {
-							ecsCoordinator.destroyEntity(entity);
-						}
-						ImGui::TreePop();
-
-					}
-					ImGui::PopID();
-					ImGui::Separator();
-					
 				}
-				else if (ecsCoordinator.getEntityID(entity) == "player") {
-					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					auto signature = ecsCoordinator.getEntityID(entity);
+				else
+					if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
+						auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
+						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						auto signature = ecsCoordinator.getEntityID(entity);
 
-					float posXSlide = transform.position.GetX();
-					float posYSlide = transform.position.GetY();
+						float posXSlide = transform.position.GetX();
+						float posYSlide = transform.position.GetY();
 
-					float orientationSlide = transform.orientation.GetX();
+						float fontScaleSlide = fontComp.textScale;
+						float textBoxSlide = fontComp.textBoxWidth;
+						float fontColorR = fontComp.color.GetX();
+						float fontColorG = fontComp.color.GetY();
+						float fontColorB = fontComp.color.GetZ();
 
-					float playerScaleSlide = transform.scale.GetX();
+						ImGui::PushID(entity);
+						if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
 
-					ImGui::PushID(entity);
+							ImGui::SetNextItemWidth(objAttributeSliderMidLength);
+							if (ImGui::SliderFloat("Red", &fontColorR, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
+								fontComp.color.SetX(fontColorR);
+							}
 
-					if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
+							ImGui::SetNextItemWidth(objAttributeSliderMidLength);
+							if (ImGui::SliderFloat("Green", &fontColorG, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
+								fontComp.color.SetY(fontColorG);
+							}
 
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
-							transform.position.SetX(posXSlide);
+							ImGui::SetNextItemWidth(objAttributeSliderMidLength);
+							if (ImGui::SliderFloat("Blue", &fontColorB, fontColorMinLimit, fontColorMaxLimit, "%.1f")) {
+								fontComp.color.SetZ(fontColorB);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
+								transform.position.SetX(posXSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
+								transform.position.SetY(posYSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Scale", &fontScaleSlide, fontScaleMinLimit, fontScaleMaxLimit, "%.1f")) {
+								fontComp.textScale = fontScaleSlide;
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Text Box", &textBoxSlide, textBoxMinLimit, textBoxMaxLimit, "%.1f")) {
+								fontComp.textBoxWidth = textBoxSlide;
+							}
+							if (ImGui::Button("Remove")) {
+								ecsCoordinator.destroyEntity(entity);
+							}
+							ImGui::TreePop();
+
 						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
-							transform.position.SetY(posYSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f")) {
-							transform.orientation.SetX(orientationSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Size", &playerScaleSlide, objSizeXMin, objSizeXMax, "%.1f")) {
-							transform.scale.SetX(playerScaleSlide);
-							transform.scale.SetY(playerScaleSlide);
-						}
-
-						if (ImGui::Button("Remove")) {
-							ecsCoordinator.destroyEntity(entity);
-						}
-
-						ImGui::TreePop();
+						ImGui::PopID();
+						ImGui::Separator();
 
 					}
+					else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
+						&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
+						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						auto signature = ecsCoordinator.getEntityID(entity);
 
-					ImGui::PopID();
-					ImGui::Separator();
-				}else
-				{
-					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					auto signature = ecsCoordinator.getEntityID(entity);
+						float posXSlide = transform.position.GetX();
+						float posYSlide = transform.position.GetY();
 
-					float posXSlide = transform.position.GetX();
-					float posYSlide = transform.position.GetY();
+						float orientationSlide = transform.orientation.GetX();
 
-					float orientationSlide = transform.orientation.GetX();
+						float playerScaleSlide = transform.scale.GetX();
 
-					objWidthSlide = transform.scale.GetX();
-					objHeightSlide = transform.scale.GetY();
+						ImGui::PushID(entity);
 
-					ImGui::PushID(entity);
+						if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
 
-					if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
+								transform.position.SetX(posXSlide);
+							}
 
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
-							transform.position.SetX(posXSlide);
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
+								transform.position.SetY(posYSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f")) {
+								transform.orientation.SetX(orientationSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Size", &playerScaleSlide, objSizeXMin, objSizeXMax, "%.1f")) {
+								transform.scale.SetX(playerScaleSlide);
+								transform.scale.SetY(playerScaleSlide);
+							}
+
+							if (ImGui::Button("Remove")) {
+								ecsCoordinator.destroyEntity(entity);
+							}
+
+							ImGui::TreePop();
+
 						}
 
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
-							transform.position.SetY(posYSlide);
+						ImGui::PopID();
+						ImGui::Separator();
+					}
+					else
+					{ //Remaining object's data modification features
+						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						auto signature = ecsCoordinator.getEntityID(entity);
+
+						float posXSlide = transform.position.GetX();
+						float posYSlide = transform.position.GetY();
+
+						float orientationSlide = transform.orientation.GetX();
+
+						objWidthSlide = transform.scale.GetX();
+						objHeightSlide = transform.scale.GetY();
+
+						ImGui::PushID(entity);
+
+						if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
+								transform.position.SetX(posXSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
+								transform.position.SetY(posYSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f")) {
+								transform.orientation.SetX(orientationSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Width", &objWidthSlide, objSizeXMin, objSizeXMax, "%.1f")) {
+								transform.scale.SetX(objWidthSlide);
+							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+							if (ImGui::SliderFloat("Height", &objHeightSlide, objSizeYMin, objSizeYMax, "%.1f")) {
+								transform.scale.SetY(objHeightSlide);
+							}
+
+							if (ImGui::Button("Remove")) {
+								ecsCoordinator.destroyEntity(entity);
+							}
+
+							ImGui::TreePop();
+
 						}
 
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f")) {
-							transform.orientation.SetX(orientationSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Width", &objWidthSlide, objSizeXMin, objSizeXMax, "%.1f")) {
-							transform.scale.SetX(objWidthSlide);
-						}
-
-						ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
-						if (ImGui::SliderFloat("Height", &objHeightSlide, objSizeYMin, objSizeYMax, "%.1f")) {
-							transform.scale.SetY(objHeightSlide);
-						}
-
-						if (ImGui::Button("Remove")) {
-							ecsCoordinator.destroyEntity(entity);
-						}
-
-						ImGui::TreePop();
+						ImGui::PopID();
+						ImGui::Separator();
 
 					}
-
-					ImGui::PopID();
-					ImGui::Separator();
-
-				}
 			}
 
-			if (ImGui::Button("Save")) 
+			if (ImGui::Button("Save")) //Generate 1 new json file and save existing object data in it
 			{
 				if (saveCount < saveLimit) {
 					std::string saveFile = GenerateSaveJSONFile(saveCount);
@@ -746,9 +754,9 @@ void DebugSystem::update() {
 			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-			// Create popup modal window
+			// Create popup modal window for loading of save files
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-	
+
 				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 				if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
@@ -763,7 +771,7 @@ void DebugSystem::update() {
 					char label[32];
 					sprintf_s(label, "Save File %d", i);
 					int saveNum = saveCount;
-					
+
 					if (ImGui::Button(label, ImVec2(fileWindowWidth, fileWindowHeight))) {
 
 						if (saveNum == saveLimit) {
@@ -777,7 +785,7 @@ void DebugSystem::update() {
 
 					ImGui::Spacing();  // Add space between buttons
 				}
-				
+
 				ImGui::EndChild();
 
 				// Close button
@@ -792,11 +800,8 @@ void DebugSystem::update() {
 
 		ImGui::End();
 
-		ImGuiWindowFlags viewportWindowFlags =
-			ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoScrollWithMouse;
-
-		ImGui::Begin("Game Viewport", nullptr, viewportWindowFlags);
+		ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
 
@@ -817,13 +822,13 @@ void DebugSystem::update() {
 
 	}
 }
-	
+//Clean up and shut down ImGui resources	
 void DebugSystem::cleanup() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
-
+//For performance viewer
 SystemType DebugSystem::getSystem() {
 	return DebugSystemType;
 }
@@ -895,7 +900,7 @@ void DebugSystem::UpdateSystemTimes() {
 		lastUpdateTime = currentTime;
 	}
 }
-
+//Add new entity's data to JSON save file
 nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
 	nlohmann::json entityJSON;
@@ -943,25 +948,26 @@ nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, st
 	if (ecs.hasComponent<PhysicsComponent>(entity))
 	{
 		PhysicsComponent& rb = ecs.getComponent<PhysicsComponent>(entity);
-
-		entityJSON["PhysicsComponent"]["mass"] = rb.mass;
-		entityJSON["PhysicsComponent"]["gravityScale"]["x"] = rb.gravityScale.GetX();
-		entityJSON["PhysicsComponent"]["gravityScale"]["y"] = rb.gravityScale.GetY();
-		entityJSON["PhysicsComponent"]["jump"] = rb.jump;
-		entityJSON["PhysicsComponent"]["dampening"] = rb.dampening;
 		entityJSON["PhysicsComponent"]["velocity"]["x"] = rb.velocity.GetX();
 		entityJSON["PhysicsComponent"]["velocity"]["y"] = rb.velocity.GetY();
+		entityJSON["PhysicsComponent"]["gravityScale"]["x"] = rb.gravityScale.GetX();
+		entityJSON["PhysicsComponent"]["gravityScale"]["y"] = rb.gravityScale.GetY();
 		entityJSON["PhysicsComponent"]["acceleration"]["x"] = rb.acceleration.GetX();
 		entityJSON["PhysicsComponent"]["acceleration"]["y"] = rb.acceleration.GetY();
-		entityJSON["PhysicsComponent"]["force"]["magnitude"] = rb.force.GetMagnitude();
-		entityJSON["PhysicsComponent"]["force"]["direction"]["x"] = rb.force.GetDirection().GetX();
-		entityJSON["PhysicsComponent"]["force"]["direction"]["y"] = rb.force.GetDirection().GetY();
 		entityJSON["PhysicsComponent"]["accumulatedForce"]["x"] = rb.accumulatedForce.GetX();
 		entityJSON["PhysicsComponent"]["accumulatedForce"]["y"] = rb.accumulatedForce.GetY();
+
+		entityJSON["PhysicsComponent"]["jump"] = rb.jump;
+		entityJSON["PhysicsComponent"]["dampening"] = rb.dampening;
+		entityJSON["PhysicsComponent"]["mass"] = rb.mass;
 		entityJSON["PhysicsComponent"]["maxVelocity"] = rb.maxVelocity;
 		entityJSON["PhysicsComponent"]["maxAccumulatedForce"] = rb.maxAccumulatedForce;
 		entityJSON["PhysicsComponent"]["prevForce"] = rb.prevForce;
 		entityJSON["PhysicsComponent"]["targetForce"] = rb.targetForce;
+
+		entityJSON["PhysicsComponent"]["force"]["direction"]["x"] = rb.force.GetDirection().GetX();
+		entityJSON["PhysicsComponent"]["force"]["direction"]["y"] = rb.force.GetDirection().GetY();
+		entityJSON["PhysicsComponent"]["force"]["magnitude"] = rb.force.GetMagnitude();
 
 	}
 
@@ -1001,7 +1007,7 @@ nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, st
 
 	return entityJSON;
 }
-
+//Remove an entity from JSON save file
 void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
 {
 	nlohmann::json jsonData;
@@ -1019,18 +1025,18 @@ void DebugSystem::RemoveEntityFromJSON(std::string const& entityId)
 
 		entitiesArrayObj.erase(std::remove_if(entitiesArrayObj.begin(), entitiesArrayObj.end(), [&entityId](nlohmann::json const& entity) {
 			return entity.contains("id") && entity["id"] == entityId;
-		}), entitiesArrayObj.end());
+			}), entitiesArrayObj.end());
 	}
-	
+
 	std::ofstream outFile(FilePathManager::GetEntitiesJSONPath());
-	
+
 	if (outFile.is_open())
 	{
 		outFile << jsonData.dump(2);
 		outFile.close();
 	}
 }
-
+//Load debug system configuration from JSON
 void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -1083,7 +1089,7 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadInt(currentItem, "Debug.currentItem");
 	serializer.ReadInt(minEntitesToCreate, "Debug.minEntitesToCreate");
 	serializer.ReadInt(numEntitiesToCreate, "Debug.numEntitiesToCreate");
-	serializer.ReadCharArray(numBuffer,MAXBUFFERSIZE, "Debug.numBuffer");
+	serializer.ReadCharArray(numBuffer, MAXBUFFERSIZE, "Debug.numBuffer");
 	serializer.ReadCharArray(textBuffer, MAXTEXTSIZE, "Debug.textBuffer");
 	serializer.ReadCharArray(textScaleBuffer, MAXBUFFERSIZE, "Debug.textScaleBuffer");
 	serializer.ReadCharArray(xCoordinatesBuffer, MAXBUFFERSIZE, "Debug.xCoordinatesBuffer");
@@ -1133,7 +1139,7 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(textBoxMaxLimit, "Debug.textBoxMaxLimit");
 	serializer.ReadFloat(textBoxMinLimit, "Debug.textBoxMinLimit");
 }
-
+//Save debug saveCount data back into same JSON file
 void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -1147,9 +1153,9 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
 	serializer.WriteInt(saveCount, "Debug.saveCount", filename);
-	
-}
 
+}
+//Generates a new JSON save file
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
@@ -1184,7 +1190,7 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 
 	return jsonPath;
 }
-
+//Get current save count
 int DebugSystem::GetSaveCount()
 {
 	return saveCount;
@@ -1194,12 +1200,12 @@ int DebugSystem::GetSaveCount()
 static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 	//Check key code within 0 and 512 due to old ImGui key management (if found means its a legacy key)
 	return key >= 0 && key < 512
-		&& ImGui::GetIO().KeyMap[key] != -1; 
+		&& ImGui::GetIO().KeyMap[key] != -1;
 }
 
-
+//Creates appropriate components based on object type
 void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
-	if (!strcmp(items[itemIndex],"Enemy")) {
+	if (!strcmp(items[itemIndex], "Enemy")) {
 
 		EnemyComponent enemy{};
 		serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
@@ -1242,9 +1248,6 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
 		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
 
-		MovementComponent movement{};
-		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
-
 		AnimationComponent animation{};
 		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
@@ -1271,11 +1274,9 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		forces.force.SetMagnitude(magnitude);
 
 		ecsCoordinator.addComponent(entityObj, aabb);
-		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, forces);
 
-		std::cout << ecsCoordinator.getComponent<PhysicsComponent>(entityObj).dampening<< "," << std::endl;
 	}
 	else if (!strcmp(items[itemIndex], "Platform")) {
 
@@ -1293,5 +1294,3 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 
 	}
 }
-
-

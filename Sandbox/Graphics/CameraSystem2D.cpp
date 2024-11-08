@@ -21,18 +21,19 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 
 #define M_PI   3.14159265358979323846264338327950288f
+// Constructor implementation
 CameraSystem2D::CameraSystem2D()
 	: m_CameraPosition(0.0f, 0.0f), m_CameraRotation(0.0f), m_CameraZoom(1.0f), ecsCoordinator(ecsCoordinator), m_LockedComponent(nullptr), m_ViewMatrix(), m_ProjectionMatrix()
 {
     // Constructor implementation
 }
-
+// Destructor implementation
 CameraSystem2D::~CameraSystem2D()
 {
     // Destructor implementation
 	cleanup();
 }
-
+// Initialise function implementation
 void CameraSystem2D::initialise()
 {
     // Set the initial view and projection matrices
@@ -43,7 +44,7 @@ void CameraSystem2D::initialise()
     m_CameraRotation = 0.0f;
     m_CameraZoom = 1.0f;
 }
-
+// Update function implementation
 void CameraSystem2D::update()
 {
     myMath::Matrix3x3 translationMatrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
@@ -52,14 +53,6 @@ void CameraSystem2D::update()
     {
 		myMath::Vector2D entityPosition = { m_LockedComponent->position.GetX(), m_LockedComponent->position.GetY() };
         setCameraPosition(entityPosition);
-        //if (GLFWFunctions::keyState[Key::Z])
-        //    m_CameraZoom += 0.1f * GLFWFunctions::delta_time;
-        //if (GLFWFunctions::keyState[Key::X])
-        //    m_CameraZoom -= 0.1f * GLFWFunctions::delta_time;
-        //// Update the view matrix based on the camera's position, rotation, and zoom
-       
-        //translationMatrix.SetMatrixValue(2, 0, -m_CameraPosition.GetX());
-        //translationMatrix.SetMatrixValue(2, 1, -m_CameraPosition.GetY());
     }
     else {
 		// Currently fixed camera position
@@ -71,7 +64,7 @@ void CameraSystem2D::update()
     myMath::Matrix3x3 rotationMatrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
     float cosTheta = 0.0f;
     float sinTheta = 0.0f;
-    //std::cout << "m_LockedComponent->orientation.GetX(): " << m_LockedComponent->orientation.GetX() << std::endl;
+    
     if (m_LockedComponent && GLFWFunctions::allow_camera_movement == false) {
         cosTheta = cos(-m_LockedComponent->orientation.GetX() * M_PI / 180.0f);
         sinTheta = sin(-m_LockedComponent->orientation.GetX() * M_PI / 180.0f);
@@ -80,90 +73,84 @@ void CameraSystem2D::update()
 		cosTheta = cos(-m_CameraRotation);
 		sinTheta = sin(-m_CameraRotation);
 	}
-    
-    //rotationMatrix[0][0] = cosTheta;
-    //rotationMatrix[0][1] = sinTheta;
-    //rotationMatrix[1][0] = -sinTheta;
-    //rotationMatrix[1][1] = cosTheta;
+
     rotationMatrix.SetMatrixValue(0, 0, cosTheta);
     rotationMatrix.SetMatrixValue(0, 1, sinTheta);
     rotationMatrix.SetMatrixValue(1, 0, -sinTheta);
     rotationMatrix.SetMatrixValue(1, 1, cosTheta);
 
     myMath::Matrix3x3 scaleMatrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-    //scaleMatrix[0][0] = m_CameraZoom;
-    //scaleMatrix[1][1] = m_CameraZoom;
     scaleMatrix.SetMatrixValue(0, 0, m_CameraZoom);
     scaleMatrix.SetMatrixValue(1, 1, m_CameraZoom);
 
     m_ViewMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
-
+// Cleanup function implementation
 void CameraSystem2D::cleanup()
 {
     // Cleanup code
 }
-
+// GetSystem function implementation
 SystemType CameraSystem2D::getSystem()
 {
     return CameraType; // Assuming SystemType has a Camera enum value
 }
-
+// SetViewMatrix function implementation
 void CameraSystem2D::setViewMatrix(const myMath::Matrix3x3& viewMatrix)
 {
     m_ViewMatrix = viewMatrix;
 }
-
+// GetViewMatrix function implementation
 myMath::Matrix3x3 CameraSystem2D::getViewMatrix() const
 {
     return m_ViewMatrix;
 }
-
+// SetProjectionMatrix function implementation
 void CameraSystem2D::setProjectionMatrix(const myMath::Matrix3x3& projectionMatrix)
 {
     m_ProjectionMatrix = projectionMatrix;
 }
-
+// GetProjectionMatrix function implementation
 myMath::Matrix3x3 CameraSystem2D::getProjectionMatrix() const
 {
     return m_ProjectionMatrix;
 }
-
+// SetCameraPosition function implementation
 void CameraSystem2D::setCameraPosition(const myMath::Vector2D& position)
 {
     m_CameraPosition = position;
 }
-
+// GetCameraPosition function implementation
 myMath::Vector2D CameraSystem2D::getCameraPosition() const
 {
     return m_CameraPosition;
 }
-
+// SetCameraRotation function implementation
 void CameraSystem2D::setCameraRotation(const GLfloat& rotation)
 {
     m_CameraRotation = rotation;
 }
-
+// GetCameraRotation function implementation
 GLfloat CameraSystem2D::getCameraRotation() const
 {
     return m_CameraRotation;
 }
-
+// SetCameraZoom function implementation
 void CameraSystem2D::setCameraZoom(const GLfloat& zoom)
 {
     m_CameraZoom = zoom;
 }
-
+// GetCameraZoom function implementation
 GLfloat CameraSystem2D::getCameraZoom() const
 {
     return m_CameraZoom;
 }
-
+// LockToComponent function implementation
 void CameraSystem2D::lockToComponent(const TransformComponent& component)
 {
     m_LockedComponent = &component;
 }
-
+// CheckLockedComponent function implementation
 bool CameraSystem2D::checkLockedComponent() const
 {
     return (m_LockedComponent ? true : false);
