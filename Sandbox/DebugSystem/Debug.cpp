@@ -151,7 +151,8 @@ void DebugSystem::initialise() {
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multiple Viewport
-	font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), fontSize);  // Load text font file
+	//font = io->Fonts->AddFontFromFileTTF(FilePathManager::GetIMGUIFontPath().c_str(), fontSize);  // Load text font file
+	font = io->Fonts->AddFontFromFileTTF(assetsManager.GetFontPath("Mono").c_str(), fontSize);  // Load text font file
 
 	ImGui::StyleColorsDark();  // Set theme as dark
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -1199,19 +1200,31 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		MovementComponent movement{};
 		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
 
-		RigidBodyComponent rigidBody{};
-		serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
-		serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
-		serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
-		serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
-		serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
-		serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
-		serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
-		serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+		PhysicsComponent forces{};
+
+		myMath::Vector2D direction = forces.force.GetDirection();
+		float magnitude = forces.force.GetMagnitude();
+
+		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
+		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
+		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
+		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
+		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
+		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
+		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
+		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
+		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
+		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
+		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
+
+		forces.force.SetDirection(direction);
+		forces.force.SetMagnitude(magnitude);
 
 		ecsCoordinator.addComponent(entityObj, enemy);
 		ecsCoordinator.addComponent(entityObj, movement);
-		ecsCoordinator.addComponent(entityObj, rigidBody);
+		ecsCoordinator.addComponent(entityObj, forces);
 
 	}
 	else if (!strcmp(items[itemIndex], "Player")) {
@@ -1228,22 +1241,34 @@ void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JS
 		AnimationComponent animation{};
 		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
-		RigidBodyComponent rigidBody{};
-		serializer.ReadObject(rigidBody.mass, entityId, "entities.rigidBody.mass");
-		serializer.ReadObject(rigidBody.gravityScale, entityId, "entities.rigidBody.gravityScale");
-		serializer.ReadObject(rigidBody.jump, entityId, "entities.rigidBody.jump");
-		serializer.ReadObject(rigidBody.dampening, entityId, "entities.rigidBody.dampening");
-		serializer.ReadObject(rigidBody.velocity, entityId, "entities.rigidBody.velocity");
-		serializer.ReadObject(rigidBody.acceleration, entityId, "entities.rigidBody.acceleration");
-		serializer.ReadObject(rigidBody.force, entityId, "entities.rigidBody.force");
-		serializer.ReadObject(rigidBody.accumulatedForce, entityId, "entities.rigidBody.accumulatedForce");
+		PhysicsComponent forces{};
+
+		myMath::Vector2D direction = forces.force.GetDirection();
+		float magnitude = forces.force.GetMagnitude();
+
+		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
+		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
+		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
+		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
+		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
+		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
+		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
+		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
+		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
+		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
+		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
+		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
+
+		forces.force.SetDirection(direction);
+		forces.force.SetMagnitude(magnitude);
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, animation);
-		ecsCoordinator.addComponent(entityObj, rigidBody);
+		ecsCoordinator.addComponent(entityObj, forces);
 
-		std::cout << ecsCoordinator.getComponent<RigidBodyComponent>(entityObj).dampening<< "," << std::endl;
+		std::cout << ecsCoordinator.getComponent<PhysicsComponent>(entityObj).dampening<< "," << std::endl;
 	}
 	else if (!strcmp(items[itemIndex], "Platform")) {
 

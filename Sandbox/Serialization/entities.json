@@ -100,14 +100,14 @@
           ]
         ],
         "scale": {
-          "x": 500.0,
+          "x": 400.0,
           "y": 50.0
         }
       },
       "aabb": {
         "bottom": -175.0,
-        "left": -250.0,
-        "right": 250.0,
+        "left": -200.0,
+        "right": 200.0,
         "top": -125.0
       },
       "closestPlatform": {
@@ -230,35 +230,42 @@
         "right": 350.0,
         "top": 250.0
       },
-      "rigidBody": {
+      "forces": {
         "mass": 1.0,
         "gravityScale": {
           "x": 9.8,
           "y": 9.8
-          },
-          "jump": 15.0,
-          "dampening": 0.9,
-          "velocity": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "force": {
-            "x": 0.05,
-            "y": 0.05
-          },
-          "accumulatedForce": {
-            "x": 0.0,
-            "y": 0.0
-          }
         },
-      "animation": {
-        "isAnimated": true
-      }
-    },
+        "jump": 0.0,
+        "dampening": 0.9,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "maxVelocity": 200.0,
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "force": {
+          "direction": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "magnitude": 0.05
+        },
+        "accumulatedForce": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "maxAccumulatedForce": 40.0,
+        "prevForce": 0.0,
+        "targetForce": 0.0
+        },
+        "animation": {
+          "isAnimated": true
+        }
+      },
     {
       "id": "enemy",
       "transform": {
@@ -315,27 +322,37 @@
         "top": 250.0,
         "bottom": 150.0
       },
-      "rigidBody": {
+      "forces": {
         "mass": 1.0,
-        "gravityScale": -0.98,
+        "gravityScale": {
+          "x": -0.98,
+          "y": -0.98
+        },
         "jump": 0.8,
         "dampening": 0.9,
         "velocity": {
           "x": 0.0,
           "y": 0.0
         },
+        "maxVelocity": 0.0,
         "acceleration": {
           "x": 0.0,
           "y": 0.0
         },
         "force": {
-          "x": 0.05,
-          "y": 0.05
+          "direction": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "magnitude": 0.05
         },
         "accumulatedForce": {
           "x": 0.0,
           "y": 0.0
-        }
+        },
+        "maxAccumulatedForce": 0.0,
+        "prevForce": 0.0,
+        "targetForce": 0.0
       },
       "enemy": {
         "isEnemy": true

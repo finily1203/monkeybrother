@@ -18,7 +18,7 @@ public:
 	void update(float dt) override;
 
 	void ApplyForce(Entity entity, const myMath::Vector2D& appliedForce);
-
+	
 	std::string getSystemECS() override;
 
 private:

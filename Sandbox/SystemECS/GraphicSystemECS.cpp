@@ -20,7 +20,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "MovementComponent.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
-#include "RigidBodyComponent.h"
+#include "PhysicsComponent.h"
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
@@ -52,7 +52,7 @@ void GraphicSystemECS::update(float dt) {
         Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
         //if (GLFWFunctions::testMode == 0) {
-        bool hasMovement = ecsCoordinator.hasComponent<RigidBodyComponent>(entity);
+        bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
         bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 		if (ecsCoordinator.getEntityID(entity) == "background") {
             transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);

@@ -366,6 +366,7 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
     if (fontLoaded) {
         //Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
         m_Fonts[fontName] = std::move(tempCharacters);
+        m_FontPaths[fontName] = fontPath;
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
@@ -383,6 +384,17 @@ std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) co
     else {
 		std::cerr << "Font not found!" << std::endl;
 		return std::map<char, Character>();
+	}
+}
+
+std::string AssetsManager::GetFontPath(const std::string& fontName) const {
+    auto iterator = m_FontPaths.find(fontName);
+    if (iterator != m_FontPaths.end()) {
+		return iterator->second;
+	}
+    else {
+		std::cerr << "Font not found!" << std::endl;
+		return "";
 	}
 }
 

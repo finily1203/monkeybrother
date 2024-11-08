@@ -39,7 +39,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
-#include "RigidBodyComponent.h"
+#include "PhysicsComponent.h"
 #include "FontComponent.h"
 
 #include <iostream>
@@ -117,6 +117,9 @@ public:
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 	// update the entity's data
 	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
+
+	template <typename T>
+	std::shared_ptr<T> getSpecificSystem();
 
 
 	//System Manager Functions
@@ -219,4 +222,10 @@ template <typename T>
 bool ECSCoordinator::hasComponent(Entity entity)
 {
 	return componentManager->hasComponent<T>(entity);
+}
+
+template <typename T>
+std::shared_ptr<T> ECSCoordinator::getSpecificSystem()
+{
+	return systemManager->getSpecificSystem<T>();
 }

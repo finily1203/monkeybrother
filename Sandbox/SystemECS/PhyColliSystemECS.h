@@ -13,27 +13,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "EngineDefinitions.h"
 #include "ECSCoordinator.h"
 #include "vector2D.h"
-
-enum CollisionSide {
-    NONE,
-    TOP,
-    BOTTOM,
-    LEFT,
-    RIGHT,
-    LEFTEDGE,
-    RIGHTEDGE
-};
+#include "Force.h"
 
 class CollisionSystemECS
 {
 public:
     CollisionSystemECS() = default;
-
-    struct AABB
-    {
-        myMath::Vector2D min;
-        myMath::Vector2D max;
-    };
 
     struct OBB {
         myMath::Vector2D center;      // Center position
@@ -46,43 +31,20 @@ public:
 
     // Project point onto axis
     float projectPoint(const myMath::Vector2D& point, const myMath::Vector2D& axis);
+    
     // Get projection interval of OBB onto axis
     void projectOBB(const OBB& obb, const myMath::Vector2D& axis, float& min, float& max);
 
     // Get OBB vertices
     void getOBBVertices(const OBB& obb, myMath::Vector2D vertices[4]);
+    
     // Circle vs OBB collision detection using SAT
     bool checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration);
+    
     //bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2);
     bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, myMath::Vector2D& normal, float& penetration);
 
-    // AABB Collision detection
-    bool CollisionIntersection_RectRect(const AABB& platform,
-        const myMath::Vector2D& platformVel,
-        const AABB& player,
-        const myMath::Vector2D& playerVel,
-        float& firstTimeOfCollision);
-
-    // AABB slope collision detection
-    //bool AABBSlopeCollision(Entity platform, Entity player, myMath::Vector2D velocity);
-
-    // Getters and Setters
-    myMath::Vector2D GetCollisionPoint() const { return collisionPoint; }
-    void SetCollisionPoint(myMath::Vector2D newCollisionPoint) { collisionPoint = newCollisionPoint; }
-
-    // PROTOTYPING: Circle vs Rectangle collision detection
-    //CollisionSide circleRectCollision(float circleX, float circleY, float circleRadius, Entity platform);
-
-private:
-    myMath::Vector2D collisionPoint;
-
-};
-
-class Force {
-public:
-    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
-    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxSpeed);
-    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
+    void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
 };
 
 class PhysicsSystemECS : public System
@@ -96,31 +58,21 @@ public:
 
     std::string getSystemECS() override;
 
-    // Getters and Setters
     bool GetAlrJumped() const { return alrJumped; }
-
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
-    void ApplyForce(Entity player, const myMath::Vector2D& appliedForce);
-    void ApplyGravity(Entity entity, float dt);
-    Entity FindClosestPlatform(Entity player);
-    myMath::Vector2D directionalVector(float angle);
-    myMath::Vector2D clampVelocity(myMath::Vector2D velocity, float maxVelocity);
-    float ResultantForce(myMath::Vector2D direction, myMath::Vector2D normal, float maxAccForce);
 
+    Entity FindClosestPlatform(Entity player);
     void HandleCircleOBBCollision(Entity player, Entity platform);
 
-    //// Handling slope collision for the player
-    //void HandleSlopeCollision(Entity closestPlatform, Entity player);
-
-    //// Handling AABB collision for the player
-    //void HandleAABBCollision(Entity player, Entity closestPlatform);
-
-    // Player input handling for movement (left: 'A', right: 'D')
-    void HandlePlayerInput(Entity player);
+    myMath::Vector2D directionalVector(float angle);
+    void clampVelocity(Entity player, float maxVelocity);
 
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
 
+    ForceManager getForceManager() const { return forceManager; }
+
+    bool getIsColliding() const { return isColliding; } 
 
 private:
     static float friction;
@@ -128,9 +80,10 @@ private:
     static bool alrJumped;
     static bool isFalling;
     static bool isSliding;
+    bool isColliding;
     PlayerEventPublisher eventSource;
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
-    Force Force;
+    ForceManager forceManager;
 };

@@ -53,6 +53,9 @@ public:
 	//Change the signature of the entity
 	void entitySigChange(Entity entity, ComponentSig entitySig);
 
+	template <typename T>
+	std::shared_ptr<T> getSpecificSystem();
+
 	void update();
 
 	void cleanup();
@@ -78,4 +81,12 @@ void SystemManager::setSystemSignature(ComponentSig signature) {
 	//checks if system already exists
 	assert(Systems.find(typeName) != Systems.end() && "System used before registered.");
 	systemSignatures.insert({ typeName, signature });
+}
+
+template <typename T>
+std::shared_ptr<T> SystemManager::getSpecificSystem() {
+	std::string typeName = typeid(T).name();
+	//checks if system exists
+	assert(Systems.find(typeName) != Systems.end() && "System has not been registered.");
+	return std::static_pointer_cast<T>(Systems[typeName]);
 }
