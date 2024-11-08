@@ -264,7 +264,8 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
-	(void)window;
+    //On relase it doesn't use since we use cursorPositionEvent for debugging
+    (void)window; (void)xpos; (void)ypos;
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
 #endif
@@ -272,7 +273,9 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-	(void)window;
+	//On relase it doesn't use since we use ScrollEvent for debugging
+    (void)window; (void)xoffset; (void)yoffset;
+    
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
