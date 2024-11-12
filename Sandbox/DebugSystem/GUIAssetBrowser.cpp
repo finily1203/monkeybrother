@@ -79,7 +79,7 @@ void AssetBrowser::Update() {
 				ImGui::BeginGroup();
 				//Experiment 
 				if (ImGui::ImageButton(asset.c_str(), (void*)assetsManager.GetTexture("fileIcon"), {thumbnailSize, thumbnailSize}, {0, 1}, {1, 0})) {
-					std::cout << "Play audio" << std::endl;
+					audioSystem.playSoundAssetBrowser(asset.c_str());
 				}
 				ImGui::Text(asset.c_str());
 				ImGui::EndGroup();

@@ -31,7 +31,7 @@ enum SystemType { //For perfomance viewer
 	FontType
 };
 
-
+extern AudioSystem audioSystem;
 extern AssetsManager assetsManager;
 extern ECSCoordinator ecsCoordinator;
 extern GraphicsSystem graphicsSystem;

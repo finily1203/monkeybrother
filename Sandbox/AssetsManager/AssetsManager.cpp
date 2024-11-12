@@ -262,9 +262,9 @@ void AssetsManager::LoadAudioAssets() {
     }
 }
 
-void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* audioSystem) {
+void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* auSystem) {
     FMOD::Sound* audioSong = nullptr;
-    FMOD_RESULT result = audioSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
+    FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
     if (result != FMOD_OK) {
         std::cout << "FMOD error! (" << result << ") " << std::endl;
         return;
