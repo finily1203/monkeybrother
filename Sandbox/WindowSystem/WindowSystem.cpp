@@ -24,7 +24,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 
 //GraphicsSystem graphicsSystem;
-//GraphicsSystem::GLObject gameObject, gameObject2, background, blackBox;
+//GraphicsSystem::GLObject gameObject, gameObject2, 
+// , blackBox;
 //Shader* shader = nullptr;
 //Shader* shader2 = nullptr;
 //std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;

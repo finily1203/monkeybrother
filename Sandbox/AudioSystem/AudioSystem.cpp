@@ -18,7 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : audioChannel(nullptr), soundEffectChannel(nullptr), currSongIndex(0), volume(0.1f) {}
+AudioSystem::AudioSystem() : audioChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr), currSongIndex(0), volume(0.1f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
@@ -45,7 +45,7 @@ void AudioSystem::initialise() {
 
     //loadAudioAssets();
 
-    playSong("background");
+    playSong("bgm");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -60,7 +60,7 @@ void AudioSystem::update() {
 
         // If not playing, replay the sound unless stopAudio is true
         if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
-            playSong("background");
+            playSong("bgm");
         }
 
 
@@ -100,7 +100,7 @@ void AudioSystem::update() {
         if (GLFWFunctions::audioNext) {
             switch (GLFWFunctions::audioNum) {
             case 0:
-                playSong("background");
+                playSong("bgm");
                 break;
             case 1:
                 playSong("bubbles");
@@ -184,14 +184,24 @@ void AudioSystem::playSong(const std::string& songName) {
 }
 
 
-void AudioSystem::playSoundEffect(const std::string& soundName)
+void AudioSystem::playSoundEffect(const std::string& soundEffectName)
 {
-    FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
+    FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
     soundEffectChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &soundEffectChannel);
     if (result != FMOD_OK) {
         std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
     }
+}
+
+void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
+{
+	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
+	assetBrowserChannel = nullptr;
+	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &assetBrowserChannel);
+    if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+	}
 }
 
 
