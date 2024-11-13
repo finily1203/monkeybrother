@@ -18,11 +18,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "fmod.hpp"
 #include "GlobalCoordinator.h"
 
+#include <filesystem>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0) {}
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false) {}
 
 AssetsManager::~AssetsManager()
 {
@@ -102,6 +104,7 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
         stbi_image_free(data);
 
         m_Textures[texName] = texID;
+        m_AssetList.push_back(texName);
         std::cout << "texture loaded successfully!" << std::endl;
     }
     else {
@@ -189,6 +192,7 @@ void AssetsManager::LoadShader(const std::string& name, const std::string& fileP
     }
     else {
         m_Shaders[name] = std::move(shader);
+        m_AssetList.push_back(name);
         std::cout << "Shader loaded successfully!" << std::endl;
     }
 
@@ -258,15 +262,16 @@ void AssetsManager::LoadAudioAssets() {
     }
 }
 
-void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* audioSystem) {
+void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* auSystem) {
     FMOD::Sound* audioSong = nullptr;
-    FMOD_RESULT result = audioSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
+    FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
     if (result != FMOD_OK) {
         std::cout << "FMOD error! (" << result << ") " << std::endl;
         return;
     }
 
     m_Audio[songName] = audioSong;
+    m_AssetList.push_back(songName);
 }
 
 FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
@@ -383,6 +388,7 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
        
         m_Fonts[fontName] = std::move(tempCharacters);
         m_FontPaths[fontName] = fontPath;
+        m_AssetList.push_back(fontName);
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
@@ -438,3 +444,53 @@ void AssetsManager::ClearFonts() {
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
+void AssetsManager::handleDropFile(std::string filePath) {
+    std::filesystem::path path(filePath);
+
+    if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+		LoadTexture(path.filename().string(), path.string());
+        std::cout << "Texture loaded from drag and drop!" << std::endl;
+	}
+    else if (path.extension() == ".shader") {
+        LoadShader(path.filename().string(), path.string());
+        std::cout << "Shader loaded from drag and drop!" << std::endl;
+    }
+    else if (path.extension() == ".ttf") {
+		LoadFont(path.filename().string(), path.string(), 48);
+        std::cout << "Font loaded from drag and drop!" << std::endl;
+	}
+    else if (path.extension() == ".wav" || path.extension() == ".mp3") {
+		LoadAudio(path.filename().string(), path.string(), audSystem);
+        std::cout << "Audio loaded from drag and drop!" << std::endl;
+	}
+    else {
+		std::cerr << "File type not supported!" << std::endl;
+	}
+
+    hasAssetsListChanged = true;
+}
+
+bool AssetsManager::checkIfAssetListChanged() const {
+	return hasAssetsListChanged;
+}
+
+std::vector<std::string> AssetsManager::getAssetList() const {
+	return m_AssetList;
+}
+
+
+const std::map<std::string, GLuint>& AssetsManager::getTextureList() const {
+	return m_Textures;
+}
+
+const std::map<std::string, std::unique_ptr<Shader>>& AssetsManager::getShaderList() const {
+	return m_Shaders;
+}
+
+const std::map<std::string, FMOD::Sound*>& AssetsManager::getAudioList() const {
+	return m_Audio;
+}
+
+const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontList() const {
+	return m_Fonts;
+}

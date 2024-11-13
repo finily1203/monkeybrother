@@ -35,6 +35,7 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "Debug.h"
 #include "GUIGameViewport.h"
 #include "GUIConsole.h"
+#include "GUIAssetBrowser.h"
 #include "GlfwFunctions.h"
 #include "Crashlog.h"
 #include "GlobalCoordinator.h"
@@ -174,6 +175,7 @@ void DebugSystem::initialise() {
 
 	lastUpdateTime = glfwGetTime();
 
+	AssetBrowser::Initialise();
 }
 
 //Handle rendering of the debug and level editor features
@@ -929,6 +931,10 @@ void DebugSystem::update() {
 
 		ImGui::Begin("Console");
 		Console::Update("Console"); //ImGui console system
+		ImGui::End();
+
+		ImGui::Begin("Assets Browser");
+		AssetBrowser::Update();
 		ImGui::End();
 
 		//Rendering of UI

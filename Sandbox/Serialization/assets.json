@@ -1,7 +1,7 @@
 {
   "audioAssets": [
     {
-      "audioName": "background",
+      "audioName": "bgm",
       "filePath": "assets/audio/Iris_L2_BGM_Loop.wav"
     },
     {
@@ -23,14 +23,6 @@
   ],
   "textureAssets": [
     {
-      "id": "texture1",
-      "filePath": "assets/textures/player.png"
-    },
-    {
-      "id": "texture2",
-      "filePath": "assets/textures/image.png"
-    },
-    {
       "id": "mossball",
       "filePath": "assets/textures/mossball_idle_body.png"
     },
@@ -45,6 +37,14 @@
     {
       "id": "woodtile",
       "filePath": "assets/textures/TOP_BODY_1.png"
+    },
+    {
+      "id": "directoryIcon",
+      "filePath": "assets/textures/directoryIcon.png"
+    },
+    {
+      "id": "fileIcon",
+      "filePath": "assets/textures/fileIcon.png"
     }
   ],
   "shaderAssets": [
