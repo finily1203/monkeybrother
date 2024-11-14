@@ -68,7 +68,7 @@ void AssetsManager::LoadTextureAssets() const {
         std::string textureName = textureAsset["id"].get<std::string>();
         std::string relativePath = textureAsset["filePath"].get<std::string>();
 
-        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadTexture(textureName, textureFilePath);
     }
 }
@@ -170,7 +170,7 @@ void AssetsManager::LoadShaderAssets() const {
         std::string shaderName = shaderAsset["id"].get<std::string>();
         std::string relativePath = shaderAsset["filePath"].get<std::string>();
 
-        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadShader(shaderName, shaderFilePath);
     }
 }
@@ -253,7 +253,7 @@ void AssetsManager::LoadAudioAssets() {
         std::string audioName = audioAsset["audioName"].get<std::string>();
         std::string relativePath = audioAsset["filePath"].get<std::string>();
 
-        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadAudio(audioName, audioFilePath, audSystem);
     }
 }
@@ -326,7 +326,7 @@ void AssetsManager::LoadFontAssets() const {
         std::string fontName = fontAssets["id"].get<std::string>();
         std::string relativePath = fontAssets["filePath"].get<std::string>();
 
-        std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadFont(fontName, fontFilePath, 48 ); //default font size
         
     }

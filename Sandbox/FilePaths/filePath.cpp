@@ -42,7 +42,7 @@ std::string FilePathManager::GetWindowConfigJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the windowsConfig JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\windowConfig.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\windowConfig.json";
 
     return jsonPath;
 }
@@ -54,7 +54,7 @@ std::string FilePathManager::GetEntitiesJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the entities JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\entities.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\entities.json";
 
     return jsonPath;
 }
@@ -66,7 +66,7 @@ std::string FilePathManager::GetIMGUIConsoleJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the IMGUI console JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\imguiConsole.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiConsole.json";
 
     return jsonPath;
 }
@@ -78,7 +78,7 @@ std::string FilePathManager::GetIMGUIViewportJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the IMGUI viewport JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\imguiViewport.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiViewport.json";
 
     return jsonPath;
 }
@@ -90,7 +90,7 @@ std::string FilePathManager::GetIMGUIDebugJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the IMGUI debug JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\imguiDebug.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiDebug.json";
 
     return jsonPath;
 }
@@ -102,7 +102,7 @@ std::string FilePathManager::GetAssetsJSONPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the audio assets JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\assets.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\assets.json";
 
     return jsonPath;
 }
@@ -114,7 +114,7 @@ std::string FilePathManager::GetIMGUIFontPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the IMGUI font file path
-    std::string fontFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\DebugSystem\\Assets\\liberation-mono.ttf";
+    std::string fontFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\fonts\\liberation-mono.ttf";
 
     return fontFilePath;
 }
@@ -126,7 +126,7 @@ std::string FilePathManager::GetPhysicsPath()
     std::string execPath = GetExecutablePath();
 
     // retrieves the physics JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\physicsConfig.json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\physicsConfig.json";
 
     return jsonPath;
 }
@@ -138,7 +138,7 @@ std::string FilePathManager::GetSaveJSONPath(int& saveCount)
     std::string execPath = GetExecutablePath();
 
     // retrieves the save JSON file path
-    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveCount) + ".json";
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\save" + std::to_string(saveCount) + ".json";
 
     return jsonPath;
 }

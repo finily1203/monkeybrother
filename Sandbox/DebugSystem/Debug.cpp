@@ -1159,7 +1159,7 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\save" + std::to_string(saveNumber) + ".json";
 	std::string sourceFilePath;
 
 	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
