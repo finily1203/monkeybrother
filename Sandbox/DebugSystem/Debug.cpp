@@ -48,6 +48,18 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "ClosestPlatform.h"
 #include <cmath>
 
+bool IsPointInCircle(float pointX, float pointY, float circleX, float circleY, float radius) {
+	// Calculate the distance between the point and circle center using distance formula
+	float distanceX = pointX - circleX;
+	float distanceY = pointY - circleY;
+
+	// Use Pythagorean theorem to get actual distance
+	float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+	// Compare with radius squared (avoiding square root for better performance)
+	return distanceSquared <= (radius * radius);
+}
+
 //Variables for DebugSystem
 float DebugSystem::fontSize;
 ImVec4 DebugSystem::clearColor;
@@ -928,6 +940,26 @@ void DebugSystem::update() {
 			ImGuiWindowFlags_NoScrollWithMouse);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
+		ImVec2 mouseWorldPos = GameViewWindow::GetMouseWorldPosition();
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.getEntityID(entity) == "enemy") {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				float radius = transform.scale.GetX() / 2.0f;
+
+				float dx = mouseWorldPos.x - transform.position.GetX();
+				float dy = mouseWorldPos.y - transform.position.GetY();
+				float distSq = dx * dx + dy * dy;
+
+				Console::GetLog() << "Mouse World: (" << mouseWorldPos.x << ", " << mouseWorldPos.y << ")\n"
+					<< "Enemy Pos: (" << transform.position.GetX() << ", " << transform.position.GetY() << ")\n"
+					<< "Delta: (" << dx << ", " << dy << ")\n"
+					<< "Distance^2: " << distSq << " <= " << (radius * radius) << " (radius^2)\n";
+
+				if (distSq <= (radius * radius)) {
+					Console::GetLog() << "HIT" << std::endl;
+				}
+			}
+		}
 
 		ImGui::Begin("Console");
 		Console::Update("Console"); //ImGui console system
@@ -1295,7 +1327,21 @@ void DebugSystem::SaveDebugConfigFromJSON(std::string const& filename)
 std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
-	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\..\\..\\Sandbox\\Serialization\\save" + std::to_string(saveNumber) + ".json";
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\save" + std::to_string(saveNumber) + ".json";
+	std::string sourceFilePath;
+
+	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+
+	nlohmann::json entitiesJSON;
+
+	std::ifstream sourceFile(sourceFilePath);
+
+	if (sourceFile.is_open())
+	{
+		sourceFile >> entitiesJSON;
+		sourceFile.close();
+	}
+
 	std::ofstream outFile(jsonPath);
 	if (!outFile.is_open()) {
 		std::cout << "Error: could not create file " << jsonPath << std::endl;

@@ -100,7 +100,7 @@ public:
 
 	//Generate new JSON save file
 	std::string GenerateSaveJSONFile(int& saveNumber);
-
+	
 private:
 	ImGuiIO* io;
 	ImFont* font;
