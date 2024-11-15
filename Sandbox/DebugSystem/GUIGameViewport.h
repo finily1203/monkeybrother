@@ -28,6 +28,12 @@ File Contributions: Lew Zong Han Owen (90%)
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
 
+//enum for creating game obj
+enum Specifier {
+	TEXTURE,
+	FONT,
+};
+
 //Class for ImGui game viewport window in debugging mode
 class GameViewWindow {
 public:
@@ -125,6 +131,8 @@ public:
 	static ImVec2 getViewportPos() { return viewportPos; }
 	static void LoadViewportConfigFromJSON(std::string const& filename);
 	static void SaveViewportConfigToJSON(std::string const& filename);
+
+	static void createDropEntity(const char* assetName, Specifier specifier);
 
 	static void setAccumulatedDragDistance(float valueX, float valueY) {
 		accumulatedMouseDragDist.x = valueX;
