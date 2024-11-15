@@ -314,6 +314,7 @@ void GLFWFunctions::getFps() {
 }
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
+    (void)window;
     for (int i = 0; i < count; i++) {
         std::string filePath = paths[i];
         assetsManager.handleDropFile(filePath);

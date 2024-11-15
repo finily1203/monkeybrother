@@ -21,6 +21,8 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIGameViewport.h"
 #include "GlfwFunctions.h"
 #include "GUIConsole.h"
+#include "Debug.h"
+#include "GlobalCoordinator.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -94,6 +96,28 @@ void GameViewWindow::Update() {
 	ImGui::SetCursorPos(renderPos);
 	ImTextureID textureID = (ImTextureID)(intptr_t)viewportTexture;
 	ImGui::Image(textureID, availWindowSize, ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payloadTex = ImGui::AcceptDragDropPayload("TEXTURE_PAYLOAD")) {
+			const char* assetName = (const char*)payloadTex->Data;
+			createDropEntity(assetName, TEXTURE);
+			std::cout << "Dropped Texture: " << assetName << std::endl;
+			
+		}
+		else if (const ImGuiPayload* payloadShdr = ImGui::AcceptDragDropPayload("SHADER_PAYLOAD")) {
+			const char* assetName = (const char*)payloadShdr->Data;
+			std::cout << "Dropped Shader: " << assetName << std::endl;
+
+		}
+		else if (const ImGuiPayload* payloadFont = ImGui::AcceptDragDropPayload("FONT_PAYLOAD")) {
+			const char* assetName = (const char*)payloadFont->Data;
+			createDropEntity(assetName, FONT);
+			std::cout << "Dropped Font: " << assetName << std::endl;
+
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	ImGui::End();
 }
 //Clean up resources
@@ -266,4 +290,86 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 
 	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom", filename);
 	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom", filename);
+}
+
+//Create entity from drag and drop
+void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
+	Entity dropEntity = ecsCoordinator.createEntity();
+
+	TransformComponent transform;
+	transform.position = { 300.0f, 300.0f };
+	transform.scale = { 100.0f, 100.0f };
+	transform.orientation = { 0.0f, 0.0f };
+	
+	ecsCoordinator.addComponent(dropEntity, transform);
+
+	JSONSerializer serializer;
+
+	// Add the appropriate components based on the specifier
+	switch (specifier) {
+	case TEXTURE:
+		if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
+			if (strcmp(assetName, "goldfish") == 0) {
+				EnemyComponent enemy;
+				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
+				ecsCoordinator.addComponent(dropEntity, enemy);
+			}
+
+			AABBComponent aabb;
+			serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
+			serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
+			serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
+			serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
+			ecsCoordinator.addComponent(dropEntity, aabb);
+
+			PhysicsComponent physics;
+
+			myMath::Vector2D direction = physics.force.GetDirection();
+			float magnitude = physics.force.GetMagnitude();
+
+			serializer.ReadObject(physics.mass,					assetName, "entities.forces.mass");
+			serializer.ReadObject(physics.gravityScale,			assetName, "entities.forces.gravityScale");
+			serializer.ReadObject(physics.jump,					assetName, "entities.forces.jump");
+			serializer.ReadObject(physics.dampening,			assetName, "entities.forces.dampening");
+			serializer.ReadObject(physics.velocity,				assetName, "entities.forces.velocity");
+			serializer.ReadObject(physics.maxVelocity,			assetName, "entities.forces.maxVelocity");
+			serializer.ReadObject(physics.acceleration,			assetName, "entities.forces.acceleration");
+			serializer.ReadObject(direction,					assetName, "entities.forces.force.direction");
+			serializer.ReadObject(magnitude,					assetName, "entities.forces.force.magnitude");
+			serializer.ReadObject(physics.accumulatedForce,		assetName, "entities.forces.accumulatedForce");
+			serializer.ReadObject(physics.maxAccumulatedForce,	assetName, "entities.forces.maxAccumulatedForce");
+			serializer.ReadObject(physics.prevForce,			assetName, "entities.forces.prevForces");
+			serializer.ReadObject(physics.targetForce,			assetName, "entities.forces.targetForce");
+
+			physics.force.SetDirection(direction);
+			physics.force.SetMagnitude(magnitude);
+
+			ecsCoordinator.addComponent(dropEntity, physics);
+		}
+		else if (strcmp(assetName, "woodtile") == 0) {
+			AABBComponent aabb{};
+			serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
+			serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
+			serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
+			serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
+
+			ClosestPlatform closestPlatform{};
+			serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
+
+			ecsCoordinator.addComponent(dropEntity, aabb);
+			ecsCoordinator.addComponent(dropEntity, closestPlatform);
+		}
+		break;
+	case FONT:
+		FontComponent font;
+		font.fontId = assetName;
+		font.text = "Temporary";
+		font.textScale = 1.0f;
+		font.textBoxWidth = 300.0f;
+		font.color = { 1.0f, 1.0f, 1.0f };
+		ecsCoordinator.addComponent(dropEntity, font);
+		break;
+	}
+
+	ecsCoordinator.setEntityID(dropEntity, assetName);
 }

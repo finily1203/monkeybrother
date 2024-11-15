@@ -38,6 +38,11 @@ void AssetBrowser::Update() {
 			if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), {thumbnailSize, thumbnailSize}, {0, 1}, {1, 0});
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					ImGui::SetDragDropPayload("TEXTURE_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
+					ImGui::Text("Dragging: %s", asset.c_str());
+					ImGui::EndDragDropSource();
+				}
 				ImGui::Text(asset.c_str());
 				ImGui::EndGroup();
 				ImGui::SameLine();
@@ -58,6 +63,11 @@ void AssetBrowser::Update() {
 			if (assetsManager.getShaderList().find(asset) != assetsManager.getShaderList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					ImGui::SetDragDropPayload("SHADER_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
+					ImGui::Text("Dragging: %s", asset.c_str());
+					ImGui::EndDragDropSource();
+				}
 				ImGui::Text(asset.c_str());
 				ImGui::EndGroup();
 				ImGui::SameLine();
@@ -77,7 +87,6 @@ void AssetBrowser::Update() {
 		for (auto& asset : assetNames) {
 			if (assetsManager.getAudioList().find(asset) != assetsManager.getAudioList().end()) {
 				ImGui::BeginGroup();
-				//Experiment 
 				if (ImGui::ImageButton(asset.c_str(), (void*)assetsManager.GetTexture("fileIcon"), {thumbnailSize, thumbnailSize}, {0, 1}, {1, 0})) {
 					audioSystem.playSoundAssetBrowser(asset.c_str());
 				}
@@ -101,6 +110,11 @@ void AssetBrowser::Update() {
 			if (assetsManager.getFontList().find(asset) != assetsManager.getFontList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					ImGui::SetDragDropPayload("FONT_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
+					ImGui::Text("Dragging: %s", asset.c_str());
+					ImGui::EndDragDropSource();
+				}
 				ImGui::Text(asset.c_str());
 				ImGui::EndGroup();
 				ImGui::SameLine();
