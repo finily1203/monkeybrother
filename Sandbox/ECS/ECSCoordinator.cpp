@@ -92,7 +92,8 @@ Entity ECSCoordinator::createEntity()
 
 //Destroy the entity from all parts of the ECS system
 void ECSCoordinator::destroyEntity(Entity entity)
-{
+{	
+
 	//remove entity from all systems
 	entityManager->destroyEntity(entity);
 	componentManager->entityRemoved(entity);
@@ -211,7 +212,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, movement);
 		}
 
-		if (entityData.contains("animation"))
+		if (entityData.contains("animation") && entityId == "player")
 		{
 			AnimationComponent animation{};
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
@@ -314,14 +315,26 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 			}
 
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<AABBComponent>()))
-			{
-				AABBComponent aabb = getComponent<AABBComponent>(entity);
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<PhysicsComponent>())) {
+				PhysicsComponent physics = getComponent<PhysicsComponent>(entity);
 
-				serializer.WriteObject(aabb.left, entityId, "entities.aabb.left");
-				serializer.WriteObject(aabb.right, entityId, "entities.aabb.right");
-				serializer.WriteObject(aabb.top, entityId, "entities.aabb.top");
-				serializer.WriteObject(aabb.bottom, entityId, "entities.aabb.bottom");
+				myMath::Vector2D direction = physics.force.GetDirection();
+				float magnitude = physics.force.GetMagnitude();
+
+				serializer.WriteObject(physics.mass, entityId, "entities.forces.mass");
+				serializer.WriteObject(physics.gravityScale, entityId, "entities.forces.gravityScale");
+				serializer.WriteObject(physics.jump, entityId, "entities.forces.jump");
+				serializer.WriteObject(physics.dampening, entityId, "entities.forces.dampening");
+				serializer.WriteObject(physics.velocity, entityId, "entities.forces.velocity");
+				serializer.WriteObject(physics.maxVelocity, entityId, "entities.forces.maxVelocity");
+				serializer.WriteObject(physics.acceleration, entityId, "entities.forces.acceleration");
+				serializer.WriteObject(direction, entityId, "entities.forces.force.direction");
+				serializer.WriteObject(magnitude, entityId, "entities.forces.force.magnitude");
+				serializer.WriteObject(physics.accumulatedForce, entityId, "entities.forces.accumulatedForce");
+				serializer.WriteObject(physics.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
+				serializer.WriteObject(physics.prevForce, entityId, "entities.forces.prevForce");
+				serializer.WriteObject(physics.targetForce, entityId, "entities.forces.targetForce");
+
 			}
 
 			if (ecs.entityManager->getSignature(entity).test(getComponentType<ClosestPlatform>()))
