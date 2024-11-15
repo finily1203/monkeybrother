@@ -27,7 +27,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
-//CameraSystem2D cameraSystem;
 
 
 //std::unique_ptr<EntityManager> entityManager;
