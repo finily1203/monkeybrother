@@ -124,9 +124,32 @@ void WindowSystem::initialise() {
 	
 }
 
+void WindowSystem::handleWindowFocus()
+{
+	int isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
+
+	if (isFocused && !wasFocused)
+	{
+		isInterrupted = false;
+		GLFWFunctions::audioPaused = false;
+		glfwRestoreWindow(GLFWFunctions::pWindow);
+	}
+
+	else if (!isFocused && wasFocused)
+	{
+		isInterrupted = true;
+		GLFWFunctions::audioPaused = true;
+		glfwIconifyWindow(GLFWFunctions::pWindow);
+	}
+
+	wasFocused = isFocused;
+}
+
 void WindowSystem::update() {
 
 	glfwPollEvents();
+
+	handleWindowFocus();
 
 	if (glfwWindowShouldClose(GLFWFunctions::pWindow)) {
 		glfwSetWindowShouldClose(GLFWFunctions::pWindow, GLFW_TRUE);

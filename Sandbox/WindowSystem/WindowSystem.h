@@ -32,6 +32,11 @@ public:
 	void update() override;
 	void cleanup() override;
 	SystemType getSystem() override; //For perfomance viewer
+	void handleWindowFocus();
+
+private:
+	bool isInterrupted = false;
+	bool wasFocused = true;
 
 	//void logicUpdate();
 	
