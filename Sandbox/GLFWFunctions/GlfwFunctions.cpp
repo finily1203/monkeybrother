@@ -98,31 +98,26 @@ bool GLFWFunctions::init(int width, int height, const std::string& title, bool s
         return false;
     }
 
-    // Store initial windowed mode dimensions
     savedWindowedWidth = width;
     savedWindowedHeight = height;
 
-    // Get primary monitor
     primaryMonitor = glfwGetPrimaryMonitor();
     if (!primaryMonitor) {
         glfwTerminate();
         return false;
     }
 
-    // Get video mode
     const GLFWvidmode* mode = getPreferredVideoMode();
     if (!mode) {
         glfwTerminate();
         return false;
     }
 
-    // Set window hints
     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-    // Create window based on mode
     if (startFullscreen) {
         pWindow = glfwCreateWindow(mode->width, mode->height, title.c_str(),
             primaryMonitor, nullptr);
@@ -131,7 +126,7 @@ bool GLFWFunctions::init(int width, int height, const std::string& title, bool s
         windowHeight = mode->height;
     }
     else {
-        // Center the window
+       
         int monitorX, monitorY;
         glfwGetMonitorPos(primaryMonitor, &monitorX, &monitorY);
         savedWindowedPosX = monitorX + (mode->width - width) / 2;
@@ -190,11 +185,13 @@ void GLFWFunctions::setFullscreen(bool fullscreen) {
         windowHeight = mode->height;
     }
     else {
-        // Switch back to windowed mode
+        
         glfwSetWindowMonitor(pWindow, nullptr, savedWindowedPosX, savedWindowedPosY,
             savedWindowedWidth, savedWindowedHeight, 0);
         windowWidth = savedWindowedWidth;
         windowHeight = savedWindowedHeight;
+
+        glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
     }
 
     isFullscreen = fullscreen;
