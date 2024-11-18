@@ -103,10 +103,6 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
-	std::string GetExecutablePath();
-	std::string GetWindowConfigJSONPath();
-	std::string GetEntitiesJSONPath();
-
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
 	Entity getEntityFromID(std::string ID);
@@ -115,8 +111,6 @@ public:
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
-	// update the entity's data
-	void UpdateEntity(Entity& entity, TransformComponent&, GraphicsComponent&, FontComponent&);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
@@ -132,10 +126,6 @@ public:
 
 	ComponentSig getEntitySignature(Entity entity);
 
-	//void test();
-	void test2();
-	void test3();
-	void test4();
 	void test5();
 	void initialiseSystemsAndComponents();
 
