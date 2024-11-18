@@ -60,6 +60,8 @@ void GraphicSystemECS::update(float dt) {
         }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
 
+        bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
+
         // Use hasMovement for the update parameter
         graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
@@ -103,6 +105,17 @@ void GraphicSystemECS::update(float dt) {
         }
         else if(isPlatform){
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
+        }
+
+        else if (isButton) {
+            if (ecsCoordinator.getEntityID(entity) == "quitButton") {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
+            }
+
+            else
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
+            }
         }
         //}
     }

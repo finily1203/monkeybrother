@@ -88,6 +88,7 @@
     <ClInclude Include="Engine\EngineDefinitions.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="Graphics\FontSystem.h" />
+    <ClInclude Include="Components\ButtonComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

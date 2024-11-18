@@ -269,6 +269,14 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, font);
 		}
 
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
@@ -362,6 +370,13 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 				serializer.WriteObject(fontComp.color, entityId, "entities.font.color");
 				serializer.WriteObject(fontComp.fontId, entityId, "entities.font.fontId.fontName");
 			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<ButtonComponent>()))
+			{
+				ButtonComponent button = getComponent<ButtonComponent>(entity);
+
+				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
+			}
 		}
 	}
 
@@ -407,6 +422,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<EnemyComponent>();
 	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
+	registerComponent<ButtonComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

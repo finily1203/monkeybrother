@@ -152,6 +152,7 @@
     <ClInclude Include="AudioSystem\AudioSystem.h" />
     <ClInclude Include="Components\AABBComponent.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
     <ClInclude Include="Components\EnemyComponent.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
