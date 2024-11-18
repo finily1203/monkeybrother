@@ -88,8 +88,8 @@ std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
 bool GLFWFunctions::isFullscreen = false;
 GLFWmonitor* GLFWFunctions::primaryMonitor = nullptr;
-int GLFWFunctions::savedWindowedPosX = 0;
-int GLFWFunctions::savedWindowedPosY = 0;
+int GLFWFunctions::savedWindowedPosX = 50;
+int GLFWFunctions::savedWindowedPosY = 50;
 int GLFWFunctions::savedWindowedWidth = 0;
 int GLFWFunctions::savedWindowedHeight = 0;
 // Initialize the window
@@ -159,7 +159,7 @@ bool GLFWFunctions::init(int width, int height, const std::string& title, bool s
         if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && (mods & GLFW_MOD_ALT)) {
             toggleFullscreen();
         }
-        // Call the original keyboard callback
+       
         keyboardEvent(window, key, scancode, action, mods);
         });
 
