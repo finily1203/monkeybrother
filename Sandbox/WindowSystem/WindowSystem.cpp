@@ -95,8 +95,7 @@ void WindowSystem::initialise() {
 	nlohmann::json windowConfigJSON;
 	std::ifstream windowConfigFile(FilePathManager::GetWindowConfigJSONPath());
 
-	if (!windowConfigFile.is_open())
-	{
+	if (!windowConfigFile.is_open()) {
 		std::cout << "Unable to open JSON file" << std::endl;
 		return;
 	}
@@ -107,8 +106,9 @@ void WindowSystem::initialise() {
 	int windowWidth = windowConfigJSON["width"].get<int>();
 	int windowHeight = windowConfigJSON["height"].get<int>();
 	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
+	bool startFullscreen = windowConfigJSON.value("fullscreen", true); // Default to fullscreen
 
-	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle.c_str())) {
+	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle, startFullscreen)) {
 		std::cout << "Failed to initialise GLFW" << std::endl;
 		exit(EXIT_FAILURE);
 	}
