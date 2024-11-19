@@ -46,6 +46,8 @@ struct GLFWFunctions {
 	static void cursorPositionEvent(GLFWwindow* window, double xpos, double ypos);
 	//Handle scroll events
 	static void scrollEvent(GLFWwindow* window, double xoffset, double yoffset);
+	//Handle Drag and Drop events
+	static void dropEvent(GLFWwindow* window, int count, const char** paths);
 	//Handle window to check for events
 	static void callEvents();
 

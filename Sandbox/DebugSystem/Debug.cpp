@@ -35,6 +35,7 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "Debug.h"
 #include "GUIGameViewport.h"
 #include "GUIConsole.h"
+#include "GUIAssetBrowser.h"
 #include "GlfwFunctions.h"
 #include "Crashlog.h"
 #include "GlobalCoordinator.h"
@@ -47,6 +48,18 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "ClosestPlatform.h"
 #include <cmath>
 
+bool IsPointInCircle(float pointX, float pointY, float circleX, float circleY, float radius) {
+	// Calculate the distance between the point and circle center using distance formula
+	float distanceX = pointX - circleX;
+	float distanceY = pointY - circleY;
+
+	// Use Pythagorean theorem to get actual distance
+	float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+	// Compare with radius squared (avoiding square root for better performance)
+	return distanceSquared <= (radius * radius);
+}
+
 //Variables for DebugSystem
 float DebugSystem::fontSize;
 ImVec4 DebugSystem::clearColor;
@@ -58,6 +71,9 @@ bool DebugSystem::isRedToggled;
 bool DebugSystem::isGreenToggled;
 bool DebugSystem::isBlueToggled;
 bool DebugSystem::isSelectingFile;
+bool isSelectingSaveFile;
+bool saveFileChosen = false;
+bool loadFileChosen = false;
 int DebugSystem::currentItem;
 
 int DebugSystem::numberOfColumnPV;
@@ -171,6 +187,7 @@ void DebugSystem::initialise() {
 
 	lastUpdateTime = glfwGetTime();
 
+	AssetBrowser::Initialise();
 }
 
 //Handle rendering of the debug and level editor features
@@ -341,7 +358,7 @@ void DebugSystem::update() {
 
 			objCount += static_cast<int>(ecsCoordinator.getAllLiveEntities().size()) - 1;
 
-			const char* items[] = { "Player", "Enemy", "Platform", "TextBox" };
+			const char* items[] = { "Player", "Enemy", "Platform", "TextBox", "Background"};
 
 			// Create the combo box
 			ImGui::SetNextItemWidth(objAttributeSliderMidLength);
@@ -418,15 +435,15 @@ void DebugSystem::update() {
 			xCoordinates = std::max(coordinateMinLimitsX, strtof(xCoordinatesBuffer, nullptr));
 			yCoordinates = std::max(coordinateMinLimitsY, strtof(yCoordinatesBuffer, nullptr));
 
-			JSONSerializer serializer;
+			/*JSONSerializer serializer;
 			if (!serializer.Open(FilePathManager::GetEntitiesJSONPath())) {
 				std::cout << "Error: could not open file " << FilePathManager::GetEntitiesJSONPath() << std::endl;
 				return;
-			}
+			}*/
 			Entity entityObj;
 			std::string entityId;
 
-			nlohmann::json jsonObj = serializer.GetJSONObject();
+			/*nlohmann::json jsonObj = serializer.GetJSONObject();*/
 			//Entity creation button functionalities
 			if (ImGui::Button("Create Entity")) {
 
@@ -438,33 +455,16 @@ void DebugSystem::update() {
 
 					TransformComponent transform{};
 
-					if (!strcmp(items[currentItem], "TextBox")) {
-						FontComponent fontComp{};
-						fontComp.text = textBuffer;
-						fontComp.textScale = textScale;
-						fontComp.fontId = "Journey";
-						fontComp.textBoxWidth = textBoxMinLimit;
-						ecsCoordinator.addComponent(entityObj, fontComp);
-
-						transform.position.SetX(xCoordinates);
-						transform.position.SetY(yCoordinates);
-						transform.scale.SetX(defaultObjScaleX);
-						transform.scale.SetY(defaultObjScaleX);
-
-					}
-					else {
-						transform.position.SetX(xCoordinates);
-						transform.position.SetY(yCoordinates);
-						transform.scale.SetX(defaultObjScaleX);
-						transform.scale.SetY(defaultObjScaleX);
-					}
-
+					transform.position.SetX(xCoordinates);
+					transform.position.SetY(yCoordinates);
+					transform.scale.SetX(defaultObjScaleX);
+					transform.scale.SetY(defaultObjScaleY);
 					ecsCoordinator.addComponent(entityObj, transform);
-
-					ObjectCreationCondition(items, currentItem, serializer, entityObj, entityId);
-					newEntities.push_back(entityObj);
 					ecsCoordinator.setEntityID(entityObj, entityId);
 
+					ObjectCreationCondition(items, currentItem, entityObj, entityId);
+					newEntities.push_back(entityObj);
+					
 
 				}
 
@@ -475,46 +475,33 @@ void DebugSystem::update() {
 			//For creating entity with random position
 			if (ImGui::Button("Random")) {
 				for (int i = 0; i < numEntitiesToCreate; i++) {
+
 					entityObj = ecsCoordinator.createEntity();
 
 					entityId = sigBuffer;
 
-					// Common components for all entities
 					TransformComponent transform{};
-					if (!strcmp(items[currentItem], "TextBox")) {
-						FontComponent fontComp{};
-						fontComp.text = textBuffer;
-						fontComp.textScale = textScale;
-						fontComp.fontId = "Journey";
-						ecsCoordinator.addComponent(entityObj, fontComp);
 
-						transform.position = myMath::Vector2D(ecsCoordinator.getRandomVal(coordinateMinLimitsX, coordinateMaxLimitsX),
-							ecsCoordinator.getRandomVal(coordinateMinLimitsY, coordinateMaxLimitsY));
-						transform.scale.SetX(defaultObjScaleX);
-						transform.scale.SetY(defaultObjScaleX);
-
-					}
-					else {
-						transform.position = myMath::Vector2D(ecsCoordinator.getRandomVal(coordinateMinLimitsX, coordinateMaxLimitsX),
-							ecsCoordinator.getRandomVal(coordinateMinLimitsY, coordinateMaxLimitsY));
-						transform.scale.SetX(defaultObjScaleX);
-						transform.scale.SetY(defaultObjScaleY);
-					}
-
+					transform.position = myMath::Vector2D(ecsCoordinator.getRandomVal(coordinateMinLimitsX, coordinateMaxLimitsX),
+						ecsCoordinator.getRandomVal(coordinateMinLimitsY, coordinateMaxLimitsY));
+					transform.scale.SetX(defaultObjScaleX);
+					transform.scale.SetY(defaultObjScaleY);
 					ecsCoordinator.addComponent(entityObj, transform);
-
-					ObjectCreationCondition(items, currentItem, serializer, entityObj, entityId);
-
 					ecsCoordinator.setEntityID(entityObj, entityId);
+
+					ObjectCreationCondition(items, currentItem, entityObj, entityId);
+					newEntities.push_back(entityObj);
+
+
 				}
 			}
 
 			//Button to destroy all existing entity
 			if (ImGui::Button("Remove All Entity")) {
 				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-					if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {}
-					else
+					if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
 						ecsCoordinator.destroyEntity(entity);
+					}
 				}
 			}
 
@@ -691,54 +678,180 @@ void DebugSystem::update() {
 
 					}
 			}
+			if (ImGui::Button("Save")) {
+				isSelectingSaveFile = true;
+			}
 
-			if (ImGui::Button("Save")) //Generate 1 new json file and save existing object data in it
-			{
-				if (saveCount < saveLimit) {
-					std::string saveFile = GenerateSaveJSONFile(saveCount);
-
-					for (auto entity : ecsCoordinator.getAllLiveEntities())
-					{
-						ecsCoordinator.SaveEntityToJSON(ecsCoordinator, entity, saveFile);
-					}
-
-					nlohmann::json jsonData;
-					std::ifstream inputFile(saveFile);
-
-					if (inputFile.is_open())
-					{
-						inputFile >> jsonData;
-						inputFile.close();
-					}
-
-					for (auto& entity : newEntities) {
-						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-						std::string entityId = ecsCoordinator.getEntityID(entity);
-
-						std::cout << "Before AddNewEntityToJSON for " << entityId << ": " << jsonData.dump(2) << std::endl;
+			if (isSelectingSaveFile) {
+				ImGui::OpenPopup("Choose save files");
+			}
 
 
-						nlohmann::json newEntityJSON = DebugSystem::AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
+			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-						std::cout << "New entity JSON for " << entityId << ": " << newEntityJSON.dump(2) << std::endl;
+			// Create popup modal window for loading of save files
+			if (ImGui::BeginPopupModal("Choose save files", &isSelectingSaveFile, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-						jsonData["entities"].push_back(newEntityJSON);
-						std::cout << "After push_back: " << jsonData.dump(2) << std::endl;
-					}
+				ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
+				int saveNum;
+				int fileNum;
+
+				if (ImGui::Button("Slot 1", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+					saveNum = 1;
+					saveFileChosen = true;
+					isSelectingSaveFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear 1", ImVec2(80, fileWindowHeight))) {
+					fileNum = 1;
+					std::string saveFile = GenerateSaveJSONFile(fileNum);
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
 					std::ofstream outputFile(saveFile);
-					if (outputFile.is_open())
-					{
+					if (outputFile.is_open()) {
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+				}
+
+				if (ImGui::Button("Slot 2", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+					saveNum = 2;
+					saveFileChosen = true;
+					isSelectingSaveFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear 2", ImVec2(80, fileWindowHeight))) {
+					fileNum = 2;
+					std::string saveFile = GenerateSaveJSONFile(fileNum);
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open()) {
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+				}
+
+				if (ImGui::Button("Slot 3", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+					saveNum = 3;
+					saveFileChosen = true;
+					isSelectingSaveFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear 3", ImVec2(80, fileWindowHeight))) {
+					fileNum = 3;
+					std::string saveFile = GenerateSaveJSONFile(fileNum);
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open()) {
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+				}
+
+				if (ImGui::Button("Slot 4", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+					saveNum = 4;
+					saveFileChosen = true;
+					isSelectingSaveFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear 4", ImVec2(80, fileWindowHeight))) {
+					fileNum = 4;
+					std::string saveFile = GenerateSaveJSONFile(fileNum);
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open()) {
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+				}
+
+				if (ImGui::Button("Slot 5", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+					saveNum = 5;
+					saveFileChosen = true;
+					isSelectingSaveFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear 5", ImVec2(80, fileWindowHeight))) {
+					fileNum = 5;
+					std::string saveFile = GenerateSaveJSONFile(fileNum);
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open()) {
+						outputFile << jsonData.dump(2);
+						outputFile.close();
+					}
+				}
+
+
+				if (saveFileChosen) {
+					std::string saveFile = GenerateSaveJSONFile(saveNum);
+
+					// Create base JSON structure using ordered_json consistently
+					nlohmann::ordered_json jsonData;
+					jsonData["entities"] = nlohmann::ordered_json::array();
+
+					// Add placeholder entity using ordered_json
+					jsonData["entities"].push_back(nlohmann::ordered_json{
+						{"id", "placeholderentity"}
+						});
+
+					// Save all currently live entities
+					for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+						std::string entityId = ecsCoordinator.getEntityID(entity);
+						if (entityId != "placeholderentity") {
+							TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+							auto entityJson = DebugSystem::AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
+							jsonData["entities"].push_back(entityJson);
+						}
+					}
+
+					// Clear newEntities since they're already saved
+					newEntities.clear();
+
+					// Save to file
+					std::ofstream outputFile(saveFile);
+					if (outputFile.is_open()) {
 						outputFile << jsonData.dump(2);
 						outputFile.close();
 					}
 
-					newEntities.clear();
-					if (saveCount < saveLimit)
-						saveCount++;
-
+					//saveCount++;
 					SaveDebugConfigFromJSON(FilePathManager::GetIMGUIDebugJSONPath());
+					saveFileChosen = false;
+					isSelectingSaveFile = false;
+					//ImGui::CloseCurrentPopup();
 				}
+
+
+				ImGui::EndChild();
+
+				ImGui::EndPopup();
 			}
 
 			ImGui::SameLine();
@@ -751,8 +864,8 @@ void DebugSystem::update() {
 				ImGui::OpenPopup("Load save files");
 			}
 
-			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			ImVec2 saveCenter = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(saveCenter, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
 			// Create popup modal window for loading of save files
 			if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -765,34 +878,57 @@ void DebugSystem::update() {
 						ecsCoordinator.destroyEntity(entity);
 					}
 					ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-				}
-
-				for (int i = 1; i < saveCount; i++) {
-					char label[32];
-					sprintf_s(label, "Save File %d", i);
-					int saveNum = saveCount;
-
-					if (ImGui::Button(label, ImVec2(fileWindowWidth, fileWindowHeight))) {
-
-						if (saveNum == saveLimit) {
-							for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-								ecsCoordinator.destroyEntity(entity);
-							}
-							saveNum -= 1;
-							ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
-						}
-					}
-
-					ImGui::Spacing();  // Add space between buttons
-				}
-
-				ImGui::EndChild();
-
-				// Close button
-				if (ImGui::Button("Close")) {
 					isSelectingFile = false;
 					ImGui::CloseCurrentPopup();
 				}
+
+				int saveNum;
+
+				if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
+					saveNum = 1;
+					loadFileChosen = true;
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
+					saveNum = 2;
+					loadFileChosen = true;
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
+					saveNum = 3;
+					loadFileChosen = true;
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
+					saveNum = 4;
+					loadFileChosen = true;
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
+					saveNum = 5;
+					loadFileChosen = true;
+					isSelectingFile = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (loadFileChosen) {
+					for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+						ecsCoordinator.destroyEntity(entity);
+					}
+
+					ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
+					loadFileChosen = false;
+				}
+
+				ImGui::EndChild();
 
 				ImGui::EndPopup();
 			}
@@ -804,9 +940,33 @@ void DebugSystem::update() {
 			ImGuiWindowFlags_NoScrollWithMouse);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
+		ImVec2 mouseWorldPos = GameViewWindow::GetMouseWorldPosition();
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.getEntityID(entity) == "enemy") {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				float radius = transform.scale.GetX() / 2.0f;
+
+				float dx = mouseWorldPos.x - transform.position.GetX();
+				float dy = mouseWorldPos.y - transform.position.GetY();
+				float distSq = dx * dx + dy * dy;
+
+				Console::GetLog() << "Mouse World: (" << mouseWorldPos.x << ", " << mouseWorldPos.y << ")\n"
+					<< "Enemy Pos: (" << transform.position.GetX() << ", " << transform.position.GetY() << ")\n"
+					<< "Delta: (" << dx << ", " << dy << ")\n"
+					<< "Distance^2: " << distSq << " <= " << (radius * radius) << " (radius^2)\n";
+
+				if (distSq <= (radius * radius)) {
+					Console::GetLog() << "HIT" << std::endl;
+				}
+			}
+		}
 
 		ImGui::Begin("Console");
 		Console::Update("Console"); //ImGui console system
+		ImGui::End();
+
+		ImGui::Begin("Assets Browser");
+		AssetBrowser::Update();
 		ImGui::End();
 
 		//Rendering of UI
@@ -901,108 +1061,116 @@ void DebugSystem::UpdateSystemTimes() {
 	}
 }
 //Add new entity's data to JSON save file
-nlohmann::json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
+nlohmann::ordered_json DebugSystem::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
-	nlohmann::json entityJSON;
-	nlohmann::json localTransformJSON = nlohmann::json::array();
-	nlohmann::json projectionMatrixJSON = nlohmann::json::array();
+	// Initialize ordered components that should always be present first
+	nlohmann::ordered_json entityJSON = {
+		{"id", entityId},
+		{"transform", {
+			{"localTransform", {
+				{transform.mdl_xform.GetMatrixValue(0, 0), transform.mdl_xform.GetMatrixValue(0, 1), transform.mdl_xform.GetMatrixValue(0, 2)},
+				{transform.mdl_xform.GetMatrixValue(1, 0), transform.mdl_xform.GetMatrixValue(1, 1), transform.mdl_xform.GetMatrixValue(1, 2)},
+				{transform.mdl_xform.GetMatrixValue(2, 0), transform.mdl_xform.GetMatrixValue(2, 1), transform.mdl_xform.GetMatrixValue(2, 2)}
+			}},
+			{"orientation", {
+				{"x", transform.orientation.GetX()},
+				{"y", transform.orientation.GetY()}
+			}},
+			{"position", {
+				{"x", transform.position.GetX()},
+				{"y", transform.position.GetY()}
+			}},
+			{"projectionMatrix", {
+				{transform.mdl_to_ndc_xform.GetMatrixValue(0, 0), transform.mdl_to_ndc_xform.GetMatrixValue(0, 1), transform.mdl_to_ndc_xform.GetMatrixValue(0, 2)},
+				{transform.mdl_to_ndc_xform.GetMatrixValue(1, 0), transform.mdl_to_ndc_xform.GetMatrixValue(1, 1), transform.mdl_to_ndc_xform.GetMatrixValue(1, 2)},
+				{transform.mdl_to_ndc_xform.GetMatrixValue(2, 0), transform.mdl_to_ndc_xform.GetMatrixValue(2, 1), transform.mdl_to_ndc_xform.GetMatrixValue(2, 2)}
+			}},
+			{"scale", {
+				{"x", transform.scale.GetX()},
+				{"y", transform.scale.GetY()}
+			}}
+		}}
+	};
 
-	// ID
-	entityJSON["id"] = entityId;
-
-	// Transform Component
-	entityJSON["transform"]["position"]["x"] = transform.position.GetX();
-	entityJSON["transform"]["position"]["y"] = transform.position.GetY();
-	entityJSON["transform"]["orientation"]["x"] = transform.orientation.GetX();
-	entityJSON["transform"]["orientation"]["y"] = transform.orientation.GetY();
-	entityJSON["transform"]["scale"]["x"] = transform.scale.GetX();
-	entityJSON["transform"]["scale"]["y"] = transform.scale.GetY();
-
-	// Transform Matrices
-	for (int i = 0; i < 3; ++i)
-	{
-		nlohmann::json transformRowJSON = nlohmann::json::array();
-		nlohmann::json projectionRowJSON = nlohmann::json::array();
-		for (int j = 0; j < 3; ++j)
-		{
-			transformRowJSON.push_back(transform.mdl_xform.GetMatrixValue(i, j));
-			projectionRowJSON.push_back(transform.mdl_to_ndc_xform.GetMatrixValue(i, j));
-		}
-		localTransformJSON.push_back(transformRowJSON);
-		projectionMatrixJSON.push_back(projectionRowJSON);
-	}
-	entityJSON["transform"]["localTransform"] = localTransformJSON;
-	entityJSON["transform"]["projectionMatrix"] = projectionMatrixJSON;
-
-	// AABB Component
-	if (ecs.hasComponent<AABBComponent>(entity))
-	{
-		AABBComponent& aabb = ecs.getComponent<AABBComponent>(entity);
-		entityJSON["aabb"]["left"] = aabb.left;
-		entityJSON["aabb"]["right"] = aabb.right;
-		entityJSON["aabb"]["top"] = aabb.top;
-		entityJSON["aabb"]["bottom"] = aabb.bottom;
-	}
-
-	// RigidBody Component
-	if (ecs.hasComponent<PhysicsComponent>(entity))
-	{
-		PhysicsComponent& rb = ecs.getComponent<PhysicsComponent>(entity);
-		entityJSON["PhysicsComponent"]["velocity"]["x"] = rb.velocity.GetX();
-		entityJSON["PhysicsComponent"]["velocity"]["y"] = rb.velocity.GetY();
-		entityJSON["PhysicsComponent"]["gravityScale"]["x"] = rb.gravityScale.GetX();
-		entityJSON["PhysicsComponent"]["gravityScale"]["y"] = rb.gravityScale.GetY();
-		entityJSON["PhysicsComponent"]["acceleration"]["x"] = rb.acceleration.GetX();
-		entityJSON["PhysicsComponent"]["acceleration"]["y"] = rb.acceleration.GetY();
-		entityJSON["PhysicsComponent"]["accumulatedForce"]["x"] = rb.accumulatedForce.GetX();
-		entityJSON["PhysicsComponent"]["accumulatedForce"]["y"] = rb.accumulatedForce.GetY();
-
-		entityJSON["PhysicsComponent"]["jump"] = rb.jump;
-		entityJSON["PhysicsComponent"]["dampening"] = rb.dampening;
-		entityJSON["PhysicsComponent"]["mass"] = rb.mass;
-		entityJSON["PhysicsComponent"]["maxVelocity"] = rb.maxVelocity;
-		entityJSON["PhysicsComponent"]["maxAccumulatedForce"] = rb.maxAccumulatedForce;
-		entityJSON["PhysicsComponent"]["prevForce"] = rb.prevForce;
-		entityJSON["PhysicsComponent"]["targetForce"] = rb.targetForce;
-
-		entityJSON["PhysicsComponent"]["force"]["direction"]["x"] = rb.force.GetDirection().GetX();
-		entityJSON["PhysicsComponent"]["force"]["direction"]["y"] = rb.force.GetDirection().GetY();
-		entityJSON["PhysicsComponent"]["force"]["magnitude"] = rb.force.GetMagnitude();
-
+	// Add additional components in the desired order
+	if (ecs.hasComponent<AABBComponent>(entity)) {
+		auto& aabb = ecs.getComponent<AABBComponent>(entity);
+		entityJSON["aabb"] = {
+			{"left", aabb.left},
+			{"right", aabb.right},
+			{"top", aabb.top},
+			{"bottom", aabb.bottom}
+		};
 	}
 
-	// Enemy Component
-	if (ecs.hasComponent<EnemyComponent>(entity))
-	{
-		EnemyComponent& enemy = ecs.getComponent<EnemyComponent>(entity);
-		entityJSON["enemy"]["isEnemy"] = enemy.isEnemy;
+	if (ecs.hasComponent<PhysicsComponent>(entity)) {
+		auto& rb = ecs.getComponent<PhysicsComponent>(entity);
+		entityJSON["forces"] = {
+			{"mass", rb.mass},
+			{"gravityScale", {
+				{"x", rb.gravityScale.GetX()},
+				{"y", rb.gravityScale.GetY()}
+			}},
+			{"jump", rb.jump},
+			{"dampening", rb.dampening},
+			{"velocity", {
+				{"x", rb.velocity.GetX()},
+				{"y", rb.velocity.GetY()}
+			}},
+			{"maxVelocity", rb.maxVelocity},
+			{"acceleration", {
+				{"x", rb.acceleration.GetX()},
+				{"y", rb.acceleration.GetY()}
+			}},
+			{"force", {
+				{"direction", {
+					{"x", rb.force.GetDirection().GetX()},
+					{"y", rb.force.GetDirection().GetY()}
+				}},
+				{"magnitude", rb.force.GetMagnitude()}
+			}},
+			{"accumulatedForce", {
+				{"x", rb.accumulatedForce.GetX()},
+				{"y", rb.accumulatedForce.GetY()}
+			}},
+			{"maxAccumulatedForce", rb.maxAccumulatedForce},
+			{"prevForce", rb.prevForce},
+			{"targetForce", rb.targetForce}
+		};
 	}
 
-	// Animation Component
-	if (ecs.hasComponent<AnimationComponent>(entity))
-	{
-		AnimationComponent& anim = ecs.getComponent<AnimationComponent>(entity);
-		entityJSON["animation"]["isAnimated"] = anim.isAnimated;
+	if (ecs.hasComponent<EnemyComponent>(entity)) {
+		entityJSON["enemy"] = { {"isEnemy", true} };
 	}
 
-	// ClosestPlatform Component
-	if (ecs.hasComponent<ClosestPlatform>(entity))
-	{
-		ClosestPlatform& platform = ecs.getComponent<ClosestPlatform>(entity);
-		entityJSON["closestPlatform"]["isClosest"] = platform.isClosest;
+	if (ecs.hasComponent<ClosestPlatform>(entity)) {
+		auto& platform = ecs.getComponent<ClosestPlatform>(entity);
+		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
 	}
 
-	// Font Component
-	if (ecs.hasComponent<FontComponent>(entity))
-	{
-		FontComponent& fontComp = ecs.getComponent<FontComponent>(entity);
-		entityJSON["font"]["text"]["string"] = fontComp.text;
-		entityJSON["font"]["text"]["BoxWidth"] = fontComp.textBoxWidth;
-		entityJSON["font"]["textScale"]["scale"] = fontComp.textScale;
-		entityJSON["font"]["color"]["x"] = fontComp.color.GetX();
-		entityJSON["font"]["color"]["y"] = fontComp.color.GetY();
-		entityJSON["font"]["color"]["z"] = fontComp.color.GetZ();
-		entityJSON["font"]["fontId"]["fontName"] = fontComp.fontId;
+	if (ecs.hasComponent<AnimationComponent>(entity)) {
+		entityJSON["animation"] = { {"isAnimated", true} };
+	}
+
+	if (ecs.hasComponent<FontComponent>(entity)) {
+		auto& fontComp = ecs.getComponent<FontComponent>(entity);
+		entityJSON["font"] = nlohmann::ordered_json{
+			{"text", {
+				{"string", fontComp.text},
+				{"BoxWidth", fontComp.textBoxWidth}
+			}},
+			{"textScale", {
+				{"scale", fontComp.textScale}
+			}},
+			{"color", {
+				{"x", fontComp.color.GetX()},
+				{"y", fontComp.color.GetY()},
+				{"z", fontComp.color.GetZ()}
+			}},
+			{"fontId", {
+				{"fontName", fontComp.fontId}
+			}}
+		};
 	}
 
 	return entityJSON;
@@ -1175,18 +1343,11 @@ std::string DebugSystem::GenerateSaveJSONFile(int& saveNumber)
 	}
 
 	std::ofstream outFile(jsonPath);
-
-	if (outFile.is_open())
-	{
-		outFile << entitiesJSON.dump(2);
-		outFile.close();
-	}
-
-	else
-	{
+	if (!outFile.is_open()) {
 		std::cout << "Error: could not create file " << jsonPath << std::endl;
 		return "";
 	}
+	outFile.close();
 
 	return jsonPath;
 }
@@ -1204,93 +1365,100 @@ static bool LegacyKeyDuplicationCheck(ImGuiKey key) {
 }
 
 //Creates appropriate components based on object type
-void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, JSONSerializer& serializer, Entity entityObj, std::string entityId) {
-	if (!strcmp(items[itemIndex], "Enemy")) {
+void DebugSystem::ObjectCreationCondition(const char* items[], int itemIndex, Entity entityObj, std::string entityId) {
 
+	// Get transform for AABB calculations
+	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entityObj);
+
+	if (!strcmp(items[itemIndex], "Enemy")) {
+		// For a new enemy entity, set default values
 		EnemyComponent enemy{};
-		serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+		enemy.isEnemy = true;  // Set default for new enemy
 
 		MovementComponent movement{};
-		serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
+		movement.speed = 5.0f;  // Default speed
 
 		PhysicsComponent forces{};
+		forces.mass = 1.0f;
+		forces.gravityScale = { -0.98f, -0.98f };
+		forces.jump = 0.8f;
+		forces.dampening = 0.9f;
+		forces.maxVelocity = 0.0f;
+		forces.force.SetDirection({ 0.0f, 0.0f });
+		forces.force.SetMagnitude(0.05f);
 
-		myMath::Vector2D direction = forces.force.GetDirection();
-		float magnitude = forces.force.GetMagnitude();
-
-		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
-		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
-		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
-		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
-		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
-		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
-		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
-		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
-		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
-		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
-		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
-		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
-		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
-
-		forces.force.SetDirection(direction);
-		forces.force.SetMagnitude(magnitude);
+		// Calculate AABB based on transform
+		AABBComponent aabb{};
+		float halfWidth = transform.scale.GetX() / 2.0f;
+		float halfHeight = transform.scale.GetY() / 2.0f;
+		aabb.left = transform.position.GetX() - halfWidth;
+		aabb.right = transform.position.GetX() + halfWidth;
+		aabb.top = transform.position.GetY() + halfHeight;
+		aabb.bottom = transform.position.GetY() - halfHeight;
 
 		ecsCoordinator.addComponent(entityObj, enemy);
 		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, forces);
-
+		ecsCoordinator.addComponent(entityObj, aabb);
 	}
 	else if (!strcmp(items[itemIndex], "Player")) {
 
-		AABBComponent aabb{};
-		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
-		serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
-		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
-		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
-
 		AnimationComponent animation{};
-		serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
+		animation.isAnimated = true;
+
+		// Calculate AABB based on transform
+		AABBComponent aabb{};
+		float halfWidth = transform.scale.GetX() / 2.0f;
+		float halfHeight = transform.scale.GetY() / 2.0f;
+		aabb.left = transform.position.GetX() - halfWidth;
+		aabb.right = transform.position.GetX() + halfWidth;
+		aabb.top = transform.position.GetY() + halfHeight;
+		aabb.bottom = transform.position.GetY() - halfHeight;
 
 		PhysicsComponent forces{};
+		forces.mass = 1.0f;
+		forces.gravityScale = { 9.8f, 9.8f };
+		forces.jump = 0.0f;
+		forces.dampening = 0.9f;
+		forces.maxVelocity = 200.0f;
+		forces.force.SetDirection({ 0.0f, 0.0f });
+		forces.force.SetMagnitude(10.0f);
+		forces.maxAccumulatedForce = 40.0f;
 
-		myMath::Vector2D direction = forces.force.GetDirection();
-		float magnitude = forces.force.GetMagnitude();
-
-		serializer.ReadObject(forces.mass, entityId, "entities.forces.mass");
-		serializer.ReadObject(forces.gravityScale, entityId, "entities.forces.gravityScale");
-		serializer.ReadObject(forces.jump, entityId, "entities.forces.jump");
-		serializer.ReadObject(forces.dampening, entityId, "entities.forces.dampening");
-		serializer.ReadObject(forces.velocity, entityId, "entities.forces.velocity");
-		serializer.ReadObject(forces.maxVelocity, entityId, "entities.forces.maxVelocity");
-		serializer.ReadObject(forces.acceleration, entityId, "entities.forces.acceleration");
-		serializer.ReadObject(direction, entityId, "entities.forces.force.direction");
-		serializer.ReadObject(magnitude, entityId, "entities.forces.force.magnitude");
-		serializer.ReadObject(forces.accumulatedForce, entityId, "entities.forces.accumulatedForce");
-		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
-		serializer.ReadObject(forces.prevForce, entityId, "entities.forces.prevForces");
-		serializer.ReadObject(forces.targetForce, entityId, "entities.forces.targetForce");
-
-		forces.force.SetDirection(direction);
-		forces.force.SetMagnitude(magnitude);
-
-		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, animation);
+		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, forces);
-
 	}
 	else if (!strcmp(items[itemIndex], "Platform")) {
-
+		// Calculate AABB based on transform
 		AABBComponent aabb{};
-		serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
-		serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
-		serializer.ReadObject(aabb.top, entityId, "entities.aabb.top");
-		serializer.ReadObject(aabb.bottom, entityId, "entities.aabb.bottom");
+		float halfWidth = transform.scale.GetX() / 2.0f;
+		float halfHeight = transform.scale.GetY() / 2.0f;
+		aabb.left = transform.position.GetX() - halfWidth;
+		aabb.right = transform.position.GetX() + halfWidth;
+		aabb.top = transform.position.GetY() + halfHeight;
+		aabb.bottom = transform.position.GetY() - halfHeight;
 
 		ClosestPlatform closestPlatform{};
-		serializer.ReadObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
+		closestPlatform.isClosest = (transform.orientation.GetX() == 0); // Set true only for flat platform
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, closestPlatform);
+	}
+	else if (!strcmp(items[itemIndex], "TextBox")) {
+		// Calculate AABB based on transform
+		FontComponent fontComp{};
+		fontComp.text = textBuffer;
+		fontComp.textScale = textScale;
+		fontComp.fontId = "Journey";
+		fontComp.textBoxWidth = textBoxMinLimit;
+		fontComp.color.SetX(1);
+		fontComp.color.SetY(2);
+		fontComp.color.SetZ(3);
 
+		ecsCoordinator.addComponent(entityObj, fontComp);
+	}
+	else if (!strcmp(items[itemIndex], "Background")) {
+		
 	}
 }

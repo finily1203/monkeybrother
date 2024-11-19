@@ -71,6 +71,21 @@ public:
 	std::map<std::string, std::string> m_FontPaths;
 	std::map<std::string, std::map<char, Character>> m_Fonts;
 
+	//For Drag and Drop files from file explorer
+	void handleDropFile(std::string filePath);
+	bool checkIfAssetListChanged() const;
+	std::vector<std::string> getAssetList() const;
+
+	//When adding in new assets
+	void AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath);
+
+	//For asset browser
+	const std::map<std::string, GLuint>& getTextureList() const;
+	const std::map<std::string, std::unique_ptr<Shader>>& getShaderList() const;
+	const std::map<std::string, FMOD::Sound*>& getAudioList() const;
+	const std::map<std::string, std::map<char, Character>>& getFontList() const;
+
+
 
 private:
 	FMOD::System* audSystem;
@@ -79,5 +94,9 @@ private:
 	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
 	std::map<std::string, FMOD::Sound*> m_Audio;
 
+	std::vector<std::string> m_AssetList;
+
 	int m_textureWidth, m_textureHeight, nrChannels;
+
+	bool hasAssetsListChanged;
 };

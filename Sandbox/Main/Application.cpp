@@ -15,7 +15,6 @@ File Contributions: Joel Chu (50%)
 #include "GlfwFunctions.h"
 #include "Engine.h"
 #include "ECSCoordinator.h"
-#include "AudioSystem.h"
 #include "GlobalCoordinator.h"
 #include "Crashlog.h"
 
@@ -58,8 +57,8 @@ int main() {
 
 		engine->addSystem(&assetsManager);
 
-		AudioSystem* audioSystem = new AudioSystem();
-		engine->addSystem(audioSystem);
+		//AudioSystem* audioSystem = new AudioSystem();
+		engine->addSystem(&audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
 

@@ -43,6 +43,7 @@ void SystemManager::entitySigChange(Entity entity, ComponentSig entitySig) {
 
 void SystemManager::update() {
 	for (auto const& pair : Systems) {
+
 		auto const& system = pair.second;
 		if (system->getSystemECS() == "PhysicsColliSystemECS") {
 			debugSystem.StartSystemTiming("PhysicsColliSystemECS");

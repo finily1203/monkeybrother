@@ -38,6 +38,7 @@
     <ClCompile Include="Graphics\FontSystem.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="Graphics\CameraSystem2D.cpp" />
+    <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -89,6 +90,7 @@
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="Graphics\FontSystem.h" />
     <ClInclude Include="Components\ButtonComponent.h" />
+    <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

@@ -125,6 +125,7 @@ void GLFWFunctions::callEvents() {
     glfwSetMouseButtonCallback(GLFWFunctions::pWindow, GLFWFunctions::mouseButtonEvent);
     glfwSetCursorPosCallback(GLFWFunctions::pWindow, GLFWFunctions::cursorPositionEvent);
     glfwSetScrollCallback(GLFWFunctions::pWindow, GLFWFunctions::scrollEvent);
+    glfwSetDropCallback(GLFWFunctions::pWindow, GLFWFunctions::dropEvent);
 }
 
 //Handle keyboard events
@@ -363,24 +364,15 @@ void GLFWFunctions::getFps() {
 
 }
 
+void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
+    (void)window;
+    for (int i = 0; i < count; i++) {
+        std::string filePath = paths[i];
+        assetsManager.handleDropFile(filePath);
+    }
+}
+
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
 }
-
-// Input state functions
-//bool GLFWFunctions::isKeyPressed(Key key) {
-//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
-//}
-//
-//bool GLFWFunctions::isKeyReleased(Key key) {
-//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
-//}
-//
-//bool GLFWFunctions::isKeyHeld(Key key) {
-//    return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
-//}
-//
-//bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
-//    return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
-//}
