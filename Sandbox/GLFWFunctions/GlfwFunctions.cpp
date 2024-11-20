@@ -265,7 +265,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
             glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
 
             float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY) - 55.f;
+            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
             handleMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
         }
     }
@@ -309,8 +309,8 @@ void GLFWFunctions::handleMouseClick(GLFWwindow* window, double mouseX, double m
 
             if (ecsCoordinator.getEntityID(entity) == "quitButton" && mouseIsOverButton(mouseX, mouseY, transform))
             {
-                std::cout << "Button clicked!" << std::endl;
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
+                std::cout << "Quit Button clicked!" << std::endl;
+                //glfwSetWindowShouldClose(window, GLFW_TRUE);
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "retryButton" && mouseIsOverButton(mouseX, mouseY, transform))
@@ -323,10 +323,11 @@ void GLFWFunctions::handleMouseClick(GLFWwindow* window, double mouseX, double m
 
 bool GLFWFunctions::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
 {
-    float buttonLeft = transform.position.GetX() - transform.scale.GetX() / 2.f;
-    float buttonRight = transform.position.GetX() + transform.scale.GetX() / 2.f;
-    float buttonTop = transform.position.GetY() + transform.scale.GetY() / 2.f;
-    float buttonBottom = transform.position.GetY() - transform.scale.GetY() / 2.f;
+    const float scaler = 0.7f;
+    float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scaler / 2.f;
+    float buttonRight = transform.position.GetX() + transform.scale.GetX() * scaler / 2.f;
+    float buttonTop = transform.position.GetY() + transform.scale.GetY() * scaler / 2.f;
+    float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scaler / 2.f;
 
     std::cout << "Mouse X: " << mouseX << " | Left: " << buttonLeft << " | Right: " << buttonRight << std::endl;
     std::cout << "Mouse Y: " << mouseY << " | Top: " << buttonTop << " | Bottom: " << buttonBottom << std::endl;
