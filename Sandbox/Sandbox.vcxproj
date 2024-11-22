@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;$(SolutionDir)Sandbox\SystemECS\Scripts;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -84,7 +84,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;$(SolutionDir)Sandbox\SystemECS\Scripts;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,10 +143,12 @@
     <ClCompile Include="MessageSystem\observable.cpp" />
     <ClCompile Include="MessageSystem\observer.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
+    <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
+    <ClCompile Include="SystemECS\PlayerBehaviour.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +162,7 @@
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
+    <ClInclude Include="Components\PlayerComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\Debug.h" />
@@ -193,11 +196,13 @@
     <ClInclude Include="MessageSystem\observer.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
+    <ClInclude Include="SystemECS\EnemyBehaviour.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
+    <ClInclude Include="SystemECS\PlayerBehaviour.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

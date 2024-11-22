@@ -23,6 +23,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "FontSystemECS.h"
 #include "GraphicsSystem.h"
+
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+
 #include <Windows.h>
 
 #include "GlobalCoordinator.h"
@@ -120,12 +124,12 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		std::string entityId = entityData["id"].get<std::string>();
 
 		//FOR NOW WE DO ASSIGNING OF BEHAVIOUR FOR PLAYER MANUALLY
-		if (entityId == "player") {
-			logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
-			//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
-			//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
-		}
+		//if (entityId == "player") {
+		//	logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+		//	//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
+		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
+		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
+		//}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -172,6 +176,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
 			ecs.addComponent(entityObj, animation);
+		}
+
+		if (entityData.contains("player")) {
+			PlayerComponent player{};
+			serializer.ReadObject(player.isPlayer, entityId, "entities.player.isPlayer");
+
+			ecs.addComponent(entityObj, player);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 		}
 
 		if (entityData.contains("enemy"))
@@ -377,6 +390,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<EnemyComponent>();
 	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
+	registerComponent<PlayerComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

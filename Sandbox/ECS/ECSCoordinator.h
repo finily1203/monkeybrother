@@ -41,6 +41,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "EnemyComponent.h"
 #include "PhysicsComponent.h"
 #include "FontComponent.h"
+#include "PlayerComponent.h"
 
 #include <iostream>
 #include <fstream>

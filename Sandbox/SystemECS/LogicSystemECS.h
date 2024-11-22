@@ -22,21 +22,6 @@ public:
 	virtual void update(Entity entity, float dt) = 0;
 };
 
-class PlayerBehaviour : public BehaviourECS {
-public:
-	void update(Entity entity, float dt) override;
-};
-
-class EnemyBehaviour : public BehaviourECS {
-public:
-	void update(Entity entity, float dt) override;
-};
-
-//class CameraBehaviour : public BehaviourECS {
-//public:
-//	void update(Entity entity, float dt) override;
-//};
-
 class LogicSystemECS : public System
 {
 public:
