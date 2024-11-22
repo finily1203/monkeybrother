@@ -1,0 +1,87 @@
+>Custom Input and Usage:
+---------------------------------------------------------------
+| Key | Function                                              |
+---------------------------------------------------------------
+|  1  | Enable/Disable Debug & Level Editor mode (ImGui GUI)  |
+|  P  | Pause/ Play audio                                     |
+|  N  | Change to next audio                                  |
+|  ,  | Decrease audio volume                                 |
+|  .  | Increase audio volume                                 |
+|  9  | Play audio effect (Bubble button)                     |
+|  0  | Play audio effect (Bubble single)                     |
+|  ←  | Enemy object rotate anti-clockwise                    |
+|  →  | Enemy object rotate clockwise                         |
+|  ↑  | Enemy object scale increase                           |
+|  ↓  | Enemy object scale decrease                           |
+|  I  | Enemy object move up                                  |
+|  K  | Enemy object move down                                |
+|  J  | Enemy object move left                                |
+|  L  | Enemy object move right                               |
+|  Q  | Rotate environment anti-clockwise                     |
+|  E  | Rotate environment clockwise                          |
+|Space| Player object jump (only when angled against platform)|
+|  2  | Change camera mode                                    |
+|  Z  | Camera zoom in                                        |
+|  X  | Camera zoom out                                       |
+|  W  | Camera pan up (static camera mode)                    |
+|  S  | Camera pan down (static camera mode)                  |
+|  A  | Camera pan left (static camera mode)                  |
+|  D  | Camera pan right (static camera mode)                 |
+| Esc | Exit application                                      |
+---------------------------------------------------------------
+
+>Editor Guide (Press numpad "1" to access)
+===============================================================================================
+| Features         |                                                                          |
+===============================================================================================
+| Performance Data | Include application FPS that updates in real-time                        |
+|                  | Include Performance Viewer that displays all active systems and their    |
+|                  | game loop percentages. Allows users to determine the bottlenecks         |
+-----------------------------------------------------------------------------------------------
+| Input Data       | Displays mouse cursor position.                                          |
+|                  | Displays mouse and key inputs when pressed                               |
+-----------------------------------------------------------------------------------------------
+| Game Viewport    | Includes "Reset Perspective", "Zoom", and "Pan" buttons.                 |
+| Controls         | "Zoom"  > Enable zoom in and out the game scene.                         |
+|                  | "Pan"   > Enable panning for game scene.                                 |
+|                  | "Reset Perspective" > Reset the game scene to its original magnification |
+|                  | and position.                                                            |
+-----------------------------------------------------------------------------------------------
+| Object Creation  | Displays the total number of existing objects.                           |
+|                  | Allow user to choose which object type to create ("Player", "Enemy",     |
+|                  | "Platform", "TextBox").                                                  |
+|                  | Name the object.                                                         |
+|                  | Set the quantity of objects to be created ("Player", "Enemy", "Platform")|
+|                  | Set text box information ("TextBox")                                     |
+|                  | Set scale ("TextBox")                                                    |
+|                  | Set X | Y Coordinates                                                    |
+|                  | "Create Entity"     > Create object according to the set coordinates     |
+|                  | "Random"            > Create object with random coordinates              |
+|                  | "Remove all Entity" > Destroy all existing objects                       |
+-----------------------------------------------------------------------------------------------
+| Hierarchy List   | Display all current existing game objects                                |
+|                  | Allows independent data modification for every game object               |
+|                  | "Remove" > Delete the selected game object                               |
+-----------------------------------------------------------------------------------------------
+| Console          | Allow an alternative channel to output debugging information             |
+|                  | "Clear" > Delete current logs                                            |
+|                  | "Copy"  > Copy current logs to clipboard                                 |
+-----------------------------------------------------------------------------------------------
+| Docking          | Allow user to shift and snap all ImGui window around the application     |
+-----------------------------------------------------------------------------------------------
+
+>Create new level file
+- Press numpad 1 to enter level editor
+- Proceed to object creation and clear all entities (Dont use the original save data cuz got some bugs)
+- Build level with object creation
+- Edit entities' data with hierarchy list
+- Once done, scroll to the bottom of hierarchy list and click save
+- Choose a slot you wish to save current level in ("Clear" button is to clear all data from that specific save)
+- Click load to load the slot of your choice (max 5 save slots)
+
+>IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- Only create ONE background type and must be named "background"
+- Only create ONE player type and must be named "player"
+- ALL entities must have a unique name regardless of types (wall1, wall2, wall3, enemy, fish, man etc.)
+
+
