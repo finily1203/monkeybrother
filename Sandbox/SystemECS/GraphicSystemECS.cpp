@@ -125,7 +125,7 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
             }
 
-            else
+            else if (ecsCoordinator.getEntityID(entity) == "retryButton")
             {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
             }

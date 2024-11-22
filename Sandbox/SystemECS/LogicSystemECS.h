@@ -32,18 +32,16 @@ public:
 	void update(Entity entity, float dt) override;
 };
 
-class OnClickBehaviour : public BehaviourECS {
+class MouseBehaviour : public BehaviourECS {
 public:
 	void update(Entity entity, float dt) override;
-	void updateWithMouse(GLFWwindow* window, double mouseX, double mouseY);
+	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
+	void onMouseHover(double mouseX, double mouseY);
 
+private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
-};
 
-//class CameraBehaviour : public BehaviourECS {
-//public:
-//	void update(Entity entity, float dt) override;
-//};
+};
 
 class LogicSystemECS : public System
 {

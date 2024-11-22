@@ -205,8 +205,10 @@ void LogicSystemECS::cleanup() {}
 //}
 
 void LogicSystemECS::update(float dt) {
-	for (auto& [entity, behaviour] : behaviours) {
-		behaviour->update(entity, dt);
+	for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+		if (behaviours.find(entity) != behaviours.end()) {
+			behaviours[entity]->update(entity, dt);
+		}
 	}
 }
 
@@ -378,20 +380,29 @@ void EnemyBehaviour::update(Entity entity, float dt) {
 	ePos.SetY(ePos.GetY() + eVel.GetY());
 }
 
-void OnClickBehaviour::update(Entity entity, float dt)
-{
-	TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+void MouseBehaviour::update(Entity entity, float dt) {
+	if (glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_HOVERED))
+	{
+		double mouseX{}, mouseY{};
+		int windowWidth{}, windowHeight{};
+		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
 
+		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+		float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+		onMouseHover(static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+	}
 
+	(void)entity;
+	(void)dt;
 }
 
-void OnClickBehaviour::updateWithMouse(GLFWwindow* window, double mouseX, double mouseY)
+void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mouseY)
 {
 	for (auto& entity : ecsCoordinator.getAllLiveEntities())
 	{
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
-			ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
 			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
@@ -418,16 +429,36 @@ void OnClickBehaviour::updateWithMouse(GLFWwindow* window, double mouseX, double
 	}
 }
 
-bool OnClickBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
+void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 {
-	float const scalar = 0.65f;
+	for (auto& entity : ecsCoordinator.getAllLiveEntities())
+	{
+		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+			if (mouseIsOverButton(mouseX, mouseY, transform))
+			{
+				transform.scale.SetX(240.f);
+				transform.scale.SetY(120.f);
+			}
+
+			else
+			{
+				transform.scale.SetX(200.f);
+				transform.scale.SetY(100.f);
+			}
+		}
+	}
+}
+
+bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
+{
+	float const scalar = 0.7f;
     float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 2.f;
     float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 2.f;
     float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
     float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
-
-    std::cout << "Mouse X: " << mouseX << " | Left: " << buttonLeft << " | Right: " << buttonRight << std::endl;
-    std::cout << "Mouse Y: " << mouseY << " | Top: " << buttonTop << " | Bottom: " << buttonBottom << std::endl;
 
     return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
 }

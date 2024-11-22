@@ -128,7 +128,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		if (entityId == "quitButton" || entityId == "retryButton")
 		{
-			logicSystemRef->assignBehaviour(entityObj, std::make_shared<OnClickBehaviour>());
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
 		}
 
 		// read all of the data from the JSON object and assign the data
