@@ -378,6 +378,60 @@ void EnemyBehaviour::update(Entity entity, float dt) {
 	ePos.SetY(ePos.GetY() + eVel.GetY());
 }
 
+void OnClickBehaviour::update(Entity entity, float dt)
+{
+	TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+
+}
+
+void OnClickBehaviour::updateWithMouse(GLFWwindow* window, double mouseX, double mouseY)
+{
+	for (auto& entity : ecsCoordinator.getAllLiveEntities())
+	{
+		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
+		{
+			ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+			if (mouseIsOverButton(mouseX, mouseY, transform))
+			{
+				if (ecsCoordinator.getEntityID(entity) == "quitButton")
+				{
+					std::cout << "QUIT Button clicked" << std::endl;
+					glfwSetWindowShouldClose(window, GLFW_TRUE);
+				}
+
+				else if (ecsCoordinator.getEntityID(entity) == "retryButton")
+				{
+					std::cout << "RETRY Button clicked" << std::endl;
+
+					for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+					{
+						ecsCoordinator.destroyEntity(currEntity);
+					}
+
+					ecsCoordinator.test5();
+				}
+			}
+		}
+	}
+}
+
+bool OnClickBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
+{
+	float const scalar = 0.65f;
+    float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 2.f;
+    float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 2.f;
+    float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
+    float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
+
+    std::cout << "Mouse X: " << mouseX << " | Left: " << buttonLeft << " | Right: " << buttonRight << std::endl;
+    std::cout << "Mouse Y: " << mouseY << " | Top: " << buttonTop << " | Bottom: " << buttonBottom << std::endl;
+
+    return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
+}
+
 //camera behaviour should only be affected by one entity
 //void CameraBehaviour::update(Entity entity, float dt) {
 //

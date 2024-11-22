@@ -51,9 +51,6 @@ struct GLFWFunctions {
 	//Handle window to check for events
 	static void callEvents();
 
-	static void handleMouseClick(GLFWwindow* window, double mouseX, double mouseY);
-	static bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
-
 	//terminates the window
 	static void glfwCleanup();
 

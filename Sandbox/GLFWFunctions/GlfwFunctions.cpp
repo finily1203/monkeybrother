@@ -19,6 +19,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "GUIGameViewport.h"
 #include "GlobalCoordinator.h"
+#include "LogicSystemECS.h"
 #include <algorithm>
 #include <iostream>
 //#include <chrono>
@@ -259,14 +260,15 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
         if (mappedButton == MouseButton::left)
         {
+            OnClickBehaviour click;
             double mouseX{}, mouseY{};
             int windowWidth{}, windowHeight{};
             glfwGetCursorPos(pWindow, &mouseX, &mouseY);
             glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
 
             float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY) - 55.f;
-            handleMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+            click.updateWithMouse(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
         }
     }
     else if (action == GLFW_RELEASE) {
@@ -295,44 +297,7 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
 #endif
 }
 
-void GLFWFunctions::handleMouseClick(GLFWwindow* window, double mouseX, double mouseY)
-{
-    ButtonComponent button{};
-    TransformComponent transform{};
 
-    for (auto entity : ecsCoordinator.getAllLiveEntities())
-    {
-        if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
-        {
-            button = ecsCoordinator.getComponent<ButtonComponent>(entity);
-            transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" && mouseIsOverButton(mouseX, mouseY, transform))
-            {
-                std::cout << "Button clicked!" << std::endl;
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
-            }
-
-            else if (ecsCoordinator.getEntityID(entity) == "retryButton" && mouseIsOverButton(mouseX, mouseY, transform))
-            {
-                std::cout << "RETRY Button is clicked!" << std::endl;
-            }
-        }
-    }
-}
-
-bool GLFWFunctions::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
-{
-    float buttonLeft = transform.position.GetX() - transform.scale.GetX() / 2.f;
-    float buttonRight = transform.position.GetX() + transform.scale.GetX() / 2.f;
-    float buttonTop = transform.position.GetY() + transform.scale.GetY() / 2.f;
-    float buttonBottom = transform.position.GetY() - transform.scale.GetY() / 2.f;
-
-    std::cout << "Mouse X: " << mouseX << " | Left: " << buttonLeft << " | Right: " << buttonRight << std::endl;
-    std::cout << "Mouse Y: " << mouseY << " | Top: " << buttonTop << " | Bottom: " << buttonBottom << std::endl;
-
-    return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
-}
 
 //Caluclate the FPS and delta_time to be used
 void GLFWFunctions::getFps() {

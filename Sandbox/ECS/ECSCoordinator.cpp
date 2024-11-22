@@ -34,7 +34,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
 	componentManager = std::make_unique<ComponentManager>();
-	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
 }
 
@@ -125,6 +124,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
 			//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
 			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
+		}
+
+		if (entityId == "quitButton" || entityId == "retryButton")
+		{
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<OnClickBehaviour>());
 		}
 
 		// read all of the data from the JSON object and assign the data
