@@ -72,6 +72,7 @@ void GameViewWindow::Update() {
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
+		//GLFWFunctions::allow_camera_movement = !GLFWFunctions::allow_camera_movement;
 		TogglePause();
 	}
 
@@ -92,6 +93,12 @@ void GameViewWindow::Update() {
 	if (insideViewport && clickedZoom) {
 		zoomLevel = std::min(GameViewWindow::MAX_ZOOM, std::max(GameViewWindow::MIN_ZOOM, newZoomLevel));
 	}
+
+	/*if (insideViewport && clickedZoom) {
+		
+		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * 0.1f);
+		
+	}*/
 
 	Console::GetLog() << "zoomLevel " << GameViewWindow::zoomLevel << " MAX_ZOOM " << GameViewWindow::MAX_ZOOM
 		<< std::endl;
@@ -136,12 +143,13 @@ void GameViewWindow::Cleanup() {
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
-	if (viewportTexture != 0) {
+		if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 	}
 
 	glGenTextures(1, &viewportTexture);
-
+	viewportWidth = GLFWFunctions::windowWidth;
+	viewportHeight = GLFWFunctions::windowHeight;
 	glBindTexture(GL_TEXTURE_2D, viewportTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewportWidth, viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -152,61 +160,15 @@ void GameViewWindow::SetupViewportTexture() {
 GLuint GameViewWindow::pausedTexture = 0;
 
 void GameViewWindow::CaptureMainWindow() {
-	if (isPaused) {
-		if (pausedTexture == 0) {
-			// Create new texture for storing the paused frame
-			glGenTextures(1, &pausedTexture);
-			glBindTexture(GL_TEXTURE_2D, pausedTexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewportWidth, viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			// Copy from the back buffer to our pause texture
-			GLint previousBuffer;
-			glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
-			glReadBuffer(GL_BACK);
+	glBindTexture(GL_TEXTURE_2D, viewportTexture);
 
-			// Bind pause texture and copy the current frame
-			glBindTexture(GL_TEXTURE_2D, pausedTexture);
-			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, viewportWidth, viewportHeight, 0);
+	GLint previousBuffer;
+	glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
 
-			// Restore previous state
-			glReadBuffer(previousBuffer);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		// Copy the paused texture to the viewport texture
-		glBindTexture(GL_TEXTURE_2D, viewportTexture);
-
-		// Get the pixels from pausedTexture
-		std::vector<unsigned char> pixels(viewportWidth * viewportHeight * 3);
-		glBindTexture(GL_TEXTURE_2D, pausedTexture);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-
-		// Put them in viewportTexture
-		glBindTexture(GL_TEXTURE_2D, viewportTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewportWidth, viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	else {
-		if (pausedTexture != 0) {
-			glDeleteTextures(1, &pausedTexture);
-			pausedTexture = 0;
-		}
-
-		// Normal capture for unpaused state
-		glBindTexture(GL_TEXTURE_2D, viewportTexture);
-
-		GLint previousBuffer;
-		glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
-		glReadBuffer(GL_BACK);
-
-		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, viewportWidth, viewportHeight, 0);
-
-		glReadBuffer(previousBuffer);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	glReadBuffer(GL_BACK);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, viewportWidth, viewportHeight, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //Function scale real time game scene to the size of the game viewport window

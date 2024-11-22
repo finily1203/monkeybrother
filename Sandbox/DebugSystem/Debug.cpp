@@ -106,6 +106,7 @@ int DebugSystem::minEntitesToCreate;
 char DebugSystem::numBuffer[MAXBUFFERSIZE];
 char DebugSystem::sigBuffer[MAXNAMELENGTH];
 char DebugSystem::textBuffer[MAXTEXTSIZE];
+char modifyTextBuffer[MAXTEXTSIZE];
 char DebugSystem::textScaleBuffer[MAXBUFFERSIZE];
 char DebugSystem::xCoordinatesBuffer[MAXBUFFERSIZE];
 char DebugSystem::yCoordinatesBuffer[MAXBUFFERSIZE];
@@ -527,6 +528,15 @@ void DebugSystem::update() {
 						float fontColorR = fontComp.color.GetX();
 						float fontColorG = fontComp.color.GetY();
 						float fontColorB = fontComp.color.GetZ();
+						size_t maxSize = 1000;
+						std::string tempStr = fontComp.text;
+
+						size_t length = std::min(tempStr.length(), maxSize);
+						for (size_t i = 0; i < length; i++)
+						{
+							textBuffer[i] = tempStr[i];
+						}
+						
 
 						ImGui::PushID(entity);
 						if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
@@ -565,6 +575,12 @@ void DebugSystem::update() {
 							if (ImGui::SliderFloat("Text Box", &textBoxSlide, textBoxMinLimit, textBoxMaxLimit, "%.1f")) {
 								fontComp.textBoxWidth = textBoxSlide;
 							}
+
+							ImGui::SetNextItemWidth(objAttributeSliderMaxLength);  // Set width of input field
+							ImGui::InputText("##Text", textBuffer, IM_ARRAYSIZE(textBuffer));
+							ImGui::SameLine();
+							ImGui::Text("Text");
+							fontComp.text = textBuffer;
 							if (ImGui::Button("Remove")) {
 								ecsCoordinator.destroyEntity(entity);
 							}
@@ -940,25 +956,194 @@ void DebugSystem::update() {
 			ImGuiWindowFlags_NoScrollWithMouse);
 		GameViewWindow::Update(); //Game viewport system
 		ImGui::End();
+
 		ImVec2 mouseWorldPos = GameViewWindow::GetMouseWorldPosition();
-		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.getEntityID(entity) == "enemy") {
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				float radius = transform.scale.GetX() / 2.0f;
+		static int selectedEntityID = -1; // -1 means no entity is selected
+		static int draggedEntityID = -1;  // -1 means no entity is being dragged
+		static int chosenEntityID = -1;   // Entity selected for potential deletion
+		bool openDeletePopup = false;
 
-				float dx = mouseWorldPos.x - transform.position.GetX();
-				float dy = mouseWorldPos.y - transform.position.GetY();
-				float distSq = dx * dx + dy * dy;
+		// Inspector Window
+		if (ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoMove)) {
+			if (selectedEntityID != -1) {
+				std::string entityID = ecsCoordinator.getEntityID(selectedEntityID);
 
-				Console::GetLog() << "Mouse World: (" << mouseWorldPos.x << ", " << mouseWorldPos.y << ")\n"
-					<< "Enemy Pos: (" << transform.position.GetX() << ", " << transform.position.GetY() << ")\n"
-					<< "Delta: (" << dx << ", " << dy << ")\n"
-					<< "Distance^2: " << distSq << " <= " << (radius * radius) << " (radius^2)\n";
+				// Only show inspector for non-background entities
+				if (entityID != "placeholderentity") {
+					ImGui::Text("Entity: %s", entityID.c_str());
+					ImGui::Separator();
 
-				if (distSq <= (radius * radius)) {
-					Console::GetLog() << "HIT" << std::endl;
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+
+					// Create local variables for the sliders
+					float posXSlide = transform.position.GetX();
+					float posYSlide = transform.position.GetY();
+					float orientationSlide = transform.orientation.GetX();
+					objWidthSlide = transform.scale.GetX();
+					objHeightSlide = transform.scale.GetY();
+
+					// Create a unique ID stack for this entity
+					ImGui::PushID(entityID.c_str());  // Use string ID instead of numeric ID
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					if (ImGui::SliderFloat("X", &posXSlide, coordinateMinLimitsX, coordinateMaxLimitsX, "%.1f")) {
+						transform.position.SetX(posXSlide);
+					}
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					if (ImGui::SliderFloat("Y", &posYSlide, coordinateMinLimitsY, coordinateMaxLimitsY, "%.1f")) {
+						transform.position.SetY(posYSlide);
+					}
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					if (ImGui::SliderFloat("Orientation", &orientationSlide, orientationMinLimit, orientationMaxLimit, "%.1f")) {
+						transform.orientation.SetX(orientationSlide);
+					}
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					if (ImGui::SliderFloat("Width", &objWidthSlide, objSizeXMin, objSizeXMax, "%.1f")) {
+						transform.scale.SetX(objWidthSlide);
+					}
+
+					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);
+					if (ImGui::SliderFloat("Height", &objHeightSlide, objSizeYMin, objSizeYMax, "%.1f")) {
+						transform.scale.SetY(objHeightSlide);
+					}
+
+					if (ImGui::Button("Remove")) {
+						ecsCoordinator.destroyEntity(selectedEntityID);
+						selectedEntityID = -1;  // Reset selection after deletion
+					}
+
+					ImGui::PopID();
+					ImGui::Separator();
 				}
 			}
+			else {
+				ImGui::Text("No entity selected");
+			}
+		}
+		ImGui::End();
+
+		// Function to check if mouse is over entity
+		auto isMouseOverEntity = [&](int entity, float& outDistSq) -> bool {
+			auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			float radiusX = transform.scale.GetX() / 2.0f;
+			float radiusY = transform.scale.GetY() / 2.0f;
+			float dx = mouseWorldPos.x - transform.position.GetX();
+			float dy = mouseWorldPos.y - transform.position.GetY();
+			outDistSq = dx * dx + dy * dy;
+			return outDistSq <= (radiusX * radiusY);
+			};
+
+		// Handle entity selection
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			bool entityFound = false;
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				// Skip background AND placeholder entities during selection
+				if (ecsCoordinator.getEntityID(entity) != "background" &&
+					ecsCoordinator.getEntityID(entity) != "placeholderentity") {
+					float distSq;
+					if (isMouseOverEntity(entity, distSq)) {
+						selectedEntityID = entity;
+						draggedEntityID = entity;
+						entityFound = true;
+						break;
+					}
+				}
+			}
+			if (!entityFound) {
+				selectedEntityID = -1;
+			}
+		}
+
+		// Handle entity dragging
+		if (draggedEntityID != -1) {
+			if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
+				transform.position.SetX(mouseWorldPos.x);
+				transform.position.SetY(mouseWorldPos.y);
+			}
+			else {
+				draggedEntityID = -1;
+			}
+		}
+
+		// Handle right-click deletion
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				if (ecsCoordinator.getEntityID(entity) != "background") {
+					float distSq;
+					if (isMouseOverEntity(entity, distSq)) {
+						chosenEntityID = entity;
+						openDeletePopup = true;
+						break;
+					}
+				}
+			}
+		}
+
+		// Handle mouse wheel scaling
+		if (ImGui::GetIO().MouseWheel != 0.0f) {
+			float wheel_delta = ImGui::GetIO().MouseWheel;
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				if (ecsCoordinator.getEntityID(entity) != "background") {
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					float radiusX = transform.scale.GetX() / 2.0f;
+					float radiusY = transform.scale.GetY() / 2.0f;
+					float dx = mouseWorldPos.x - transform.position.GetX();
+					float dy = mouseWorldPos.y - transform.position.GetY();
+					float distSq = dx * dx + dy * dy;
+					float scaleFactor = 1.0f + (wheel_delta * 0.1f);
+
+					if (distSq <= (radiusX * radiusY)) {
+						// If CTRL is held, adjust width (X scale)
+						if (ImGui::GetIO().KeyCtrl) {
+							transform.scale.SetX(transform.scale.GetX() * scaleFactor);
+						}
+						// Otherwise adjust height (Y scale)
+						else {
+							transform.scale.SetY(transform.scale.GetY() * scaleFactor);
+						}
+					}
+				}
+			}
+		}
+
+		// Create and handle the delete confirmation popup
+		if (openDeletePopup) {
+			ImGui::OpenPopup("Delete Entity?");
+			openDeletePopup = false;
+		}
+
+		// Always center this window when appearing
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+		if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Are you sure you want to delete this entity?");
+			ImGui::Separator();
+
+			if (ImGui::Button("Delete", ImVec2(120, 0))) {
+				if (chosenEntityID != -1) {
+					if (chosenEntityID == selectedEntityID) {
+						selectedEntityID = -1;
+					}
+					if (chosenEntityID == draggedEntityID) {
+						draggedEntityID = -1;
+					}
+					ecsCoordinator.destroyEntity(chosenEntityID);
+					chosenEntityID = -1;
+				}
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SetItemDefaultFocus();
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+				chosenEntityID = -1;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 
 		ImGui::Begin("Console");

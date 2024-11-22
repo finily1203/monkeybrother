@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <GLFW/glfw3.h>  // Then GLFW
 #include "SystemManager.h"
 #include "GlobalCoordinator.h"
+#include "GUIGameViewport.h"
 
 void SystemManager::entityRemoved(Entity entity) {
 	//erase entity from all systems
@@ -45,6 +46,11 @@ void SystemManager::update() {
 	for (auto const& pair : Systems) {
 
 		auto const& system = pair.second;
+		if (GameViewWindow::getPaused()) {
+			if (system->getSystemECS() == "LogicSystemECS" || system->getSystemECS() == "PhysicsColliSystemECS") {
+				continue;
+			}
+		}
 		if (system->getSystemECS() == "PhysicsColliSystemECS") {
 			debugSystem.StartSystemTiming("PhysicsColliSystemECS");
 		}

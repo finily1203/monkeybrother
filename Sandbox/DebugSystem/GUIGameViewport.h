@@ -27,6 +27,7 @@ File Contributions: Lew Zong Han Owen (90%)
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
+#include "GlobalCoordinator.h"
 
 //enum for creating game obj
 enum Specifier {
@@ -40,27 +41,41 @@ public:
 	static void TogglePause() { isPaused = !isPaused; }
 	static bool IsPaused() { return isPaused; }
 	static ImVec2 NormalizeViewportCoordinates(float screenX, float screenY) {
-		//myMath::Vector2D cameraPos = GlobalCoordinator::GetInstance().GetSystemManager().GetSystem<CameraSystem2D>()->getCameraPosition();
-		// Get mouse position relative to viewport
+		// Get viewport dimensions and position
 		ImVec2 aspectSize = GetLargestSizeForViewport();
-		float centerOffsetX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
-		float centerOffsetY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
+		ImVec2 viewPos = GetCenteredPosForViewport(aspectSize);
 
-		// Adjust viewport position to account for centering
-		float viewX = screenX - (viewportPos.x + centerOffsetX);
-		float viewY = screenY - (viewportPos.y + centerOffsetY);
+		myMath::Vector2D referencePos;
+		if (!GLFWFunctions::allow_camera_movement) {
+			// Camera is locked to player
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				if (ecsCoordinator.getEntityID(entity) == "player") {
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					referencePos = transform.position;
+					break;
+				}
+			}
+		}
+		else {
+			// Free camera movement - use global cameraSystem
+			referencePos = cameraSystem.getCameraPosition();
+		}
 
-		// Convert to normalized device coordinates (-1 to 1)
-		float ndcX = (2.0f * viewX / aspectSize.x) - 1.0f;
-		float ndcY = 1.0f - (2.0f * viewY / aspectSize.y);
+		// Calculate viewport-local coordinates
+		float viewX = screenX - (viewportPos.x + viewPos.x);
+		float viewY = screenY - (viewportPos.y + viewPos.y);
 
-		// Scale by zoom and apply pan offset
-		ndcX = (ndcX + accumulatedMouseDragDist.x / windowSize.x) / zoomLevel;
-		ndcY = (ndcY + accumulatedMouseDragDist.y / windowSize.y) / zoomLevel;
+		// Convert to normalized device coordinates (-1 to 1) relative to viewport center
+		float ndcX = (viewX / aspectSize.x) * 2.0f - 1.0f;
+		float ndcY = -((viewY / aspectSize.y) * 2.0f - 1.0f); // Flip Y-axis
 
-		// Convert to world coordinates based on your viewport size
-		float worldX = ndcX * (viewportWidth / 2.0f);
-		float worldY = ndcY * (viewportHeight / 2.0f);
+		// Convert to world coordinates relative to player position
+		float worldX = referencePos.GetX() + ((ndcX * viewportWidth) / (2.0f * zoomLevel));
+		float worldY = referencePos.GetY() + ((ndcY * viewportHeight) / (2.0f * zoomLevel));
+
+		// Apply pan offset
+		worldX += accumulatedMouseDragDist.x / (zoomLevel * aspectRatioXScale);
+		worldY -= accumulatedMouseDragDist.y / (zoomLevel * aspectRatioYScale);
 
 		return ImVec2(worldX, worldY);
 	}
@@ -75,28 +90,46 @@ public:
 	}
 	// Convert screen coordinates to viewport coordinates
 	static ImVec2 ScreenToViewport(float screenX, float screenY) {
+		ImVec2 aspectSize = GetLargestSizeForViewport();
+		ImVec2 viewPos = GetCenteredPosForViewport(aspectSize);
+
 		return ImVec2(
-			screenX - viewportPos.x,
-			screenY - viewportPos.y
+			screenX - (viewportPos.x + viewPos.x),
+			screenY - (viewportPos.y + viewPos.y)
 		);
 	}
 
 	// Convert viewport coordinates to game world coordinates
 	static ImVec2 ViewportToWorld(float viewportX, float viewportY) {
-		// Get the current viewport size and scale
 		ImVec2 size = GetLargestSizeForViewport();
 
-		// Calculate the viewport center offset (including pan)
-		float centerX = (windowSize.x / 2.0f) - (size.x / 2.0f) - accumulatedMouseDragDist.x;
-		float centerY = (windowSize.y / 2.0f) - (size.y / 2.0f) - accumulatedMouseDragDist.y;
+		myMath::Vector2D referencePos;
+		if (!GLFWFunctions::allow_camera_movement) {
+			// Camera is locked to player
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				if (ecsCoordinator.getEntityID(entity) == "player") {
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					referencePos = transform.position;
+					break;
+				}
+			}
+		}
+		else {
+			// Free camera movement - use global cameraSystem
+			referencePos = cameraSystem.getCameraPosition();
+		}
 
-		// Convert to normalized coordinates (-1 to 1)
-		float normalizedX = ((viewportX - centerX) / size.x) * 2.0f;
-		float normalizedY = ((viewportY - centerY) / size.y) * 2.0f;
+		// Calculate normalized coordinates relative to viewport center
+		float normalizedX = (viewportX / size.x) * 2.0f - 1.0f;
+		float normalizedY = -((viewportY / size.y) * 2.0f - 1.0f); // Flip Y-axis
 
-		// Apply zoom and aspect ratio
-		float worldX = normalizedX * (aspectRatioXScale / zoomLevel);
-		float worldY = normalizedY * (aspectRatioYScale / zoomLevel);
+		// Convert to world coordinates relative to player position
+		float worldX = referencePos.GetX() + ((normalizedX * viewportWidth) / (2.0f * zoomLevel));
+		float worldY = referencePos.GetY() + ((normalizedY * viewportHeight) / (2.0f * zoomLevel));
+
+		// Apply pan offset
+		worldX += accumulatedMouseDragDist.x / (zoomLevel * aspectRatioXScale);
+		worldY -= accumulatedMouseDragDist.y / (zoomLevel * aspectRatioYScale);
 
 		return ImVec2(worldX, worldY);
 	}
@@ -109,17 +142,40 @@ public:
 
 	// Helper method to check if world coordinates are in view
 	static bool IsWorldPointVisible(float worldX, float worldY) {
-		float viewWidth = aspectRatioXScale / zoomLevel;
-		float viewHeight = aspectRatioYScale / zoomLevel;
+		myMath::Vector2D referencePos;
+		if (!GLFWFunctions::allow_camera_movement) {
+			// Camera is locked to player
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				if (ecsCoordinator.getEntityID(entity) == "player") {
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					referencePos = transform.position;
+					break;
+				}
+			}
+		}
+		else {
+			// Free camera movement - use global cameraSystem
+			referencePos = cameraSystem.getCameraPosition();
+		}
+
+		// Convert world bounds to viewport space considering zoom and pan
+		float viewWidth = viewportWidth / zoomLevel;
+		float viewHeight = viewportHeight / zoomLevel;
+
+		// Calculate bounds relative to player position
+		float minX = referencePos.GetX() - viewWidth / 2;
+		float maxX = referencePos.GetX() + viewWidth / 2;
+		float minY = referencePos.GetY() - viewHeight / 2;
+		float maxY = referencePos.GetY() + viewHeight / 2;
 
 		// Account for panning
-		float panOffsetX = accumulatedMouseDragDist.x / (windowSize.x * zoomLevel);
-		float panOffsetY = accumulatedMouseDragDist.y / (windowSize.y * zoomLevel);
+		float panX = accumulatedMouseDragDist.x / (zoomLevel * aspectRatioXScale);
+		float panY = accumulatedMouseDragDist.y / (zoomLevel * aspectRatioYScale);
 
-		return worldX >= -viewWidth / 2 - panOffsetX &&
-			worldX <= viewWidth / 2 - panOffsetX &&
-			worldY >= -viewHeight / 2 - panOffsetY &&
-			worldY <= viewHeight / 2 - panOffsetY;
+		return worldX >= minX - panX &&
+			worldX <= maxX - panX &&
+			worldY >= minY + panY &&
+			worldY <= maxY + panY;
 	}
 
 	static void Initialise();
@@ -156,6 +212,8 @@ public:
 		if (value > max) return max;
 		return value;
 	}
+
+	static bool getPaused() { return isPaused; }
 
 private:
 	static int viewportWidth;

@@ -217,14 +217,16 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else if (action == GLFW_REPEAT) {
         keyState[mappedKey] = true;
     }
+    if (!GameViewWindow::getPaused()) {
+        if (keyState[Key::NUM_2])
+            allow_camera_movement = ~allow_camera_movement;
 
-    if (keyState[Key::NUM_2])
-        allow_camera_movement = ~allow_camera_movement;
-
-    if (keyState[Key::NUM_1]) {
-        debug_flag = ~debug_flag;
-        isGuiOpen = ~isGuiOpen;
+        if (keyState[Key::NUM_1]) {
+            debug_flag = ~debug_flag;
+            isGuiOpen = ~isGuiOpen;
+        }
     }
+    
 
     if (keyState[Key::P])
         audioPaused = ~audioPaused;

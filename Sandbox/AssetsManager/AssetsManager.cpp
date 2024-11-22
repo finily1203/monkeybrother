@@ -254,7 +254,7 @@ void AssetsManager::LoadAudioAssets() {
 
     for (const auto& audioAsset : jsonObj["audioAssets"])
     {
-        std::string audioName = audioAsset["audioName"].get<std::string>();
+        std::string audioName = audioAsset["id"].get<std::string>();
         std::string relativePath = audioAsset["filePath"].get<std::string>();
 
         std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
