@@ -75,11 +75,20 @@ GLboolean GLFWFunctions::audioPaused = false;
 GLboolean GLFWFunctions::audioStopped = false;
 GLboolean GLFWFunctions::audioNext = false;
 GLboolean GLFWFunctions::adjustVol = false;
+GLboolean GLFWFunctions::instantWin = false;
+GLboolean GLFWFunctions::instantLose = false;
+GLboolean GLFWFunctions::skipToNextLevel = false;
+GLboolean GLFWFunctions::skipToEnd = false;
+GLboolean GLFWFunctions::godMode = false;
+GLboolean GLFWFunctions::fullscreen = true;
+
 
 
 int GLFWFunctions::audioNum = 0;
 int GLFWFunctions::windowWidth = 0;
 int GLFWFunctions::windowHeight = 0;
+int GLFWFunctions::defultWindowWidth = 0;
+int GLFWFunctions::defultWindowHeight = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::firstCollision = false;
 
@@ -94,12 +103,31 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     if (!glfwInit())
         return false;
 
+    //// Set window hints for OpenGL version and profile
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Determine if fullscreen or windowed mode
+    GLFWmonitor* monitor = nullptr;
+    if (fullscreen) {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        windowWidth = mode->width;
+        windowHeight = mode->height;
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    }
+    else {
+        windowWidth = width;
+        windowHeight = height;
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // Make window non-resizable
+    }
     // Set the window width and height
-    windowWidth = width;
-    windowHeight = height;
+	defultWindowHeight = height;
+	defultWindowWidth = width;
 
     /* Create a windowed mode window and its OpenGL context */
-    GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    GLFWFunctions::pWindow = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
     if (!GLFWFunctions::pWindow)
     {
         glfwTerminate();
@@ -133,6 +161,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 	// unused parameters
 	(void)scancode;
 	(void)mods;
+	(void)window;
 
     Key mappedKey;
     switch (key) {
@@ -240,7 +269,78 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-	(void)window;
+    if (action == GLFW_PRESS) {
+        keyState[static_cast<Key>(key)] = true;
+
+        // Cheat codes
+        if (keyState[Key::G] && keyState[Key::O] && keyState[Key::D]) {
+            godMode = ~godMode;
+            std::cout << "God Mode: " << (godMode ? "ON" : "OFF") << std::endl;
+        }
+
+        if (keyState[Key::N] && keyState[Key::E] && keyState[Key::X] && keyState[Key::T]) {
+            skipToNextLevel = true;
+            std::cout << "Skip to Next Level" << std::endl;
+        }
+
+        if (keyState[Key::E] && keyState[Key::N] && keyState[Key::D]) {
+            skipToEnd = true;
+            std::cout << "Skip to End" << std::endl;
+        }
+
+        if (keyState[Key::W] && keyState[Key::I] && keyState[Key::N]) {
+            instantWin = true;
+            std::cout << "Instant Win" << std::endl;
+        }
+
+		if (keyState[Key::L] && keyState[Key::O] && keyState[Key::S] && keyState[Key::E]) {
+			instantLose = true;
+			std::cout << "Instant Lose" << std::endl;
+		}
+
+        if (keyState[Key::F] && action == GLFW_PRESS) {
+            fullscreen = !fullscreen;
+            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+
+            if (fullscreen) {
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(
+                    pWindow,
+                    monitor,
+                    0, 0,
+                    mode->width,
+                    mode->height,
+                    mode->refreshRate
+                );
+            }
+            else {
+                // Switch to windowed mode
+                int windowedWidth = defultWindowWidth;  // Desired windowed mode width
+                int windowedHeight = defultWindowHeight; // Desired windowed mode height
+                int x = 150;             // Desired X position for the window
+                int y = 150;             // Desired Y position for the window
+
+                glfwSetWindowMonitor(
+                    pWindow,
+                    nullptr,
+                    x, y,
+                    windowedWidth,
+                    windowedHeight,
+                    0
+                );
+
+                // Restore window decorations
+                glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
+				glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
+            }
+
+            std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
+        }
+
+    }
+    else if (action == GLFW_RELEASE) {
+        keyState[static_cast<Key>(key)] = false;
+    }
 }
 
 //Handle mouse button events

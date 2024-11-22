@@ -127,10 +127,20 @@ struct GLFWFunctions {
 	static GLboolean adjustVol;
 	static GLboolean audioNext;
 
+	// Cheat codes
+	static GLboolean skipToNextLevel;
+	static GLboolean skipToEnd;
+	static GLboolean godMode;
+	static GLboolean instantWin;
+	static GLboolean instantLose;
+	static GLboolean fullscreen;
+
 
 	static int audioNum;
 	static int windowWidth;
 	static int windowHeight;
+	static int defultWindowWidth;
+	static int defultWindowHeight;
 	static bool bumpAudio;
 	static bool firstCollision;
 
