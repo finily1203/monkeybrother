@@ -86,118 +86,35 @@ bool GLFWFunctions::firstCollision = false;
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
-bool GLFWFunctions::isFullscreen = false;
-GLFWmonitor* GLFWFunctions::primaryMonitor = nullptr;
-int GLFWFunctions::savedWindowedPosX = 0;
-int GLFWFunctions::savedWindowedPosY = 0;
-int GLFWFunctions::savedWindowedWidth = 0;
-int GLFWFunctions::savedWindowedHeight = 0;
+
 // Initialize the window
-bool GLFWFunctions::init(int width, int height, const std::string& title, bool startFullscreen) {
-    if (!glfwInit()) {
+bool GLFWFunctions::init(int width, int height, std::string title) {
+
+    /* Initialize the library */
+    if (!glfwInit())
         return false;
-    }
 
-    // Store initial windowed mode dimensions
-    savedWindowedWidth = width;
-    savedWindowedHeight = height;
+    // Set the window width and height
+    windowWidth = width;
+    windowHeight = height;
 
-    // Get primary monitor
-    primaryMonitor = glfwGetPrimaryMonitor();
-    if (!primaryMonitor) {
+    /* Create a windowed mode window and its OpenGL context */
+    GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    if (!GLFWFunctions::pWindow)
+    {
         glfwTerminate();
-        return false;
+        //return false;
+        throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
+        //std::cerr << "Failed to create window" << std::endl;
     }
-
-    // Get video mode
-    const GLFWvidmode* mode = getPreferredVideoMode();
-    if (!mode) {
-        glfwTerminate();
-        return false;
-    }
-
-    // Set window hints
-    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-    // Create window based on mode
-    if (startFullscreen) {
-        pWindow = glfwCreateWindow(mode->width, mode->height, title.c_str(),
-            primaryMonitor, nullptr);
-        isFullscreen = true;
-        windowWidth = mode->width;
-        windowHeight = mode->height;
-    }
-    else {
-        // Center the window
-        int monitorX, monitorY;
-        glfwGetMonitorPos(primaryMonitor, &monitorX, &monitorY);
-        savedWindowedPosX = monitorX + (mode->width - width) / 2;
-        savedWindowedPosY = monitorY + (mode->height - height) / 2;
-
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        pWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-        glfwSetWindowPos(pWindow, savedWindowedPosX, savedWindowedPosY);
-        isFullscreen = false;
-        windowWidth = width;
-        windowHeight = height;
-    }
-
-    if (!pWindow) {
-        glfwTerminate();
-        return false;
-    }
-
-    glfwMakeContextCurrent(pWindow);
-    glfwSwapInterval(0); // vsync
+    /* Make the window's context current */
+    glfwMakeContextCurrent(GLFWFunctions::pWindow);
+    glfwSwapInterval(0); //vsync
     callEvents();
 
-    // Add fullscreen toggle hotkey (Alt+Enter)
-    glfwSetKeyCallback(pWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && (mods & GLFW_MOD_ALT)) {
-            toggleFullscreen();
-        }
-        // Call the original keyboard callback
-        keyboardEvent(window, key, scancode, action, mods);
-        });
+    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     return true;
-}
-
-const GLFWvidmode* GLFWFunctions::getPreferredVideoMode() {
-    return glfwGetVideoMode(primaryMonitor);
-}
-
-void GLFWFunctions::toggleFullscreen() {
-    setFullscreen(!isFullscreen);
-}
-
-void GLFWFunctions::setFullscreen(bool fullscreen) {
-    if (isFullscreen == fullscreen) return;
-
-    if (fullscreen) {
-        // Save windowed mode position and size
-        glfwGetWindowPos(pWindow, &savedWindowedPosX, &savedWindowedPosY);
-        glfwGetWindowSize(pWindow, &savedWindowedWidth, &savedWindowedHeight);
-
-        // Switch to fullscreen
-        const GLFWvidmode* mode = getPreferredVideoMode();
-        glfwSetWindowMonitor(pWindow, primaryMonitor, 0, 0,
-            mode->width, mode->height, mode->refreshRate);
-        windowWidth = mode->width;
-        windowHeight = mode->height;
-    }
-    else {
-        // Switch back to windowed mode
-        glfwSetWindowMonitor(pWindow, nullptr, savedWindowedPosX, savedWindowedPosY,
-            savedWindowedWidth, savedWindowedHeight, 0);
-        windowWidth = savedWindowedWidth;
-        windowHeight = savedWindowedHeight;
-    }
-
-    isFullscreen = fullscreen;
 }
 
 //Handle window to check for events
@@ -213,9 +130,9 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	// unused parameters
-	(void)scancode;
-	(void)mods;
+    // unused parameters
+    (void)scancode;
+    (void)mods;
 
     Key mappedKey;
     switch (key) {
@@ -323,7 +240,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-	(void)window;
+    (void)window;
 }
 
 //Handle mouse button events
@@ -344,7 +261,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         mouseButtonState[mappedButton] = false;
     }
 
-	(void)window;
+    (void)window;
 }
 
 //Handle cursor position events
@@ -358,9 +275,9 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-	//On relase it doesn't use since we use ScrollEvent for debugging
+    //On relase it doesn't use since we use ScrollEvent for debugging
     (void)window; (void)xoffset; (void)yoffset;
-    
+
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
