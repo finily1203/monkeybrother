@@ -22,6 +22,27 @@ public:
 	virtual void update(Entity entity, float dt) = 0;
 };
 
+class PlayerBehaviour : public BehaviourECS {
+public:
+	void update(Entity entity, float dt) override;
+};
+
+class EnemyBehaviour : public BehaviourECS {
+public:
+	void update(Entity entity, float dt) override;
+};
+
+class MouseBehaviour : public BehaviourECS {
+public:
+	void update(Entity entity, float dt) override;
+	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
+	void onMouseHover(double mouseX, double mouseY);
+
+private:
+	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
+
+};
+
 class LogicSystemECS : public System
 {
 public:

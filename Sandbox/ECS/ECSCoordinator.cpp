@@ -38,7 +38,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
 	componentManager = std::make_unique<ComponentManager>();
-	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
 }
 
@@ -130,6 +129,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
 		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
 		//}
+
+		if (entityId == "quitButton" || entityId == "retryButton")
+		{
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -240,6 +244,14 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, font);
 		}
 
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
@@ -345,6 +357,13 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 				serializer.WriteObject(fontComp.color, entityId, "entities.font.color");
 				serializer.WriteObject(fontComp.fontId, entityId, "entities.font.fontId.fontName");
 			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<ButtonComponent>()))
+			{
+				ButtonComponent button = getComponent<ButtonComponent>(entity);
+
+				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
+			}
 		}
 	}
 
@@ -391,6 +410,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
 	registerComponent<PlayerComponent>();
+	registerComponent<ButtonComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

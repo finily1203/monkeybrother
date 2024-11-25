@@ -18,6 +18,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <GLFW/glfw3.h>
 #include <string>
 #include <unordered_map>
+#include "TransformComponent.h"
+#include "ButtonComponent.h"
 
 enum class Key {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
