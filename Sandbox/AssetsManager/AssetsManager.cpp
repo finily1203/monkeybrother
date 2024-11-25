@@ -70,7 +70,7 @@ void AssetsManager::LoadTextureAssets() const {
         std::string textureName = textureAsset["id"].get<std::string>();
         std::string relativePath = textureAsset["filePath"].get<std::string>();
 
-        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string textureFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadTexture(textureName, textureFilePath);
     }
 }
@@ -120,7 +120,7 @@ GLuint AssetsManager::GetTexture(const std::string& texName) const {
 		return iterator->second;
 	}
     else {
-		std::cerr << "Texture not found!" << std::endl;
+		std::cerr << "Texture:" << texName << " not found!" << std::endl;
 		return 0;
 	}
 }
@@ -173,7 +173,7 @@ void AssetsManager::LoadShaderAssets() const {
         std::string shaderName = shaderAsset["id"].get<std::string>();
         std::string relativePath = shaderAsset["filePath"].get<std::string>();
 
-        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string shaderFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadShader(shaderName, shaderFilePath);
     }
 }
@@ -254,10 +254,10 @@ void AssetsManager::LoadAudioAssets() {
 
     for (const auto& audioAsset : jsonObj["audioAssets"])
     {
-        std::string audioName = audioAsset["audioName"].get<std::string>();
+        std::string audioName = audioAsset["id"].get<std::string>();
         std::string relativePath = audioAsset["filePath"].get<std::string>();
 
-        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadAudio(audioName, audioFilePath, audSystem);
     }
 }
@@ -331,7 +331,7 @@ void AssetsManager::LoadFontAssets() const {
         std::string fontName = fontAssets["id"].get<std::string>();
         std::string relativePath = fontAssets["filePath"].get<std::string>();
 
-        std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
+        std::string fontFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
         assetsManager.LoadFont(fontName, fontFilePath, 48 ); //default font size
         
     }
@@ -444,23 +444,55 @@ void AssetsManager::ClearFonts() {
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
+
+//-----------------------------ASSET MANAGEMENT----------------------------------//
 void AssetsManager::handleDropFile(std::string filePath) {
     std::filesystem::path path(filePath);
 
+    //check if file already exists
+    if (std::find(m_AssetList.begin(), m_AssetList.end(), path.filename().string()) != m_AssetList.end()) {
+		//if it exists, delete the current one within the program
+        if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+			UnloadTexture(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "textureAssets");
+		}
+		else if (path.extension() == ".shader") {
+			UnloadShader(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "shaderAssets");
+		}
+		else if (path.extension() == ".ttf") {
+			UnloadFont(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "fontAssets");
+		}
+		else if (path.extension() == ".wav" || path.extension() == ".mp3") {
+			UnloadAudio(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "audioAssets");
+		}
+		else {
+			std::cerr << "File type not supported!" << std::endl;
+        }
+
+        std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
+    }
+
     if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
-		LoadTexture(path.filename().string(), path.string());
+		LoadTexture(path.filename().string().c_str(), path.string());
+        AddNewAssetToJSON(path.filename().string(), "textureAssets", path.string());
         std::cout << "Texture loaded from drag and drop!" << std::endl;
 	}
     else if (path.extension() == ".shader") {
         LoadShader(path.filename().string(), path.string());
+        AddNewAssetToJSON(path.filename().string(), "shaderAssets", path.string());
         std::cout << "Shader loaded from drag and drop!" << std::endl;
     }
     else if (path.extension() == ".ttf") {
 		LoadFont(path.filename().string(), path.string(), 48);
+        AddNewAssetToJSON(path.filename().string(), "fontAssets", path.string());
         std::cout << "Font loaded from drag and drop!" << std::endl;
 	}
     else if (path.extension() == ".wav" || path.extension() == ".mp3") {
 		LoadAudio(path.filename().string(), path.string(), audSystem);
+        AddNewAssetToJSON(path.filename().string(), "audioAssets", path.string());
         std::cout << "Audio loaded from drag and drop!" << std::endl;
 	}
     else {
@@ -493,4 +525,144 @@ const std::map<std::string, FMOD::Sound*>& AssetsManager::getAudioList() const {
 
 const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontList() const {
 	return m_Fonts;
+}
+
+void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath) {
+    nlohmann::ordered_json assetObj = {};
+
+    std::string identifier = "";
+    std::string finalFilePath = "assets/";
+
+    if (assetType == "textureAssets") {
+		identifier = "textures/";
+        finalFilePath += identifier + assetName;
+	}
+    else if (assetType == "shaderAssets") {
+		identifier = "shaders/";
+        finalFilePath += identifier + assetName;
+	}
+    else if (assetType == "fontAssets") {
+		identifier = "fonts/";
+        finalFilePath += identifier + assetName;
+	}
+    else if (assetType == "audioAssets") {
+		identifier = "audio/";
+        finalFilePath += identifier + assetName;
+	}
+
+
+    //Add in asset into assets folder
+    std::string destintationPath = FilePathManager::GetExecutablePath() + "\\" + finalFilePath;
+    std::filesystem::path dest(destintationPath);
+
+    if (!std::filesystem::exists(dest)) {
+        try {
+            std::string srcPath = sourcePath;
+            std::filesystem::path src(srcPath);
+            std::cout << srcPath << std::endl;
+
+            if (std::filesystem::exists(src)) {
+				std::filesystem::create_directories(dest.parent_path());
+				std::filesystem::copy_file(src, dest, std::filesystem::copy_options::overwrite_existing);
+				std::cout << "File copied to assets folder: " << destintationPath << std::endl;
+			}
+            else {
+				std::cerr << "Source file not found: " << srcPath << std::endl;
+				return;
+			} 
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+			std::cerr << "Error copying file: " << e.what() << std::endl;
+			return;
+		}
+    }
+
+    assetObj = {
+        {"id", assetName},
+        {"filePath", finalFilePath}
+    };
+
+    std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+    //std::ofstream file(jsonFilePath);
+
+    JSONSerializer serializer;
+    serializer.Open(jsonFilePath);
+
+    nlohmann::json obj = serializer.GetJSONObject();
+    obj[assetType].push_back(assetObj);
+
+    std::ofstream file(jsonFilePath);
+    if (file.is_open()) {
+        file << obj.dump(2);
+        file.close();
+    }
+
+    std::cout << "Asset added to JSON!" << std::endl;
+}
+
+
+void AssetsManager::DeleteAssetFromJSON(std::string const& assetName, std::string assetType) {
+
+    //read assets.json file
+    nlohmann::json jsonData;
+    std::ifstream inputFile(FilePathManager::GetAssetsJSONPath());
+    if (inputFile.is_open()) {
+        inputFile >> jsonData;
+        inputFile.close();
+    }
+    else {
+        std::cerr << "Error: Could not open JSON file for reading." << std::endl;
+        return;
+    }
+
+    // Check if the assetType exists in the JSON file and is an array
+    if (jsonData.contains(assetType) && jsonData[assetType].is_array()) {
+        auto& assetArray = jsonData[assetType];
+
+        // Find and remove the asset from the array
+        assetArray.erase(std::remove_if(assetArray.begin(), assetArray.end(), [&assetName](nlohmann::json const& asset) {
+            return asset.contains("id") && asset["id"] == assetName;
+        }), assetArray.end());
+    }
+    else {
+        std::cerr << "Error: Asset type not found in JSON or is not an array." << std::endl;
+        return;
+    }
+
+    // Write the updated JSON back to the file
+    std::ofstream outputFile(FilePathManager::GetAssetsJSONPath());
+    if (outputFile.is_open()) {
+        outputFile << jsonData.dump(2);
+        outputFile.close();
+    }
+    else {
+        std::cerr << "Error: Could not open JSON file for writing." << std::endl;
+        return;
+    }
+
+    // Construct the file path to delete
+    std::string identifier = "";
+    if (assetType == "textureAssets") identifier = "textures/";
+    else if (assetType == "shaderAssets") identifier = "shaders/";
+    else if (assetType == "fontAssets") identifier = "fonts/";
+    else if (assetType == "audioAssets") identifier = "audio/";
+
+    std::string filePath = FilePathManager::GetExecutablePath() + "\\assets\\" + identifier + assetName;
+
+    // Remove the file from the filesystem
+    try {
+        std::filesystem::path fileToDelete(filePath);
+        if (std::filesystem::exists(fileToDelete)) {
+            std::filesystem::remove(fileToDelete);
+            std::cout << "Deleted asset file: " << filePath << std::endl;
+        }
+        else {
+            std::cerr << "Error: File does not exist: " << filePath << std::endl;
+        }
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Error deleting file: " << e.what() << std::endl;
+    }
+
+    std::cout << "Asset removed from JSON and deleted from the file system." << std::endl;
 }

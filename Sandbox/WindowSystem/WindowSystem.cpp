@@ -8,9 +8,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 used to handle the window application for the game engine. It will initialise,
 		 update and cleanup the window system.
 		 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
-								    for the WindowSystem class as well as the init, update,
+									for the WindowSystem class as well as the init, update,
 									and rendering of those objects
-		  						    (50%)
+									(50%)
 		 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
 							   initialise, update and cleanup the window system.
 							   (50%)
@@ -121,7 +121,7 @@ void WindowSystem::initialise() {
 	std::cout << "GLEW initialized successfully" << std::endl;
 
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
-	
+
 }
 
 void WindowSystem::handleWindowFocus()

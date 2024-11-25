@@ -39,5 +39,5 @@ private:
 	bool wasFocused = true;
 
 	//void logicUpdate();
-	
+
 };

@@ -21,6 +21,8 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIGameViewport.h"
 #include "GlfwFunctions.h"
 #include "GUIConsole.h"
+#include "Debug.h"
+#include "GlobalCoordinator.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -28,6 +30,10 @@ int GameViewWindow::viewportWidth;
 ImVec2 GameViewWindow::viewportPos;
 GLuint GameViewWindow::viewportTexture;
 ImVec2 GameViewWindow::windowSize;
+ImVec2 GameViewWindow::aspectSize;
+ImVec2 GameViewWindow::globalMousePos;
+ImVec2 GameViewWindow::applicationCenter;
+ImVec2 GameViewWindow::renderPos;
 
 bool insideViewport = false;
 bool zoomTestFlag = false;
@@ -38,7 +44,6 @@ float GameViewWindow::zoomDelta;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
 
-ImVec2 GameViewWindow::currentMousePos;
 float GameViewWindow::scrollY;
 
 bool GameViewWindow::clickedScreenPan = false;
@@ -53,47 +58,342 @@ float GameViewWindow::aspectRatioYScale;
 float GameViewWindow::aspectRatioWidth;
 float GameViewWindow::aspectRatioHeight;
 
+bool GameViewWindow::isSelectingSaveFile;
+bool GameViewWindow::isSelectingFile = false;
+bool GameViewWindow::saveFileChosen = false;
+bool GameViewWindow::loadFileChosen = false;
+int GameViewWindow::saveCount;
+int GameViewWindow::saveLimit;
+float GameViewWindow::lastPosX;
+float GameViewWindow::saveWindowWidth;
+float GameViewWindow::fileWindowWidth;
+float GameViewWindow::saveWindowHeight;
+float GameViewWindow::fileWindowHeight;
+
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 }
+bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
 void GameViewWindow::Update() {
 	SetupViewportTexture();
 
+	aspectSize = GetLargestSizeForViewport();
 	windowSize = ImGui::GetContentRegionAvail();
+	globalMousePos = ImGui::GetMousePos();
+	applicationCenter = ImGui::GetMainViewport()->GetCenter();
+	renderPos = GetCenteredPosForViewport(aspectSize);
 
-	ImGui::Begin("Game Viewport", nullptr, ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse |
-		ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin("Game Viewport");
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 2));
+
+	if (ImGui::Button("Save")) {
+		isSelectingSaveFile = true;
+	}
+
+	if (isSelectingSaveFile) {
+		ImGui::OpenPopup("Choose save files");
+	}
+
+	ImGui::SetNextWindowPos(applicationCenter, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	// Create popup modal window for loading of save files
+	if (ImGui::BeginPopupModal("Choose save files", &isSelectingSaveFile, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
+
+		int saveNum;
+		int fileNum;
+
+		if (ImGui::Button("Slot 1", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+			saveNum = 1;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine(0, 5);
+		if (ImGui::Button("Clear 1", ImVec2(80, fileWindowHeight))) {
+			fileNum = 1;
+			std::string saveFile = GenerateSaveJSONFile(fileNum);
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+		}
+
+		if (ImGui::Button("Slot 2", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+			saveNum = 2;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine(0, 5);
+		if (ImGui::Button("Clear 2", ImVec2(80, fileWindowHeight))) {
+			fileNum = 2;
+			std::string saveFile = GenerateSaveJSONFile(fileNum);
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+		}
+
+		if (ImGui::Button("Slot 3", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+			saveNum = 3;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine(0, 5);
+		if (ImGui::Button("Clear 3", ImVec2(80, fileWindowHeight))) {
+			fileNum = 3;
+			std::string saveFile = GenerateSaveJSONFile(fileNum);
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+		}
+
+		if (ImGui::Button("Slot 4", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+			saveNum = 4;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine(0, 5);
+		if (ImGui::Button("Clear 4", ImVec2(80, fileWindowHeight))) {
+			fileNum = 4;
+			std::string saveFile = GenerateSaveJSONFile(fileNum);
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+		}
+
+		if (ImGui::Button("Slot 5", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+			saveNum = 5;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine(0, 5);
+		if (ImGui::Button("Clear 5", ImVec2(80, fileWindowHeight))) {
+			fileNum = 5;
+			std::string saveFile = GenerateSaveJSONFile(fileNum);
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+		}
+
+
+		if (saveFileChosen) {
+			std::string saveFile = GenerateSaveJSONFile(saveNum);
+
+			// Create base JSON structure using ordered_json consistently
+			nlohmann::ordered_json jsonData;
+			jsonData["entities"] = nlohmann::ordered_json::array();
+
+			// Add placeholder entity using ordered_json
+			jsonData["entities"].push_back(nlohmann::ordered_json{
+				{"id", "placeholderentity"}
+				});
+
+			// Save all currently live entities
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				std::string entityId = ecsCoordinator.getEntityID(entity);
+				if (entityId != "placeholderentity") {
+					TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					auto entityJson = AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
+					jsonData["entities"].push_back(entityJson);
+				}
+			}
+
+			// Clear newEntities since they're already saved
+			DebugSystem::newEntities.clear();
+
+			// Save to file
+			std::ofstream outputFile(saveFile);
+			if (outputFile.is_open()) {
+				outputFile << jsonData.dump(2);
+				outputFile.close();
+			}
+
+			saveFileChosen = false;
+			isSelectingSaveFile = false;
+			//ImGui::CloseCurrentPopup();
+		}
+
+
+		ImGui::EndChild();
+
+		ImGui::EndPopup();
+	}
+
+	ImGui::SameLine(0, 5);
+
+	if (ImGui::Button("Load")) {
+		isSelectingFile = true;
+	}
+
+	if (isSelectingFile) {
+		ImGui::OpenPopup("Load save files");
+	}
+
+	ImGui::SetNextWindowPos(applicationCenter, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	// Create popup modal window for loading of save files
+	if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
+
+		if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
+
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				ecsCoordinator.destroyEntity(entity);
+			}
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		int saveNum;
+
+		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = 1;
+			loadFileChosen = true;
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = 2;
+			loadFileChosen = true;
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = 3;
+			loadFileChosen = true;
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = 4;
+			loadFileChosen = true;
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = 5;
+			loadFileChosen = true;
+			isSelectingFile = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (loadFileChosen) {
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				ecsCoordinator.destroyEntity(entity);
+			}
+
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
+			loadFileChosen = false;
+		}
+
+		ImGui::EndChild();
+
+		ImGui::EndPopup();
+	}
+
+	ImGui::SameLine(0, 5);
+
+	// Add pause button to viewport
+	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
+		GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
+		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
+		TogglePause();
+	}
+
+	ImGui::PopStyleVar();
 
 	viewportPos = ImGui::GetWindowPos();
-	currentMousePos = ImGui::GetMousePos();
 
-	if (GameViewWindow::IsPointInViewport(currentMousePos.x, currentMousePos.y))
+	if (GameViewWindow::IsPointInViewport(globalMousePos.x, globalMousePos.y))
 		insideViewport = true;
 	else
 		insideViewport = false;
 
 	ImGuiIO& io = ImGui::GetIO();
 	scrollY = io.MouseWheel;
-	zoomDelta = scrollY * 0.1f;
-	newZoomLevel = GameViewWindow::zoomLevel + zoomDelta;
 
 	if (insideViewport && clickedZoom) {
-		zoomLevel = std::min(GameViewWindow::MAX_ZOOM, std::max(GameViewWindow::MIN_ZOOM, newZoomLevel));
+		
+		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * 0.1f);
+		
 	}
 
-	Console::GetLog() << "zoomLevel " << GameViewWindow::zoomLevel << " MAX_ZOOM " << GameViewWindow::MAX_ZOOM
-		<< std::endl;
 	CaptureMainWindow();
 
-	ImVec2 availWindowSize = GetLargestSizeForViewport();
-	ImVec2 renderPos = GetCenteredPosForViewport(availWindowSize);
 
 	ImGui::SetCursorPos(renderPos);
 	ImTextureID textureID = (ImTextureID)(intptr_t)viewportTexture;
-	ImGui::Image(textureID, availWindowSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image(textureID, aspectSize, ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payloadTex = ImGui::AcceptDragDropPayload("TEXTURE_PAYLOAD")) {
+			const char* assetName = (const char*)payloadTex->Data;
+			createDropEntity(assetName, TEXTURE);
+			std::cout << "Dropped Texture: " << assetName << std::endl;
+			
+		}
+		else if (const ImGuiPayload* payloadShdr = ImGui::AcceptDragDropPayload("SHADER_PAYLOAD")) {
+			const char* assetName = (const char*)payloadShdr->Data;
+			std::cout << "Dropped Shader: " << assetName << std::endl;
+
+		}
+		else if (const ImGuiPayload* payloadFont = ImGui::AcceptDragDropPayload("FONT_PAYLOAD")) {
+			const char* assetName = (const char*)payloadFont->Data;
+			createDropEntity(assetName, FONT);
+			std::cout << "Dropped Font: " << assetName << std::endl;
+
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	ImGui::End();
 }
 //Clean up resources
@@ -105,80 +405,117 @@ void GameViewWindow::Cleanup() {
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
-	if (viewportTexture != 0) {
+		if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 	}
 
 	glGenTextures(1, &viewportTexture);
-
+	viewportWidth = GLFWFunctions::windowWidth;
+	viewportHeight = GLFWFunctions::windowHeight;
 	glBindTexture(GL_TEXTURE_2D, viewportTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewportWidth, viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 //Capture rendered game scene
+GLuint GameViewWindow::pausedTexture = 0;
+
 void GameViewWindow::CaptureMainWindow() {
+
 	glBindTexture(GL_TEXTURE_2D, viewportTexture);
 
-	// Store the current read buffer
 	GLint previousBuffer;
 	glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
 
-	// Set the read buffer to the back buffer
 	glReadBuffer(GL_BACK);
-
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, viewportWidth, viewportHeight, 0);
-
-	// Restore the previous read buffer
-	glReadBuffer(previousBuffer);
-
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //Function scale real time game scene to the size of the game viewport window
 ImVec2 GameViewWindow::GetLargestSizeForViewport()
 {
-	aspectRatioWidth = windowSize.x;
-	aspectRatioHeight = aspectRatioWidth / (aspectRatioXScale / aspectRatioYScale);
+	// Calculate aspect ratio
+	float targetAspectRatio = (float)GLFWFunctions::windowWidth / (float)GLFWFunctions::windowHeight;
 
-	float scaledWidth = aspectRatioWidth;
-	float scaledHeight = aspectRatioHeight;
+	// Get available space in the viewport window
+	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
+	float pauseButtonHeight = ImGui::GetFrameHeight();
+	float padding = ImGui::GetStyle().ItemSpacing.y * 2; // Add padding between elements
 
-	// Use zoomLevel instead of fixed 3.0f multiplier
-	scaledWidth = aspectRatioWidth * zoomLevel;
-	scaledHeight = aspectRatioHeight * zoomLevel;
+	// Calculate total UI overhead
+	float uiOverhead = headerHeight + pauseButtonHeight + padding;
 
+	float availableWidth = windowSize.x;
+	float availableHeight = windowSize.y - uiOverhead;
 
-	return ImVec2(scaledWidth, scaledHeight);
+	// Calculate dimensions that maintain aspect ratio
+	float width = availableWidth;
+	float height = width / targetAspectRatio;
+
+	// If height is too big, scale based on height instead
+	if (height > availableHeight) {
+		height = availableHeight;
+		width = height * targetAspectRatio;
+	}
+
+	// Apply zoom while ensuring we don't exceed available space
+	width *= zoomLevel;
+	height *= zoomLevel;
+
+	// Clamp dimensions to available space
+	if (height > availableHeight) {
+		float scale = availableHeight / height;
+		width *= scale;
+		height = availableHeight;
+	}
+
+	return ImVec2(width, height);
 
 }
 
 //Function to translate the real time game scene to the center of the game viewport window
-ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 aspectSize)
+ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 {
-	float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
-	float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
+	// Calculate UI element heights and padding
+	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
+	float pauseButtonHeight = ImGui::GetFrameHeight();
+	float padding = ImGui::GetStyle().ItemSpacing.y * 2;
 
+	// Calculate vertical starting position after header and pause button with padding
+	float startY = headerHeight + pauseButtonHeight + padding;
+
+	// Center horizontally
+	float viewportX = (windowSize.x - size.x) * 0.5f;
+
+	// Position vertically after UI elements with proper spacing
+	float remainingHeight = windowSize.y - startY;
+	float viewportY = startY + (remainingHeight - size.y) * 0.5f;
+
+	// Handle panning logic
 	if (clickedScreenPan && insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-		ImVec2 Mouse = ImGui::GetMousePos();
 		if (!isDragging) {
 			isDragging = true;
-			initialMousePos = Mouse;
+			initialMousePos = globalMousePos;
 		}
-		currentMouseDragDist = { initialMousePos.x - Mouse.x , initialMousePos.y - Mouse.y };
-		accumulatedMouseDragDist.x += (currentMouseDragDist.x - mouseDragDist.x);
-		accumulatedMouseDragDist.y += (currentMouseDragDist.y - mouseDragDist.y);
+
+		currentMouseDragDist = { initialMousePos.x - globalMousePos.x, initialMousePos.y - globalMousePos.y };
+
+		// Move camera position
+		float dragSpeed = 1.5f;
+		myMath::Vector2D camPos = cameraSystem.getCameraPosition();
+		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * dragSpeed);
+		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * dragSpeed);
+		cameraSystem.setCameraPosition(camPos);
 
 		mouseDragDist = currentMouseDragDist;
 	}
 	else {
 		isDragging = false;
-		mouseDragDist = { 0.0f,0.0f };
+		mouseDragDist = { 0.0f, 0.0f };
 	}
 
-	viewportX -= accumulatedMouseDragDist.x;  // Apply the accumulated offset
-	viewportY -= accumulatedMouseDragDist.y;
 	return ImVec2(viewportX, viewportY);
 
 }
@@ -223,8 +560,8 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
 
-	serializer.ReadFloat(currentMousePos.x, "GUIViewport.currentMousePosX");
-	serializer.ReadFloat(currentMousePos.y, "GUIViewport.currentMousePosY");
+	serializer.ReadFloat(globalMousePos.x, "GUIViewport.currentMousePosX");
+	serializer.ReadFloat(globalMousePos.y, "GUIViewport.currentMousePosY");
 
 	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
 	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");
@@ -238,8 +575,13 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
 	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
 
-	serializer.ReadFloat(aspectRatioXScale, "GUIViewport.aspectRatioXScale");
-	serializer.ReadFloat(aspectRatioYScale, "GUIViewport.aspectRatioYScale");
+	serializer.ReadFloat(lastPosX, "GUIViewport.lastPosX");
+	serializer.ReadFloat(saveWindowWidth, "GUIViewport.saveWindowWidth");
+	serializer.ReadFloat(fileWindowWidth, "GUIViewport.fileWindowWidth");
+	serializer.ReadFloat(saveWindowHeight, "GUIViewport.saveWindowHeight");
+	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
+	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
+
 }
 //Save viewport configuration to JSON
 void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
@@ -266,4 +608,343 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 
 	serializer.WriteFloat(MIN_ZOOM, "GUIViewport.minZoom", filename);
 	serializer.WriteFloat(MAX_ZOOM, "GUIViewport.maxZoom", filename);
+}
+
+//Create entity from drag and drop
+void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
+	Entity dropEntity = ecsCoordinator.createEntity();
+
+	TransformComponent transform;
+	transform.position = { 300.0f, 300.0f };
+	transform.scale = { 100.0f, 100.0f };
+	transform.orientation = { 0.0f, 0.0f };
+	
+	ecsCoordinator.addComponent(dropEntity, transform);
+
+	JSONSerializer serializer;
+
+	// Add the appropriate components based on the specifier
+	switch (specifier) {
+	case TEXTURE:
+		if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
+			if (strcmp(assetName, "goldfish") == 0) {
+				EnemyComponent enemy;
+				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
+				ecsCoordinator.addComponent(dropEntity, enemy);
+			}
+
+			AABBComponent aabb;
+			serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
+			serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
+			serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
+			serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
+			ecsCoordinator.addComponent(dropEntity, aabb);
+
+			PhysicsComponent physics;
+
+			myMath::Vector2D direction = physics.force.GetDirection();
+			float magnitude = physics.force.GetMagnitude();
+
+			serializer.ReadObject(physics.mass,assetName, "entities.forces.mass");
+			serializer.ReadObject(physics.gravityScale,assetName, "entities.forces.gravityScale");
+			serializer.ReadObject(physics.jump,assetName, "entities.forces.jump");
+			serializer.ReadObject(physics.dampening,assetName, "entities.forces.dampening");
+			serializer.ReadObject(physics.velocity,	assetName, "entities.forces.velocity");
+			serializer.ReadObject(physics.maxVelocity,assetName, "entities.forces.maxVelocity");
+			serializer.ReadObject(physics.acceleration,	assetName, "entities.forces.acceleration");
+			serializer.ReadObject(direction,assetName, "entities.forces.force.direction");
+			serializer.ReadObject(magnitude,assetName, "entities.forces.force.magnitude");
+			serializer.ReadObject(physics.accumulatedForce,assetName, "entities.forces.accumulatedForce");
+			serializer.ReadObject(physics.maxAccumulatedForce,assetName, "entities.forces.maxAccumulatedForce");
+			serializer.ReadObject(physics.prevForce,assetName, "entities.forces.prevForces");
+			serializer.ReadObject(physics.targetForce,assetName, "entities.forces.targetForce");
+
+			physics.force.SetDirection(direction);
+			physics.force.SetMagnitude(magnitude);
+
+			ecsCoordinator.addComponent(dropEntity, physics);
+		}
+		else if (strcmp(assetName, "woodtile") == 0) {
+			AABBComponent aabb{};
+			serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
+			serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
+			serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
+			serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
+
+			ClosestPlatform closestPlatform{};
+			serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
+
+			ecsCoordinator.addComponent(dropEntity, aabb);
+			ecsCoordinator.addComponent(dropEntity, closestPlatform);
+		}
+		break;
+	case FONT:
+		FontComponent font;
+		font.fontId = assetName;
+		font.text = "Temporary";
+		font.textScale = 1.0f;
+		font.textBoxWidth = 300.0f;
+		font.color = { 1.0f, 1.0f, 1.0f };
+		ecsCoordinator.addComponent(dropEntity, font);
+		break;
+	}
+
+	ecsCoordinator.setEntityID(dropEntity, assetName);
+}
+
+std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
+{
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\save" + std::to_string(saveNumber) + ".json";
+	std::string sourceFilePath;
+
+	sourceFilePath = FilePathManager::GetEntitiesJSONPath();
+
+	nlohmann::json entitiesJSON;
+
+	std::ifstream sourceFile(sourceFilePath);
+
+	if (sourceFile.is_open())
+	{
+		sourceFile >> entitiesJSON;
+		sourceFile.close();
+	}
+
+	std::ofstream outFile(jsonPath);
+	if (!outFile.is_open()) {
+		std::cout << "Error: could not create file " << jsonPath << std::endl;
+		return "";
+	}
+	outFile.close();
+
+	return jsonPath;
+}
+
+nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
+{
+	// Initialize ordered components that should always be present first
+	nlohmann::ordered_json entityJSON = {
+		{"id", entityId},
+		{"transform", {
+			{"localTransform", {
+				{transform.mdl_xform.GetMatrixValue(0, 0), transform.mdl_xform.GetMatrixValue(0, 1), transform.mdl_xform.GetMatrixValue(0, 2)},
+				{transform.mdl_xform.GetMatrixValue(1, 0), transform.mdl_xform.GetMatrixValue(1, 1), transform.mdl_xform.GetMatrixValue(1, 2)},
+				{transform.mdl_xform.GetMatrixValue(2, 0), transform.mdl_xform.GetMatrixValue(2, 1), transform.mdl_xform.GetMatrixValue(2, 2)}
+			}},
+			{"orientation", {
+				{"x", transform.orientation.GetX()},
+				{"y", transform.orientation.GetY()}
+			}},
+			{"position", {
+				{"x", transform.position.GetX()},
+				{"y", transform.position.GetY()}
+			}},
+			{"projectionMatrix", {
+				{transform.mdl_to_ndc_xform.GetMatrixValue(0, 0), transform.mdl_to_ndc_xform.GetMatrixValue(0, 1), transform.mdl_to_ndc_xform.GetMatrixValue(0, 2)},
+				{transform.mdl_to_ndc_xform.GetMatrixValue(1, 0), transform.mdl_to_ndc_xform.GetMatrixValue(1, 1), transform.mdl_to_ndc_xform.GetMatrixValue(1, 2)},
+				{transform.mdl_to_ndc_xform.GetMatrixValue(2, 0), transform.mdl_to_ndc_xform.GetMatrixValue(2, 1), transform.mdl_to_ndc_xform.GetMatrixValue(2, 2)}
+			}},
+			{"scale", {
+				{"x", transform.scale.GetX()},
+				{"y", transform.scale.GetY()}
+			}}
+		}}
+	};
+
+	// Add additional components in the desired order
+	if (ecs.hasComponent<AABBComponent>(entity)) {
+		auto& aabb = ecs.getComponent<AABBComponent>(entity);
+		entityJSON["aabb"] = {
+			{"left", aabb.left},
+			{"right", aabb.right},
+			{"top", aabb.top},
+			{"bottom", aabb.bottom}
+		};
+	}
+
+	if (ecs.hasComponent<PhysicsComponent>(entity)) {
+		auto& rb = ecs.getComponent<PhysicsComponent>(entity);
+		entityJSON["forces"] = {
+			{"mass", rb.mass},
+			{"gravityScale", {
+				{"x", rb.gravityScale.GetX()},
+				{"y", rb.gravityScale.GetY()}
+			}},
+			{"jump", rb.jump},
+			{"dampening", rb.dampening},
+			{"velocity", {
+				{"x", rb.velocity.GetX()},
+				{"y", rb.velocity.GetY()}
+			}},
+			{"maxVelocity", rb.maxVelocity},
+			{"acceleration", {
+				{"x", rb.acceleration.GetX()},
+				{"y", rb.acceleration.GetY()}
+			}},
+			{"force", {
+				{"direction", {
+					{"x", rb.force.GetDirection().GetX()},
+					{"y", rb.force.GetDirection().GetY()}
+				}},
+				{"magnitude", rb.force.GetMagnitude()}
+			}},
+			{"accumulatedForce", {
+				{"x", rb.accumulatedForce.GetX()},
+				{"y", rb.accumulatedForce.GetY()}
+			}},
+			{"maxAccumulatedForce", rb.maxAccumulatedForce},
+			{"prevForce", rb.prevForce},
+			{"targetForce", rb.targetForce}
+		};
+	}
+
+	if (ecs.hasComponent<EnemyComponent>(entity)) {
+		entityJSON["enemy"] = { {"isEnemy", true} };
+	}
+
+	if (ecs.hasComponent<ClosestPlatform>(entity)) {
+		auto& platform = ecs.getComponent<ClosestPlatform>(entity);
+		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
+	}
+
+	if (ecs.hasComponent<AnimationComponent>(entity)) {
+		entityJSON["animation"] = { {"isAnimated", true} };
+	}
+
+	if (ecs.hasComponent<FontComponent>(entity)) {
+		auto& fontComp = ecs.getComponent<FontComponent>(entity);
+		entityJSON["font"] = nlohmann::ordered_json{
+			{"text", {
+				{"string", fontComp.text},
+				{"BoxWidth", fontComp.textBoxWidth}
+			}},
+			{"textScale", {
+				{"scale", fontComp.textScale}
+			}},
+			{"color", {
+				{"x", fontComp.color.GetX()},
+				{"y", fontComp.color.GetY()},
+				{"z", fontComp.color.GetZ()}
+			}},
+			{"fontId", {
+				{"fontName", fontComp.fontId}
+			}}
+		};
+	}
+
+	return entityJSON;
+}
+
+ImVec2 GameViewWindow::GetCenteredMousePosition() {
+
+	// Calculate the game scene bounds in screen space
+	float gameLeft = viewportPos.x + renderPos.x;
+	float gameTop = viewportPos.y + renderPos.y;
+
+	// Get mouse position relative to game scene origin
+	float sceneX = globalMousePos.x - (gameLeft + aspectSize.x * 0.5f);
+	float sceneY = (gameTop + aspectSize.y * 0.5f) - globalMousePos.y;
+
+	// Check if mouse is within game scene bounds
+	if (globalMousePos.x < gameLeft || globalMousePos.x > gameLeft + aspectSize.x ||
+		globalMousePos.y < gameTop || globalMousePos.y > gameTop + aspectSize.y) {
+		return ImVec2(0, 0);
+	}
+
+	// Map the coordinates to ±800 x ±450 range
+	float normalizedX = (sceneX / aspectSize.x) * 800.0f * 2.0f;
+	float normalizedY = (sceneY / aspectSize.y) * 450.0f * 2.0f;
+
+	return ImVec2(normalizedX, normalizedY);
+}
+
+ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY) {
+
+	myMath::Vector2D referencePos;
+	if (!GLFWFunctions::allow_camera_movement) {
+		// Camera is locked to player
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.getEntityID(entity) == "player") {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				referencePos = transform.position;
+				break;
+			}
+		}
+	}
+	else {
+		// Free camera movement - use global cameraSystem
+		referencePos = cameraSystem.getCameraPosition();
+	}
+
+	// Calculate viewport-local coordinates
+	float viewX = screenX - (viewportPos.x + renderPos.x);
+	float viewY = screenY - (viewportPos.y + renderPos.y);
+
+	// Convert to normalized device coordinates (-1 to 1) relative to viewport center
+	float ndcX = (viewX / aspectSize.x) * 2.0f - 1.0f;
+	float ndcY = -((viewY / aspectSize.y) * 2.0f - 1.0f); // Flip Y-axis
+
+	// Convert to world coordinates relative to player position
+	float worldX = referencePos.GetX() + ((ndcX * viewportWidth) / (2.0f * zoomLevel));
+	float worldY = referencePos.GetY() + ((ndcY * viewportHeight) / (2.0f * zoomLevel));
+
+	// Apply pan offset
+	worldX += accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
+	worldY -= accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+
+	return ImVec2(worldX, worldY);
+}
+
+ImVec2 GameViewWindow::GetMouseWorldPosition() {
+	if (IsPointInViewport(globalMousePos.x, globalMousePos.y)) {
+		return NormalizeViewportCoordinates(globalMousePos.x, globalMousePos.y);
+	}
+	return ImVec2(0.0f, 0.0f);
+}
+// Convert screen coordinates to viewport coordinates
+ImVec2 GameViewWindow::ScreenToViewport(float screenX, float screenY) {
+
+	return ImVec2(
+		screenX - (viewportPos.x + renderPos.x),
+		screenY - (viewportPos.y + renderPos.y)
+	);
+}
+
+// Convert viewport coordinates to game world coordinates
+ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
+
+	myMath::Vector2D referencePos;
+	if (!GLFWFunctions::allow_camera_movement) {
+		// Camera is locked to player
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.getEntityID(entity) == "player") {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				referencePos = transform.position;
+				break;
+			}
+		}
+	}
+	else {
+		// Free camera movement - use global cameraSystem
+		referencePos = cameraSystem.getCameraPosition();
+	}
+
+	// Calculate normalized coordinates relative to viewport center
+	float normalizedX = (viewportX / aspectSize.x) * 2.0f - 1.0f;
+	float normalizedY = -((viewportY / aspectSize.y) * 2.0f - 1.0f); // Flip Y-axis
+
+	// Convert to world coordinates relative to player position
+	float worldX = referencePos.GetX() + ((normalizedX * viewportWidth) / (2.0f * zoomLevel));
+	float worldY = referencePos.GetY() + ((normalizedY * viewportHeight) / (2.0f * zoomLevel));
+
+	// Apply pan offset
+	worldX += accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
+	worldY -= accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+
+	return ImVec2(worldX, worldY);
+}
+
+ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {
+	ImVec2 viewportCoords = ScreenToViewport(screenX, screenY);
+	return ViewportToWorld(viewportCoords.x, viewportCoords.y);
 }

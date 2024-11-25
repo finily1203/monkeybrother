@@ -19,8 +19,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "GUIGameViewport.h"
 #include "GlobalCoordinator.h"
+#include "LogicSystemECS.h"
 #include <algorithm>
 #include <iostream>
+#include <Windows.h>
 //#include <chrono>
 //#include <thread>
 
@@ -80,12 +82,13 @@ GLboolean GLFWFunctions::adjustVol = false;
 int GLFWFunctions::audioNum = 0;
 int GLFWFunctions::windowWidth = 0;
 int GLFWFunctions::windowHeight = 0;
+int GLFWFunctions::collectableCount = 0;
 bool GLFWFunctions::bumpAudio = false;
+bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
 
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
-
 
 // Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
@@ -130,9 +133,9 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	// unused parameters
-	(void)scancode;
-	(void)mods;
+    // unused parameters
+    (void)scancode;
+    (void)mods;
 
     Key mappedKey;
     switch (key) {
@@ -217,14 +220,16 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else if (action == GLFW_REPEAT) {
         keyState[mappedKey] = true;
     }
+    if (!GameViewWindow::getPaused()) {
+        if (keyState[Key::NUM_2])
+            allow_camera_movement = ~allow_camera_movement;
 
-    if (keyState[Key::NUM_2])
-        allow_camera_movement = ~allow_camera_movement;
-
-    if (keyState[Key::NUM_1]) {
-        debug_flag = ~debug_flag;
-        isGuiOpen = ~isGuiOpen;
+        if (keyState[Key::NUM_1]) {
+            debug_flag = ~debug_flag;
+            isGuiOpen = ~isGuiOpen;
+        }
     }
+    
 
     if (keyState[Key::P])
         audioPaused = ~audioPaused;
@@ -240,7 +245,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-	(void)window;
+    (void)window;
 }
 
 //Handle mouse button events
@@ -256,12 +261,25 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
     if (action == GLFW_PRESS) {
         mouseButtonState[mappedButton] = true;
+
+        if (mappedButton == MouseButton::left)
+        {
+            MouseBehaviour click;
+            double mouseX{}, mouseY{};
+            int windowWidth{}, windowHeight{};
+            glfwGetCursorPos(pWindow, &mouseX, &mouseY);
+            glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+
+            float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+            click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+        }
     }
     else if (action == GLFW_RELEASE) {
         mouseButtonState[mappedButton] = false;
     }
 
-	(void)window;
+    (void)window;
 }
 
 //Handle cursor position events
@@ -275,13 +293,15 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-	//On relase it doesn't use since we use ScrollEvent for debugging
+    //On relase it doesn't use since we use ScrollEvent for debugging
     (void)window; (void)xoffset; (void)yoffset;
-    
+
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
 }
+
+
 
 //Caluclate the FPS and delta_time to be used
 void GLFWFunctions::getFps() {
@@ -314,13 +334,38 @@ void GLFWFunctions::getFps() {
 }
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
+    (void)window;
     for (int i = 0; i < count; i++) {
         std::string filePath = paths[i];
-        assetsManager.handleDropFile(filePath);
+        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+            //seperate window to inform not allowed to drop type of file
+            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+        }
+        else {
+            assetsManager.handleDropFile(filePath);
+        }
     }
 }
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
+}
+
+// Input state functions
+bool GLFWFunctions::isKeyPressed(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
+}
+
+bool GLFWFunctions::isKeyReleased(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
+}
+
+bool GLFWFunctions::isKeyHeld(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
+}
+
+bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
+	return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
 }
