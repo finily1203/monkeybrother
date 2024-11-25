@@ -19,22 +19,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 class BehaviourECS {
 public:
 	virtual ~BehaviourECS() = default;
-	virtual void update(Entity entity, float dt) = 0;
-};
-
-class PlayerBehaviour : public BehaviourECS {
-public:
-	void update(Entity entity, float dt) override;
-};
-
-class EnemyBehaviour : public BehaviourECS {
-public:
-	void update(Entity entity, float dt) override;
+	virtual void update(Entity entity) = 0;
 };
 
 class MouseBehaviour : public BehaviourECS {
 public:
-	void update(Entity entity, float dt) override;
+	void update(Entity entity) override;
 	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
 	void onMouseHover(double mouseX, double mouseY);
 
@@ -59,7 +49,7 @@ public:
 	void update(float dt) override;
 
 	//For now we don't use a behaviour manager since we have little behaviours
-	//But might need to expand this in the future
+	//But need to expand this in the future
 	void assignBehaviour(Entity entity, std::shared_ptr<BehaviourECS> behaviour);
 
 	void ApplyForce(Entity entity, const myMath::Vector2D& appliedForce);

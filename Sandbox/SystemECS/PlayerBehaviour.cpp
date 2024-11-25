@@ -1,9 +1,8 @@
 #include "PlayerBehaviour.h"
-#include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
-void PlayerBehaviour::update(Entity entity, float dt) {
+void PlayerBehaviour::update(Entity entity) {
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
@@ -13,10 +12,10 @@ void PlayerBehaviour::update(Entity entity, float dt) {
 
 
 	if (GLFWFunctions::keyState[Key::Q]) {
-		rotation.SetX(rotation.GetX() + (180.f * dt));
+		rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
 	}
 	else if (GLFWFunctions::keyState[Key::E]) {
-		rotation.SetX(rotation.GetX() - (180.f * dt));
+		rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
 
 	}
 

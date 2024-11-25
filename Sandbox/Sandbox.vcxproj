@@ -144,7 +144,10 @@
     <ClCompile Include="MessageSystem\observable.cpp" />
     <ClCompile Include="MessageSystem\observer.cpp" />
     <ClCompile Include="Serialization\jsonSerialization.cpp" />
+    <ClCompile Include="SystemECS\CollectableBehaviour.cpp" />
+    <ClCompile Include="SystemECS\EffectPumpBehaviour.cpp" />
     <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
+    <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
@@ -159,12 +162,15 @@
     <ClInclude Include="Components\AnimationComponent.h" />
     <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
+    <ClInclude Include="Components\CollectableComponent.h" />
     <ClInclude Include="Components\EnemyComponent.h" />
+    <ClInclude Include="Components\ExitComponent.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="Components\PlayerComponent.h" />
+    <ClInclude Include="Components\PumpComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\Debug.h" />
@@ -198,7 +204,10 @@
     <ClInclude Include="MessageSystem\observer.h" />
     <ClInclude Include="Serialization\jsonSerialization.h" />
     <ClInclude Include="Serialization\serialization.h" />
+    <ClInclude Include="SystemECS\CollectableBehaviour.h" />
+    <ClInclude Include="SystemECS\EffectPumpBehaviour.h" />
     <ClInclude Include="SystemECS\EnemyBehaviour.h" />
+    <ClInclude Include="SystemECS\ExitBehaviour.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />

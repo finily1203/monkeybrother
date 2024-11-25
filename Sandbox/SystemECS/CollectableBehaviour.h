@@ -3,5 +3,5 @@
 
 class CollectableBehaviour : public BehaviourECS {
 public:
-	void update(Entity entity, float dt) override;
+	void update(Entity entity) override;
 };

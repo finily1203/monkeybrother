@@ -43,6 +43,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "FontComponent.h"
 #include "PlayerComponent.h"
 #include "ButtonComponent.h"
+#include "CollectableComponent.h"
+#include "PumpComponent.h"
+#include "ExitComponent.h"
 
 #include <iostream>
 #include <fstream>

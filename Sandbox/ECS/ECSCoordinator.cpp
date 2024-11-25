@@ -26,6 +26,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
 
 #include <Windows.h>
 
@@ -200,6 +203,36 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			//ASSIGN ENEMY BEHAVIOUR
 			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
+		}
+
+		if (entityData.contains("collectable")) {
+
+			CollectableComponent collectable{};
+			serializer.ReadObject(collectable.isCollectable, entityId, "entities.collectable.isCollectable");
+
+			ecs.addComponent(entityObj, collectable);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
+
+			GLFWFunctions::collectableCount++;
+		}
+
+		if (entityData.contains("pump")) {
+			PumpComponent pump{};
+			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
+
+			ecs.addComponent(entityObj, pump);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+		}
+
+		if (entityData.contains("exit")) {
+			ExitComponent exit{};
+			serializer.ReadObject(exit.isExit, entityId, "entities.exit.isExit");
+
+			ecs.addComponent(entityObj, exit);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
 		}
 
 		if (entityData.contains("forces"))
@@ -411,6 +444,9 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<FontComponent>();
 	registerComponent<PlayerComponent>();
 	registerComponent<ButtonComponent>();
+	registerComponent<CollectableComponent>();
+	registerComponent<PumpComponent>();
+	registerComponent<ExitComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 
