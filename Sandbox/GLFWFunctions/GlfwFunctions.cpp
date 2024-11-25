@@ -88,6 +88,10 @@ std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
 
+std::unordered_map<Key, bool> GLFWFunctions::keyState;
+std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
+
+
 // Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -342,4 +346,21 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
+}
+
+// Input state functions
+bool GLFWFunctions::isKeyPressed(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
+}
+
+bool GLFWFunctions::isKeyReleased(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
+}
+
+bool GLFWFunctions::isKeyHeld(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
+}
+
+bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
+	return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
 }

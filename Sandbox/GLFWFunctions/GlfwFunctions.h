@@ -27,6 +27,7 @@ enum class Key {
 	LEFT, RIGHT, UP, DOWN,
 	LSHIFT, LCTRL, LALT, SPACE, ESCAPE, COMMA, PERIOD,
 	NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9
+	SPACE, ESCAPE, LEFT, RIGHT, UP, DOWN, LSHIFT, LCTRL, LALT
 };
 
 enum class MouseButton {
@@ -111,6 +112,19 @@ struct GLFWFunctions {
 	//static bool zoomViewport;
 	//static int testMode;
 
+	// Input state functions
+	static bool isKeyPressed(Key key);
+	static bool isKeyReleased(Key key);
+	static bool isKeyHeld(Key key);
+
+	static bool isMouseButtonPressed(MouseButton button);
+
+	// key state
+	static std::unordered_map<Key, bool> keyState;
+	static std::unordered_map<MouseButton, bool> mouseButtonState;
+
+
+	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
 	static double fps;
 	static float delta_time;
