@@ -92,6 +92,7 @@
     <ClInclude Include="Engine\EngineDefinitions.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="Graphics\FontSystem.h" />
+    <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
     <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
     <ClInclude Include="DebugSystem\GUIObjectCreation.h" />

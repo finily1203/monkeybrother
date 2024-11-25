@@ -19,6 +19,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlfwFunctions.h"
 #include "GUIGameViewport.h"
 #include "GlobalCoordinator.h"
+#include "LogicSystemECS.h"
 #include <algorithm>
 #include <iostream>
 //#include <chrono>
@@ -258,6 +259,19 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
     if (action == GLFW_PRESS) {
         mouseButtonState[mappedButton] = true;
+
+        if (mappedButton == MouseButton::left)
+        {
+            MouseBehaviour click;
+            double mouseX{}, mouseY{};
+            int windowWidth{}, windowHeight{};
+            glfwGetCursorPos(pWindow, &mouseX, &mouseY);
+            glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+
+            float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+            click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+        }
     }
     else if (action == GLFW_RELEASE) {
         mouseButtonState[mappedButton] = false;
@@ -284,6 +298,8 @@ void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffs
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
 }
+
+
 
 //Caluclate the FPS and delta_time to be used
 void GLFWFunctions::getFps() {

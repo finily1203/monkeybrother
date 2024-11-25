@@ -76,11 +76,16 @@ public:
 	bool checkIfAssetListChanged() const;
 	std::vector<std::string> getAssetList() const;
 
+	//When adding in new assets
+	void AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath);
+
 	//For asset browser
 	const std::map<std::string, GLuint>& getTextureList() const;
 	const std::map<std::string, std::unique_ptr<Shader>>& getShaderList() const;
 	const std::map<std::string, FMOD::Sound*>& getAudioList() const;
 	const std::map<std::string, std::map<char, Character>>& getFontList() const;
+
+
 
 private:
 	FMOD::System* audSystem;
