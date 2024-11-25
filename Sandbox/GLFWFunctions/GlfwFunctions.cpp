@@ -87,11 +87,6 @@ bool GLFWFunctions::firstCollision = false;
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
-
-std::unordered_map<Key, bool> GLFWFunctions::keyState;
-std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
-
-
 // Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
