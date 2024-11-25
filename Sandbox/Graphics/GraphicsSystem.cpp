@@ -32,6 +32,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "stb_image.h"
 #include <iostream>
 #include "GlobalCoordinator.h"
+#include "GUIGameViewport.h"
 
 
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -148,7 +149,10 @@ void GraphicsSystem::update() {}
 
 void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
-        m_AnimationData->Update(deltaTime);
+        if (!GameViewWindow::getPaused()) {
+            m_AnimationData->Update(deltaTime);
+        }
+        //m_AnimationData->Update(deltaTime);
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
 
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);

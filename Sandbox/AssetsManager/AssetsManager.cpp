@@ -120,7 +120,7 @@ GLuint AssetsManager::GetTexture(const std::string& texName) const {
 		return iterator->second;
 	}
     else {
-		std::cerr << "Texture not found!" << std::endl;
+		std::cerr << "Texture:" << texName << " not found!" << std::endl;
 		return 0;
 	}
 }
@@ -449,6 +449,32 @@ void AssetsManager::ClearFonts() {
 void AssetsManager::handleDropFile(std::string filePath) {
     std::filesystem::path path(filePath);
 
+    //check if file already exists
+    if (std::find(m_AssetList.begin(), m_AssetList.end(), path.filename().string()) != m_AssetList.end()) {
+		//if it exists, delete the current one within the program
+        if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+			UnloadTexture(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "textureAssets");
+		}
+		else if (path.extension() == ".shader") {
+			UnloadShader(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "shaderAssets");
+		}
+		else if (path.extension() == ".ttf") {
+			UnloadFont(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "fontAssets");
+		}
+		else if (path.extension() == ".wav" || path.extension() == ".mp3") {
+			UnloadAudio(path.filename().string());
+			DeleteAssetFromJSON(path.filename().string(), "audioAssets");
+		}
+		else {
+			std::cerr << "File type not supported!" << std::endl;
+        }
+
+        std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
+    }
+
     if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
 		LoadTexture(path.filename().string().c_str(), path.string());
         AddNewAssetToJSON(path.filename().string(), "textureAssets", path.string());
@@ -572,4 +598,71 @@ void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string 
     }
 
     std::cout << "Asset added to JSON!" << std::endl;
+}
+
+
+void AssetsManager::DeleteAssetFromJSON(std::string const& assetName, std::string assetType) {
+
+    //read assets.json file
+    nlohmann::json jsonData;
+    std::ifstream inputFile(FilePathManager::GetAssetsJSONPath());
+    if (inputFile.is_open()) {
+        inputFile >> jsonData;
+        inputFile.close();
+    }
+    else {
+        std::cerr << "Error: Could not open JSON file for reading." << std::endl;
+        return;
+    }
+
+    // Check if the assetType exists in the JSON file and is an array
+    if (jsonData.contains(assetType) && jsonData[assetType].is_array()) {
+        auto& assetArray = jsonData[assetType];
+
+        // Find and remove the asset from the array
+        assetArray.erase(std::remove_if(assetArray.begin(), assetArray.end(), [&assetName](nlohmann::json const& asset) {
+            return asset.contains("id") && asset["id"] == assetName;
+        }), assetArray.end());
+    }
+    else {
+        std::cerr << "Error: Asset type not found in JSON or is not an array." << std::endl;
+        return;
+    }
+
+    // Write the updated JSON back to the file
+    std::ofstream outputFile(FilePathManager::GetAssetsJSONPath());
+    if (outputFile.is_open()) {
+        outputFile << jsonData.dump(2);
+        outputFile.close();
+    }
+    else {
+        std::cerr << "Error: Could not open JSON file for writing." << std::endl;
+        return;
+    }
+
+    // Construct the file path to delete
+    std::string identifier = "";
+    if (assetType == "textureAssets") identifier = "textures/";
+    else if (assetType == "shaderAssets") identifier = "shaders/";
+    else if (assetType == "fontAssets") identifier = "fonts/";
+    else if (assetType == "audioAssets") identifier = "audio/";
+
+    std::string filePath = FilePathManager::GetExecutablePath() + "\\assets\\" + identifier + assetName;
+
+    // Remove the file from the filesystem
+    try {
+        std::filesystem::path fileToDelete(filePath);
+        if (std::filesystem::exists(fileToDelete)) {
+            std::filesystem::remove(fileToDelete);
+            std::cout << "Deleted asset file: " << filePath << std::endl;
+        }
+        else {
+            std::cerr << "Error: File does not exist: " << filePath << std::endl;
+        }
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Error deleting file: " << e.what() << std::endl;
+    }
+
+    std::cout << "Asset removed from JSON and deleted from the file system." << std::endl;
 }

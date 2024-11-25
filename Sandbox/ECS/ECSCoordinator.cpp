@@ -23,6 +23,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "FontSystemECS.h"
 #include "GraphicsSystem.h"
+
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
+
 #include <Windows.h>
 
 #include "GlobalCoordinator.h"
@@ -34,7 +41,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 void ECSCoordinator::initialise() {
 	entityManager = std::make_unique<EntityManager>();
 	componentManager = std::make_unique<ComponentManager>();
-	componentManager = std::make_unique<ComponentManager>();
 	systemManager = std::make_unique<SystemManager>();
 }
 
@@ -42,19 +48,7 @@ void ECSCoordinator::initialise() {
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
 	systemManager->update();
-	//if (GLFWFunctions::goNextMode) {
-	//	for (Entity entity : entityManager->getLiveEntities()) {
-	//		destroyEntity(entity);
-	//	}
-	//	//std::cout << getEntityNum() << std::endl;
-	//	if (GLFWFunctions::testMode == 0) {
-	//		test5();
-	//	}
-	//	else if (GLFWFunctions::testMode == 1) {
-	//		test4();
-	//	}
-	//	GLFWFunctions::goNextMode = false;
-	//}
+
 }
 
 //Cleans up the ECS system by calling the cleanup function
@@ -101,50 +95,6 @@ void ECSCoordinator::destroyEntity(Entity entity)
 
 }
 
-
-//Used to test for serialization of entities;
-void ECSCoordinator::test2() {
-	std::cout << "testing ECS with graphics side" << std::endl << std::endl;
-
-	std::cout << "Set entity" << std::endl;
-	//Entity entity = createEntity();
-	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-	
-	// test codes for saving to JSON file
-	// can be uncommented for the testing of saving to JSON file
-	//TransformComponent transUpdate = getComponent<TransformComponent>(entity);
-	//GraphicsComponent graphicsUpdate = getComponent<GraphicsComponent>(entity);
-	//transUpdate.position = { 0.32f, -0.83f };
-	//transUpdate.scale = { 0.5f, 0.5f };
-	//transUpdate.orientation = { 0.0f, 0.0f };
-
-	//graphicsUpdate.glObject.position = { -0.5f, -0.61f };
-	//graphicsUpdate.glObject.scaling = { 0.15f, 0.3f };
-	//graphicsUpdate.glObject.orientation = { 0.0f, 0.0f };
-
-	//UpdateEntity(entity, transUpdate, graphicsUpdate);
-	//SaveEntityToJSON(*this, entity, GetPlayerJSONPath());
-
-	//Entity entity2 = createEntity();
-	//LoadEntityFromJSON(*this, entity2, GetEnemyJSONPath());
-}
-
-
-//class PlayerSystem : public System {
-//public:
-//	void initialise() override {
-//		std::cout << "PlayerSystem initialise" << std::endl;
-//	}
-//
-//	void update(float dt) override {
-//		//std::cout << "PlayerSystem update" << std::endl;
-//	}
-//
-//	void cleanup() override {
-//		std::cout << "PlayerSystem cleanup" << std::endl;
-//	}
-//};
-
 // this is the definition of the function that loads the data from JSON file to the entity
 // open the JSON file and initialize the entity data based on the values read
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
@@ -161,6 +111,8 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 	// return the JSON object from the file
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
 	// loop through the entities array in the JSON object and
 	// retrieve each data
 	for (const auto& entityData : jsonObj["entities"])
@@ -172,6 +124,19 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+
+		//FOR NOW WE DO ASSIGNING OF BEHAVIOUR FOR PLAYER MANUALLY
+		//if (entityId == "player") {
+		//	logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+		//	//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
+		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
+		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
+		//}
+
+		if (entityId == "quitButton" || entityId == "retryButton")
+		{
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -220,12 +185,54 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, animation);
 		}
 
+		if (entityData.contains("player")) {
+			PlayerComponent player{};
+			serializer.ReadObject(player.isPlayer, entityId, "entities.player.isPlayer");
+
+			ecs.addComponent(entityObj, player);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+		}
+
 		if (entityData.contains("enemy"))
 		{
 			EnemyComponent enemy{};
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
 
 			ecs.addComponent(entityObj, enemy);
+
+			//ASSIGN ENEMY BEHAVIOUR
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
+		}
+
+		if (entityData.contains("collectable")) {
+
+			CollectableComponent collectable{};
+			serializer.ReadObject(collectable.isCollectable, entityId, "entities.collectable.isCollectable");
+
+			ecs.addComponent(entityObj, collectable);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
+
+			GLFWFunctions::collectableCount++;
+		}
+
+		if (entityData.contains("pump")) {
+			PumpComponent pump{};
+			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
+
+			ecs.addComponent(entityObj, pump);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+		}
+
+		if (entityData.contains("exit")) {
+			ExitComponent exit{};
+			serializer.ReadObject(exit.isExit, entityId, "entities.exit.isExit");
+
+			ecs.addComponent(entityObj, exit);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
 		}
 
 		if (entityData.contains("forces"))
@@ -268,6 +275,14 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			std::cout << font.fontId << std::endl;
 
 			ecs.addComponent(entityObj, font);
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
 		}
 
 		// set the entityId for the current entity
@@ -375,6 +390,13 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 				serializer.WriteObject(fontComp.color, entityId, "entities.font.color");
 				serializer.WriteObject(fontComp.fontId, entityId, "entities.font.fontId.fontName");
 			}
+
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<ButtonComponent>()))
+			{
+				ButtonComponent button = getComponent<ButtonComponent>(entity);
+
+				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
+			}
 		}
 	}
 
@@ -420,6 +442,11 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<EnemyComponent>();
 	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
+	registerComponent<PlayerComponent>();
+	registerComponent<ButtonComponent>();
+	registerComponent<CollectableComponent>();
+	registerComponent<PumpComponent>();
+	registerComponent<ExitComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

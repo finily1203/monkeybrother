@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Systems.h"
 #include "GlfwFunctions.h"
 #include "GlobalCoordinator.h"
+#include "GUIGameViewport.h"
 #include <iostream>
 
 Engine::Engine() {}
@@ -41,8 +42,6 @@ void Engine::updateSystem() {
 	//ecsCoordinator.update();
 
 	for (auto& system : m_systems) {
-		//Console::GetLog() << "System type: " << static_cast<int>(system->getSystem()) << std::endl;
-		//Start time record for perfomance viewer
 		switch (system->getSystem()) {
 		case SystemType::AudioSystemType:
 			debugSystem.StartSystemTiming("AudioSystem");

@@ -31,6 +31,10 @@ public:
 	static std::string GetIMGUIConsoleJSONPath();
 	static std::string GetIMGUIViewportJSONPath();
 	static std::string GetIMGUIDebugJSONPath();
+	static std::string GetIMGUILayoutPath();
+	static std::string GetIMGUIInspectorJSONPath();
+	static std::string GetIMGUICreationJSONPath();
+	static std::string GetIMGUIHierarchyJSONPath();
 	static std::string GetAssetsJSONPath();
 	static std::string GetIMGUIFontPath();
 	static std::string GetPhysicsPath();

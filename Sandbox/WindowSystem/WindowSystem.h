@@ -34,5 +34,5 @@ public:
 	SystemType getSystem() override; //For perfomance viewer
 
 	//void logicUpdate();
-	
+
 };

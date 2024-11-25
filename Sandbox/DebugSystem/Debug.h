@@ -81,119 +81,36 @@ public:
 
 	void UpdateSystemTimes(); //Update all system loop time
 
-	static int GetSaveCount(); //Returns save count
-
-	//Serialize entity data to JSON file
-	nlohmann::ordered_json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
-
-	//Remove entity data from JSON save file
-	void RemoveEntityFromJSON(std::string const& entityId);
-
 	//Load debug system configuration from JSON file
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
-	//Create appropriate components based on object type
-	void ObjectCreationCondition(const char* items[], int current_item, Entity entityObj, std::string entityId);
+	static std::vector<Entity> newEntities;
 
-	//Save current debug save count configuration to JSON
-	void SaveDebugConfigFromJSON(std::string const& filename);
-
-	//Generate new JSON save file
-	std::string GenerateSaveJSONFile(int& saveNumber);
-	
+	static ImVec2 getMouseWorldPos() {
+		return mouseWorldPos;
+	}
 private:
+	static std::string iniPath;
 	ImGuiIO* io;
 	ImFont* font;
 	static float fontSize;
 	static float textBorderSize;
 	static ImVec4 clearColor;
-
-	static bool isSelectingFile;
 	static bool isZooming;
 	static bool isPanning;
-	static bool isSliding;
-	static bool isRedToggled;
-	static bool isGreenToggled;
-	static bool isBlueToggled;
-	static bool createEntity;
-	static int currentItem;
-
+	static float paddingPV;
 	static double ecsTotal;
 	static bool foundECS;
-	static int numberOfColumnPV;
-	static float paddingPV;
-	static float initialZoomLevel;
-	static float initialDragDistX;
-	static float initialDragDistY;
-
-	static float defaultObjScaleX;
-	static float defaultObjScaleY;
-
-	static float coordinateMaxLimitsX;
-	static float coordinateMaxLimitsY;
-	static float coordinateMinLimitsX;
-	static float coordinateMinLimitsY;
-	static float orientationMaxLimit;
-	static float orientationMinLimit;
-
-	static float fontScaleMaxLimit;
-	static float fontScaleMinLimit;
-	static float fontColorMaxLimit;
-	static float fontColorMinLimit;
-	static float textBoxMaxLimit;
-	static float textBoxMinLimit;
-	static float textBoxWidth;
-
-	static int numEntitiesToCreate;
-	static int minEntitesToCreate;
-	static char numBuffer[MAXBUFFERSIZE];
-	static char sigBuffer[MAXNAMELENGTH];
-	static char textBuffer[MAXTEXTSIZE];
-	static char textScaleBuffer[MAXBUFFERSIZE];
-	static char xCoordinatesBuffer[MAXBUFFERSIZE];
-	static char yCoordinatesBuffer[MAXBUFFERSIZE];
-	static char xOrientationBuffer[MAXBUFFERSIZE];
-	static char yOrientationBuffer[MAXBUFFERSIZE];
-	static float xCoordinates;
-	static float yCoordinates;
-	static float xOrientation;
-	static float yOrientation;
-	static float textScale;
-	static float textScaleMinLimit;
-
-	static float objAttributeSliderMaxLength;
-	static float objAttributeSliderMidLength;
-	static float objAttributeSliderMinLength;
-
-	static std::unordered_map<const char*, double> systemTimes;
 	static std::unordered_map<std::string, double> systemStartTimes;
-	static std::unordered_map<std::string, double> systemTotalTimes;
 	static std::unordered_map<std::string, double> accumulatedTimes;
 	static double loopStartTime;
 	static double totalLoopTime;
-	static double totalECSTime;
 	static double lastUpdateTime;
 	static bool firstFrame;
 	static std::vector<const char*> systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
-
-	static float objWidthSlide;
-	static float objHeightSlide;
-	static int objCount;
-
-	static float objSizeXMax;
-	static float objSizeXMin;
-	static float objSizeYMax;
-	static float objSizeYMin;
-
-	static int saveLimit;
-	static int saveCount;
-	static float lastPosX;
-	static float fileWindowWidth;
-	static float saveWindowHeight;
-	static float fileWindowHeight;
-	static float saveWindowWidth;
+	static ImVec2 mouseWorldPos;
 };
 
 static bool LegacyKeyDuplicationCheck(ImGuiKey key); //Prevent key duplication according to ImGui legacy key map
