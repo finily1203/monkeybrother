@@ -39,6 +39,9 @@
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="Graphics\CameraSystem2D.cpp" />
     <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
+    <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
+    <ClCompile Include="DebugSystem\GUIObjectCreation.cpp" />
+    <ClCompile Include="DebugSystem\GUIInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -90,6 +93,9 @@
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="Graphics\FontSystem.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
+    <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
+    <ClInclude Include="DebugSystem\GUIObjectCreation.h" />
+    <ClInclude Include="DebugSystem\GUIInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
