@@ -23,6 +23,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "FontSystemECS.h"
 #include "GraphicsSystem.h"
+
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
+
 #include <Windows.h>
 
 #include "GlobalCoordinator.h"
@@ -119,12 +126,12 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		std::string entityId = entityData["id"].get<std::string>();
 
 		//FOR NOW WE DO ASSIGNING OF BEHAVIOUR FOR PLAYER MANUALLY
-		if (entityId == "player") {
-			logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
-			//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
-			//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
-		}
+		//if (entityId == "player") {
+		//	logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+		//	//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
+		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
+		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
+		//}
 
 		if (entityId == "quitButton" || entityId == "retryButton")
 		{
@@ -178,6 +185,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, animation);
 		}
 
+		if (entityData.contains("player")) {
+			PlayerComponent player{};
+			serializer.ReadObject(player.isPlayer, entityId, "entities.player.isPlayer");
+
+			ecs.addComponent(entityObj, player);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+		}
+
 		if (entityData.contains("enemy"))
 		{
 			EnemyComponent enemy{};
@@ -187,6 +203,36 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			//ASSIGN ENEMY BEHAVIOUR
 			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
+		}
+
+		if (entityData.contains("collectable")) {
+
+			CollectableComponent collectable{};
+			serializer.ReadObject(collectable.isCollectable, entityId, "entities.collectable.isCollectable");
+
+			ecs.addComponent(entityObj, collectable);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
+
+			GLFWFunctions::collectableCount++;
+		}
+
+		if (entityData.contains("pump")) {
+			PumpComponent pump{};
+			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
+
+			ecs.addComponent(entityObj, pump);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+		}
+
+		if (entityData.contains("exit")) {
+			ExitComponent exit{};
+			serializer.ReadObject(exit.isExit, entityId, "entities.exit.isExit");
+
+			ecs.addComponent(entityObj, exit);
+
+			logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
 		}
 
 		if (entityData.contains("forces"))
@@ -396,7 +442,11 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<EnemyComponent>();
 	registerComponent<PhysicsComponent>();
 	registerComponent<FontComponent>();
+	registerComponent<PlayerComponent>();
 	registerComponent<ButtonComponent>();
+	registerComponent<CollectableComponent>();
+	registerComponent<PumpComponent>();
+	registerComponent<ExitComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

@@ -66,6 +66,7 @@ public:
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
     ForceManager getForceManager() const { return forceManager; }
+	CollisionSystemECS getCollisionSystem() const { return collisionSystem; }
 
     bool getIsColliding() const { return isColliding; }
 
@@ -84,6 +85,8 @@ public:
 	// Load and save physics config from JSON
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
+
+
 
 
 private:

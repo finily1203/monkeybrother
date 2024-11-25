@@ -22,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include <algorithm>
 #include <iostream>
+#include <Windows.h>
 //#include <chrono>
 //#include <thread>
 
@@ -81,7 +82,9 @@ GLboolean GLFWFunctions::adjustVol = false;
 int GLFWFunctions::audioNum = 0;
 int GLFWFunctions::windowWidth = 0;
 int GLFWFunctions::windowHeight = 0;
+int GLFWFunctions::collectableCount = 0;
 bool GLFWFunctions::bumpAudio = false;
+bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
 
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
@@ -334,7 +337,14 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
     (void)window;
     for (int i = 0; i < count; i++) {
         std::string filePath = paths[i];
-        assetsManager.handleDropFile(filePath);
+        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+            //seperate window to inform not allowed to drop type of file
+            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+        }
+        else {
+            assetsManager.handleDropFile(filePath);
+        }
     }
 }
 

@@ -14,6 +14,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							   100%
 *//*___________________________________________________________________________-*/
 #include "GraphicSystemECS.h"
+
 #include "TransformComponent.h"
 #include "GraphicsComponent.h"
 #include "AABBComponent.h"
@@ -21,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
 #include "PhysicsComponent.h"
+
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
 #include "Debug.h"
@@ -58,8 +60,10 @@ void GraphicSystemECS::update(float dt) {
             transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
         }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
-
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
+		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
+		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
+		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
         // Use hasMovement for the update parameter
         graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
@@ -108,16 +112,9 @@ void GraphicSystemECS::update(float dt) {
         else if (hasMovement) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
-        else if (entitySig.test(0) && entitySig.count() == 1) {
-            if(ecsCoordinator.getEntityID(entity) == "placeholderentity")
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-            else
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-        }
         else if(isPlatform){
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
-
         else if (isButton) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
@@ -130,7 +127,21 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
             }
         }
-        //}
+        else if (isCollectable) {
+			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+        }
+        else if (isPump) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
+        }
+        else if (isExit) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
+        }
+        else if (entitySig.test(0) && entitySig.count() == 1) {
+            if (ecsCoordinator.getEntityID(entity) == "placeholderentity")
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            else
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+        }
     }
 }
 

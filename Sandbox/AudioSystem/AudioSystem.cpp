@@ -138,6 +138,11 @@ void AudioSystem::update() {
         GLFWFunctions::bumpAudio = false;
     }
 
+    if (GLFWFunctions::collectAudio) {
+        playSoundEffect("bubbleButton");
+        GLFWFunctions::collectAudio = false;
+    }
+
     if (GLFWFunctions::keyState[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
         playSoundEffect("bubbleButton");
         GLFWFunctions::keyState[Key::NUM_9] = false;

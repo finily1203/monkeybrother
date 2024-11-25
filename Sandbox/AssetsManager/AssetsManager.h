@@ -79,6 +79,9 @@ public:
 	//When adding in new assets
 	void AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath);
 
+	//When deleting assets
+	void DeleteAssetFromJSON(std::string const& assetName, std::string assetType);
+
 	//For asset browser
 	const std::map<std::string, GLuint>& getTextureList() const;
 	const std::map<std::string, std::unique_ptr<Shader>>& getShaderList() const;

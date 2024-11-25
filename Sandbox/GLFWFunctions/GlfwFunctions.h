@@ -131,7 +131,10 @@ struct GLFWFunctions {
 	static int audioNum;
 	static int windowWidth;
 	static int windowHeight;
+	static int collectableCount;
+
 	static bool bumpAudio;
+	static bool collectAudio;
 	static bool firstCollision;
 
 

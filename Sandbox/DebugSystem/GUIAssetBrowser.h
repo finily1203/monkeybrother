@@ -15,6 +15,8 @@ public:
 	static void Update();
 	static void Cleanup();
 
+	static std::string cutString(const std::string& str, float maxWidth);
+
 private:
 	static std::vector<std::string> assetNames;
 	static bool showTextures;
