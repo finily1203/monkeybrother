@@ -47,7 +47,7 @@ void SystemManager::update() {
 	for (auto const& pair : Systems) {
 
 		auto const& system = pair.second;
-		if (GameViewWindow::getPaused() || !WindowSystem::GetOnCtrlAltDelPage() ) {
+		if (GameViewWindow::getPaused() || WindowSystem::GetAltTab() || WindowSystem::GetCtrlAltDel() ) {
 			if (system->getSystemECS() == "LogicSystemECS" || system->getSystemECS() == "PhysicsColliSystemECS") {
 				continue;
 			}

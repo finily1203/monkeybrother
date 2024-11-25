@@ -33,8 +33,8 @@ public:
 	void cleanup() override;
 	SystemType getSystem() override; //For perfomance viewer
 
-	bool GetOnCtrlAltDelPage() { return onCtrlAltDelPage; }
-
+	static bool GetAltTab() { return altTab; }
+	static bool GetCtrlAltDel() { return ctrlAltDel; }
 
 	void handleWindowFocus();
 
@@ -42,10 +42,11 @@ private:
 	//bool isInterrupted = false;
 	bool isFocused = true;
 	bool wasFocused = false;
-	static bool onCtrlAltDelPage;
+	bool onCtrlAltDelPage = false;
 	bool wasInCtrlAltDelPage = false;
 	bool keysWerePressed = false;
-
+	static bool altTab;
+	static bool ctrlAltDel;
 	//void logicUpdate();
 
 };

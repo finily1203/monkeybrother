@@ -24,6 +24,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
+bool WindowSystem::altTab = false;
+bool WindowSystem::ctrlAltDel = false;
 //GraphicsSystem graphicsSystem;
 //GraphicsSystem::GLObject gameObject, gameObject2, 
 // , blackBox;
@@ -122,7 +124,6 @@ void WindowSystem::initialise() {
 	std::cout << "GLEW initialized successfully" << std::endl;
 
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
-	onCtrlAltDelPage = false;
 }
 
 //void WindowSystem::handleWindowFocus()
@@ -221,6 +222,7 @@ void WindowSystem::handleWindowFocus() {
 		isFocused = false;
 		GLFWFunctions::audioPaused = true;
 		glfwIconifyWindow(GLFWFunctions::pWindow);
+		ctrlAltDel = true;
 	}
 
 	// Handle Ctrl+Alt+Del page exit
@@ -235,7 +237,6 @@ void WindowSystem::handleWindowFocus() {
 			if (wasFocused) {
 				//std::cout << wasFocused << std::endl;
 				onCtrlAltDelPage = false;
-
 				SetForegroundWindow(appWindow);
 				Sleep(100);
 				//glfwRestoreWindow(GLFWFunctions::pWindow);
@@ -254,10 +255,13 @@ void WindowSystem::handleWindowFocus() {
 		if (isFocused) {
 			GLFWFunctions::audioPaused = false;
 			glfwRestoreWindow(GLFWFunctions::pWindow);
+			altTab = false;
+			ctrlAltDel = false;
 		}
 		else {
 			GLFWFunctions::audioPaused = true;
 			glfwIconifyWindow(GLFWFunctions::pWindow);
+			altTab = true;
 		}
 	}
 
