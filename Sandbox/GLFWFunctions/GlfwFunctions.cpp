@@ -130,9 +130,9 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	// unused parameters
-	(void)scancode;
-	(void)mods;
+    // unused parameters
+    (void)scancode;
+    (void)mods;
 
     Key mappedKey;
     switch (key) {
@@ -242,7 +242,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-	(void)window;
+    (void)window;
 }
 
 //Handle mouse button events
@@ -276,7 +276,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         mouseButtonState[mappedButton] = false;
     }
 
-	(void)window;
+    (void)window;
 }
 
 //Handle cursor position events
@@ -290,9 +290,9 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-	//On relase it doesn't use since we use ScrollEvent for debugging
+    //On relase it doesn't use since we use ScrollEvent for debugging
     (void)window; (void)xoffset; (void)yoffset;
-    
+
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
