@@ -50,7 +50,7 @@ void ObjectCreation::Update() {
 
 	objCount += static_cast<int>(ecsCoordinator.getAllLiveEntities().size()) - 1;
 
-	const char* items[] = { "Player", "Enemy", "Platform", "TextBox", "Background" };
+	const char* items[] = { "Player", "Enemy", "Platform", "TextBox", "Background", "Pump", "Exit", "Collectable"};
 
 	// Create the combo box
 	ImGui::SetNextItemWidth(objAttributeSliderMidLength);
@@ -289,8 +289,23 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 		ecsCoordinator.addComponent(entityObj, fontComp);
 	}
+	else if (!strcmp(items[itemIndex], "Pump")) {
+		PumpComponent pump{};
+		pump.isPump = true;
+		ecsCoordinator.addComponent(entityObj, pump);
+	}
+	else if (!strcmp(items[itemIndex], "Exit")) {
+		ExitComponent exit{};
+		exit.isExit = true;
+		ecsCoordinator.addComponent(entityObj, exit);
+	}
+	else if (!strcmp(items[itemIndex], "Collectable")) {
+		CollectableComponent collectable{};
+		collectable.isCollectable = true;
+		ecsCoordinator.addComponent(entityObj, collectable);
+	}
 	else if (!strcmp(items[itemIndex], "Background")) {
-
+		
 	}
 }
 
