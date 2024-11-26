@@ -35,9 +35,10 @@ void EffectPumpBehaviour::update(Entity entity) {
 
 		if (isColliding) {
 			auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
-			float mag = playerPhysics.force.GetMagnitude();
+			float pumpForce = ecsCoordinator.getComponent<PumpComponent>(entity).pumpForce;
+			float mag = playerPhysics.force.GetMagnitude() * pumpForce;
 
-			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-1.0f, -1.0f));
+			PhysicsSystemRef->getForceManager().AddForce(playerEntity, myMath::Vector2D(-mag, -mag));
 
 			std::cout << "Collision" << std::endl;
 		}
