@@ -10,10 +10,10 @@ EnemyBehaviour::EnemyBehaviour() {
 	currentState = PATROL;
 
 	//For now all enemies have same way point
-	waypoints.push_back(myMath::Vector2D(100, 100));
-	waypoints.push_back(myMath::Vector2D(-100, 100));
-	waypoints.push_back(myMath::Vector2D(-100, -100));
-	waypoints.push_back(myMath::Vector2D(100, -100));
+	waypoints.push_back(myMath::Vector2D(400, 200));
+	waypoints.push_back(myMath::Vector2D(300, 200));
+	waypoints.push_back(myMath::Vector2D(300, 100));
+	waypoints.push_back(myMath::Vector2D(400, 100));
 
 }
 
@@ -73,21 +73,50 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto& waypoints = getWaypoints();
     int& currentWaypointIndex = getCurrentWaypointIndex();
 
-    // Set waypoint target
+    // Set the current waypoint target
     myMath::Vector2D target = waypoints[currentWaypointIndex];
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
     float length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+
+    // If close enough to the waypoint, move to the next one
+    const float waypointThreshold = 1.0f;
+    if (length < waypointThreshold) {
+        // Snap position to the exact target
+        transform.position.SetX(target.GetX());
+        transform.position.SetY(target.GetY());
+
+        // Reset forces and velocity
+        physics.accumulatedForce.SetX(0.f);
+        physics.accumulatedForce.SetY(0.f);
+        physics.velocity.SetX(0.f);
+        physics.velocity.SetY(0.f);
+
+        // Move to the next waypoint
+        currentWaypointIndex++;
+        if (currentWaypointIndex >= waypoints.size()) {
+            currentWaypointIndex = 0; // Loop back to the first waypoint
+        }
+
+        target = waypoints[currentWaypointIndex];
+        direction = target - transform.position;
+        length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+
+    }
+
+    // Normalize direction if length is not zero
     if (length != 0) {
         direction.SetX(direction.GetX() / length);
         direction.SetY(direction.GetY() / length);
     }
 
-    // Apply movement force in the direction
-    float movementForceMagnitude = 5.0f; // Example value
-    myMath::Vector2D movementForce = direction * movementForceMagnitude;
-    PhysicsSystemRef->getForceManager().AddForce(entity, movementForce);
+    // Apply movement force if not at the waypoint
+    if (length >= waypointThreshold) {
+        const float movementForceMagnitude = 5.0f; // Example value
+        myMath::Vector2D movementForce = direction * movementForceMagnitude;
+        PhysicsSystemRef->getForceManager().AddForce(entity, movementForce);
+    }
 
     // Physics calculations
     float invMass = physics.mass > 0.f ? 1.f / physics.mass : 0.f;
@@ -97,7 +126,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     physics.velocity.SetX(physics.velocity.GetX() + physics.acceleration.GetX() * GLFWFunctions::delta_time);
     physics.velocity.SetY(physics.velocity.GetY() + physics.acceleration.GetY() * GLFWFunctions::delta_time);
 
-    const float maxSpeed = 0.2f;
+    const float maxSpeed = 0.2f; // Example max speed
     if (physics.velocity.GetX() > maxSpeed) physics.velocity.SetX(maxSpeed);
     if (physics.velocity.GetX() < -maxSpeed) physics.velocity.SetX(-maxSpeed);
     if (physics.velocity.GetY() > maxSpeed) physics.velocity.SetY(maxSpeed);
@@ -107,20 +136,9 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    // Check if the enemy is close to the waypoint
-    float distance = std::sqrt(
-        std::pow(transform.position.GetX() - target.GetX(), 2.f) +
-        std::pow(transform.position.GetY() - target.GetY(), 2.f)
-    );
-
-    if (distance < 10.f) {
-        currentWaypointIndex++;
-        if (currentWaypointIndex >= waypoints.size()) {
-            currentWaypointIndex = 0;
-        }
-    }
-
-	std::cout << transform.position.GetX() << " " << transform.position.GetY() << std::endl;
+    //std::cout << "Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
+    //std::cout << "Distance to Target: " << length << std::endl;
+    //std::cout << "Direction: " << direction.GetX() << ", " << direction.GetY() << std::endl;
 }
 
 
