@@ -83,6 +83,26 @@ std::string FilePathManager::GetIMGUIViewportJSONPath()
     return jsonPath;
 }
 
+// this function retrieves the IMGUI Creation JSON file
+std::string FilePathManager::GetIMGUICreationJSONPath()
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the IMGUI debug JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiCreation.json";
+
+    return jsonPath;
+}
+
+// this function retrieves the IMGUI Layout JSON file
+std::string FilePathManager::GetIMGUILayoutPath() {
+
+    std::string execPath = GetExecutablePath();
+    std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
+    return execDir + "\\Sandbox\\assets\\imgui\\imgui_layout.ini";
+}
+
 // this function retrieves the IMGUI debug JSON file
 std::string FilePathManager::GetIMGUIDebugJSONPath()
 {
@@ -91,6 +111,29 @@ std::string FilePathManager::GetIMGUIDebugJSONPath()
 
     // retrieves the IMGUI debug JSON file path
     std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiDebug.json";
+
+    return jsonPath;
+}
+
+// this function retrieves the IMGUI Hierarchy JSON file
+std::string FilePathManager::GetIMGUIHierarchyJSONPath()
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the IMGUI debug JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiHierarchy.json";
+
+    return jsonPath;
+}
+
+std::string FilePathManager::GetIMGUIInspectorJSONPath()
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the IMGUI debug JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiInspector.json";
 
     return jsonPath;
 }

@@ -25,8 +25,9 @@ enum class Key {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 	F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 	LEFT, RIGHT, UP, DOWN,
-	LSHIFT, LCTRL, LALT, SPACE, ESCAPE, COMMA, PERIOD,
-	NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9
+	LSHIFT, LCTRL, LALT, COMMA, PERIOD,
+	NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9,
+	SPACE, ESCAPE
 };
 
 enum class MouseButton {
@@ -110,7 +111,9 @@ struct GLFWFunctions {
 	//static bool isGuiOpen;
 	//static bool zoomViewport;
 	//static int testMode;
+	// key state
 
+	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
 	static double fps;
 	static float delta_time;

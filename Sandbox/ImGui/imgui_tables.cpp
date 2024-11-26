@@ -1215,7 +1215,8 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
         window_content_max_y = ImMax(table->InnerWindow->ContentRegionRect.Max.y, (table->Flags & ImGuiTableFlags_ScrollY) ? 0.0f : table->OuterRect.Max.y);
     table->InnerWindow->WorkRect.Max.y = ImClamp(window_content_max_y - g.Style.CellPadding.y, table->InnerWindow->WorkRect.Min.y, table->InnerWindow->WorkRect.Max.y);
 
-    // [Part 9] Allocate draw channels and setup background cliprect
+    // [Part 9] Allocate draw channels and setup 
+    // cliprect
     TableSetupDrawChannels(table);
 
     // [Part 10] Hit testing on borders

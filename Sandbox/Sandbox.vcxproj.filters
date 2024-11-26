@@ -39,11 +39,9 @@
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="Graphics\CameraSystem2D.cpp" />
     <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
-    <ClCompile Include="SystemECS\PlayerBehaviour.cpp" />
-    <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
-    <ClCompile Include="SystemECS\EffectPumpBehaviour.cpp" />
-    <ClCompile Include="SystemECS\CollectableBehaviour.cpp" />
-    <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
+    <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
+    <ClCompile Include="DebugSystem\GUIObjectCreation.cpp" />
+    <ClCompile Include="DebugSystem\GUIInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -96,15 +94,9 @@
     <ClInclude Include="Graphics\FontSystem.h" />
     <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
-    <ClInclude Include="Components\PlayerComponent.h" />
-    <ClInclude Include="SystemECS\PlayerBehaviour.h" />
-    <ClInclude Include="SystemECS\EnemyBehaviour.h" />
-    <ClInclude Include="SystemECS\EffectPumpBehaviour.h" />
-    <ClInclude Include="Components\CollectableComponent.h" />
-    <ClInclude Include="Components\PumpComponent.h" />
-    <ClInclude Include="SystemECS\CollectableBehaviour.h" />
-    <ClInclude Include="SystemECS\ExitBehaviour.h" />
-    <ClInclude Include="Components\ExitComponent.h" />
+    <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
+    <ClInclude Include="DebugSystem\GUIObjectCreation.h" />
+    <ClInclude Include="DebugSystem\GUIInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

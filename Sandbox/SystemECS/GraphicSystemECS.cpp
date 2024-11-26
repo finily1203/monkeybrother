@@ -56,8 +56,8 @@ void GraphicSystemECS::update(float dt) {
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
         bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 		if (ecsCoordinator.getEntityID(entity) == "background") {
-            transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
-            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);
+            /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
+            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
         }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);

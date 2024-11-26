@@ -118,6 +118,9 @@
     <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
+    <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
+    <ClCompile Include="DebugSystem\GUIInspector.cpp" />
+    <ClCompile Include="DebugSystem\GUIObjectCreation.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="ECS\ComponentManager.cpp" />
     <ClCompile Include="ECS\ECSCoordinator.cpp" />
@@ -177,6 +180,9 @@
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
+    <ClInclude Include="DebugSystem\GUIInspector.h" />
+    <ClInclude Include="DebugSystem\GUIObjectCreation.h" />
     <ClInclude Include="Engine\EngineDefinitions.h" />
     <ClInclude Include="EntityManager\ComponentBase.h" />
     <ClInclude Include="Engine\Engine.h" />

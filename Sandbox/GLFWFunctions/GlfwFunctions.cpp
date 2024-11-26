@@ -90,7 +90,6 @@ bool GLFWFunctions::firstCollision = false;
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
-
 // Initialize the window
 bool GLFWFunctions::init(int width, int height, std::string title) {
 
@@ -134,9 +133,9 @@ void GLFWFunctions::callEvents() {
 
 //Handle keyboard events
 void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	// unused parameters
-	(void)scancode;
-	(void)mods;
+    // unused parameters
+    (void)scancode;
+    (void)mods;
 
     Key mappedKey;
     switch (key) {
@@ -221,14 +220,16 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else if (action == GLFW_REPEAT) {
         keyState[mappedKey] = true;
     }
+    if (!GameViewWindow::getPaused()) {
+        if (keyState[Key::NUM_2])
+            allow_camera_movement = ~allow_camera_movement;
 
-    if (keyState[Key::NUM_2])
-        allow_camera_movement = ~allow_camera_movement;
-
-    if (keyState[Key::NUM_1]) {
-        debug_flag = ~debug_flag;
-        isGuiOpen = ~isGuiOpen;
+        if (keyState[Key::NUM_1]) {
+            debug_flag = ~debug_flag;
+            isGuiOpen = ~isGuiOpen;
+        }
     }
+    
 
     if (keyState[Key::P])
         audioPaused = ~audioPaused;
@@ -244,7 +245,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     if (keyState[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-	(void)window;
+    (void)window;
 }
 
 //Handle mouse button events
@@ -278,7 +279,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         mouseButtonState[mappedButton] = false;
     }
 
-	(void)window;
+    (void)window;
 }
 
 //Handle cursor position events
@@ -292,9 +293,9 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
 
 //Handle scroll events
 void GLFWFunctions::scrollEvent(GLFWwindow* window, double xoffset, double yoffset) {
-	//On relase it doesn't use since we use ScrollEvent for debugging
+    //On relase it doesn't use since we use ScrollEvent for debugging
     (void)window; (void)xoffset; (void)yoffset;
-    
+
 #ifdef _DEBUG
     std::cout << "Scroll offset: " << xoffset << ", " << yoffset << std::endl;
 #endif
@@ -350,4 +351,21 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     glfwTerminate();
+}
+
+// Input state functions
+bool GLFWFunctions::isKeyPressed(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_PRESS;
+}
+
+bool GLFWFunctions::isKeyReleased(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_RELEASE;
+}
+
+bool GLFWFunctions::isKeyHeld(Key key) {
+	return glfwGetKey(GLFWFunctions::pWindow, static_cast<int>(key)) == GLFW_REPEAT;
+}
+
+bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
+	return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
 }
