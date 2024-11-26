@@ -99,6 +99,8 @@ public:
 	static void CaptureMainWindow(); //Capture rendered game scene
 
 private:
+	static int saveNum;
+	static int fileNum;
 	static int viewportWidth;
 	static int viewportHeight;
 	static ImVec2 viewportPos;

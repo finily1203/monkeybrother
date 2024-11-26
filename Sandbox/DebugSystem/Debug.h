@@ -96,6 +96,8 @@ private:
 	static float fontSize;
 	static float textBorderSize;
 	static ImVec4 clearColor;
+	static float displayBuffer;
+	static float initialZoom;
 	static bool isZooming;
 	static bool isPanning;
 	static float paddingPV;

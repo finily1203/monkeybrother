@@ -37,6 +37,8 @@ ImVec2 GameViewWindow::renderPos;
 
 bool insideViewport = false;
 bool zoomTestFlag = false;
+int GameViewWindow::saveNum;
+int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
 float GameViewWindow::zoomLevel;
 float GameViewWindow::newZoomLevel;
@@ -103,9 +105,6 @@ void GameViewWindow::Update() {
 	if (ImGui::BeginPopupModal("Choose save files", &isSelectingSaveFile, ImGuiWindowFlags_AlwaysAutoResize)) {
 
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
-
-		int saveNum;
-		int fileNum;
 
 		if (ImGui::Button("Slot 1", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
 			saveNum = 1;
@@ -288,8 +287,6 @@ void GameViewWindow::Update() {
 			ImGui::CloseCurrentPopup();
 		}
 
-		int saveNum;
-
 		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
 			loadFileChosen = true;
@@ -349,6 +346,37 @@ void GameViewWindow::Update() {
 	}
 
 	ImGui::PopStyleVar();
+
+	ImGui::SameLine(0, 5);
+
+	if (ImGui::Button(clickedZoom ? "UnZoom" : "Zoom")) {
+		clickedZoom = !clickedZoom;
+	}
+
+	ImGui::SameLine(0, 5);
+
+	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
+		clickedScreenPan = !clickedScreenPan;
+	}
+
+	ImGui::SameLine(0, 5);
+
+
+	if (ImGui::Button("Reset Perspective")) {
+		myMath::Vector2D initialCamPos{};
+
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.getEntityID(entity) == "player") {
+				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
+			}
+		}
+
+		cameraSystem.setCameraPosition(initialCamPos);
+		float initialZoom = 1.0f;
+		// Reset camera zoom to default value
+		cameraSystem.setCameraZoom(initialZoom);
+	}
 
 	viewportPos = ImGui::GetWindowPos();
 
@@ -523,65 +551,6 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 bool GameViewWindow::IsPointInViewport(double x, double y) {
 	return (x - viewportPos.x <= windowSize.x && x - viewportPos.x >= 0
 		&& y - viewportPos.y <= windowSize.y && y - viewportPos.y >= 0);
-}
-
-// Load the IMGUI viewport configuration values from JSON file
-void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
-{
-	JSONSerializer serializer;
-
-	// checks if JSON file can be opened
-	if (!serializer.Open(filename))
-	{
-		Console::GetLog() << "Error: could not open file " << filename << std::endl;
-		return;
-	}
-
-	// return the entire JSON object from the file
-	nlohmann::json jsonObj = serializer.GetJSONObject();
-
-	// read all of the data from the JSON object and assign all the read data to
-	// data elements of GameViewWindow class that needs to be initialized
-	serializer.ReadInt(viewportWidth, "GUIViewport.viewportWidth");
-	serializer.ReadInt(viewportHeight, "GUIViewport.viewportHeight");
-
-	serializer.ReadFloat(viewportPos.x, "GUIViewport.viewportPos.x");
-	serializer.ReadFloat(viewportPos.y, "GUIViewport.viewportPos.y");
-
-	serializer.ReadUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
-
-	serializer.ReadFloat(zoomLevel, "GUIViewport.zoomLevel");
-
-	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
-	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
-
-	serializer.ReadFloat(zoomDelta, "GUIViewport.zoomDelta");
-	serializer.ReadFloat(newZoomLevel, "GUIViewport.newZoomLevel");
-
-	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
-
-	serializer.ReadFloat(globalMousePos.x, "GUIViewport.currentMousePosX");
-	serializer.ReadFloat(globalMousePos.y, "GUIViewport.currentMousePosY");
-
-	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
-	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");
-
-	serializer.ReadFloat(initialMousePos.x, "GUIViewport.initialMousePos.x");
-	serializer.ReadFloat(initialMousePos.y, "GUIViewport.initialMousePos.y");
-
-	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
-	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
-
-	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
-	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
-
-	serializer.ReadFloat(lastPosX, "GUIViewport.lastPosX");
-	serializer.ReadFloat(saveWindowWidth, "GUIViewport.saveWindowWidth");
-	serializer.ReadFloat(fileWindowWidth, "GUIViewport.fileWindowWidth");
-	serializer.ReadFloat(saveWindowHeight, "GUIViewport.saveWindowHeight");
-	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
-	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
-
 }
 //Save viewport configuration to JSON
 void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
@@ -832,6 +801,31 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		};
 	}
 
+	if (ecs.hasComponent<PlayerComponent>(entity)) {
+		auto& player = ecs.getComponent<PlayerComponent>(entity);
+		entityJSON["player"] = { { "isPlayer", true } };
+	}
+
+	if (ecs.hasComponent<PumpComponent>(entity)) {
+		auto& pump = ecs.getComponent<PumpComponent>(entity);
+		entityJSON["pump"] = { {"isPump", true} };
+	}
+
+	if (ecs.hasComponent<ExitComponent>(entity)) {
+		auto& exit = ecs.getComponent<ExitComponent>(entity);
+		entityJSON["exit"] = { {"isExit", true} };
+	}
+
+	if (ecs.hasComponent<ButtonComponent>(entity)) {
+		auto& button = ecs.getComponent<ButtonComponent>(entity);
+		entityJSON["button"] = { {"isButton", true} };
+	}
+
+	if (ecs.hasComponent<CollectableComponent>(entity)) {
+		auto& button = ecs.getComponent<CollectableComponent>(entity);
+		entityJSON["collectable"] = { {"isCollectable", true} };
+	}
+
 	return entityJSON;
 }
 
@@ -947,4 +941,66 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {
 	ImVec2 viewportCoords = ScreenToViewport(screenX, screenY);
 	return ViewportToWorld(viewportCoords.x, viewportCoords.y);
+}
+
+// Load the IMGUI viewport configuration values from JSON file
+void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	// checks if JSON file can be opened
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	// return the entire JSON object from the file
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// read all of the data from the JSON object and assign all the read data to
+	// data elements of GameViewWindow class that needs to be initialized
+	serializer.ReadInt(viewportWidth, "GUIViewport.viewportWidth");
+	serializer.ReadInt(viewportHeight, "GUIViewport.viewportHeight");
+
+	serializer.ReadInt(saveNum, "GUIViewport.saveNum");
+	serializer.ReadInt(fileNum, "GUIViewport.fileNum");
+
+	serializer.ReadFloat(viewportPos.x, "GUIViewport.viewportPos.x");
+	serializer.ReadFloat(viewportPos.y, "GUIViewport.viewportPos.y");
+
+	serializer.ReadUnsignedInt(viewportTexture, "GUIViewport.viewportTexture");
+
+	serializer.ReadFloat(zoomLevel, "GUIViewport.zoomLevel");
+
+	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
+	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
+
+	serializer.ReadFloat(zoomDelta, "GUIViewport.zoomDelta");
+	serializer.ReadFloat(newZoomLevel, "GUIViewport.newZoomLevel");
+
+	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
+
+	serializer.ReadFloat(globalMousePos.x, "GUIViewport.currentMousePosX");
+	serializer.ReadFloat(globalMousePos.y, "GUIViewport.currentMousePosY");
+
+	serializer.ReadFloat(accumulatedMouseDragDist.x, "GUIViewport.accumulatedMouseDragDist.x");
+	serializer.ReadFloat(accumulatedMouseDragDist.y, "GUIViewport.accumulatedMouseDragDist.y");
+
+	serializer.ReadFloat(initialMousePos.x, "GUIViewport.initialMousePos.x");
+	serializer.ReadFloat(initialMousePos.y, "GUIViewport.initialMousePos.y");
+
+	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
+	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
+
+	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
+	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
+
+	serializer.ReadFloat(lastPosX, "GUIViewport.lastPosX");
+	serializer.ReadFloat(saveWindowWidth, "GUIViewport.saveWindowWidth");
+	serializer.ReadFloat(fileWindowWidth, "GUIViewport.fileWindowWidth");
+	serializer.ReadFloat(saveWindowHeight, "GUIViewport.saveWindowHeight");
+	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
+	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
+
 }

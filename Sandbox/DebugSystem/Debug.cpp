@@ -55,6 +55,8 @@ File Contributions: Lew Zong Han Owen (80%)
 float DebugSystem::fontSize;
 ImVec4 DebugSystem::clearColor;
 float DebugSystem::textBorderSize;
+float DebugSystem::initialZoom;
+float DebugSystem::displayBuffer;
 bool DebugSystem::isZooming;
 bool DebugSystem::isPanning;
 float DebugSystem::paddingPV;
@@ -160,147 +162,96 @@ void DebugSystem::update() {
 
 		ImGui::Begin("Debug");
 
-		//Performance Data formatting
-		if (ImGui::CollapsingHeader("Performance Data")) {
-			static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
-				ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
+		static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable |
+			ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 
-			ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x); //To calculate the size of table
+		ImVec2 outerSize = ImVec2(0.0f, ImGui::CalcTextSize("A").x); //To calculate the size of table
 
-			ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
+		ImGui::Text("FPS: %.1f", GLFWFunctions::fps); //Display FPS
 
-			ImGui::SeparatorText("Performance Viewer");
-			ImGui::Text("Number of Systems: %d", systemCount);
+		ImGui::SeparatorText("Performance Viewer");
+		ImGui::Text("Number of Systems: %d", systemCount);
 
-			if (ImGui::BeginTable("Performance Data", 2, flags)) {
+		if (ImGui::BeginTable("Performance Data", 2, flags)) {
 
-				ImGui::TableSetupColumn("Systems");
-				ImGui::TableSetupColumn("Game Loop %");
-				ImGui::TableHeadersRow();
+			ImGui::TableSetupColumn("Systems");
+			ImGui::TableSetupColumn("Game Loop %");
+			ImGui::TableHeadersRow();
 
-				foundECS = false;
-				ecsTotal = 0.0;
+			foundECS = false;
+			ecsTotal = 0.0;
 
-				//Show non-ECS systems
-				for (size_t i = 0; i < systems.size(); i++) {
-					if (i >= systemGameLoopPercent.size()) break; // Safety check
+			const char* systemName;
 
-					const char* systemName = systems[i];
+			//Show non-ECS systems
+			for (size_t i = 0; i < systems.size(); i++) {
+				if (i >= systemGameLoopPercent.size()) break; // Safety check
 
-					// Skip ECS systems
-					if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
-						foundECS = true;
-						ecsTotal += systemGameLoopPercent[i];
-						continue;
-					}
+				systemName = systems[i];
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					ImGui::Text("%s", systemName);
-					ImGui::TableNextColumn();
-					ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+				// Skip ECS systems
+				if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+					foundECS = true;
+					ecsTotal += systemGameLoopPercent[i];
+					continue;
 				}
 
-				// Show ECS systems
-				if (foundECS) {
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				ImGui::Text("%s", systemName);
+				ImGui::TableNextColumn();
+				ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+			}
 
-					if (ImGui::TreeNode("ECS Systems")) {
-						for (size_t i = 0; i < systems.size(); i++) {
-							if (i >= systemGameLoopPercent.size()) break; // Safety check
+			// Show ECS systems
+			if (foundECS) {
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
 
-							const char* systemName = systems[i];
-							if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
-								ImGui::Text("%s:", systemName);
-								float normalizedPercentage = static_cast<float>((systemGameLoopPercent[i] / ecsTotal) * FULL_PERCENTAGE);
-								ImGui::SameLine(paddingPV);
-								ImGui::Text("%6.2f%%", normalizedPercentage);
-							}
+				if (ImGui::TreeNode("ECS Systems")) {
+					for (size_t i = 0; i < systems.size(); i++) {
+						if (i >= systemGameLoopPercent.size()) break; // Safety check
+
+						systemName = systems[i];
+						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
+							ImGui::Text("%s:", systemName);
+							float normalizedPercentage = static_cast<float>((systemGameLoopPercent[i] / ecsTotal) * FULL_PERCENTAGE);
+							ImGui::SameLine(paddingPV);
+							ImGui::Text("%6.2f%%", normalizedPercentage);
 						}
-						ImGui::TreePop();
 					}
-
-					ImGui::TableNextColumn();
-					ImGui::Text("%.2f%%", ecsTotal);
+					ImGui::TreePop();
 				}
 
-				ImGui::EndTable();
+				ImGui::TableNextColumn();
+				ImGui::Text("%.2f%%", ecsTotal);
 			}
+
+			ImGui::EndTable();
 		}
-		//Input Data formatting
-		if (ImGui::CollapsingHeader("Input Data")) { //Create collapsing header for input data
-			ImGui::SeparatorText("Mouse Coordinates");
-			if (ImGui::IsMousePosValid())
-				ImGui::Text("Mouse position: (%g, %g)", mouseWorldPos.x, mouseWorldPos.y); //Display mouse position data
-			else
-				ImGui::Text("Mouse position: <INVALID>");
+		
+		ImGui::SeparatorText("Mouse Coordinates");
+		if (ImGui::IsMousePosValid())
+			ImGui::Text("Mouse position: (%g, %g)", mouseWorldPos.x, mouseWorldPos.y); //Display mouse position data
+		else
+			ImGui::Text("Mouse position: <INVALID>");
 
-			ImGui::SeparatorText("Mouse/Keys Input\n");
-			ImGui::Text("Mouse/Key pressed:"); //Display mouse/key input data
+		ImGui::SeparatorText("Mouse/Keys Input\n");
+		ImGui::Text("Mouse/Key pressed:"); //Display mouse/key input data
 
-			ImGuiKey startKey = (ImGuiKey)0;
-			//Check that key exist in ImGuiKey data (includes legacy and modern keys)
-			for (ImGuiKey key = startKey; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
-			{
-				//Don't render if key is typed legacy OR if the key is not pressed (avoid duplication)
-				if (LegacyKeyDuplicationCheck(key) //Check if key is the legacy version
-					|| !ImGui::IsKeyDown(key)) //Check if key is pressed
-					continue; //iterates the next key in ImGuiKey
+		ImGuiKey startKey = (ImGuiKey)0;
+		//Check that key exist in ImGuiKey data (includes legacy and modern keys)
+		for (ImGuiKey key = startKey; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
+		{
+			//Don't render if key is typed legacy OR if the key is not pressed (avoid duplication)
+			if (LegacyKeyDuplicationCheck(key) //Check if key is the legacy version
+				|| !ImGui::IsKeyDown(key)) //Check if key is pressed
+				continue; //iterates the next key in ImGuiKey
 
-				ImGui::SameLine();
-				ImGui::Text("\"%s\"", ImGui::GetKeyName(key));
-			}
-			ImGui::NewLine();
+			ImGui::SameLine();
+			ImGui::Text("\"%s\"", ImGui::GetKeyName(key));
 		}
-
-		//Game Viewport Controls formatting
-		if (ImGui::CollapsingHeader("Game Viewport Controls")) {
-			if (ImGui::Button("Reset Perspective")) {
-				myMath::Vector2D initialCamPos{};
-				
-				for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-					if (ecsCoordinator.getEntityID(entity) == "player") {
-						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-						initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY()};
-					}
-				}
-			
-				cameraSystem.setCameraPosition(initialCamPos);
-
-				// Reset camera zoom to default value
-				float initialZoom = 1.0f; // Adjust this value based on your default zoom
-				cameraSystem.setCameraZoom(initialZoom);
-			}
-
-			if (ImGui::Button("Zoom")) {
-				isZooming = !isZooming;
-			}
-			if (isZooming) {
-				GameViewWindow::setClickedZoom(true);
-				ImGui::SameLine();
-				ImGui::Text("Zooming");  // Only show text when zooming is active
-			}
-			else {
-				GameViewWindow::setClickedZoom(false);
-				ImGui::SameLine();
-				ImGui::Text("Not Zooming");
-			}
-
-			if (ImGui::Button("Pan")) {
-				isPanning = !isPanning;
-			}
-			if (isPanning) {
-				GameViewWindow::setClickedScreenPan(true);
-				ImGui::SameLine();
-				ImGui::Text("Panning");  // Only show text when zooming is active
-			}
-			else {
-				GameViewWindow::setClickedScreenPan(false);
-				ImGui::SameLine();
-				ImGui::Text("Not Panning");
-			}
-		}
+		ImGui::NewLine();
 
 		ImGui::End();
 
@@ -356,7 +307,7 @@ SystemType DebugSystem::getSystem() {
 
 //Capture start game loop time
 void DebugSystem::StartLoop() {
-	if (glfwGetTime() - lastUpdateTime >= 1.0f) {
+	if (glfwGetTime() - lastUpdateTime >= displayBuffer) {
 		// Reset accumulated times every second
 		accumulatedTimes.clear();
 		firstFrame = true;
@@ -394,7 +345,7 @@ void DebugSystem::EndSystemTiming(const char* systemName) {
 // Update system times and percentages
 void DebugSystem::UpdateSystemTimes() {
 	double currentTime = glfwGetTime();
-	if (currentTime - lastUpdateTime >= 1.0f) {
+	if (currentTime - lastUpdateTime >= displayBuffer) {
 
 		// Calculate total time spent in all systems
 		double totalSystemTime = 0.0;
@@ -438,7 +389,8 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 
 	// read all of the data from the JSON object, assign every read
 	// data to every elements that needs to be initialized
-
+	serializer.ReadFloat(displayBuffer, "Debug.displayBuffer");
+	serializer.ReadFloat(initialZoom, "Debug.initialZoom");
 	serializer.ReadBool(isZooming, "Debug.isZooming");
 	serializer.ReadBool(isPanning, "Debug.isPanning");
 	serializer.ReadBool(firstFrame, "Debug.firstFrame");
