@@ -220,6 +220,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("pump")) {
 			PumpComponent pump{};
 			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
+			serializer.ReadObject(pump.pumpForce, entityId, "entities.pump.pumpForce");
 
 			ecs.addComponent(entityObj, pump);
 
