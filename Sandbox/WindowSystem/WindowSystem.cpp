@@ -26,6 +26,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 bool WindowSystem::altTab = false;
 bool WindowSystem::ctrlAltDel = false;
+//HWND WindowSystem::foreground = nullptr;
 //GraphicsSystem graphicsSystem;
 //GraphicsSystem::GLObject gameObject, gameObject2, 
 // , blackBox;
@@ -205,7 +206,43 @@ void WindowSystem::initialise() {
 //	keysWerePressed = keysArePressed;
 //}
 
- 
+
+//void WindowSystem::handleWindowFocus() {
+//	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
+//	
+//	bool keysArePressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
+//		(GetAsyncKeyState(VK_MENU) & 0x8000) &&
+//		(GetAsyncKeyState(VK_DELETE) & 0x8000);
+//
+//	if (keysArePressed) {
+//		onCtrlAltDelPage = true;
+//		wasFocused = true;
+//		//foreground = GetForegroundWindow();
+//	}
+//
+//	if (onCtrlAltDelPage) {
+//		GLFWFunctions::audioPaused = true;
+//		glfwIconifyWindow(GLFWFunctions::pWindow);
+//		onCtrlAltDelPage = false;
+//		isFocused = true;
+//	}
+//
+//	if (!onCtrlAltDelPage) {
+//		if (isFocused) {
+//			GLFWFunctions::audioPaused = false;
+//			glfwRestoreWindow(GLFWFunctions::pWindow);
+//			altTab = false;
+//			ctrlAltDel = false;
+//		}
+//		else {
+//			GLFWFunctions::audioPaused = true;
+//			glfwIconifyWindow(GLFWFunctions::pWindow);
+//			altTab = true;
+//		}
+//	}
+//
+//}
+
 void WindowSystem::handleWindowFocus() {
 	bool previousFocusState = isFocused;
 	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
@@ -227,26 +264,17 @@ void WindowSystem::handleWindowFocus() {
 
 	// Handle Ctrl+Alt+Del page exit
 	if (onCtrlAltDelPage) {
-		//GLFWFunctions::audioPaused = true;
 
 		HWND foreground = GetForegroundWindow();
 		HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
 
-		if (foreground != NULL && !keysArePressed) {
+		if (foreground != appWindow && !keysArePressed) {
 			// Only restore if we were focused before Ctrl+Alt+Del
 			if (wasFocused) {
-				//std::cout << wasFocused << std::endl;
 				onCtrlAltDelPage = false;
 				SetForegroundWindow(appWindow);
-				Sleep(100);
-				//glfwRestoreWindow(GLFWFunctions::pWindow);
-				//GLFWFunctions::audioPaused = false;
+				Sleep(300);
 			}
-			//else {
-
-				//GLFWFunctions::audioPaused = true;
-				//glfwIconifyWindow(GLFWFunctions::pWindow);
-			//}
 		}
 	}
 
