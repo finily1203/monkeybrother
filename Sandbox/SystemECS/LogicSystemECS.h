@@ -33,6 +33,7 @@ public:
 
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
+	void handleButtonClick(GLFWwindow* window, Entity entity);
 };
 
 class LogicSystemECS : public System

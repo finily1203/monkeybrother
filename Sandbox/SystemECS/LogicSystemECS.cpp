@@ -416,20 +416,7 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
-				if (ecsCoordinator.getEntityID(entity) == "quitButton")
-				{
-					glfwSetWindowShouldClose(window, GLFW_TRUE);
-				}
-
-				else if (ecsCoordinator.getEntityID(entity) == "retryButton")
-				{
-					for (auto currEntity : ecsCoordinator.getAllLiveEntities())
-					{
-						ecsCoordinator.destroyEntity(currEntity);
-					}
-
-					ecsCoordinator.test5();
-				}
+				handleButtonClick(window, entity);
 			}
 		}
 	}
@@ -467,6 +454,26 @@ bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformCo
     float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
 
     return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
+}
+
+void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
+{
+	std::string entityId = ecsCoordinator.getEntityID(entity);
+
+	if (entityId == "quitButton")
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
+	else if (entityId == "retryButton")
+	{
+		for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		ecsCoordinator.test5();
+	}
 }
 
 //camera behaviour should only be affected by one entity
