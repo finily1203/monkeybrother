@@ -71,10 +71,12 @@ float GameViewWindow::saveWindowWidth;
 float GameViewWindow::fileWindowWidth;
 float GameViewWindow::saveWindowHeight;
 float GameViewWindow::fileWindowHeight;
+int GameViewWindow::scene;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
+	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
 }
 bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
@@ -278,7 +280,8 @@ void GameViewWindow::Update() {
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 		if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
-
+			scene = 0;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				ecsCoordinator.destroyEntity(entity);
 			}
@@ -289,6 +292,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -296,6 +301,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -303,6 +310,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -310,6 +319,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -317,6 +328,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -1003,4 +1016,34 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
 	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
 
+}
+
+void GameViewWindow::LoadSceneFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	serializer.ReadInt(scene, "scene");
+}
+
+void GameViewWindow::SaveSceneToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	serializer.WriteInt(scene, "scene", filename);
 }

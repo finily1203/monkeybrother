@@ -266,12 +266,12 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         {
             MouseBehaviour click;
             double mouseX{}, mouseY{};
-            int windowWidth{}, windowHeight{};
+            int currWindowWidth{}, currWindowHeight{};
             glfwGetCursorPos(pWindow, &mouseX, &mouseY);
-            glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+            glfwGetWindowSize(pWindow, &currWindowWidth, &currWindowHeight);
 
-            float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-            float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+            float cursorXCentered = static_cast<float>(mouseX) - (currWindowWidth / 2.f);
+            float cursorYCentered = (currWindowHeight / 2.f) - static_cast<float>(mouseY);
             click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
         }
     }
