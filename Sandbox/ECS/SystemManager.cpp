@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "SystemManager.h"
 #include "GlobalCoordinator.h"
 #include "GUIGameViewport.h"
+#include "WindowSystem.h"
 
 void SystemManager::entityRemoved(Entity entity) {
 	//erase entity from all systems
@@ -46,7 +47,7 @@ void SystemManager::update() {
 	for (auto const& pair : Systems) {
 
 		auto const& system = pair.second;
-		if (GameViewWindow::getPaused()) {
+		if (GameViewWindow::getPaused() || WindowSystem::GetAltTab() || WindowSystem::GetCtrlAltDel() ) {
 			if (system->getSystemECS() == "LogicSystemECS" || system->getSystemECS() == "PhysicsColliSystemECS") {
 				continue;
 			}
