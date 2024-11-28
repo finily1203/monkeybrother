@@ -479,6 +479,23 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						break;
 					}*/
 
+					/*if (ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<EnemyComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PumpComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PumpComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<ExitComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<ExitComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<CollectableComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<CollectableComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);*/
+
+					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+
+					PhysicsComponent physics;
 					// Add new component
 					switch (i) {
 					case 0:
@@ -486,6 +503,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 							logicSystemRef->unassignBehaviour(selectedEntityID);
 						break;
 					case 1:
+						//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
+						physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
+						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
 						break;
 					case 2:
@@ -498,6 +518,13 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
 						break;
 					case 5:
+						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+						physics.mass = 1.0f;
+						physics.dampening = 0.9f;
+						physics.maxVelocity = 200.0f;
+						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
+						physics.maxAccumulatedForce = 40.0f;
+						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
 						break;
 					}
