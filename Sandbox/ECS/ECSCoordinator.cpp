@@ -136,11 +136,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
 		//}
 
-		if (entityId == "quitButton" || entityId == "retryButton")
-		{
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
-		}
-
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
 		serializer.ReadObject(transform.position, entityId, "entities.transform.position");
@@ -292,6 +287,8 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("button"))
 		{
 			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
 			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
 
 			ecs.addComponent(entityObj, button);
@@ -442,6 +439,8 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 			{
 				ButtonComponent button = getComponent<ButtonComponent>(entity);
 
+				serializer.WriteObject(button.originalScale, entityId, "entities.transform.scale");
+				serializer.WriteObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
 				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
 			}
 		}

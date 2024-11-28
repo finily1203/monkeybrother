@@ -353,8 +353,11 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
             float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
             float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+
             if (!debug_flag)
-            click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+            {
+                click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+            }
         }
     }
     else if (action == GLFW_RELEASE) {
