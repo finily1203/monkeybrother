@@ -185,3 +185,15 @@ std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 
     return jsonPath;
 }
+
+// this function retrieves the scene JSON file
+std::string FilePathManager::GetSceneJSONPath()
+{
+    // retrieves the executable path
+    std::string execPath = GetExecutablePath();
+
+    // retrieves the scene JSON file path
+    std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\scene.json";
+
+    return jsonPath;
+}

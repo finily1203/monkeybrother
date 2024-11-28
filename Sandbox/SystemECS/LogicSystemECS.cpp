@@ -1,6 +1,6 @@
 /*!
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-@author: Joel Chu (c.weiyuan)
+@author: Joel Chu (c.weiyuan), Ian Loi (ian.loi)
 @team:   MonkeHood
 @course: CSD2401
 @file:   LogicSystemECS.cpp
@@ -9,11 +9,15 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 all entities in the game. Currently, it handles the jumping of player since our
 		 current game demo is rotational based, there is no movement keys for the player.
 		 Logic system also takes care of the enemy movement as well as camera movement.
-		 Interacts with other ECS systems such as PhyColliSystemECS.
+		 Interacts with other ECS systems such as PhyColliSystemECS. Logic system now also
+		 handles Behaviour logic like mouse on-click and on-hover behaviour.
 
 		 Joel Chu (c.weiyuan): Implemented all of the functions that belongs to
 							   the LogicSystemECS.
-							   100%
+							   90%
+		 Ian Loi  (ian.loi)  : Implemented functions that belongs to the MouseBehaviour
+							   class which inherits from BehaviourECS.
+							   10%
 *//*___________________________________________________________________________-*/
 
 #include "LogicSystemECS.h"
@@ -425,23 +429,7 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
-				if (ecsCoordinator.getEntityID(entity) == "quitButton")
-				{
-					std::cout << "QUIT Button clicked" << std::endl;
-					glfwSetWindowShouldClose(window, GLFW_TRUE);
-				}
-
-				else if (ecsCoordinator.getEntityID(entity) == "retryButton")
-				{
-					std::cout << "RETRY Button clicked" << std::endl;
-
-					for (auto currEntity : ecsCoordinator.getAllLiveEntities())
-					{
-						ecsCoordinator.destroyEntity(currEntity);
-					}
-
-					ecsCoordinator.test5();
-				}
+				handleButtonClick(window, entity);
 			}
 		}
 	}
@@ -479,6 +467,26 @@ bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformCo
     float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
 
     return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
+}
+
+void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
+{
+	std::string entityId = ecsCoordinator.getEntityID(entity);
+
+	if (entityId == "quitButton")
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
+	else if (entityId == "retryButton")
+	{
+		for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		ecsCoordinator.test5();
+	}
 }
 
 //camera behaviour should only be affected by one entity

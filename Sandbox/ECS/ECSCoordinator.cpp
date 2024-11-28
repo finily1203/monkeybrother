@@ -23,6 +23,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "FontSystemECS.h"
 #include "GraphicsSystem.h"
+#include "GUIGameViewport.h"
 
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
@@ -471,7 +472,16 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
-	LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+	if (GameViewWindow::getSceneNum() != 0)
+	{
+		int scene = GameViewWindow::getSceneNum();
+		LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(scene));
+	}
+
+	else
+	{
+		LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
+	}
 
 }
 

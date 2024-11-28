@@ -39,4 +39,5 @@ public:
 	static std::string GetIMGUIFontPath();
 	static std::string GetPhysicsPath();
 	static std::string GetSaveJSONPath(int& saveCount);
+	static std::string GetSceneJSONPath();
 };

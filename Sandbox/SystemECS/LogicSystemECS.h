@@ -1,6 +1,6 @@
 /*!
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-@author: Joel Chu (c.weiyuan)
+@author: Joel Chu (c.weiyuan), Ian Loi (ian.loi)
 @team:   MonkeHood
 @course: CSD2401
 @file:   LogicSystemECS.h
@@ -9,7 +9,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 in the game. Currently logic systems handle player, enemy and camera
 		 Joel Chu (c.weiyuan): Declared class LogicSystemECS with its functions.
 							   inherited from System class.
-							   100%
+							   90%
+		 Ian Loi  (ian.loi)  : Declared class MouseBehaviour that inherits from
+							   BehaviourECS class.
+							   10%
 *//*___________________________________________________________________________-*/
 #pragma once
 #include "ECSCoordinator.h"
@@ -30,7 +33,7 @@ public:
 
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
-
+	void handleButtonClick(GLFWwindow* window, Entity entity);
 };
 
 class LogicSystemECS : public System
