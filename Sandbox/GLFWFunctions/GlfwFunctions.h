@@ -37,7 +37,7 @@ enum class MouseButton {
 struct GLFWFunctions {
 
 	// Initialize the window
-	//static bool init(int width, int height, std::string title);
+	static bool init(int width, int height, std::string title, bool isfullscreen);
 
 	//Handle keyboard events
 	static void keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -127,12 +127,22 @@ struct GLFWFunctions {
 	static GLboolean adjustVol;
 	static GLboolean audioNext;
 
+	// Cheat codes
+	static GLboolean skipToNextLevel;
+	static GLboolean skipToEnd;
+	static GLboolean godMode;
+	static GLboolean instantWin;
+	static GLboolean instantLose;
+	static GLboolean fullscreen;
+
 
 	static int audioNum;
 	static int windowWidth;
 	static int windowHeight;
 	static int collectableCount;
 
+	static int defultWindowWidth;
+	static int defultWindowHeight;
 	static bool bumpAudio;
 	static bool collectAudio;
 	static bool firstCollision;
@@ -140,15 +150,6 @@ struct GLFWFunctions {
 
 	static std::unordered_map<Key, bool> keyState;
 	static std::unordered_map<MouseButton, bool> mouseButtonState;
-
-	static bool isFullscreen;
-	static GLFWmonitor* primaryMonitor;
-	static int savedWindowedPosX, savedWindowedPosY;
-	static int savedWindowedWidth, savedWindowedHeight;
-	static void toggleFullscreen();
-	static bool init(int width, int height, const std::string& title, bool startFullscreen);
-	static void setFullscreen(bool fullscreen);
-	static const GLFWvidmode* getPreferredVideoMode();
 };
 
 #endif

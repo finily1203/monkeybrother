@@ -143,11 +143,13 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
-		serializer.ReadObject(transform.position, entityId, "entities.transform.position");
-		serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
-		serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
-		serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
-		serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
 
 		// add the component with all of the data populated from
 		// the JSON object
