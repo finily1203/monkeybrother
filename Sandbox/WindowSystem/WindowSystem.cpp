@@ -111,8 +111,9 @@ void WindowSystem::initialise() {
 	int windowWidth = windowConfigJSON["width"].get<int>();
 	int windowHeight = windowConfigJSON["height"].get<int>();
 	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
+	bool startFullscreen = windowConfigJSON.value("fullscreen", true); // Default to fullscreen
 
-	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle.c_str())) {
+	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle, startFullscreen)) {
 		std::cout << "Failed to initialise GLFW" << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -127,123 +128,9 @@ void WindowSystem::initialise() {
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
 }
 
-//void WindowSystem::handleWindowFocus()
-//{
-//	static bool wasInCtrlAltDelPage = false;
-//
-//	// Poll for Ctrl+Alt+Del key states
-//	bool keysArePressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
-//		(GetAsyncKeyState(VK_MENU) & 0x8000) &&
-//		(GetAsyncKeyState(VK_DELETE) & 0x8000);
-//
-//	HWND foreground = GetForegroundWindow();
-//	HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
-//
-//	// Detect entering the Ctrl+Alt+Del page
-//	if (keysArePressed && !wasInCtrlAltDelPage)
-//	{
-//		wasInCtrlAltDelPage = true;
-//		onCtrlAltDelPage = true;
-//
-//		// Minimize window when entering the page
-//		isFocused = false;
-//		GLFWFunctions::audioPaused = true;
-//		glfwIconifyWindow(GLFWFunctions::pWindow);
-//
-//		std::cout << "Entered Ctrl+Alt+Del page. isFocused: " << isFocused << std::endl;
-//		return;
-//	}
-//
-//	// Detect exiting the Ctrl+Alt+Del page
-//	if (wasInCtrlAltDelPage && !keysArePressed)
-//	{
-//		GLFWFunctions::audioPaused = true;
-//		SetForegroundWindow(appWindow);
-//
-//		if (foreground == appWindow)
-//		{
-//			// Successfully regained focus
-//			wasInCtrlAltDelPage = false;
-//			onCtrlAltDelPage = false;
-//
-//			// Restore window and audio when exiting the page
-//			isFocused = true;
-//			GLFWFunctions::audioPaused = false;
-//			glfwRestoreWindow(GLFWFunctions::pWindow);
-//
-//			std::cout << "Exited Ctrl+Alt+Del page. isFocused: " << isFocused << std::endl;
-//		}
-//		else
-//		{
-//			// Attempt to bring the window to the foreground manually
-//			//SetForegroundWindow(appWindow);
-//			std::cout << "Attempting to bring the window to the foreground..." << std::endl;
-//		}
-//		return;
-//	}
-//
-//	// Handle normal focus updates (not in Ctrl+Alt+Del page)
-//	if (!onCtrlAltDelPage)
-//	{
-//		bool currentFocusState = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
-//		if (currentFocusState != isFocused)
-//		{
-//			isFocused = currentFocusState;
-//			GLFWFunctions::audioPaused = !isFocused;
-//
-//			if (isFocused)
-//			{
-//				std::cout << "Window regained focus." << std::endl;
-//			}
-//			else
-//			{
-//				std::cout << "Window lost focus." << std::endl;
-//			}
-//		}
-//	}
-//
-//	// Update the key state tracking
-//	keysWerePressed = keysArePressed;
-//}
 
-
-//void WindowSystem::handleWindowFocus() {
-//	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
-//	
-//	bool keysArePressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
-//		(GetAsyncKeyState(VK_MENU) & 0x8000) &&
-//		(GetAsyncKeyState(VK_DELETE) & 0x8000);
-//
-//	if (keysArePressed) {
-//		onCtrlAltDelPage = true;
-//		wasFocused = true;
-//		//foreground = GetForegroundWindow();
-//	}
-//
-//	if (onCtrlAltDelPage) {
-//		GLFWFunctions::audioPaused = true;
-//		glfwIconifyWindow(GLFWFunctions::pWindow);
-//		onCtrlAltDelPage = false;
-//		isFocused = true;
-//	}
-//
-//	if (!onCtrlAltDelPage) {
-//		if (isFocused) {
-//			GLFWFunctions::audioPaused = false;
-//			glfwRestoreWindow(GLFWFunctions::pWindow);
-//			altTab = false;
-//			ctrlAltDel = false;
-//		}
-//		else {
-//			GLFWFunctions::audioPaused = true;
-//			glfwIconifyWindow(GLFWFunctions::pWindow);
-//			altTab = true;
-//		}
-//	}
-//
-//}
-
-void WindowSystem::handleWindowFocus() {
+void WindowSystem::handleWindowFocus() 
+{
 	bool previousFocusState = isFocused;
 	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
 
@@ -253,7 +140,8 @@ void WindowSystem::handleWindowFocus() {
 		(GetAsyncKeyState(VK_DELETE) & 0x8000);
 
 	// Handle initial Ctrl+Alt+Del press
-	if (keysArePressed && !keysWerePressed && isFocused) {
+	if (keysArePressed && !keysWerePressed && isFocused) 
+	{
 		onCtrlAltDelPage = true;
 		wasFocused = previousFocusState;  // Store the previous focus state
 		isFocused = false;
@@ -263,14 +151,17 @@ void WindowSystem::handleWindowFocus() {
 	}
 
 	// Handle Ctrl+Alt+Del page exit
-	if (onCtrlAltDelPage) {
+	if (onCtrlAltDelPage) 
+	{
 
 		HWND foreground = GetForegroundWindow();
 		HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
 
-		if (foreground != appWindow && !keysArePressed) {
+		if (foreground != appWindow && !keysArePressed) 
+		{
 			// Only restore if we were focused before Ctrl+Alt+Del
-			if (wasFocused) {
+			if (wasFocused) 
+			{
 				onCtrlAltDelPage = false;
 				SetForegroundWindow(appWindow);
 				Sleep(300);
@@ -279,14 +170,18 @@ void WindowSystem::handleWindowFocus() {
 	}
 
 	// Handle normal focus changes (when not on Ctrl+Alt+Del page)
-	if (!onCtrlAltDelPage) {
-		if (isFocused) {
+	if (!onCtrlAltDelPage) 
+	{
+		if (isFocused) 
+		{
 			GLFWFunctions::audioPaused = false;
 			glfwRestoreWindow(GLFWFunctions::pWindow);
 			altTab = false;
 			ctrlAltDel = false;
 		}
-		else {
+
+		else 
+		{
 			GLFWFunctions::audioPaused = true;
 			glfwIconifyWindow(GLFWFunctions::pWindow);
 			altTab = true;

@@ -90,34 +90,115 @@ bool GLFWFunctions::firstCollision = false;
 std::unordered_map<Key, bool> GLFWFunctions::keyState;
 std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
+bool GLFWFunctions::isFullscreen = false;
+GLFWmonitor* GLFWFunctions::primaryMonitor = nullptr;
+int GLFWFunctions::savedWindowedPosX = 0;
+int GLFWFunctions::savedWindowedPosY = 0;
+int GLFWFunctions::savedWindowedWidth = 0;
+int GLFWFunctions::savedWindowedHeight = 0;
 // Initialize the window
-bool GLFWFunctions::init(int width, int height, std::string title) {
-
-    /* Initialize the library */
-    if (!glfwInit())
+bool GLFWFunctions::init(int width, int height, const std::string& title, bool startFullscreen) {
+    if (!glfwInit()) {
         return false;
-
-    // Set the window width and height
-    windowWidth = width;
-    windowHeight = height;
-
-    /* Create a windowed mode window and its OpenGL context */
-    GLFWFunctions::pWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    if (!GLFWFunctions::pWindow)
-    {
-        glfwTerminate();
-        //return false;
-        throw CrashLog::Exception("Failed to create window", __FILE__, __LINE__);
-        //std::cerr << "Failed to create window" << std::endl;
     }
-    /* Make the window's context current */
-    glfwMakeContextCurrent(GLFWFunctions::pWindow);
-    glfwSwapInterval(0); //vsync
+
+    // Store initial windowed mode dimensions
+    savedWindowedWidth = width;
+    savedWindowedHeight = height;
+
+    // Get primary monitor
+    primaryMonitor = glfwGetPrimaryMonitor();
+    if (!primaryMonitor) {
+		glfwTerminate();
+		return false;
+	}
+
+    const GLFWvidmode* mode = getPreferredVideoMode();
+    if (!mode) {
+        glfwTerminate();
+        return false;
+    }
+
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    // Create window based on mode
+    if (startFullscreen) {
+        pWindow = glfwCreateWindow(mode->width, mode->height, title.c_str(), 
+            primaryMonitor, nullptr);
+        isFullscreen = true;
+        windowWidth = mode->width;
+        windowHeight = mode->height;
+    }
+    else {
+        // Center the window
+        int monitorX, monitorY;
+        glfwGetMonitorPos(primaryMonitor, &monitorX, &monitorY);
+        savedWindowedPosX = monitorX + (mode->width - width) / 2;
+        savedWindowedPosY = monitorY + (mode->height - height) / 2;
+
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        pWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+        glfwSetWindowPos(pWindow, savedWindowedPosX, savedWindowedPosY);
+        isFullscreen = false;
+        windowWidth = width;
+        windowHeight = height;
+    }
+
+    if (!pWindow) {
+		glfwTerminate();
+		return false;
+	}
+
+    glfwMakeContextCurrent(pWindow);
+    glfwSwapInterval(0); // vsync
     callEvents();
 
-    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetKeyCallback(pWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && (mods & GLFW_MOD_ALT)) {
+            toggleFullscreen();
+        }
+        // Call the original keyboard callback
+        keyboardEvent(window, key, scancode, action, mods);
+    });
 
     return true;
+}
+
+const GLFWvidmode* GLFWFunctions::getPreferredVideoMode() {
+    return glfwGetVideoMode(primaryMonitor);
+}
+
+void GLFWFunctions::toggleFullscreen() {
+    setFullscreen(!isFullscreen);
+}
+
+void GLFWFunctions::setFullscreen(bool fullscreen) {
+    if (isFullscreen == fullscreen) return;
+
+    if (fullscreen) {
+        // Save windowed mode position and size
+        glfwGetWindowPos(pWindow, &savedWindowedPosX, &savedWindowedPosY);
+        glfwGetWindowSize(pWindow, &savedWindowedWidth, &savedWindowedHeight);
+
+        // Switch to fullscreen
+        const GLFWvidmode* mode = getPreferredVideoMode();
+        glfwSetWindowMonitor(pWindow, primaryMonitor, 0, 0,
+            mode->width, mode->height, mode->refreshRate);
+        windowWidth = mode->width;
+        windowHeight = mode->height;
+    }
+    else {
+        // Switch back to windowed mode
+        glfwSetWindowMonitor(pWindow, nullptr, savedWindowedPosX, savedWindowedPosY,
+            savedWindowedWidth, savedWindowedHeight, 0);
+        windowWidth = savedWindowedWidth;
+        windowHeight = savedWindowedHeight;
+    }
+
+    isFullscreen = fullscreen;
 }
 
 //Handle window to check for events
