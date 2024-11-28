@@ -513,7 +513,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID))
 						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);*/
 
-					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
 						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
 
 					PhysicsComponent physics;
