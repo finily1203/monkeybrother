@@ -163,6 +163,8 @@
     <ClInclude Include="AudioSystem\AudioSystem.h" />
     <ClInclude Include="Components\AABBComponent.h" />
     <ClInclude Include="Components\AnimationComponent.h" />
+    <ClInclude Include="Components\BackgroundComponent.h" />
+    <ClInclude Include="Components\BehaviourComponent.h" />
     <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="Components\ClosestPlatform.h" />
     <ClInclude Include="Components\CollectableComponent.h" />

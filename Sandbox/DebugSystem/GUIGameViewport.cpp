@@ -23,6 +23,14 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIConsole.h"
 #include "Debug.h"
 #include "GlobalCoordinator.h"
+#include "BehaviourComponent.h"
+#include "LogicSystemECS.h"
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
+#include "BackgroundComponent.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -709,6 +717,7 @@ std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
 
 nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 	// Initialize ordered components that should always be present first
 	nlohmann::ordered_json entityJSON = {
 		{"id", entityId},
@@ -737,6 +746,14 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			}}
 		}}
 	};
+
+	if (ecs.hasComponent<BackgroundComponent>(entity)) {
+		auto& background = ecs.getComponent<BackgroundComponent>(entity);
+
+		background.isBackground = true;
+		entityJSON["background"] = { {"isBackground", background.isBackground} };
+
+	}
 
 	// Add additional components in the desired order
 	if (ecs.hasComponent<AABBComponent>(entity)) {
@@ -818,30 +835,68 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			}}
 		};
 	}
-
+	
 	if (ecs.hasComponent<PlayerComponent>(entity)) {
 		auto& player = ecs.getComponent<PlayerComponent>(entity);
-		entityJSON["player"] = { { "isPlayer", true } };
+		player.isPlayer = true;
+		entityJSON["player"] = { { "isPlayer", player.isPlayer } };
 	}
 
 	if (ecs.hasComponent<PumpComponent>(entity)) {
 		auto& pump = ecs.getComponent<PumpComponent>(entity);
-		entityJSON["pump"] = { {"isPump", true} };
+		pump.isPump = true;
+		entityJSON["pump"] = { {"isPump", pump.isPump} };
 	}
 
 	if (ecs.hasComponent<ExitComponent>(entity)) {
 		auto& exit = ecs.getComponent<ExitComponent>(entity);
-		entityJSON["exit"] = { {"isExit", true} };
+		exit.isExit = true;
+		entityJSON["exit"] = { {"isExit", exit.isExit} };
 	}
 
 	if (ecs.hasComponent<ButtonComponent>(entity)) {
 		auto& button = ecs.getComponent<ButtonComponent>(entity);
-		entityJSON["button"] = { {"isButton", true} };
+		button.isButton = true;
+		entityJSON["button"] = { {"isButton", button.isButton} };
 	}
 
 	if (ecs.hasComponent<CollectableComponent>(entity)) {
-		auto& button = ecs.getComponent<CollectableComponent>(entity);
-		entityJSON["collectable"] = { {"isCollectable", true} };
+		auto& collectable = ecs.getComponent<CollectableComponent>(entity);
+		collectable.isCollectable = true;
+		entityJSON["collectable"] = { {"isCollectable", collectable.isCollectable} };
+	}
+	//std::cout << "Has Behaviour:" << ecs.hasComponent<BehaviourComponent>(entity) << std::endl;
+	if (ecs.hasComponent<BehaviourComponent>(entity)) {
+		auto& behaviour = ecs.getComponent<BehaviourComponent>(entity);
+
+		if (!logicSystemRef->hasBehaviour(entity)) {
+			behaviour.none = true;
+			entityJSON["behaviour"] = { {"none", behaviour.none} };
+		}
+		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(entity)) {
+			behaviour.player = true;
+			entityJSON["behaviour"] = { {"player", behaviour.player} };
+		}
+		else if (logicSystemRef->hasBehaviour<EnemyBehaviour>(entity)) {
+			behaviour.enemy = true;
+			entityJSON["behaviour"] = { {"enemy", behaviour.enemy} };
+		}
+		else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(entity)) {
+			behaviour.pump = true;
+			entityJSON["behaviour"] = { {"pump", behaviour.pump} };
+		}
+		else if (logicSystemRef->hasBehaviour<ExitBehaviour>(entity)) {
+			behaviour.exit = true;
+			entityJSON["behaviour"] = { {"exit", behaviour.exit} };
+		}
+		else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(entity)) {
+			behaviour.collectable = true;
+			entityJSON["behaviour"] = { {"collectable", behaviour.collectable} };
+		}
+		else if (logicSystemRef->hasBehaviour<MouseBehaviour>(entity)) {
+			behaviour.button = true;
+			entityJSON["behaviour"] = { {"button", behaviour.button} };
+		}
 	}
 
 	return entityJSON;

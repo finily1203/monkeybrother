@@ -6,6 +6,8 @@
 #include "CollectableBehaviour.h"
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
+#include "BehaviourComponent.h"
+#include "BackgroundComponent.h"
 
 int ObjectCreation::objCount;
 float ObjectCreation::objAttributeSliderMaxLength;
@@ -234,10 +236,14 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		aabb.top = transform.position.GetY() + halfHeight;
 		aabb.bottom = transform.position.GetY() - halfHeight;
 
+		BehaviourComponent behaviour{};
+		behaviour.enemy = true;
+
 		ecsCoordinator.addComponent(entityObj, enemy);
 		ecsCoordinator.addComponent(entityObj, movement);
 		ecsCoordinator.addComponent(entityObj, forces);
 		ecsCoordinator.addComponent(entityObj, aabb);
+		ecsCoordinator.addComponent(entityObj, behaviour);
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 	}
@@ -265,9 +271,13 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		forces.force.SetMagnitude(10.0f);
 		forces.maxAccumulatedForce = 40.0f;
 
+		BehaviourComponent behaviour{};
+		behaviour.player = true;
+
 		ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, forces);
+		ecsCoordinator.addComponent(entityObj, behaviour);
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 
@@ -285,8 +295,12 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		ClosestPlatform closestPlatform{};
 		closestPlatform.isClosest = (transform.orientation.GetX() == 0); // Set true only for flat platform
 
+		BehaviourComponent behaviour{};
+		behaviour.none = true;
+
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, closestPlatform);
+		ecsCoordinator.addComponent(entityObj, behaviour);
 	}
 	else if (!strcmp(items[itemIndex], "TextBox")) {
 		// Calculate AABB based on transform
@@ -299,14 +313,22 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		fontComp.color.SetY(2);
 		fontComp.color.SetZ(3);
 
+		BehaviourComponent behaviour{};
+		behaviour.none = true;
+
 		ecsCoordinator.addComponent(entityObj, fontComp);
+		ecsCoordinator.addComponent(entityObj, behaviour);
 	}
 	else if (!strcmp(items[itemIndex], "Pump")) {
 		PumpComponent pump{};
 		pump.isPump = true;
 		ecsCoordinator.addComponent(entityObj, pump);
 
+		BehaviourComponent behaviour{};
+		behaviour.pump = true;
+
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+		ecsCoordinator.addComponent(entityObj, behaviour);
 
 	}
 	else if (!strcmp(items[itemIndex], "Exit")) {
@@ -314,7 +336,11 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		exit.isExit = true;
 		ecsCoordinator.addComponent(entityObj, exit);
 
+		BehaviourComponent behaviour{};
+		behaviour.exit = true;
+
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
+		ecsCoordinator.addComponent(entityObj, behaviour);
 
 	}
 	else if (!strcmp(items[itemIndex], "Collectable")) {
@@ -322,10 +348,18 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		collectable.isCollectable = true;
 		ecsCoordinator.addComponent(entityObj, collectable);
 
+		BehaviourComponent behaviour{};
+		behaviour.collectable = true;
+
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
+		ecsCoordinator.addComponent(entityObj, behaviour);
 	}
 	else if (!strcmp(items[itemIndex], "Background")) {
-		
+		BackgroundComponent background{};
+		background.isBackground = true;
+
+		ecsCoordinator.addComponent(entityObj, background);
+
 	}
 }
 
