@@ -22,29 +22,21 @@ File Contributions: Joel Chu (50%)
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#ifdef _DEBUG
-
-#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
-#pragma init_seg(compiler)//global objects in this file get constructed very early on
-
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 183;
+		//_crtBreakAlloc = 365602;
 	}
 };
 
 CrtBreakAllocSetter g_crtBreakAllocSetter;
-
-#endif//_DEBUG
-
 
 namespace monkeybrother {
 	__declspec(dllimport) void Print();
 }
 
 int main() {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(183);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(161);
 
 
 	try {
@@ -109,6 +101,6 @@ int main() {
 		CrashLog::LogDebugMessage("End Log");
 		
 	}
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
 	return 0;
 }

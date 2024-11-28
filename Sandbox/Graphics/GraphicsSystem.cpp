@@ -192,9 +192,9 @@ void GraphicsSystem::cleanup() {
 }
 
 void GraphicsSystem::ReleaseResources() {
-    glDeleteBuffers(1, &m_VBO);
-    glDeleteBuffers(1, &m_UVBO);
     glDeleteBuffers(1, &m_EBO);
+    glDeleteBuffers(1, &m_UVBO);
+    glDeleteBuffers(1, &m_VBO);
     glDeleteTextures(1, &m_Texture);
     glDeleteVertexArrays(1, &m_VAO);
 }

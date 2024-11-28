@@ -2,11 +2,19 @@
 #include "GUIGameViewport.h"
 #include "Debug.h"
 #include "FontSystemECS.h"
+#include "LogicSystemECS.h"
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
+#include <memory>
 
 float Inspector::objAttributeSliderMaxLength;
 char Inspector::textBuffer[MAXTEXTSIZE];
 ImVec2 mouseWorldPos;
 glm::mat4 projectionMatrix(1.0f);
+int currentItem = 0;
 
 void Inspector::Initialise() {
 	LoadInspectorFromJSON(FilePathManager::GetIMGUIInspectorJSONPath());
@@ -426,6 +434,114 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 
 		}
 
+		auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
+
+		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player" };
+
+
+		if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
+			currentItem = 1;
+		}
+		else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(selectedEntityID)) {
+			currentItem = 2;
+		}
+		else if (logicSystemRef->hasBehaviour<ExitBehaviour>(selectedEntityID)) {
+			currentItem = 3;
+		}
+		else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(selectedEntityID)) {
+			currentItem = 4;
+		}
+		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
+			currentItem = 5;
+		}
+		else {
+			currentItem = 0;
+		}
+
+		// Create the combo box
+		ImGui::SetNextItemWidth(200);
+		if (ImGui::BeginCombo("##dropdown", items[currentItem])) {
+			for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+				const bool typeSelected = (currentItem == i);
+				if (ImGui::Selectable(items[i], typeSelected)) {
+
+					/*switch (currentItem) {
+					case 1: ecsCoordinator.removeComponent<EnemyComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+						break;
+					case 2: ecsCoordinator.removeComponent<PumpComponent>(selectedEntityID); break;
+					case 3: ecsCoordinator.removeComponent<ExitComponent>(selectedEntityID); break;
+					case 4: ecsCoordinator.removeComponent<CollectableComponent>(selectedEntityID); break;
+					case 5: ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<AnimationComponent>(selectedEntityID);
+						break;
+					}*/
+
+					// Add new component
+					switch (i) {
+					case 0:
+						if (logicSystemRef->hasBehaviour(selectedEntityID))
+							logicSystemRef->unassignBehaviour(selectedEntityID);
+						break;
+					case 1:
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
+						break;
+					case 2:
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>());
+						break;
+					case 3:
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>());
+						break;
+					case 4:
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
+						break;
+					case 5:
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+						break;
+					}
+
+					//// Add new component
+					//switch (i) {
+					//case 0: 
+					//	if(logicSystemRef->hasBehaviour(selectedEntityID))
+					//	logicSystemRef->unassignBehaviour(selectedEntityID);
+					//	break;
+					//case 1: 
+					//	ecsCoordinator.addComponent<EnemyComponent>(selectedEntityID, EnemyComponent{});
+					//	if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
+					//		ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, PhysicsComponent{});
+					//	}
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>()); 
+					//	break;
+					//case 2: 
+					//	ecsCoordinator.addComponent<PumpComponent>(selectedEntityID, PumpComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>()); 
+					//	break;
+					//case 3: 
+					//	ecsCoordinator.addComponent<ExitComponent>(selectedEntityID, ExitComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>()); 
+					//	break;
+					//case 4: 
+					//	ecsCoordinator.addComponent<CollectableComponent>(selectedEntityID, CollectableComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>()); 
+					//	break;
+					//case 5: 
+					//	ecsCoordinator.addComponent<PlayerComponent>(selectedEntityID, PlayerComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>()); 
+					//	break;
+					//}
+
+					currentItem = i;
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::SameLine();
+		ImGui::Text("Behaviour");
+
+
 	ImGui::End();
 }
 
@@ -445,4 +561,8 @@ void Inspector::LoadInspectorFromJSON(std::string const& filename)
 
 	serializer.ReadCharArray(textBuffer, MAXTEXTSIZE, "Inspector.textBuffer");
 	serializer.ReadFloat(objAttributeSliderMaxLength, "Inspector.objAttributeSliderMaxLength");
+}
+
+void Inspector::Cleanup() {
+
 }

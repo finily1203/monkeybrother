@@ -222,6 +222,18 @@ void LogicSystemECS::assignBehaviour(Entity entity, std::shared_ptr<BehaviourECS
 	behaviours[entity] = behaviour;
 }
 
+void LogicSystemECS::unassignBehaviour(Entity entity) {
+	behaviours.erase(entity);
+}
+
+//template<typename T>
+//bool LogicSystemECS::hasBehaviour(Entity entity) {
+//	if (behaviours.find(entity) != behaviours.end()) {
+//		return std::dynamic_pointer_cast<T>(behaviours[entity]) != nullptr;
+//	}
+//	return false;
+//}
+
 //void PlayerBehaviour::update(Entity entity, float dt) {
 //	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 //
@@ -396,6 +408,7 @@ void MouseBehaviour::update(Entity entity) {
 
 		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
 		float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
+		if (!GLFWFunctions::debug_flag)
 		onMouseHover(static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
 	}
 

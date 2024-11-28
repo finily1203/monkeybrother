@@ -340,7 +340,7 @@ void GameViewWindow::Update() {
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
-		GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
+		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
 		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
@@ -356,8 +356,15 @@ void GameViewWindow::Update() {
 	ImGui::SameLine(0, 5);
 
 	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
+		if (GLFWFunctions::allow_camera_movement) {
+			GLFWFunctions::allow_camera_movement = false;
+		}
+		else {
+			GLFWFunctions::allow_camera_movement = true;   // Add the else case
+		}
 		clickedScreenPan = !clickedScreenPan;
 	}
+
 
 	ImGui::SameLine(0, 5);
 
@@ -426,9 +433,20 @@ void GameViewWindow::Update() {
 }
 //Clean up resources
 void GameViewWindow::Cleanup() {
+	// First destroy all entities
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		ecsCoordinator.destroyEntity(entity);
+	}
+
+	// Then cleanup viewport texture
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 		viewportTexture = 0;
+	}
+
+	if (pausedTexture != 0) {
+		glDeleteTextures(1, &pausedTexture);
+		pausedTexture = 0;
 	}
 }
 //Set up Opengl texture to store game scene
@@ -724,10 +742,10 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<AABBComponent>(entity)) {
 		auto& aabb = ecs.getComponent<AABBComponent>(entity);
 		entityJSON["aabb"] = {
+			{"bottom", aabb.bottom},
 			{"left", aabb.left},
 			{"right", aabb.right},
-			{"top", aabb.top},
-			{"bottom", aabb.bottom}
+			{"top", aabb.top}
 		};
 	}
 
@@ -776,9 +794,9 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
 	}
 
-	if (ecs.hasComponent<AnimationComponent>(entity)) {
+	/*if (ecs.hasComponent<AnimationComponent>(entity)) {
 		entityJSON["animation"] = { {"isAnimated", true} };
-	}
+	}*/
 
 	if (ecs.hasComponent<FontComponent>(entity)) {
 		auto& fontComp = ecs.getComponent<FontComponent>(entity);

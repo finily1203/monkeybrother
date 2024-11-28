@@ -20,6 +20,8 @@ public:
 
 	static void Update();
 
+	static void Cleanup();
+
 	static void ObjectCreationCondition(const char* items[], int itemIndex, Entity entityObj, std::string entityId);
 
 	static void LoadObjectCreationFromJSON(std::string const& filename);

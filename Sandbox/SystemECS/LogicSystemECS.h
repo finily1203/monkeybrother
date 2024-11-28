@@ -53,7 +53,22 @@ public:
 	void assignBehaviour(Entity entity, std::shared_ptr<BehaviourECS> behaviour);
 
 	void ApplyForce(Entity entity, const myMath::Vector2D& appliedForce);
+
+	void unassignBehaviour(Entity entity);
 	
+	bool hasBehaviour(Entity entity) { return behaviours.find(entity) != behaviours.end(); }
+
+	template<typename T = BehaviourECS>
+	bool hasBehaviour(Entity entity) {
+		if (behaviours.find(entity) != behaviours.end()) {
+			if constexpr (std::is_same_v<T, BehaviourECS>) {
+				return true;
+			}
+			return std::dynamic_pointer_cast<T>(behaviours[entity]) != nullptr;
+		}
+		return false;
+	}
+
 	std::string getSystemECS() override;
 
 private:

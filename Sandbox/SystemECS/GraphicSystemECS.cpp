@@ -53,8 +53,10 @@ void GraphicSystemECS::update(float dt) {
         Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
         //if (GLFWFunctions::testMode == 0) {
+        bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
+        bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-        bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+        //bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 		if (ecsCoordinator.getEntityID(entity) == "background") {
             /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
             transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
@@ -66,7 +68,8 @@ void GraphicSystemECS::update(float dt) {
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
         // Use hasMovement for the update parameter
-        graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
+        //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
+        graphicsSystem.Update(dt / 10.0f, (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
@@ -101,15 +104,15 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) == "player") {
+		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
 
         // Drawing based on entity components
-        if (hasMovement && hasEnemy) {
+        if (hasMovement && isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
-        else if (hasMovement) {
+        else if (isPlayer) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
         else if(isPlatform){
