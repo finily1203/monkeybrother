@@ -249,8 +249,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 	}
 	else if (!strcmp(items[itemIndex], "Player")) {
 
-		AnimationComponent animation{};
-		animation.isAnimated = true;
+		/*AnimationComponent animation{};
+		animation.isAnimated = true;*/
 
 		// Calculate AABB based on transform
 		AABBComponent aabb{};
@@ -274,7 +274,7 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		BehaviourComponent behaviour{};
 		behaviour.player = true;
 
-		ecsCoordinator.addComponent(entityObj, animation);
+		//ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, forces);
 		ecsCoordinator.addComponent(entityObj, behaviour);

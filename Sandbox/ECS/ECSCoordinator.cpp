@@ -187,13 +187,13 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, movement);
 		}
 
-		if (entityData.contains("animation") && entityId == "player")
+		/*if (entityData.contains("animation") && entityId == "player")
 		{
 			AnimationComponent animation{};
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
 			ecs.addComponent(entityObj, animation);
-		}
+		}*/
 
 		if (entityData.contains("player")) {
 			PlayerComponent player{};
