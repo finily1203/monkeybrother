@@ -52,7 +52,10 @@ void PhysicsSystemECS::initialise()
     //std::cout << friction << " nwihediwwwwwwwwwwwwwwww" << std::endl;
 }
 
-void PhysicsSystemECS::cleanup() {}
+void PhysicsSystemECS::cleanup() {
+    eventSource.Unregister(MessageId::FALL, eventObserver);
+    eventSource.Unregister(MessageId::JUMP, eventObserver);
+}
 
 // Find the closest platform to the player
 Entity PhysicsSystemECS::FindClosestPlatform(Entity player)

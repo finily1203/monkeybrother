@@ -175,7 +175,8 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
 //	myMath::Vector2D& eVel = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 //	myMath::Vector2D& eAccForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
 //	float eMass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
-//	//float eGravityScale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
+//	//float e
+// Scale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
 //	float eMagnitude = ecsCoordinator.getComponent<PhysicsComponent>(entity).force.GetMagnitude();
 //
 //	if (GLFWFunctions::keyState[Key::I]) {

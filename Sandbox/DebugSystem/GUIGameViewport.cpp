@@ -23,6 +23,14 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIConsole.h"
 #include "Debug.h"
 #include "GlobalCoordinator.h"
+#include "BehaviourComponent.h"
+#include "LogicSystemECS.h"
+#include "PlayerBehaviour.h"
+#include "EnemyBehaviour.h"
+#include "CollectableBehaviour.h"
+#include "EffectPumpBehaviour.h"
+#include "ExitBehaviour.h"
+#include "BackgroundComponent.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -71,10 +79,12 @@ float GameViewWindow::saveWindowWidth;
 float GameViewWindow::fileWindowWidth;
 float GameViewWindow::saveWindowHeight;
 float GameViewWindow::fileWindowHeight;
+int GameViewWindow::scene;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
+	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
 }
 bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
@@ -278,7 +288,8 @@ void GameViewWindow::Update() {
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 		if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
-
+			scene = 0;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				ecsCoordinator.destroyEntity(entity);
 			}
@@ -289,6 +300,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -296,6 +309,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -303,6 +318,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -310,6 +327,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -317,6 +336,8 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
+			scene = saveNum;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
 			ImGui::CloseCurrentPopup();
@@ -340,7 +361,7 @@ void GameViewWindow::Update() {
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
-		GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
+		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
 		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
@@ -356,8 +377,15 @@ void GameViewWindow::Update() {
 	ImGui::SameLine(0, 5);
 
 	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
+		if (GLFWFunctions::allow_camera_movement) {
+			GLFWFunctions::allow_camera_movement = false;
+		}
+		else {
+			GLFWFunctions::allow_camera_movement = true;   // Add the else case
+		}
 		clickedScreenPan = !clickedScreenPan;
 	}
+
 
 	ImGui::SameLine(0, 5);
 
@@ -426,9 +454,20 @@ void GameViewWindow::Update() {
 }
 //Clean up resources
 void GameViewWindow::Cleanup() {
+	// First destroy all entities
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		ecsCoordinator.destroyEntity(entity);
+	}
+
+	// Then cleanup viewport texture
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 		viewportTexture = 0;
+	}
+
+	if (pausedTexture != 0) {
+		glDeleteTextures(1, &pausedTexture);
+		pausedTexture = 0;
 	}
 }
 //Set up Opengl texture to store game scene
@@ -691,6 +730,7 @@ std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
 
 nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
 {
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 	// Initialize ordered components that should always be present first
 	nlohmann::ordered_json entityJSON = {
 		{"id", entityId},
@@ -720,14 +760,22 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		}}
 	};
 
+	if (ecs.hasComponent<BackgroundComponent>(entity)) {
+		auto& background = ecs.getComponent<BackgroundComponent>(entity);
+
+		background.isBackground = true;
+		entityJSON["background"] = { {"isBackground", background.isBackground} };
+
+	}
+
 	// Add additional components in the desired order
 	if (ecs.hasComponent<AABBComponent>(entity)) {
 		auto& aabb = ecs.getComponent<AABBComponent>(entity);
 		entityJSON["aabb"] = {
+			{"bottom", aabb.bottom},
 			{"left", aabb.left},
 			{"right", aabb.right},
-			{"top", aabb.top},
-			{"bottom", aabb.bottom}
+			{"top", aabb.top}
 		};
 	}
 
@@ -776,9 +824,9 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
 	}
 
-	if (ecs.hasComponent<AnimationComponent>(entity)) {
+	/*if (ecs.hasComponent<AnimationComponent>(entity)) {
 		entityJSON["animation"] = { {"isAnimated", true} };
-	}
+	}*/
 
 	if (ecs.hasComponent<FontComponent>(entity)) {
 		auto& fontComp = ecs.getComponent<FontComponent>(entity);
@@ -800,30 +848,68 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			}}
 		};
 	}
-
+	
 	if (ecs.hasComponent<PlayerComponent>(entity)) {
 		auto& player = ecs.getComponent<PlayerComponent>(entity);
-		entityJSON["player"] = { { "isPlayer", true } };
+		player.isPlayer = true;
+		entityJSON["player"] = { { "isPlayer", player.isPlayer } };
 	}
 
 	if (ecs.hasComponent<PumpComponent>(entity)) {
 		auto& pump = ecs.getComponent<PumpComponent>(entity);
-		entityJSON["pump"] = { {"isPump", true} };
+		pump.isPump = true;
+		entityJSON["pump"] = { {"isPump", pump.isPump} };
 	}
 
 	if (ecs.hasComponent<ExitComponent>(entity)) {
 		auto& exit = ecs.getComponent<ExitComponent>(entity);
-		entityJSON["exit"] = { {"isExit", true} };
+		exit.isExit = true;
+		entityJSON["exit"] = { {"isExit", exit.isExit} };
 	}
 
 	if (ecs.hasComponent<ButtonComponent>(entity)) {
 		auto& button = ecs.getComponent<ButtonComponent>(entity);
-		entityJSON["button"] = { {"isButton", true} };
+		button.isButton = true;
+		entityJSON["button"] = { {"isButton", button.isButton} };
 	}
 
 	if (ecs.hasComponent<CollectableComponent>(entity)) {
-		auto& button = ecs.getComponent<CollectableComponent>(entity);
-		entityJSON["collectable"] = { {"isCollectable", true} };
+		auto& collectable = ecs.getComponent<CollectableComponent>(entity);
+		collectable.isCollectable = true;
+		entityJSON["collectable"] = { {"isCollectable", collectable.isCollectable} };
+	}
+	//std::cout << "Has Behaviour:" << ecs.hasComponent<BehaviourComponent>(entity) << std::endl;
+	if (ecs.hasComponent<BehaviourComponent>(entity)) {
+		auto& behaviour = ecs.getComponent<BehaviourComponent>(entity);
+
+		if (!logicSystemRef->hasBehaviour(entity)) {
+			behaviour.none = true;
+			entityJSON["behaviour"] = { {"none", behaviour.none} };
+		}
+		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(entity)) {
+			behaviour.player = true;
+			entityJSON["behaviour"] = { {"player", behaviour.player} };
+		}
+		else if (logicSystemRef->hasBehaviour<EnemyBehaviour>(entity)) {
+			behaviour.enemy = true;
+			entityJSON["behaviour"] = { {"enemy", behaviour.enemy} };
+		}
+		else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(entity)) {
+			behaviour.pump = true;
+			entityJSON["behaviour"] = { {"pump", behaviour.pump} };
+		}
+		else if (logicSystemRef->hasBehaviour<ExitBehaviour>(entity)) {
+			behaviour.exit = true;
+			entityJSON["behaviour"] = { {"exit", behaviour.exit} };
+		}
+		else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(entity)) {
+			behaviour.collectable = true;
+			entityJSON["behaviour"] = { {"collectable", behaviour.collectable} };
+		}
+		else if (logicSystemRef->hasBehaviour<MouseBehaviour>(entity)) {
+			behaviour.button = true;
+			entityJSON["behaviour"] = { {"button", behaviour.button} };
+		}
 	}
 
 	return entityJSON;
@@ -1003,4 +1089,34 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
 	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
 
+}
+
+void GameViewWindow::LoadSceneFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	serializer.ReadInt(scene, "scene");
+}
+
+void GameViewWindow::SaveSceneToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	serializer.WriteInt(scene, "scene", filename);
 }

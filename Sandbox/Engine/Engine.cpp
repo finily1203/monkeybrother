@@ -122,7 +122,7 @@ void Engine::cleanupSystem() {
 		}
 	}
 
-	//ecsCoordinator.cleanup();
+	ecsCoordinator.cleanup();
 	
 }
 

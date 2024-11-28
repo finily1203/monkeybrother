@@ -16,6 +16,7 @@ public:
 
 	static void Initialise();
 	static void Update();
+	static void Cleanup();
 
 	static void LoadHierarchyListFromJSON(std::string const& filename);
 

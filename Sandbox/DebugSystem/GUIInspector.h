@@ -18,6 +18,8 @@ public:
 
 	static void Update();
 
+	static void Cleanup();
+
 	static void RenderInspectorWindow(ECSCoordinator& ecsCoordinator, int selectedEntityID);
 
 	static void LoadInspectorFromJSON(std::string const& filename);

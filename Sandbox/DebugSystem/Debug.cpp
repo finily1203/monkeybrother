@@ -147,8 +147,7 @@ void DebugSystem::update() {
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoBackground;
+			ImGuiWindowFlags_NoNavFocus;
 
 		//Remove window rounding, border, and padding
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -296,6 +295,19 @@ void DebugSystem::update() {
 }
 //Clean up and shut down ImGui resources	
 void DebugSystem::cleanup() {
+	GameViewWindow::Cleanup();
+	ObjectCreation::Cleanup();
+	HierarchyList::Cleanup();
+	Inspector::Cleanup();
+	AssetBrowser::Cleanup();
+
+	// Clear containers
+	systemStartTimes.clear();
+	accumulatedTimes.clear();
+	systems.clear();
+	systemGameLoopPercent.clear();
+	newEntities.clear();
+
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

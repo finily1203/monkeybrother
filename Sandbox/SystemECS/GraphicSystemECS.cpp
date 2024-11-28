@@ -22,6 +22,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
 #include "PhysicsComponent.h"
+#include "BehaviourComponent.h"
+#include "BackgroundComponent.h"
 
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
@@ -52,9 +54,14 @@ void GraphicSystemECS::update(float dt) {
         auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
         Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
+        auto entitySig = ecsCoordinator.getEntitySignature(entity);
+
         //if (GLFWFunctions::testMode == 0) {
+        bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
+        bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-        bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+        bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
+        //bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
 		if (ecsCoordinator.getEntityID(entity) == "background") {
             /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
             transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
@@ -66,11 +73,12 @@ void GraphicSystemECS::update(float dt) {
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
         // Use hasMovement for the update parameter
-        graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
+        //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
+        graphicsSystem.Update(dt / 10.0f, (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
-        auto entitySig = ecsCoordinator.getEntitySignature(entity);
+        //auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
         /*if (ecsCoordinator.getEntityID(entity) == "background") {
             transform.scale.SetX(GLFWFunctions::windowWidth);
@@ -101,15 +109,15 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) == "player") {
+		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
 
         // Drawing based on entity components
-        if (hasMovement && hasEnemy) {
+        if (hasMovement && isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
-        else if (hasMovement) {
+        else if (isPlayer) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
         else if (isPump) {
@@ -136,11 +144,11 @@ void GraphicSystemECS::update(float dt) {
         else if (isExit) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
         }
-        else if (entitySig.test(0) && entitySig.count() == 1) {
-            if (ecsCoordinator.getEntityID(entity) == "placeholderentity")
+        else if (isBackground) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-            else
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+        }
+        else if (entitySig.test(0) && entitySig.count() == 1) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
     }
 }

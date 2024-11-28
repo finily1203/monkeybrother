@@ -201,6 +201,8 @@ void AssetBrowser::Update() {
 	}
 }
 
+void AssetBrowser::Cleanup() {}
+
 std::string AssetBrowser::cutString(const std::string& str, float maxWidth) {
 	const char* strEnd = "...";
 	float width = ImGui::CalcTextSize(str.c_str()).x;

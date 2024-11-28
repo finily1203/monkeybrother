@@ -176,3 +176,6 @@ void HierarchyList::LoadHierarchyListFromJSON(std::string const& filename)
 	serializer.ReadCharArray(textBuffer, MAXTEXTSIZE, "Hierarchy.textBuffer");
 	serializer.ReadFloat(objAttributeSliderMaxLength, "Hierarchy.objAttributeSliderMaxLength");
 }
+void HierarchyList::Cleanup() {
+
+}
