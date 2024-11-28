@@ -14,11 +14,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 ECSCoordinator ecsCoordinator;
 GraphicsSystem graphicsSystem;
-//CameraSystem2D cameraSystem;
 DebugSystem debugSystem;
 AssetsManager assetsManager;
-
-
 CameraSystem2D cameraSystem;
 FontSystem fontSystem;
 AudioSystem audioSystem;

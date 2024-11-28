@@ -45,7 +45,7 @@ void GraphicSystemECS::initialise() {
 void GraphicSystemECS::update(float dt) {
    
 
-    for (auto entity : entities) {
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         // Check if the entity has a transform component
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
         Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;

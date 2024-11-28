@@ -64,7 +64,7 @@ void FontSystemECS::update(float dt) {
         return;
     }
 
-    for (auto entity : entities) {
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<FontComponent>(entity)) {
             auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
             auto& fontTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
