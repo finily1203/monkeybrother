@@ -114,7 +114,7 @@ void GraphicSystemECS::update(float dt) {
 		}
 
         // Drawing based on entity components
-        if (hasMovement && isEnemy) {
+        if (/*hasMovement && */isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {

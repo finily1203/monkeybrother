@@ -44,24 +44,45 @@ void Inspector::Update() {
 	ImVec2 centeredMouse = GameViewWindow::GetCenteredMousePosition();
 	Console::GetLog() << "Mouse Relative: X: " << centeredMouse.x << " Y: " << centeredMouse.y << std::endl;
 	auto isMouseOverEntity = [&](int entity, float& distanceSquared, bool useCircular = false) -> bool {
+		if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton") {
+			const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			float x = transform.position.GetX();
+			float y = transform.position.GetY();
+			float width = transform.scale.GetX();
+			float height = transform.scale.GetY();
+
+			// Increase collision area by scaling the width and height
+			float collisionScale = 1.1f;  // Adjust this value to make area bigger/smaller
+			width *= collisionScale;
+			height *= collisionScale;
+
+			// Calculate bounds with scaled dimensions
+			float leftBound = x - width*0.8f;
+			float rightBound = x + width*0.2f;
+			float topBound = y + height*0.8;
+			float bottomBound = y + height * 0.4;
+
+			return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
+				centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
+		}else
 		if (ecsCoordinator.hasComponent<FontComponent>(entity) &&
 			ecsCoordinator.hasComponent<TransformComponent>(entity)) {
 			const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
 			float x = transform.position.GetX();
 			float y = transform.position.GetY();
-			float width = 400.0f;  // Increased from 200 to 400
+			float width = 400.0f;  
 			float height = 100.0f;  // Increased from 50 to 100
 
 			// Center the collision box horizontally relative to the position
 			float leftBound = x;
 			float rightBound = x + (width * 0.4f);
-			float topBound = y + height * 0.6f;    // Increased upper bound
-			float bottomBound = y - height * 0.3f;  // Lowered bottom bound
+			float topBound = y + height * 0.4f;    // Increased upper bound
+			float bottomBound = y - height * 0.8f;  // Lowered bottom bound
 
 			// Calculate distance for circular collision from centered position
 			float centerX = x;  // Use position directly since bounds are centered
-			float centerY = bottomBound + height * 0.5f;
+			float centerY = bottomBound + height * 0.1f;
 			float dx = centeredMouse.x - centerX;
 			float dy = centeredMouse.y - centerY;
 			distanceSquared = dx * dx + dy * dy;
@@ -492,7 +513,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID))
 						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);*/
 
-					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
 						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
 
 					PhysicsComponent physics;
