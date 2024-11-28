@@ -45,7 +45,7 @@ void AudioSystem::initialise() {
 
     //loadAudioAssets();
 
-    playSong("bgm");
+    playSong("Ambience.wav");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -60,7 +60,7 @@ void AudioSystem::update() {
 
         // If not playing, replay the sound unless stopAudio is true
         if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
-            playSong("bgm");
+            playSong("Ambience.wav");
         }
 
 
@@ -100,7 +100,7 @@ void AudioSystem::update() {
         if (GLFWFunctions::audioNext) {
             switch (GLFWFunctions::audioNum) {
             case 0:
-                playSong("bgm");
+                playSong("Ambience.wav");
                 break;
             case 1:
                 playSong("bubbles");
@@ -134,7 +134,7 @@ void AudioSystem::update() {
 
 
     if (GLFWFunctions::bumpAudio) {
-        playSoundEffect("splashSound");
+        playSoundEffect("Mossball_Bounce.wav");
         GLFWFunctions::bumpAudio = false;
     }
 

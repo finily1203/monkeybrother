@@ -3,5 +3,6 @@ struct PumpComponent
 {
 	bool isPump;
 
-	PumpComponent() : isPump(false) {}
+	float pumpForce;
+	PumpComponent() : isPump(false), pumpForce(0.f) {}
 };

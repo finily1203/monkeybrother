@@ -81,7 +81,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
             float distance = std::sqrt(
                 std::pow(playerPos.GetX() - platformPos.GetX(), 2.f) +
                 std::pow(playerPos.GetY() - platformPos.GetY(), 2.f)
-            );
+            ); 
 
             if (distance < closestDistance)
             {
