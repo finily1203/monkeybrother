@@ -82,7 +82,7 @@ GLboolean GLFWFunctions::instantLose = false;
 GLboolean GLFWFunctions::skipToNextLevel = false;
 GLboolean GLFWFunctions::skipToEnd = false;
 GLboolean GLFWFunctions::godMode = false;
-GLboolean GLFWFunctions::fullscreen = true;
+GLboolean GLFWFunctions::fullscreen = false;
 
 
 
@@ -101,7 +101,7 @@ std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
 
 
 // Initialize the window
-bool GLFWFunctions::init(int width, int height, std::string title) {
+bool GLFWFunctions::init(int width, int height, std::string title, bool isfullscreen) {
 
     /* Initialize the library */
     if (!glfwInit())
@@ -111,6 +111,8 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	fullscreen = isfullscreen;
 
     // Determine if fullscreen or windowed mode
     GLFWmonitor* monitor = nullptr;
@@ -144,13 +146,7 @@ bool GLFWFunctions::init(int width, int height, std::string title) {
     glfwSwapInterval(0); //vsync
     callEvents();
 
-    glfwSetKeyCallback(pWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && (mods & GLFW_MOD_ALT)) {
-            toggleFullscreen();
-        }
-        // Call the original keyboard callback
-        keyboardEvent(window, key, scancode, action, mods);
-    });
+    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     return true;
 }

@@ -37,7 +37,7 @@ enum class MouseButton {
 struct GLFWFunctions {
 
 	// Initialize the window
-	//static bool init(int width, int height, std::string title);
+	static bool init(int width, int height, std::string title, bool isfullscreen);
 
 	//Handle keyboard events
 	static void keyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
