@@ -90,14 +90,14 @@ void DebugSystem::initialise() {
 
 	// Set up ImGui layout file
 	std::filesystem::path execPath = FilePathManager::GetExecutablePath();
-	std::filesystem::path iniPath = execPath.parent_path() / "Sandbox" / "assets" / "imgui" / "imgui_layout.ini";
+	std::filesystem::path iniFilePath = execPath.parent_path() / "Sandbox" / "assets" / "imgui" / "imgui_layout.ini";
 
 	// Create directories (will create nested directories if they don't exist)
-	std::filesystem::create_directories(iniPath.parent_path());
+	std::filesystem::create_directories(iniFilePath.parent_path());
 
 	// Convert to C-string for ImGui
-	std::string iniPathString = iniPath.string();
-	io->IniFilename = iniPathString.empty() ? nullptr : iniPathString.c_str();
+	iniPath = iniFilePath.string();
+	io->IniFilename = iniPath.empty() ? nullptr : iniPath.c_str();
 
 	// Configure ImGui
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
