@@ -20,6 +20,7 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "GUIConsole.h"
 
 //Variables for Console
+size_t Console::MAX_LOGS;
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
@@ -39,15 +40,30 @@ void Console::Update(const char* title) {
 }
 
 void Console::Cleanup() {
-	if (instance) {
-		delete instance;
-		instance = nullptr;
-	}
+    static bool cleanupPerformed = false;
+    if (cleanupPerformed) {
+        return;
+    }
+
+
+    if (instance) {
+        
+        items.clear();
+
+        currentLog.str("");
+        currentLog.clear();
+
+        instance->SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+
+        delete instance;
+        instance = nullptr;
+
+        cleanupPerformed = true;
+    }
 }
 
 Console::~Console() {
-	// Save settings before the object is destroyed
-	SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+
 }
 
 void Console::DrawImpl(const char* title) {

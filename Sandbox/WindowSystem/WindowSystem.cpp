@@ -257,7 +257,7 @@ void WindowSystem::update() {
 }
 
 void WindowSystem::cleanup() {
-	Console::Cleanup();
+	//Console::Cleanup();
 	graphicsSystem.cleanup();
 	GLFWFunctions::glfwCleanup();
 }

@@ -70,7 +70,7 @@ double GLFWFunctions::fps = 0.0;
 float GLFWFunctions::delta_time = 0.0;
 
 
-GLboolean GLFWFunctions::allow_camera_movement = false;
+bool GLFWFunctions::allow_camera_movement = false;
 GLboolean GLFWFunctions::debug_flag = false;
 GLboolean GLFWFunctions::isGuiOpen = false;
 GLboolean GLFWFunctions::audioPaused = false;
@@ -116,7 +116,7 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
 
     // Determine if fullscreen or windowed mode
     GLFWmonitor* monitor = nullptr;
-    if (fullscreen) {
+    if (!fullscreen) {
         monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
         windowWidth = mode->width;
@@ -256,7 +256,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
     if (!GameViewWindow::getPaused()) {
         if (keyState[Key::NUM_2])
-            allow_camera_movement = ~allow_camera_movement;
+            allow_camera_movement = !allow_camera_movement;
 
         if (keyState[Key::NUM_1]) {
             debug_flag = ~debug_flag;
@@ -310,9 +310,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
         if (keyState[Key::F] && action == GLFW_PRESS) {
             fullscreen = !fullscreen;
-            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+            //GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+            GLFWmonitor* monitor = fullscreen ? nullptr : glfwGetPrimaryMonitor();
 
-            if (fullscreen) {
+            if (!fullscreen) {
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
                 glfwSetWindowMonitor(
                     pWindow,
@@ -377,8 +378,10 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
             float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
             float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
-            if (!debug_flag)
+            if (!debug_flag) {
                 click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+            }
+                
         }
     }
     else if (action == GLFW_RELEASE) {

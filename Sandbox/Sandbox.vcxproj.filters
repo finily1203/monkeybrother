@@ -113,6 +113,7 @@
     <ClInclude Include="SystemECS\PlayerBehaviour.h" />
     <ClInclude Include="Components\BehaviourComponent.h" />
     <ClInclude Include="Components\BackgroundComponent.h" />
+    <ClInclude Include="Components\UIComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

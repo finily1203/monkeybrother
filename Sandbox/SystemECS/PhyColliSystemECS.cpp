@@ -22,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ClosestPlatform.h"
 #include "GraphicsComponent.h"
 #include "PhysicsComponent.h"
+#include "PlayerComponent.h"
 
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
@@ -398,14 +399,23 @@ void PhysicsSystemECS::update(float dt)
 {
     (void)dt;
     //let it be the first entity
-    Entity playerEntity = ecsCoordinator.getFirstEntity();
-    Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
+    Entity playerEntity;/* = ecsCoordinator.getFirstEntity();*/
+    Entity closestPlatformEntity;
+    //Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
 
-    playerEntity = ecsCoordinator.getEntityFromID("player");
+    for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+            playerEntity = entity;
+            closestPlatformEntity = entity;
+            closestPlatformEntity = FindClosestPlatform(playerEntity);
 
-    closestPlatformEntity = FindClosestPlatform(playerEntity);
+            HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+        }
+    }
+    //Entity closestPlatformEntity;
+    //playerEntity = ecsCoordinator.hasComponent<PlayerComponent>(playerEntity);
 
-    HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+
 
 }
 

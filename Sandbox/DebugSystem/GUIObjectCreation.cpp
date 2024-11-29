@@ -274,10 +274,14 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		BehaviourComponent behaviour{};
 		behaviour.player = true;
 
+		PlayerComponent player{};
+		player.isPlayer = true;
+
 		//ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, forces);
 		ecsCoordinator.addComponent(entityObj, behaviour);
+		ecsCoordinator.addComponent(entityObj, player);
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 
@@ -322,12 +326,18 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 	else if (!strcmp(items[itemIndex], "Pump")) {
 		PumpComponent pump{};
 		pump.isPump = true;
-		ecsCoordinator.addComponent(entityObj, pump);
+		pump.pumpForce = 3.0f;
 
 		BehaviourComponent behaviour{};
 		behaviour.pump = true;
 
+		ClosestPlatform closestPlatform{};
+		closestPlatform.isClosest = true;
+
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+
+		ecsCoordinator.addComponent(entityObj, closestPlatform);
+		ecsCoordinator.addComponent(entityObj, pump);
 		ecsCoordinator.addComponent(entityObj, behaviour);
 
 	}

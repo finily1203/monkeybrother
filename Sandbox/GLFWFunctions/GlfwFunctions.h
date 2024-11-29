@@ -121,7 +121,7 @@ struct GLFWFunctions {
 
 	static GLboolean debug_flag;
 	static GLboolean isGuiOpen;
-	static GLboolean allow_camera_movement;
+	static bool allow_camera_movement;
 	static GLboolean audioPaused;
 	static GLboolean audioStopped;
 	static GLboolean adjustVol;
