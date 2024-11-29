@@ -308,9 +308,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
         if (keyState[Key::F] && action == GLFW_PRESS) {
             fullscreen = !fullscreen;
-            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+            //GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+            GLFWmonitor* monitor = fullscreen ? nullptr : glfwGetPrimaryMonitor();
 
-            if (fullscreen) {
+            if (!fullscreen) {
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
                 glfwSetWindowMonitor(
                     pWindow,
