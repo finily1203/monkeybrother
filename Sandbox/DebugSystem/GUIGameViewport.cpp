@@ -459,11 +459,6 @@ void GameViewWindow::Update() {
 }
 //Clean up resources
 void GameViewWindow::Cleanup() {
-	// First destroy all entities
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		ecsCoordinator.destroyEntity(entity);
-	}
-
 	// Then cleanup viewport texture
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);

@@ -57,9 +57,13 @@ void ECSCoordinator::update() {
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
-	entityManager->cleanup();
-	componentManager->cleanup();
-	systemManager->cleanup();
+	if (systemManager) systemManager->cleanup();
+	if (componentManager) componentManager->cleanup();
+	if (entityManager) entityManager->cleanup();
+
+	delete systemManager.release();
+	delete componentManager.release();
+	delete entityManager.release();
 }
 
 SystemType ECSCoordinator::getSystem() {

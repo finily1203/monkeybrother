@@ -121,9 +121,6 @@ void Engine::cleanupSystem() {
 			}
 		}
 	}
-
-	ecsCoordinator.cleanup();
-	
 }
 
 Engine::~Engine() {}
