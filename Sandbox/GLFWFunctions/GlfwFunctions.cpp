@@ -154,7 +154,9 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
 //Handle window to check for events
 void GLFWFunctions::callEvents() {
 
-    glfwSetKeyCallback(GLFWFunctions::pWindow, GLFWFunctions::keyboardEvent);
+    if (!isGuiOpen) {
+        glfwSetKeyCallback(GLFWFunctions::pWindow, GLFWFunctions::keyboardEvent);
+    }
     //glfwSetKeyCallback(GLFWFunctions::pWindow, DebugSystem::key_callback);
     glfwSetMouseButtonCallback(GLFWFunctions::pWindow, GLFWFunctions::mouseButtonEvent);
     glfwSetCursorPosCallback(GLFWFunctions::pWindow, GLFWFunctions::cursorPositionEvent);

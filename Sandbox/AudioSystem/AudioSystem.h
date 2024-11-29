@@ -41,6 +41,7 @@ public:
 	//Function to play song at the given index
 	//void playSong(int index);
 	void playSong(const std::string& songName);
+	void playBgm(const std::string& songName);
 
 	//Function to play sound effect
 	void playSoundEffect(const std::string& soundEffectName);
@@ -63,6 +64,7 @@ private:
 	FMOD::Channel* audioChannel;
 	FMOD::Channel* soundEffectChannel;
 	FMOD::Channel* assetBrowserChannel;
+	FMOD::Channel* bgmChannel;
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
 	float volume;
