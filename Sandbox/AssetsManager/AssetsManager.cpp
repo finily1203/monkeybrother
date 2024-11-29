@@ -50,6 +50,9 @@ void AssetsManager::cleanup()
     ClearShaders();
     ClearFonts();
     ClearAudio();
+
+    m_AssetList.clear();
+    std::vector<std::string>().swap(m_AssetList);
 }
 
 SystemType AssetsManager::getSystem()
@@ -445,6 +448,7 @@ void AssetsManager::ClearFonts() {
 		}
 	}
 	m_Fonts.clear();
+    m_FontPaths.clear();
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
