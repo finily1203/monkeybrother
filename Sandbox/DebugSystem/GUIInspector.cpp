@@ -8,6 +8,7 @@
 #include "CollectableBehaviour.h"
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
+#include "PlatformBehaviour.h"
 #include <memory>
 
 float Inspector::objAttributeSliderMaxLength;
@@ -458,7 +459,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 
 
-		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player" };
+		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform"};
 
 
 		if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
@@ -475,6 +476,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		}
 		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
 			currentItem = 5;
+		}
+		else if (ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+			currentItem = 6;
 		}
 		else {
 			currentItem = 0;
@@ -547,6 +551,10 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						physics.maxAccumulatedForce = 40.0f;
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+						break;
+					case 6:
+						
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
 						break;
 					}
 
