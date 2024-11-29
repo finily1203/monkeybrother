@@ -20,10 +20,13 @@ public:
 
 	static void Cleanup();
 
+	static ImVec2 getMouseWorldPos() { return mouseWorldPos; }
+
 	static void RenderInspectorWindow(ECSCoordinator& ecsCoordinator, int selectedEntityID);
 
 	static void LoadInspectorFromJSON(std::string const& filename);
 private:
 	static float objAttributeSliderMaxLength;
 	static char textBuffer[MAXTEXTSIZE];
+	static ImVec2 mouseWorldPos;
 };

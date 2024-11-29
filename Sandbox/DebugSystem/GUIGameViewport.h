@@ -131,13 +131,13 @@ private:
 	static ImVec2 currentMouseDragDist;
 	static ImVec2 initialMousePos;
 	static ImVec2 mouseDragDist;
+	static float mouseDragSpeed;
 
 	static float aspectRatioXScale;
 	static float aspectRatioYScale;
 	static float aspectRatioWidth;
 	static float aspectRatioHeight;
 
-	static GLuint pausedTexture;
 	static bool isPaused;
 
 	static int saveCount;
@@ -147,6 +147,11 @@ private:
 	static float fileWindowWidth;
 	static float saveWindowHeight;
 	static float fileWindowHeight;
+	static float slotWindowWidth;
+	static float clearSlotWindowWidth;
+	static float optionsButtonPadding;
+	static float initialZoom;
+	static float mouseWheelScaleFactor;
 
 	static bool isSelectingSaveFile;
 	static bool isSelectingFile;
