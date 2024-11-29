@@ -8,6 +8,7 @@ struct BehaviourComponent
 	bool exit;
 	bool collectable;
 	bool button;
+	bool platform;
 
-	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false) {}
+	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false), platform(false) {}
 };

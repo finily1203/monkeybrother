@@ -34,6 +34,7 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
 #include "BackgroundComponent.h"
+#include "PlatformBehaviour.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -923,6 +924,10 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		else if (logicSystemRef->hasBehaviour<MouseBehaviour>(entity)) {
 			behaviour.button = true;
 			entityJSON["behaviour"] = { {"button", behaviour.button} };
+		}
+		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(entity)) {
+			behaviour.platform = true;
+			entityJSON["behaviour"] = { {"platform", behaviour.platform} };
 		}
 	}
 
