@@ -477,7 +477,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
 			currentItem = 5;
 		}
-		else if (ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
 			currentItem = 6;
 		}
 		else {
