@@ -306,6 +306,7 @@ void DebugSystem::cleanup() {
 	systemStartTimes.clear();
 	accumulatedTimes.clear();
 	systems.clear();
+	std::vector<const char*>(systems).swap(systems);
 	systemGameLoopPercent.clear();
 	newEntities.clear();
 

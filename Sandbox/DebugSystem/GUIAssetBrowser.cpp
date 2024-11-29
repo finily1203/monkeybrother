@@ -201,7 +201,10 @@ void AssetBrowser::Update() {
 	}
 }
 
-void AssetBrowser::Cleanup() {}
+void AssetBrowser::Cleanup() {
+	assetNames.clear();
+	std::vector<std::string>(assetNames).swap(assetNames);
+}
 
 std::string AssetBrowser::cutString(const std::string& str, float maxWidth) {
 	const char* strEnd = "...";

@@ -457,6 +457,8 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
+    keyState.clear();
+    mouseButtonState.clear();
     glfwTerminate();
 }
 
