@@ -24,6 +24,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "PhysicsComponent.h"
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
+#include "UIComponent.h"
 
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
@@ -71,6 +72,7 @@ void GraphicSystemECS::update(float dt) {
 		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
 		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+        bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
 
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
@@ -147,8 +149,8 @@ void GraphicSystemECS::update(float dt) {
         else if (isBackground) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
-        else if (ecsCoordinator.getEntityID(entity) == "collectableUI") {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+        else if (isUI) {
+            //transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (GLFWFunctions::collectableCount == 0) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-3"), transform.mdl_xform);

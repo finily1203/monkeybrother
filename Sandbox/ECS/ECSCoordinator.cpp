@@ -32,6 +32,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ExitBehaviour.h"
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
+#include "UIComponent.h"
 
 #include <Windows.h>
 
@@ -161,6 +162,14 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
 
 			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("UI"))
+		{
+			UIComponent UI{};
+			serializer.ReadObject(UI.isUI, entityId, "entities.UI.isUI");
+
+			ecs.addComponent(entityObj, UI);
 		}
 
 		if (entityData.contains("aabb"))
@@ -537,6 +546,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<ExitComponent>();
 	registerComponent<BehaviourComponent>();
 	registerComponent<BackgroundComponent>();
+	registerComponent<UIComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

@@ -223,6 +223,7 @@
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="SystemECS\PlayerBehaviour.h" />
+    <ClInclude Include="Components\UIComponent.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>

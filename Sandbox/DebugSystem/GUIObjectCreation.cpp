@@ -274,10 +274,14 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		BehaviourComponent behaviour{};
 		behaviour.player = true;
 
+		PlayerComponent player{};
+		player.isPlayer = true;
+
 		//ecsCoordinator.addComponent(entityObj, animation);
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, forces);
 		ecsCoordinator.addComponent(entityObj, behaviour);
+		ecsCoordinator.addComponent(entityObj, player);
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 
