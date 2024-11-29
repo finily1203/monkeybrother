@@ -28,7 +28,7 @@ AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textur
 
 AssetsManager::~AssetsManager()
 {
-    ClearAudio();
+    
 }
 
 //leave empty for now
@@ -46,6 +46,10 @@ void AssetsManager::update()
 
 void AssetsManager::cleanup()
 {
+    ClearTextures();
+    ClearShaders();
+    ClearFonts();
+    ClearAudio();
 }
 
 SystemType AssetsManager::getSystem()
