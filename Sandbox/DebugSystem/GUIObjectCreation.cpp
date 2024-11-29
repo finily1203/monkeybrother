@@ -322,12 +322,18 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 	else if (!strcmp(items[itemIndex], "Pump")) {
 		PumpComponent pump{};
 		pump.isPump = true;
-		ecsCoordinator.addComponent(entityObj, pump);
+		pump.pumpForce = 3.0f;
 
 		BehaviourComponent behaviour{};
 		behaviour.pump = true;
 
+		ClosestPlatform closestPlatform{};
+		closestPlatform.isClosest = true;
+
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
+
+		ecsCoordinator.addComponent(entityObj, closestPlatform);
+		ecsCoordinator.addComponent(entityObj, pump);
 		ecsCoordinator.addComponent(entityObj, behaviour);
 
 	}
