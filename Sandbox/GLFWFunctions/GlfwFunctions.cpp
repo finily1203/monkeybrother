@@ -116,7 +116,7 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
 
     // Determine if fullscreen or windowed mode
     GLFWmonitor* monitor = nullptr;
-    if (!fullscreen) {
+    if (isfullscreen) {
         monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
         windowWidth = mode->width;
