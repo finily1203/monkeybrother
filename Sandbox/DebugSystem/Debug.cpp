@@ -300,6 +300,7 @@ void DebugSystem::cleanup() {
 	HierarchyList::Cleanup();
 	Inspector::Cleanup();
 	AssetBrowser::Cleanup();
+	Console::Cleanup();
 
 	// Clear containers
 	systemStartTimes.clear();

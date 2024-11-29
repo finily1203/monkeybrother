@@ -20,6 +20,7 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "GUIConsole.h"
 
 //Variables for Console
+size_t Console::MAX_LOGS;
 std::vector<std::string> Console::items;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
@@ -39,15 +40,61 @@ void Console::Update(const char* title) {
 }
 
 void Console::Cleanup() {
-	if (instance) {
-		delete instance;
-		instance = nullptr;
-	}
+    static bool cleanupPerformed = false;
+    if (cleanupPerformed) {
+        std::cout << "Warning: Cleanup already performed, skipping..." << std::endl;
+        return;
+    }
+
+    std::cout << "\n=== Starting Console Cleanup ===" << std::endl;
+
+    if (instance) {
+        std::cout << "Instance exists, beginning cleanup..." << std::endl;
+
+        if (items.size() > MAX_LOGS) {
+            std::cout << "Warning: Items count (" << items.size()
+                << ") exceeded maximum limit (" << MAX_LOGS << ")" << std::endl;
+        }
+
+        // Debug items vector state
+        std::cout << "Items vector size before cleanup: " << items.size() << std::endl;
+        items.clear();
+        std::cout << "Items vector size after cleanup: " << items.size() << std::endl;
+
+        // Debug currentLog state
+        std::cout << "Current log content: '" << currentLog.str() << "'" << std::endl;
+        currentLog.str("");
+        currentLog.clear();
+        std::cout << "Current log cleared" << std::endl;
+
+        // Save config before deleting instance
+        std::cout << "Saving console config to JSON..." << std::endl;
+        try {
+            instance->SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+            std::cout << "JSON config saved successfully" << std::endl;
+        }
+        catch (const std::exception& e) {
+            std::cout << "Error saving JSON config: " << e.what() << std::endl;
+        }
+
+        // Debug instance deletion
+        std::cout << "Deleting Console instance..." << std::endl;
+        delete instance;
+        instance = nullptr;
+        std::cout << "Instance deleted and nullified" << std::endl;
+
+        cleanupPerformed = true;
+    }
+    else {
+        std::cout << "No Console instance exists, nothing to clean" << std::endl;
+    }
+
+    std::cout << "=== Console Cleanup Complete ===" << std::endl;
 }
 
 Console::~Console() {
-	// Save settings before the object is destroyed
-	SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+    std::cout << "=== Console Destructor Called ===" << std::endl;
+    std::cout << "=== Console Destructor Complete ===" << std::endl;
 }
 
 void Console::DrawImpl(const char* title) {

@@ -150,6 +150,7 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
         else if (entitySig.test(0) && entitySig.count() == 1) {
+            if(ecsCoordinator.getEntityID(entity) != "placeholderentity")
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
     }
