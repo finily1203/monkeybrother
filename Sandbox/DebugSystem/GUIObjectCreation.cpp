@@ -140,7 +140,7 @@ void ObjectCreation::Update() {
 
 	if (ImGui::Button("Create Entity")) {
 
-		for (int i = 0; i < numEntitiesToCreate; i++) {
+		/*for (int i = 0; i < numEntitiesToCreate; i++) {*/
 
 			entityObj = ecsCoordinator.createEntity();
 
@@ -157,9 +157,6 @@ void ObjectCreation::Update() {
 
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
 			DebugSystem::newEntities.push_back(entityObj);
-
-
-		}
 
 
 	}
@@ -248,11 +245,24 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 	}
 	else if (!strcmp(items[itemIndex], "Player")) {
+		PhysicsComponent forces{};
+		forces.mass = 1.0f;
+		forces.gravityScale = { 9.8f, 9.8f };  // Match JSON values
+		forces.jump = 0.0f;
+		forces.dampening = 0.9f;
+		forces.maxVelocity = 200.0f;
+		forces.force.SetDirection({ 0.0f, 0.0f });  // Match JSON
+		forces.force.SetMagnitude(10.0f);
+		forces.maxAccumulatedForce = 40.0f;
+		forces.velocity = { 0.0f, 0.0f };
+		forces.acceleration = { 0.0f, 0.0f };
+		forces.accumulatedForce = { 0.0f, 0.0f };
+		forces.prevForce = 0.0f;
+		forces.targetForce = 0.0f;
 
-		/*AnimationComponent animation{};
-		animation.isAnimated = true;*/
+	
 
-		// Calculate AABB based on transform
+		// Add AABB component like in JSON
 		AABBComponent aabb{};
 		float halfWidth = transform.scale.GetX() / 2.0f;
 		float halfHeight = transform.scale.GetY() / 2.0f;
@@ -260,29 +270,22 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		aabb.right = transform.position.GetX() + halfWidth;
 		aabb.top = transform.position.GetY() + halfHeight;
 		aabb.bottom = transform.position.GetY() - halfHeight;
+		ecsCoordinator.addComponent(entityObj, aabb);
 
-		PhysicsComponent forces{};
-		forces.mass = 1.0f;
-		forces.gravityScale = { 9.8f, 9.8f };
-		forces.jump = 0.0f;
-		forces.dampening = 0.9f;
-		forces.maxVelocity = 200.0f;
-		forces.force.SetDirection({ 0.0f, 0.0f });
-		forces.force.SetMagnitude(10.0f);
-		forces.maxAccumulatedForce = 40.0f;
+		// Add physics component
+		ecsCoordinator.addComponent(entityObj, forces);
 
-		BehaviourComponent behaviour{};
-		behaviour.player = true;
-
+		// Add player component
 		PlayerComponent player{};
 		player.isPlayer = true;
-
-		//ecsCoordinator.addComponent(entityObj, animation);
-		ecsCoordinator.addComponent(entityObj, aabb);
-		ecsCoordinator.addComponent(entityObj, forces);
-		ecsCoordinator.addComponent(entityObj, behaviour);
 		ecsCoordinator.addComponent(entityObj, player);
 
+		// Add behaviour component
+		BehaviourComponent behaviour{};
+		behaviour.player = true;
+		ecsCoordinator.addComponent(entityObj, behaviour);
+
+		// Assign behaviour last, just like in JSON loading
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 
 	}

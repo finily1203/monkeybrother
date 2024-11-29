@@ -530,6 +530,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					case 1:
 						//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
 						physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
+						if(!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
 						break;
@@ -549,6 +550,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						physics.maxVelocity = 200.0f;
 						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
 						physics.maxAccumulatedForce = 40.0f;
+						if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
 						break;

@@ -74,6 +74,8 @@ void GraphicSystemECS::update(float dt) {
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
 
+        auto& behavior = ecsCoordinator.getComponent<BehaviourComponent>(entity);
+
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
         graphicsSystem.Update(dt / 10.0f, (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
@@ -93,7 +95,7 @@ void GraphicSystemECS::update(float dt) {
         if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
             cameraSystem.update();
         }
-        else if (ecsCoordinator.getEntityID(entity) == "player") {
+        else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             cameraSystem.lockToComponent(transform);
             cameraSystem.update();
         }
@@ -111,7 +113,7 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+		else if (GLFWFunctions::debug_flag/* && *//*!ecsCoordinator.hasComponent<FontComponent>(entity)*/ && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
 
@@ -166,10 +168,10 @@ void GraphicSystemECS::update(float dt) {
             }
         }
 
-        else if (entitySig.test(0) && entitySig.count() == 1) {
-            if (ecsCoordinator.getEntityID(entity) == "placeholderentity")
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-            else
+        else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
+            ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+            ecsCoordinator.getEntitySignature(entity).count() == 2) {
+           
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
     }

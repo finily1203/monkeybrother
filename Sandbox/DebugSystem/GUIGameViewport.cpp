@@ -35,6 +35,7 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "ExitBehaviour.h"
 #include "BackgroundComponent.h"
 #include "PlatformBehaviour.h"
+#include "UIComponent.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -407,7 +408,7 @@ void GameViewWindow::Update() {
 		myMath::Vector2D initialCamPos{};
 
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.getEntityID(entity) == "player") {
+			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
 			}
@@ -628,6 +629,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 
+
 	TransformComponent transform;
 	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
@@ -635,67 +637,84 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 	
 	ecsCoordinator.addComponent(dropEntity, transform);
 
+	BehaviourComponent behaviour;
+	behaviour.none = true;
+	ecsCoordinator.addComponent(dropEntity, behaviour);
+
 	JSONSerializer serializer;
 
 	// Add the appropriate components based on the specifier
 	switch (specifier) {
 	case TEXTURE:
-		if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
+		//if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
 			if (strcmp(assetName, "goldfish") == 0) {
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
 
-				BehaviourComponent behaviour;
-				serializer.ReadObject(behaviour.enemy, assetName, "entities.behaviour.enemy");
+				PhysicsComponent physics;
+				//behaviour.enemy = true;
 
 				ecsCoordinator.addComponent(dropEntity, enemy);
-				ecsCoordinator.addComponent(dropEntity, behaviour);
+				ecsCoordinator.addComponent(dropEntity, physics);
+				//ecsCoordinator.addComponent(dropEntity, behaviour);
+			}
+			if (strcmp(assetName, "mossball") == 0) {
+				PlayerComponent player;
+				serializer.ReadObject(player.isPlayer, assetName, "entities.player.isPlayer");
+				ecsCoordinator.addComponent(dropEntity, player);
+
+				PhysicsComponent physics;
+				//behaviour.enemy = true;
+
+				//ecsCoordinator.addComponent(dropEntity, enemy);
+				ecsCoordinator.addComponent(dropEntity, physics);
+				//ecsCoordinator.addComponent(dropEntity, behaviour);
 			}
 
-			AABBComponent aabb;
-			serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
-			serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
-			serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
-			serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
-			ecsCoordinator.addComponent(dropEntity, aabb);
+		//	AABBComponent aabb;
+		//	serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
+		//	serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
+		//	serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
+		//	serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
+		//	ecsCoordinator.addComponent(dropEntity, aabb);
 
-			PhysicsComponent physics;
+		//	PhysicsComponent physics;
 
-			myMath::Vector2D direction = physics.force.GetDirection();
-			float magnitude = physics.force.GetMagnitude();
+		//	myMath::Vector2D direction = physics.force.GetDirection();
+		//	float magnitude = physics.force.GetMagnitude();
 
-			serializer.ReadObject(physics.mass,assetName, "entities.forces.mass");
-			serializer.ReadObject(physics.gravityScale,assetName, "entities.forces.gravityScale");
-			serializer.ReadObject(physics.jump,assetName, "entities.forces.jump");
-			serializer.ReadObject(physics.dampening,assetName, "entities.forces.dampening");
-			serializer.ReadObject(physics.velocity,	assetName, "entities.forces.velocity");
-			serializer.ReadObject(physics.maxVelocity,assetName, "entities.forces.maxVelocity");
-			serializer.ReadObject(physics.acceleration,	assetName, "entities.forces.acceleration");
-			serializer.ReadObject(direction,assetName, "entities.forces.force.direction");
-			serializer.ReadObject(magnitude,assetName, "entities.forces.force.magnitude");
-			serializer.ReadObject(physics.accumulatedForce,assetName, "entities.forces.accumulatedForce");
-			serializer.ReadObject(physics.maxAccumulatedForce,assetName, "entities.forces.maxAccumulatedForce");
-			serializer.ReadObject(physics.prevForce,assetName, "entities.forces.prevForces");
-			serializer.ReadObject(physics.targetForce,assetName, "entities.forces.targetForce");
+		//	serializer.ReadObject(physics.mass,assetName, "entities.forces.mass");
+		//	serializer.ReadObject(physics.gravityScale,assetName, "entities.forces.gravityScale");
+		//	serializer.ReadObject(physics.jump,assetName, "entities.forces.jump");
+		//	serializer.ReadObject(physics.dampening,assetName, "entities.forces.dampening");
+		//	serializer.ReadObject(physics.velocity,	assetName, "entities.forces.velocity");
+		//	serializer.ReadObject(physics.maxVelocity,assetName, "entities.forces.maxVelocity");
+		//	serializer.ReadObject(physics.acceleration,	assetName, "entities.forces.acceleration");
+		//	serializer.ReadObject(direction,assetName, "entities.forces.force.direction");
+		//	serializer.ReadObject(magnitude,assetName, "entities.forces.force.magnitude");
+		//	serializer.ReadObject(physics.accumulatedForce,assetName, "entities.forces.accumulatedForce");
+		//	serializer.ReadObject(physics.maxAccumulatedForce,assetName, "entities.forces.maxAccumulatedForce");
+		//	serializer.ReadObject(physics.prevForce,assetName, "entities.forces.prevForces");
+		//	serializer.ReadObject(physics.targetForce,assetName, "entities.forces.targetForce");
 
-			physics.force.SetDirection(direction);
-			physics.force.SetMagnitude(magnitude);
+		//	physics.force.SetDirection(direction);
+		//	physics.force.SetMagnitude(magnitude);
 
-			ecsCoordinator.addComponent(dropEntity, physics);
-		}
-		else if (strcmp(assetName, "woodtile") == 0) {
-			AABBComponent aabb{};
-			serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
-			serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
-			serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
-			serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
+		//	ecsCoordinator.addComponent(dropEntity, physics);
+		//}
+		//else if (strcmp(assetName, "woodtile") == 0) {
+		//	AABBComponent aabb{};
+		//	serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
+		//	serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
+		//	serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
+		//	serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
 
-			ClosestPlatform closestPlatform{};
-			serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
+		//	ClosestPlatform closestPlatform{};
+		//	serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
 
-			ecsCoordinator.addComponent(dropEntity, aabb);
-			ecsCoordinator.addComponent(dropEntity, closestPlatform);
-		}
+		//	ecsCoordinator.addComponent(dropEntity, aabb);
+		//	ecsCoordinator.addComponent(dropEntity, closestPlatform);
+		//}
 		break;
 	case FONT:
 		FontComponent font;
@@ -893,6 +912,13 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		collectable.isCollectable = true;
 		entityJSON["collectable"] = { {"isCollectable", collectable.isCollectable} };
 	}
+
+	if (ecs.hasComponent<UIComponent>(entity)) {
+		auto& UI = ecs.getComponent<UIComponent>(entity);
+		UI.isUI = true;
+		entityJSON["UI"] = { {"isUI", UI.isUI} };
+	}
+
 	//std::cout << "Has Behaviour:" << ecs.hasComponent<BehaviourComponent>(entity) << std::endl;
 	if (ecs.hasComponent<BehaviourComponent>(entity)) {
 		auto& behaviour = ecs.getComponent<BehaviourComponent>(entity);
@@ -963,7 +989,7 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
 	float playerRotation = 0.0f;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.getEntityID(entity) == "player") {
+		if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
 			break;
 		}
@@ -1033,7 +1059,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
 	float playerRotation = 0.0f;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.getEntityID(entity) == "player") {
+		if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
 			break;
 		}

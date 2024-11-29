@@ -394,24 +394,38 @@ void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D norma
     playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
 }
 
+int count = 0;
+Entity playerEntity = {};/* = ecsCoordinator.getFirstEntity();*/
+Entity closestPlatformEntity = {};
+
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt)
 {
+    std::cout << "Physics System Update" << std::endl;
     (void)dt;
     //let it be the first entity
-    Entity playerEntity;/* = ecsCoordinator.getFirstEntity();*/
-    Entity closestPlatformEntity;
+    
     //Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
-
+    count = 0;
     for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+
+        count++;
+       
         if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+            
             playerEntity = entity;
-            closestPlatformEntity = entity;
+            
             closestPlatformEntity = FindClosestPlatform(playerEntity);
 
-            HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+           
         }
     }
+
+    if(count > 2)
+    HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+
+    std::cout << "count " << count << std::endl;
+
     //Entity closestPlatformEntity;
     //playerEntity = ecsCoordinator.hasComponent<PlayerComponent>(playerEntity);
 

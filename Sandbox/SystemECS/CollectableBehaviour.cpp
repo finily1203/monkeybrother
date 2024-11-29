@@ -5,14 +5,13 @@
 
 void CollectableBehaviour::update(Entity entity) {
 	//get player entity based on ifPlayer component
-	Entity playerEntity;
+	
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 	auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
 
 
-	for (auto& findPlayer : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.hasComponent<PlayerComponent>(findPlayer)) {
-			playerEntity = findPlayer;
+	for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
+		if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
 
 			//get the position of the player and the collectable
 			auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);

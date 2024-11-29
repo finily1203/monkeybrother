@@ -33,6 +33,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
 #include "UIComponent.h"
+#include "PlatformBehaviour.h"
 
 #include <Windows.h>
 
@@ -82,9 +83,9 @@ Entity ECSCoordinator::getFirstEntity() {
 Entity ECSCoordinator::createEntity()
 {
 	Entity newEntity = entityManager->createEntity();
-	if (!firstEntity) {
+	/*if (!firstEntity) {
 		firstEntity = newEntity;
-	}
+	}*/
 	return newEntity;
 }
 
@@ -339,6 +340,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			if (entityData["behaviour"].contains("button")) {
 				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+			if (entityData["behaviour"].contains("platform")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.platform");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
 			}
 
 			/*serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
