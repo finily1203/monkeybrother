@@ -379,12 +379,15 @@ void GameViewWindow::Update() {
 	ImGui::SameLine(0, 5);
 
 	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
-		if (GLFWFunctions::allow_camera_movement) {
-			GLFWFunctions::allow_camera_movement = false;
+		if (clickedScreenPan) {
+			// Clicking "UnPan" - enable camera movement
+			GLFWFunctions::allow_camera_movement = true;
 		}
-		else {
-			GLFWFunctions::allow_camera_movement = true;   // Add the else case
+		else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
+			// Clicking "Pan" - disable camera movement
+			GLFWFunctions::allow_camera_movement = true;
 		}
+		
 		clickedScreenPan = !clickedScreenPan;
 	}
 
@@ -860,7 +863,11 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<PumpComponent>(entity)) {
 		auto& pump = ecs.getComponent<PumpComponent>(entity);
 		pump.isPump = true;
-		entityJSON["pump"] = { {"isPump", pump.isPump} };
+		pump.pumpForce = 3.0f;
+		entityJSON["pump"] = {
+			{"isPump", pump.isPump},
+			{"pumpForce", pump.pumpForce}
+		};
 	}
 
 	if (ecs.hasComponent<ExitComponent>(entity)) {

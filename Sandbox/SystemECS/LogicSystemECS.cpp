@@ -412,8 +412,10 @@ void MouseBehaviour::update(Entity entity) {
 
 		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
 		float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
-		if (!GLFWFunctions::debug_flag)
-		onMouseHover(static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+		if (!GLFWFunctions::debug_flag) {
+			onMouseHover(static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+		}
+		
 	}
 
 	(void)entity;
