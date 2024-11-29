@@ -39,14 +39,6 @@ std::string FilePathManager::GetExecutablePath()
 // this function retrieves the windowsConfig JSON file
 std::string FilePathManager::GetWindowConfigJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the windowsConfig JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\windowConfig.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "windowConfig.json";
 
@@ -58,14 +50,6 @@ std::string FilePathManager::GetWindowConfigJSONPath()
 // this function retrieves the entites JSON file
 std::string FilePathManager::GetEntitiesJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the entities JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\entities.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "entities.json";
 
@@ -77,14 +61,6 @@ std::string FilePathManager::GetEntitiesJSONPath()
 // this function retrieves the IMGUI console JSON file
 std::string FilePathManager::GetIMGUIConsoleJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI console JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiConsole.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiConsole.json";
 
@@ -96,14 +72,6 @@ std::string FilePathManager::GetIMGUIConsoleJSONPath()
 // this function retrieves the IMGUI viewport JSON file
 std::string FilePathManager::GetIMGUIViewportJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI viewport JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiViewport.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiViewport.json";
 
@@ -115,14 +83,6 @@ std::string FilePathManager::GetIMGUIViewportJSONPath()
 // this function retrieves the IMGUI Creation JSON file
 std::string FilePathManager::GetIMGUICreationJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI debug JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiCreation.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiCreation.json";
 
@@ -133,11 +93,6 @@ std::string FilePathManager::GetIMGUICreationJSONPath()
 
 // this function retrieves the IMGUI Layout JSON file
 std::string FilePathManager::GetIMGUILayoutPath() {
-
-    //std::string execPath = GetExecutablePath();
-    //std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
-    //return execDir + "\\Sandbox\\assets\\imgui\\imgui_layout.ini";
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "imgui" / "imgui_layout.ini";
 
@@ -149,14 +104,6 @@ std::string FilePathManager::GetIMGUILayoutPath() {
 // this function retrieves the IMGUI debug JSON file
 std::string FilePathManager::GetIMGUIDebugJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI debug JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiDebug.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiDebug.json";
 
@@ -168,14 +115,6 @@ std::string FilePathManager::GetIMGUIDebugJSONPath()
 // this function retrieves the IMGUI Hierarchy JSON file
 std::string FilePathManager::GetIMGUIHierarchyJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI debug JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiHierarchy.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiHierarchy.json";
 
@@ -186,14 +125,6 @@ std::string FilePathManager::GetIMGUIHierarchyJSONPath()
 
 std::string FilePathManager::GetIMGUIInspectorJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI debug JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\imguiInspector.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "imguiInspector.json";
 
@@ -205,14 +136,6 @@ std::string FilePathManager::GetIMGUIInspectorJSONPath()
 // this function retrieves the audio assets JSON file
 std::string FilePathManager::GetAssetsJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the audio assets JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\assets.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "assets.json";
 
@@ -224,14 +147,6 @@ std::string FilePathManager::GetAssetsJSONPath()
 // this function retrieves the font file for IMGUI
 std::string FilePathManager::GetIMGUIFontPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the IMGUI font file path
-    //std::string fontFilePath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\fonts\\liberation-mono.ttf";
-
-    //return fontFilePath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "fonts" / "liberation-mono.ttf";
 
@@ -243,14 +158,6 @@ std::string FilePathManager::GetIMGUIFontPath()
 // this function retrieves the physics JSON file
 std::string FilePathManager::GetPhysicsPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the physics JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\physicsConfig.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "physicsConfig.json";
 
@@ -262,14 +169,6 @@ std::string FilePathManager::GetPhysicsPath()
 // this function retrieves the save JSON file
 std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the save JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\save" + std::to_string(saveCount) + ".json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::string saveFile = "save" + std::to_string(saveCount) + ".json";
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / saveFile;
@@ -282,14 +181,6 @@ std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 // this function retrieves the scene JSON file
 std::string FilePathManager::GetSceneJSONPath()
 {
-    // retrieves the executable path
-    //std::string execPath = GetExecutablePath();
-
-    // retrieves the scene JSON file path
-    //std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\scene.json";
-
-    //return jsonPath;
-
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "scene.json";
 

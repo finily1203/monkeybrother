@@ -59,6 +59,7 @@ void Console::Cleanup() {
         // Debug items vector state
         std::cout << "Items vector size before cleanup: " << items.size() << std::endl;
         items.clear();
+        std::vector<std::string>().swap(items);
         std::cout << "Items vector size after cleanup: " << items.size() << std::endl;
 
         // Debug currentLog state

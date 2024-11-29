@@ -189,6 +189,7 @@ void GraphicsSystem::Render(float deltaTime) {
 
 void GraphicsSystem::cleanup() {
     ReleaseResources();
+    delete m_AnimationData.release();
 }
 
 void GraphicsSystem::ReleaseResources() {

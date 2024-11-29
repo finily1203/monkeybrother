@@ -121,6 +121,8 @@ void Engine::cleanupSystem() {
 			}
 		}
 	}
+	
+	std::vector<GameSystems*>().swap(m_systems);
 }
 
 Engine::~Engine() {}

@@ -29,7 +29,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 void LogicSystemECS::initialise() {}
 
-void LogicSystemECS::cleanup() {}
+void LogicSystemECS::cleanup() {
+	behaviours.clear();
+}
 
 //void LogicSystemECS::update(float dt) {
 //
