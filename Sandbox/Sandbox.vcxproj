@@ -156,6 +156,7 @@
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
+    <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
     <ClCompile Include="SystemECS\PlayerBehaviour.cpp" />
     <ClCompile Include="WindowSystem\WindowSystem.cpp" />
   </ItemGroup>
@@ -222,6 +223,7 @@
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
+    <ClInclude Include="SystemECS\PlatformBehaviour.h" />
     <ClInclude Include="SystemECS\PlayerBehaviour.h" />
     <ClInclude Include="Components\UIComponent.h" />
     <ClInclude Include="WindowSystem\WindowSystem.h" />

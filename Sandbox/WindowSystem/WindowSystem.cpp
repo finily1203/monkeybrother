@@ -111,7 +111,7 @@ void WindowSystem::initialise() {
 	int windowWidth = windowConfigJSON["width"].get<int>();
 	int windowHeight = windowConfigJSON["height"].get<int>();
 	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
-	bool startFullscreen = windowConfigJSON.value("fullscreen", true); // Default to fullscreen
+	bool startFullscreen = windowConfigJSON["fullscreen"].get<bool>();
 
 	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle, startFullscreen)) {
 		std::cout << "Failed to initialise GLFW" << std::endl;

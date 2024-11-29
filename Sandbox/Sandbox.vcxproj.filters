@@ -47,6 +47,7 @@
     <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
     <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
     <ClCompile Include="SystemECS\PlayerBehaviour.cpp" />
+    <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="Components\BehaviourComponent.h" />
     <ClInclude Include="Components\BackgroundComponent.h" />
     <ClInclude Include="Components\UIComponent.h" />
+    <ClInclude Include="SystemECS\PlatformBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

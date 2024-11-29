@@ -25,6 +25,7 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIConsole.h"
 #include "Debug.h"
 #include "GlobalCoordinator.h"
+#include "GUIInspector.h"
 #include "BehaviourComponent.h"
 #include "LogicSystemECS.h"
 #include "PlayerBehaviour.h"
@@ -62,6 +63,7 @@ bool GameViewWindow::clickedScreenPan = false;
 bool GameViewWindow::isDragging = false;
 ImVec2 GameViewWindow::initialMousePos;
 ImVec2 GameViewWindow::mouseDragDist;
+float GameViewWindow::mouseDragSpeed;
 ImVec2 GameViewWindow::accumulatedMouseDragDist;
 ImVec2 GameViewWindow::currentMouseDragDist;
 
@@ -79,9 +81,14 @@ int GameViewWindow::saveLimit;
 float GameViewWindow::lastPosX;
 float GameViewWindow::saveWindowWidth;
 float GameViewWindow::fileWindowWidth;
+float GameViewWindow::slotWindowWidth;
+float GameViewWindow::clearSlotWindowWidth;
 float GameViewWindow::saveWindowHeight;
 float GameViewWindow::fileWindowHeight;
+float GameViewWindow::optionsButtonPadding;
 int GameViewWindow::scene;
+float GameViewWindow::initialZoom;
+float GameViewWindow::mouseWheelScaleFactor;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
@@ -118,14 +125,14 @@ void GameViewWindow::Update() {
 
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
-		if (ImGui::Button("Slot 1", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 1", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 1", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 1", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 1;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -140,14 +147,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 2", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 2", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 2", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 2", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 2;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -162,14 +169,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 3", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 3", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 3", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 3", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 3;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -184,14 +191,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 4", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 4", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 4", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 4", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 4;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -206,14 +213,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 5", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 5", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 5", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 5", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 5;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -359,7 +366,7 @@ void GameViewWindow::Update() {
 		ImGui::EndPopup();
 	}
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
@@ -370,13 +377,13 @@ void GameViewWindow::Update() {
 
 	ImGui::PopStyleVar();
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	if (ImGui::Button(clickedZoom ? "UnZoom" : "Zoom")) {
 		clickedZoom = !clickedZoom;
 	}
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
 		if (clickedScreenPan) {
@@ -392,7 +399,7 @@ void GameViewWindow::Update() {
 	}
 
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 
 	if (ImGui::Button("Reset Perspective")) {
@@ -406,7 +413,6 @@ void GameViewWindow::Update() {
 		}
 
 		cameraSystem.setCameraPosition(initialCamPos);
-		float initialZoom = 1.0f;
 		// Reset camera zoom to default value
 		cameraSystem.setCameraZoom(initialZoom);
 	}
@@ -423,7 +429,7 @@ void GameViewWindow::Update() {
 
 	if (insideViewport && clickedZoom) {
 		
-		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * 0.1f);
+		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * mouseWheelScaleFactor);
 		
 	}
 
@@ -469,11 +475,6 @@ void GameViewWindow::Cleanup() {
 		glDeleteTextures(1, &viewportTexture);
 		viewportTexture = 0;
 	}
-
-	if (pausedTexture != 0) {
-		glDeleteTextures(1, &pausedTexture);
-		pausedTexture = 0;
-	}
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
@@ -490,8 +491,6 @@ void GameViewWindow::SetupViewportTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-//Capture rendered game scene
-GLuint GameViewWindow::pausedTexture = 0;
 
 void GameViewWindow::CaptureMainWindow() {
 
@@ -575,10 +574,9 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 		currentMouseDragDist = { initialMousePos.x - globalMousePos.x, initialMousePos.y - globalMousePos.y };
 
 		// Move camera position
-		float dragSpeed = 1.5f;
 		myMath::Vector2D camPos = cameraSystem.getCameraPosition();
-		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * dragSpeed);
-		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * dragSpeed);
+		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * mouseDragSpeed);
+		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * mouseDragSpeed);
 		cameraSystem.setCameraPosition(camPos);
 
 		mouseDragDist = currentMouseDragDist;
@@ -627,8 +625,10 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
 	Entity dropEntity = ecsCoordinator.createEntity();
 
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
 	TransformComponent transform;
-	transform.position = { 300.0f, 300.0f };
+	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
 	transform.orientation = { 0.0f, 0.0f };
 	
@@ -643,7 +643,12 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 			if (strcmp(assetName, "goldfish") == 0) {
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
+
+				BehaviourComponent behaviour;
+				serializer.ReadObject(behaviour.enemy, assetName, "entities.behaviour.enemy");
+
 				ecsCoordinator.addComponent(dropEntity, enemy);
+				ecsCoordinator.addComponent(dropEntity, behaviour);
 			}
 
 			AABBComponent aabb;
@@ -1125,6 +1130,7 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
 	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
+	serializer.ReadFloat(mouseDragSpeed, "GUIViewport.mouseDragSpeed");
 
 	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
 	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
@@ -1134,6 +1140,12 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(fileWindowWidth, "GUIViewport.fileWindowWidth");
 	serializer.ReadFloat(saveWindowHeight, "GUIViewport.saveWindowHeight");
 	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
+	serializer.ReadFloat(slotWindowWidth, "GUIViewport.slotWindowWidth");
+	serializer.ReadFloat(clearSlotWindowWidth, "GUIViewport.clearSlotWindowWidth");
+	serializer.ReadFloat(optionsButtonPadding, "GUIViewport.optionsButtonPadding");
+
+	serializer.ReadFloat(mouseWheelScaleFactor, "GUIViewport.mouseWheelScaleFactor");
+	serializer.ReadFloat(initialZoom, "GUIViewport.initialZoom");
 	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
 
 }
