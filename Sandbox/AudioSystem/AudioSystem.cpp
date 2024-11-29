@@ -139,7 +139,7 @@ void AudioSystem::update() {
     }
 
     if (GLFWFunctions::collectAudio) {
-        playSoundEffect("bubbleButton");
+        playSoundEffect("Collection.wav");
         GLFWFunctions::collectAudio = false;
     }
 
