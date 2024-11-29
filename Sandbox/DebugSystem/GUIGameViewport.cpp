@@ -879,7 +879,13 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<ButtonComponent>(entity)) {
 		auto& button = ecs.getComponent<ButtonComponent>(entity);
 		button.isButton = true;
-		entityJSON["button"] = { {"isButton", button.isButton} };
+		entityJSON["button"] = nlohmann::ordered_json{
+			{"hoveredScale", {
+				{"x", button.hoveredScale.GetX()},
+				{"y", button.hoveredScale.GetY()}
+			}},
+			{"isButton", button.isButton}
+		};
 	}
 
 	if (ecs.hasComponent<CollectableComponent>(entity)) {

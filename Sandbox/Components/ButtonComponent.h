@@ -10,10 +10,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 							100%
 *//*___________________________________________________________________________-*/
 #pragma once
+#include "vector2D.h"
 
 struct ButtonComponent
 {
+	myMath::Vector2D originalScale;
+	myMath::Vector2D hoveredScale;
 	bool isButton;
 
-	ButtonComponent() : isButton(false) {}
+	ButtonComponent() : originalScale({ 0.f, 0.f }), hoveredScale({ 0.f, 0.f }), isButton(false) {}
 };
