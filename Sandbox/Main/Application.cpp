@@ -24,7 +24,7 @@ File Contributions: Joel Chu (50%)
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		_crtBreakAlloc = 160;
+		_crtBreakAlloc = 588259;
 	}
 };
 
@@ -36,7 +36,7 @@ namespace monkeybrother {
 
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetBreakAlloc(281756);
+	//_CrtSetBreakAlloc(281756);
 
 
 	try {

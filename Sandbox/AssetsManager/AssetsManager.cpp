@@ -50,6 +50,9 @@ void AssetsManager::cleanup()
     ClearShaders();
     ClearFonts();
     ClearAudio();
+
+    m_AssetList.clear();
+	std::vector<std::string>().swap(m_AssetList);
 }
 
 SystemType AssetsManager::getSystem()
@@ -133,6 +136,7 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
     auto iterator = m_Textures.find(texName);
     if (iterator != m_Textures.end()) {
 		glDeleteTextures(1, &iterator->second);
+        delete &iterator->second;
 		m_Textures.erase(iterator);
         std::cout << "Texture unloaded successfully!" << std::endl;
 	}
@@ -144,6 +148,7 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
 void AssetsManager::ClearTextures() {
     for (auto& texture : m_Textures) {
 		glDeleteTextures(1, &texture.second);
+        
 	}
 	m_Textures.clear();
 	std::cout << "All textures cleared!" << std::endl;
@@ -216,6 +221,7 @@ Shader* AssetsManager::GetShader(const std::string& name) const {
 void AssetsManager::UnloadShader(const std::string& name) {
     auto iterator = m_Shaders.find(name);
     if (iterator != m_Shaders.end()) {
+        delete& iterator->second;
 		m_Shaders.erase(iterator);
 		std::cout << "Shader unloaded successfully!" << std::endl;
 	}
@@ -430,6 +436,7 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
         for (auto& character : iterator->second) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
+        delete& iterator->second;
 		m_Fonts.erase(iterator);
 		std::cout << "Font unloaded successfully!" << std::endl;
 	}
@@ -444,6 +451,7 @@ void AssetsManager::ClearFonts() {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
 	}
+    m_FontPaths.clear();
 	m_Fonts.clear();
 	std::cout << "All fonts cleared!" << std::endl;
 }
