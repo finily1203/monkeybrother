@@ -316,6 +316,8 @@ void DebugSystem::cleanup() {
 	std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
 	newEntities.clear();
 	std::vector<Entity>(newEntities).swap(newEntities);
+	iniPath.clear();
+	std::string().swap(iniPath);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
