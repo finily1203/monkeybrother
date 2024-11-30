@@ -109,20 +109,20 @@ void AudioSystem::update() {
             GLFWFunctions::audioNext = false;
         }
 
-        if (GLFWFunctions::keyState[Key::COMMA]) {
+        if ((*GLFWFunctions::keyState)[Key::COMMA]) {
             volume -= 0.1f;
             if (volume < 0.0f) {
                 volume = 0.0f;
             }
-            GLFWFunctions::keyState[Key::COMMA] = false;
+            (*GLFWFunctions::keyState)[Key::COMMA] = false;
             std::cout << volume << std::endl;
         }
-        else if (GLFWFunctions::keyState[Key::PERIOD]) {
+        else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
             volume += 0.1f;
             if (volume > 1.0f) {
                 volume = 1.0f;
             }
-            GLFWFunctions::keyState[Key::PERIOD] = false;
+            (*GLFWFunctions::keyState)[Key::PERIOD] = false;
             std::cout << volume << std::endl;
         }
 
@@ -143,14 +143,14 @@ void AudioSystem::update() {
         GLFWFunctions::collectAudio = false;
     }
 
-    if (GLFWFunctions::keyState[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
+    if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
         playSoundEffect("bubbleButton");
-        GLFWFunctions::keyState[Key::NUM_9] = false;
+        (*GLFWFunctions::keyState)[Key::NUM_9] = false;
     }
 
-    if (GLFWFunctions::keyState[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
+    if ((*GLFWFunctions::keyState)[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
         playSoundEffect("bubbleSingle");
-        GLFWFunctions::keyState[Key::NUM_0] = false;
+        (*GLFWFunctions::keyState)[Key::NUM_0] = false;
     }
 
     assetsManager.GetAudioSystem()->update();

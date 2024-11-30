@@ -119,7 +119,7 @@ struct GLFWFunctions {
 	static float delta_time;
 
 
-	static GLboolean debug_flag;
+	static bool debug_flag;
 	static GLboolean isGuiOpen;
 	static bool allow_camera_movement;
 	static GLboolean audioPaused;
@@ -148,8 +148,8 @@ struct GLFWFunctions {
 	static bool firstCollision;
 
 
-	static std::unordered_map<Key, bool> keyState;
-	static std::unordered_map<MouseButton, bool> mouseButtonState;
+	static std::unordered_map<Key, bool>* keyState;
+	static std::unordered_map<MouseButton, bool>* mouseButtonState;
 };
 
 #endif

@@ -23,12 +23,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include FT_FREETYPE_H
 
 FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatrix(1.0f) {
-    if (isInitialized) return;
+   if (isInitialized) return;
 }
 
 // Destructor
 FontSystem::~FontSystem() {
-   
+
 }
 
 
@@ -111,14 +111,14 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     }
 
     if (fontLoaded) {
-        Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
+        (*Fonts)[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
     }
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << Fonts[fontPath].size() << std::endl;
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << (*Fonts)[fontPath].size() << std::endl;
 }
 
 // Render text on the screen using the specified font
@@ -128,8 +128,8 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
         return;
     }
 
-    auto it = assetsManager.m_Fonts.find(fontId);
-    if (it == assetsManager.m_Fonts.end()) {
+    auto it = assetsManager.m_Fonts->find(fontId);
+    if (it == assetsManager.m_Fonts->end()) {
 		std::cerr << "ERROR: Font not loaded: " << fontId << std::endl;
 		return;
 	}
@@ -269,7 +269,7 @@ void FontSystem::cleanup() {
     glDeleteBuffers(1, &VBO);
     //textShader.reset(); 
 
-    assetsManager.ClearFonts();
+    //assetsManager.ClearFonts();
 
     isInitialized = false;
 

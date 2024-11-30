@@ -29,7 +29,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 void LogicSystemECS::initialise() {}
 
-void LogicSystemECS::cleanup() {}
+void LogicSystemECS::cleanup() {
+	behaviours.clear();
+}
 
 //void LogicSystemECS::update(float dt) {
 //
@@ -412,10 +414,11 @@ void MouseBehaviour::update(Entity entity) {
 
 		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
 		float cursorYCentered = (windowHeight / 2.f) - static_cast<float>(mouseY);
-		if (!GLFWFunctions::debug_flag) {
+
+		if (!GLFWFunctions::debug_flag)
+		{
 			onMouseHover(static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
 		}
-		
 	}
 
 	(void)entity;
@@ -423,7 +426,9 @@ void MouseBehaviour::update(Entity entity) {
 
 void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mouseY)
 {
-	for (auto& entity : ecsCoordinator.getAllLiveEntities())
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+
+	for (auto& entity : allEntities)
 	{
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
@@ -439,22 +444,25 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 
 void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 {
-	for (auto& entity : ecsCoordinator.getAllLiveEntities())
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+
+	for (auto& entity : allEntities)
 	{
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
 			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
-				transform.scale.SetX(240.f);
-				transform.scale.SetY(120.f);
+				transform.scale.SetX(button.hoveredScale.GetX());
+				transform.scale.SetY(button.hoveredScale.GetY());
 			}
 
 			else
 			{
-				transform.scale.SetX(200.f);
-				transform.scale.SetY(100.f);
+				transform.scale.SetX(button.originalScale.GetX());
+				transform.scale.SetY(button.originalScale.GetY());
 			}
 		}
 	}
@@ -474,6 +482,7 @@ bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformCo
 void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 {
 	std::string entityId = ecsCoordinator.getEntityID(entity);
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
 
 	if (entityId == "quitButton")
 	{
@@ -482,7 +491,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "retryButton")
 	{
-		for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+		for (auto currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);
 		}

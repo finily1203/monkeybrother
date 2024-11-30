@@ -259,7 +259,7 @@ void GameViewWindow::Update() {
 			}
 
 			// Clear newEntities since they're already saved
-			DebugSystem::newEntities.clear();
+			DebugSystem::newEntities->clear();
 
 			// Save to file
 			std::ofstream outputFile(saveFile);
@@ -465,11 +465,6 @@ void GameViewWindow::Update() {
 }
 //Clean up resources
 void GameViewWindow::Cleanup() {
-	// First destroy all entities
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		ecsCoordinator.destroyEntity(entity);
-	}
-
 	// Then cleanup viewport texture
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
@@ -884,7 +879,13 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<ButtonComponent>(entity)) {
 		auto& button = ecs.getComponent<ButtonComponent>(entity);
 		button.isButton = true;
-		entityJSON["button"] = { {"isButton", button.isButton} };
+		entityJSON["button"] = nlohmann::ordered_json{
+			{"hoveredScale", {
+				{"x", button.hoveredScale.GetX()},
+				{"y", button.hoveredScale.GetY()}
+			}},
+			{"isButton", button.isButton}
+		};
 	}
 
 	if (ecs.hasComponent<CollectableComponent>(entity)) {

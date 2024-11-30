@@ -128,10 +128,12 @@ void GraphicSystemECS::update(float dt) {
         else if(isPlatform){
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
-        else if (isButton) {
+        else if (isButton) 
+        {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            if (ecsCoordinator.getEntityID(entity) == "quitButton") {
+            if (ecsCoordinator.getEntityID(entity) == "quitButton") 
+            {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
             }
 

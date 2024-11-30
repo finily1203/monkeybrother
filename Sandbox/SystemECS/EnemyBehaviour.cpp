@@ -26,20 +26,20 @@ void EnemyBehaviour::update(Entity entity) {
 
 	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
-	if (GLFWFunctions::keyState[Key::LEFT]) {
+	if ((*GLFWFunctions::keyState)[Key::LEFT]) {
 		transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
 	}
-	else if (GLFWFunctions::keyState[Key::RIGHT]) {
+	else if ((*GLFWFunctions::keyState)[Key::RIGHT]) {
 		transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
 	}
 
-	if (GLFWFunctions::keyState[Key::UP]) {
+	if ((*GLFWFunctions::keyState)[Key::UP]) {
 		if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
 			transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
 		}
 	}
-	else if (GLFWFunctions::keyState[Key::DOWN]) {
+	else if ((*GLFWFunctions::keyState)[Key::DOWN]) {
 		if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
 			transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);

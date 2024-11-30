@@ -32,6 +32,8 @@ File Contributions: Lew Zong Han Owen (90%)
 class Console {
 public:
 
+	Console();
+
 	static void Update(const char* title);
 
 	static void Cleanup();
@@ -51,13 +53,13 @@ public:
 
 	Console& operator<<(std::ostream& (*manip)(std::ostream&)) { //Handle std::endl
 		if (manip == static_cast<std::ostream & (*)(std::ostream&)>(std::endl)) {
-			items.push_back(currentLog.str());
+			items->push_back(currentLog.str());
 			currentLog.str("");
 			currentLog.clear();
 
 			// Check if we've exceeded the maximum number of logs
-			if (items.size() > MAX_LOGS && autoDelete) {
-				items.erase(items.begin(), items.begin() + (items.size() - MAX_LOGS));
+			if (items->size() > MAX_LOGS && autoDelete) {
+				items->erase(items->begin(), items->begin() + (items->size() - MAX_LOGS));
 			}
 		}
 		return *this;
@@ -66,26 +68,14 @@ public:
 	void LoadConsoleConfigFromJSON(std::string const& filename); //Load console configuration from JSON file
 	void SaveConsoleConfigToJSON(std::string const& filename);  //Saves console configuration to a JSON file
 
-	void DebugPrintState() {
-		std::cout << "\n=== Console Current State ===" << std::endl;
-		std::cout << "Instance exists: " << (instance != nullptr ? "Yes" : "No") << std::endl;
-		std::cout << "Items count: " << items.size() << std::endl;
-		std::cout << "Auto-scroll enabled: " << (autoScroll ? "Yes" : "No") << std::endl;
-		std::cout << "Auto-delete enabled: " << (autoDelete ? "Yes" : "No") << std::endl;
-		std::cout << "Last scroll position: " << lastScrollY << std::endl;
-		std::cout << "Current log buffer: '" << currentLog.str() << "'" << std::endl;
-		std::cout << "===========================" << std::endl;
-	}
-
 private:
 	static size_t MAX_LOGS;
 	static Console* instance;
-	static std::vector<std::string> items;
+	static std::vector<std::string>* items;
 	static bool autoScroll;
 	static bool autoDelete;
 	static float lastScrollY;
 	static std::ostringstream currentLog;
 
-	Console() { LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath()); }
 	void DrawImpl(const char* title); //ImGui console GUI format
 };

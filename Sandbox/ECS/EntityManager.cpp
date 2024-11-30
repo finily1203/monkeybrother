@@ -151,6 +151,7 @@ std::unordered_map<Entity, std::string> EntityManager::getEntityMap() const
 void EntityManager::cleanup() {
 	availableEnt = std::queue<Entity>();
 	liveEntCount = 0;
+	entityIds.clear();
 }
 
 

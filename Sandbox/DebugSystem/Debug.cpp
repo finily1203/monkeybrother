@@ -51,29 +51,9 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "GUIInspector.h"
 #include <cmath>
 
-//Variables for DebugSystem
-float DebugSystem::fontSize;
-ImVec4 DebugSystem::clearColor;
-float DebugSystem::textBorderSize;
-float DebugSystem::initialZoom;
-float DebugSystem::displayBuffer;
-bool DebugSystem::isZooming;
-bool DebugSystem::isPanning;
-float DebugSystem::paddingPV;
-double DebugSystem::ecsTotal;
-bool DebugSystem::foundECS;
-int DebugSystem::systemCount;
+
 ImVec2 DebugSystem::mouseWorldPos;
-std::string DebugSystem::iniPath;
-std::unordered_map<std::string, double> DebugSystem::systemStartTimes;
-std::unordered_map<std::string, double> DebugSystem::accumulatedTimes;
-double DebugSystem::loopStartTime;
-double DebugSystem::totalLoopTime;
-double DebugSystem::lastUpdateTime;
-std::vector<const char*> DebugSystem::systems;
-std::vector<double> DebugSystem::systemGameLoopPercent;
-bool DebugSystem::firstFrame;
-std::vector<Entity> DebugSystem::newEntities;
+std::vector<Entity>* DebugSystem::newEntities;
 
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
@@ -89,10 +69,21 @@ void DebugSystem::initialise() {
 	io = &ImGui::GetIO();
 
 	// Set up ImGui layout file
-	iniPath = FilePathManager::GetExecutablePath();
-	iniPath = iniPath.substr(0, iniPath.find_last_of("\\/")) + "\\Sandbox\\assets\\imgui\\imgui_layout.ini";
-	std::filesystem::create_directories(iniPath.substr(0, iniPath.find_last_of("\\/")));
-	io->IniFilename = iniPath.c_str();
+	std::filesystem::path execPath = FilePathManager::GetExecutablePath();
+	std::filesystem::path iniFilePath = execPath.parent_path() / "Sandbox" / "assets" / "imgui" / "imgui_layout.ini";
+
+	// Create directories (will create nested directories if they don't exist)
+	std::filesystem::create_directories(iniFilePath.parent_path());
+
+	// Convert to C-string for ImGui
+	std::string pathString = iniFilePath.string();  // Convert path to std::string
+	iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
+
+	// Use std::copy to copy the string safely
+	std::copy(pathString.begin(), pathString.end(), iniPath);
+	iniPath[pathString.size()] = '\0';  // Ensure null terminator at the end
+
+	io->IniFilename = iniPath;
 
 	// Configure ImGui
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -114,6 +105,30 @@ void DebugSystem::initialise() {
 		ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
 		ImGui_ImplOpenGL3_Init("#version 130");
 	}
+
+	if (!systemStartTimes) {
+		systemStartTimes = new std::unordered_map<std::string, double>();
+	}
+	if (!accumulatedTimes) {
+		accumulatedTimes = new std::unordered_map<std::string, double>();
+	}
+	systemStartTimes->clear();
+	accumulatedTimes->clear();
+
+	if (!systems) {
+		systems = new std::vector<const char*>();
+	}
+	systems->clear();
+
+	if (!systemGameLoopPercent) {
+		systemGameLoopPercent = new std::vector<double>();
+	}
+	systemGameLoopPercent->clear();
+
+	if (!newEntities) {
+		newEntities = new std::vector<Entity>();
+	}
+	newEntities->clear();
 
 	// Initialize subsystems
 	GameViewWindow::Initialise();
@@ -183,15 +198,15 @@ void DebugSystem::update() {
 			const char* systemName;
 
 			//Show non-ECS systems
-			for (size_t i = 0; i < systems.size(); i++) {
-				if (i >= systemGameLoopPercent.size()) break; // Safety check
+			for (size_t i = 0; i < (*systems).size(); i++) {
+				if (i >= (*systemGameLoopPercent).size()) break; // Safety check
 
-				systemName = systems[i];
+				systemName = (*systems)[i];
 
 				// Skip ECS systems
 				if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 					foundECS = true;
-					ecsTotal += systemGameLoopPercent[i];
+					ecsTotal += (*systemGameLoopPercent)[i];
 					continue;
 				}
 
@@ -199,7 +214,7 @@ void DebugSystem::update() {
 				ImGui::TableNextColumn();
 				ImGui::Text("%s", systemName);
 				ImGui::TableNextColumn();
-				ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+				ImGui::Text("%.2f%%", (*systemGameLoopPercent)[i]);
 			}
 
 			// Show ECS systems
@@ -208,13 +223,13 @@ void DebugSystem::update() {
 				ImGui::TableNextColumn();
 
 				if (ImGui::TreeNode("ECS Systems")) {
-					for (size_t i = 0; i < systems.size(); i++) {
-						if (i >= systemGameLoopPercent.size()) break; // Safety check
+					for (size_t i = 0; i < (*systems).size(); i++) {
+						if (i >= (*systemGameLoopPercent).size()) break; // Safety check
 
-						systemName = systems[i];
+						systemName = (*systems)[i];
 						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 							ImGui::Text("%s:", systemName);
-							float normalizedPercentage = static_cast<float>((systemGameLoopPercent[i] / ecsTotal) * FULL_PERCENTAGE);
+							float normalizedPercentage = static_cast<float>(((*systemGameLoopPercent)[i] / ecsTotal) * FULL_PERCENTAGE);
 							ImGui::SameLine(paddingPV);
 							ImGui::Text("%6.2f%%", normalizedPercentage);
 						}
@@ -303,15 +318,26 @@ void DebugSystem::cleanup() {
 	Console::Cleanup();
 
 	// Clear containers
-	systemStartTimes.clear();
-	accumulatedTimes.clear();
-	systems.clear();
-	systemGameLoopPercent.clear();
-	newEntities.clear();
+	delete systemStartTimes;
+	systemStartTimes = nullptr;
+	delete accumulatedTimes;
+	accumulatedTimes = nullptr;
+	delete systems;
+	systems = nullptr;
+	delete systemGameLoopPercent;
+	systemGameLoopPercent = nullptr;
+	delete newEntities;
+	newEntities = nullptr;
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+
+	// Free dynamically allocated memory for iniPath
+	if (iniPath != nullptr) {
+		delete[] iniPath;  // Deallocate memory for iniPath
+		iniPath = nullptr;  // Nullify the pointer
+	}
 }
 //For performance viewer
 SystemType DebugSystem::getSystem() {
@@ -322,7 +348,7 @@ SystemType DebugSystem::getSystem() {
 void DebugSystem::StartLoop() {
 	if (glfwGetTime() - lastUpdateTime >= displayBuffer) {
 		// Reset accumulated times every second
-		accumulatedTimes.clear();
+		accumulatedTimes->clear();
 		firstFrame = true;
 	}
 	loopStartTime = glfwGetTime();
@@ -339,19 +365,19 @@ void DebugSystem::EndLoop() {
 
 //Capture system's start time loop
 void DebugSystem::StartSystemTiming(const char* systemName) {
-	if (std::find(systems.begin(), systems.end(), systemName) == systems.end()) {
-		systems.push_back(systemName);
-		systemCount = static_cast<int>(systems.size());
+	if (std::find((*systems).begin(), (*systems).end(), systemName) == (*systems).end()) {
+		(*systems).push_back(systemName);
+		systemCount = static_cast<int>((*systems).size());
 	}
-	systemStartTimes[systemName] = glfwGetTime();
+	(*systemStartTimes)[systemName] = glfwGetTime();
 }
 
 //Capture system's end time loop
 void DebugSystem::EndSystemTiming(const char* systemName) {
-	auto it = systemStartTimes.find(systemName);
-	if (it != systemStartTimes.end()) {
+	auto it = systemStartTimes->find(systemName);
+	if (it != systemStartTimes->end()) {
 		double duration = glfwGetTime() - it->second;
-		accumulatedTimes[systemName] += duration;  // Accumulate time
+		(*accumulatedTimes)[systemName] += duration;  // Accumulate time
 	}
 }
 
@@ -362,23 +388,23 @@ void DebugSystem::UpdateSystemTimes() {
 
 		// Calculate total time spent in all systems
 		double totalSystemTime = 0.0;
-		for (const auto& pair : accumulatedTimes) {
+		for (const auto& pair : *accumulatedTimes) {
 			totalSystemTime += pair.second;
 		}
 
 		// Update percentages
-		systemGameLoopPercent.clear();
-		systemGameLoopPercent.resize(systems.size());
+		(*systemGameLoopPercent).clear();
+		(*systemGameLoopPercent).resize((*systems).size());
 
-		for (size_t i = 0; i < systems.size(); i++) {
-			const char* systemName = systems[i];
-			auto it = accumulatedTimes.find(systemName);
-			if (it != accumulatedTimes.end()) {
+		for (size_t i = 0; i < (*systems).size(); i++) {
+			const char* systemName = (*systems)[i];
+			auto it = accumulatedTimes->find(systemName);
+			if (it != accumulatedTimes->end()) {
 				double percentage = (it->second / totalSystemTime) * FULL_PERCENTAGE;
-				systemGameLoopPercent[i] = percentage;
+				(*systemGameLoopPercent)[i] = percentage;
 			}
 			else {
-				systemGameLoopPercent[i] = 0.0;
+				(*systemGameLoopPercent)[i] = 0.0;
 			}
 		}
 
@@ -403,9 +429,6 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	// read all of the data from the JSON object, assign every read
 	// data to every elements that needs to be initialized
 	serializer.ReadFloat(displayBuffer, "Debug.displayBuffer");
-	serializer.ReadFloat(initialZoom, "Debug.initialZoom");
-	serializer.ReadBool(isZooming, "Debug.isZooming");
-	serializer.ReadBool(isPanning, "Debug.isPanning");
 	serializer.ReadBool(firstFrame, "Debug.firstFrame");
 	serializer.ReadBool(foundECS, "Debug.foundECS");
 

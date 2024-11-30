@@ -68,8 +68,8 @@ public:
 	std::string GetFontPath(const std::string& fontName) const;
 	void UnloadFont(const std::string& fontPath);
 	void ClearFonts();
-	std::map<std::string, std::string> m_FontPaths;
-	std::map<std::string, std::map<char, Character>> m_Fonts;
+	std::map<std::string, std::string>* m_FontPaths;
+	std::map<std::string, std::map<char, Character>>* m_Fonts;
 
 	//For Drag and Drop files from file explorer
 	void handleDropFile(std::string filePath);
@@ -93,11 +93,11 @@ public:
 private:
 	FMOD::System* audSystem;
 
-	std::map<std::string, GLuint> m_Textures;
-	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
-	std::map<std::string, FMOD::Sound*> m_Audio;
+	std::map<std::string, GLuint>* m_Textures;
+	std::map<std::string, std::unique_ptr<Shader>>* m_Shaders;
+	std::map<std::string, FMOD::Sound*>* m_Audio;
 
-	std::vector<std::string> m_AssetList;
+	std::vector<std::string> *m_AssetList;
 
 	int m_textureWidth, m_textureHeight, nrChannels;
 

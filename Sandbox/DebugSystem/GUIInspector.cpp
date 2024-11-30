@@ -11,13 +11,17 @@
 #include "PlatformBehaviour.h"
 #include <memory>
 
+std::vector<std::pair<int, std::string>>* Inspector::overlappingEntities;
 float Inspector::objAttributeSliderMaxLength;
 char Inspector::textBuffer[MAXTEXTSIZE];
 ImVec2 Inspector::mouseWorldPos;
 glm::mat4 projectionMatrix(1.0f);
 int currentItem = 0;
 
+
+
 void Inspector::Initialise() {
+	overlappingEntities = new std::vector<std::pair<int, std::string>>();
 	LoadInspectorFromJSON(FilePathManager::GetIMGUIInspectorJSONPath());
 }
 
@@ -121,8 +125,7 @@ void Inspector::Update() {
 
 	Console::GetLog() << mouseWorldPos.x << "," << mouseWorldPos.y << std::endl;
 
-	std::string selEntityID; // Store selected entity ID instead of Entity handle
-	static std::vector<std::pair<int, std::string>> overlappingEntities;
+	//std::string selEntityID; // Store selected entity ID instead of Entity handle
 
 	static bool isSelectingEntity = false;
 	static bool isInitialClickAfterSelection = true;
@@ -139,27 +142,27 @@ void Inspector::Update() {
 		selectedEntityID = -1;
 		isSelectingEntity = true;
 		isInitialClickAfterSelection = true;
-		overlappingEntities.clear();
+		overlappingEntities->clear();
 
 		// Get all entities and check for collision
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 			if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
 				float distSq;
 				if (isMouseOverEntity(entity, distSq)) {
-					overlappingEntities.push_back({ entity, ecsCoordinator.getEntityID(entity) });
+					overlappingEntities->push_back({ entity, ecsCoordinator.getEntityID(entity) });
 				}
 			}
 		}
 
 		// Sort overlapping entities by distance if needed
-		if (overlappingEntities.size() > 1) {
-			std::sort(overlappingEntities.begin(), overlappingEntities.end(),
+		if (overlappingEntities->size() > 1) {
+			std::sort(overlappingEntities->begin(), overlappingEntities->end(),
 				[](const auto& a, const auto& b) {
 					return a.second < b.second;
 				});
 		}
 
-		if (!overlappingEntities.empty()) {
+		if (!overlappingEntities->empty()) {
 			ImGui::OpenPopup("Select Entity");
 		}
 		else {
@@ -177,7 +180,7 @@ void Inspector::Update() {
 		ImGui::Text("Select Entity:");
 		ImGui::Separator();
 
-		for (const auto& [entity, name] : overlappingEntities) {
+		for (const auto& [entity, name] : *overlappingEntities) {
 			if (ImGui::MenuItem(name.c_str())) {
 				selectedEntityID = entity;
 				draggedEntityID = entity;
@@ -310,6 +313,7 @@ void Inspector::Update() {
 	}
 
 	RenderInspectorWindow(ecsCoordinator, selectedEntityID);
+	
 }
 
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
@@ -620,5 +624,7 @@ void Inspector::LoadInspectorFromJSON(std::string const& filename)
 }
 
 void Inspector::Cleanup() {
-
+	memset(textBuffer, 0, MAXTEXTSIZE);
+	delete overlappingEntities;
+	overlappingEntities = nullptr;
 }

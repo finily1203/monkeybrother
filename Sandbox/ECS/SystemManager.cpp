@@ -86,5 +86,7 @@ void SystemManager::update() {
 
 void SystemManager::cleanup() {
 	Systems.clear();
+	std::unordered_map<std::string, std::shared_ptr<System>>().swap(Systems);
 	systemSignatures.clear();
+	std::unordered_map<std::string, ComponentSig>().swap(systemSignatures);
 }
