@@ -58,7 +58,7 @@ public:
 private:
     void renderText(const std::string& fontId, const std::string& text, float x, float y, float scale, myMath::Vector3D color, float maxWidth, myMath::Matrix3x3 viewMat);
     glm::mat4 projectionMatrix;
-    std::map<char, Character> Characters; // Map of characters
+    std::map<char, Character>* Characters; // Map of characters
     unsigned int VAO, VBO;                 // Vertex Array Object and Vertex Buffer Object
     std::unique_ptr<Shader> textShader;         // Shader for rendering text
     bool isCleanedUp = false;
