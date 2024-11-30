@@ -27,7 +27,7 @@ File Contributions: Joel Chu (50%)
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		_crtBreakAlloc = 178;
+		_crtBreakAlloc = 191;
 	}
 };
 

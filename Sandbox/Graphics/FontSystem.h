@@ -51,7 +51,7 @@ public:
 
     void draw(const std::string& text, const std::string& fontId, float x, float y, float scale, myMath::Vector3D color, float maxWidth,  myMath::Matrix3x3 viewMat);
     bool isInitialized = false;
-    std::map<std::string, std::map<char, Character>> Fonts;
+    std::map<std::string, std::map<char, Character>>* Fonts;
 
 
 
