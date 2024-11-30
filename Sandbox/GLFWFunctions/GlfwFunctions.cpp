@@ -96,8 +96,8 @@ bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
 
-std::unordered_map<Key, bool> GLFWFunctions::keyState;
-std::unordered_map<MouseButton, bool> GLFWFunctions::mouseButtonState;
+std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
+std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
 
 
 // Initialize the window
@@ -111,6 +111,9 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    if(!keyState)
+		keyState = new std::unordered_map<Key, bool>();
 
     fullscreen = isfullscreen;
 
@@ -244,69 +247,69 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
 
     if (action == GLFW_PRESS) {
-        keyState[mappedKey] = true;
+        (*keyState)[mappedKey] = true;
     }
     else if (action == GLFW_RELEASE) {
-        keyState[mappedKey] = false;
+        (*keyState)[mappedKey] = false;
     }
     else if (action == GLFW_REPEAT) {
-        keyState[mappedKey] = true;
+        (*keyState)[mappedKey] = true;
     }
     if (!GameViewWindow::getPaused()) {
-        if (keyState[Key::NUM_2])
+        if ((*keyState)[Key::NUM_2])
             allow_camera_movement = !allow_camera_movement;
 
-        if (keyState[Key::NUM_1]) {
+        if ((*keyState)[Key::NUM_1]) {
             debug_flag = ~debug_flag;
             isGuiOpen = ~isGuiOpen;
         }
     }
 
 
-    if (keyState[Key::P])
+    if ((*keyState)[Key::P])
         audioPaused = ~audioPaused;
 
-    if (keyState[Key::S])
+    if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;
 
-    if (keyState[Key::N]) {
+    if ((*keyState)[Key::N]) {
         audioNext = ~audioNext;
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }
 
-    if (keyState[Key::ESCAPE]) {
+    if ((*keyState)[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     if (action == GLFW_PRESS) {
-        keyState[static_cast<Key>(key)] = true;
+        (*keyState)[static_cast<Key>(key)] = true;
 
         // Cheat codes
-        if (keyState[Key::G] && keyState[Key::O] && keyState[Key::D]) {
+        if ((*keyState)[Key::G] && (*keyState)[Key::O] && (*keyState)[Key::D]) {
             godMode = ~godMode;
             std::cout << "God Mode: " << (godMode ? "ON" : "OFF") << std::endl;
         }
 
-        if (keyState[Key::N] && keyState[Key::E] && keyState[Key::X] && keyState[Key::T]) {
+        if ((*keyState)[Key::N] && (*keyState)[Key::E] && (*keyState)[Key::X] && (*keyState)[Key::T]) {
             skipToNextLevel = true;
             std::cout << "Skip to Next Level" << std::endl;
         }
 
-        if (keyState[Key::E] && keyState[Key::N] && keyState[Key::D]) {
+        if ((*keyState)[Key::E] && (*keyState)[Key::N] && (*keyState)[Key::D]) {
             skipToEnd = true;
             std::cout << "Skip to End" << std::endl;
         }
 
-        if (keyState[Key::W] && keyState[Key::I] && keyState[Key::N]) {
+        if ((*keyState)[Key::W] && (*keyState)[Key::I] && (*keyState)[Key::N]) {
             instantWin = true;
             std::cout << "Instant Win" << std::endl;
         }
 
-        if (keyState[Key::L] && keyState[Key::O] && keyState[Key::S] && keyState[Key::E]) {
+        if ((*keyState)[Key::L] && (*keyState)[Key::O] && (*keyState)[Key::S] && (*keyState)[Key::E]) {
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
         }
 
-        if (keyState[Key::F] && action == GLFW_PRESS) {
+        if ((*keyState)[Key::F] && action == GLFW_PRESS) {
             fullscreen = !fullscreen;
             GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
@@ -347,7 +350,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     }
     else if (action == GLFW_RELEASE) {
-        keyState[static_cast<Key>(key)] = false;
+        (*keyState)[static_cast<Key>(key)] = false;
     }
 }
 
@@ -363,7 +366,10 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
     }
 
     if (action == GLFW_PRESS) {
-        mouseButtonState[mappedButton] = true;
+        if (!mouseButtonState) {
+            mouseButtonState = new std::unordered_map<MouseButton, bool>();
+        }
+        mouseButtonState->operator[](mappedButton) = true;
 
         if (mappedButton == MouseButton::left)
         {
@@ -383,7 +389,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
         }
     }
     else if (action == GLFW_RELEASE) {
-        mouseButtonState[mappedButton] = false;
+        mouseButtonState->operator[](mappedButton) = false;
     }
 
     (void)window;
@@ -457,10 +463,19 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
-    keyState.clear();
-    std::unordered_map<Key, bool>().swap(keyState);
-    mouseButtonState.clear();
-    std::unordered_map<MouseButton, bool>().swap(mouseButtonState);
+    //keyState.clear();
+    //std::unordered_map<Key, bool>().swap(keyState);
+    //mouseButtonState.clear();
+    //std::unordered_map<MouseButton, bool>().swap(mouseButtonState);
+    if (keyState) {
+        delete keyState;
+        keyState = nullptr;
+    }
+	if (mouseButtonState) {
+		delete mouseButtonState;
+		mouseButtonState = nullptr;
+	}
+
     glfwTerminate();
 }
 

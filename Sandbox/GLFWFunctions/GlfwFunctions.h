@@ -148,8 +148,8 @@ struct GLFWFunctions {
 	static bool firstCollision;
 
 
-	static std::unordered_map<Key, bool> keyState;
-	static std::unordered_map<MouseButton, bool> mouseButtonState;
+	static std::unordered_map<Key, bool>* keyState;
+	static std::unordered_map<MouseButton, bool>* mouseButtonState;
 };
 
 #endif

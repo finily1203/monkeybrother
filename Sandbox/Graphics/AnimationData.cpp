@@ -60,11 +60,11 @@ void AnimationData::Update(float deltaTime) {
     if (timeAccumulator >= frameDuration) {
         timeAccumulator -= frameDuration;
 
-        if (GLFWFunctions::keyState[Key::J]) {
+        if ((*GLFWFunctions::keyState)[Key::J]) {
             currentFrame = 24 + (currentFrame + 1) % 24;
             lastDirection = Direction::Left;
         }
-        else if (GLFWFunctions::keyState[Key::L]) {
+        else if ((*GLFWFunctions::keyState)[Key::L]) {
             currentFrame = (currentFrame + 1) % 24;
             lastDirection = Direction::Right;
         }
