@@ -28,7 +28,7 @@ FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatri
 
 // Destructor
 FontSystem::~FontSystem() {
-   
+
 }
 
 
@@ -111,14 +111,14 @@ void FontSystem::loadFont(const std::string& fontPath, unsigned int fontSize) {
     }
 
     if (fontLoaded) {
-        Fonts[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
+        (*Fonts)[fontPath] = std::move(tempCharacters); // Move the local map into the Fonts map
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
     }
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << Fonts[fontPath].size() << std::endl;
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << (*Fonts)[fontPath].size() << std::endl;
 }
 
 // Render text on the screen using the specified font

@@ -22,12 +22,12 @@ File Contributions: Joel Chu (50%)
 #include "GlobalCoordinator.h"
 #include "Crashlog.h"
 
-#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
-#pragma init_seg(compiler)//global objects in this file get constructed very early on
+//#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
+//#pragma init_seg(compiler)//global objects in this file get constructed very early on
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 172;
+		//_crtBreakAlloc = 185;
 	}
 };
 
