@@ -2,10 +2,6 @@
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
-#include "EnemyBehaviour.h"  
-#include "GlobalCoordinator.h"  
-#include "PhyColliSystemECS.h"  
-
 EnemyBehaviour::EnemyBehaviour() {
 	currentState = PATROL;
 
@@ -70,15 +66,15 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    auto& waypoints = getWaypoints();
-    int& currentWaypointIndex = getCurrentWaypointIndex();
+    auto& wayPoints = getWaypoints();
+    int& currentWayPointIndex = getCurrentWaypointIndex();
 
     // Set the current waypoint target
-    myMath::Vector2D target = waypoints[currentWaypointIndex];
+    myMath::Vector2D target = wayPoints[currentWayPointIndex];
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
-    float length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+    float length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     // If close enough to the waypoint, move to the next one
     const float waypointThreshold = 1.0f;
@@ -94,14 +90,14 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         physics.velocity.SetY(0.f);
 
         // Move to the next waypoint
-        currentWaypointIndex++;
-        if (currentWaypointIndex >= waypoints.size()) {
-            currentWaypointIndex = 0; // Loop back to the first waypoint
+        currentWayPointIndex++;
+        if (currentWayPointIndex >= wayPoints.size()) {
+            currentWayPointIndex = 0; // Loop back to the first waypoint
         }
 
-        target = waypoints[currentWaypointIndex];
+        target = wayPoints[currentWayPointIndex];
         direction = target - transform.position;
-        length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+        length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     }
 

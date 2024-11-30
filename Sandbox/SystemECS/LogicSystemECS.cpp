@@ -218,6 +218,8 @@ void LogicSystemECS::update(float dt) {
 		}
 	}
 
+	(void)dt;
+
 	//Supposed to be this, but somewhere it did not work
 	//for (auto& [entity, behaviour] : behaviours) {
 	//	behaviour->update(entity, dt);
