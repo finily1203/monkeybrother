@@ -161,7 +161,7 @@ void AudioSystem::update() {
         (*GLFWFunctions::keyState)[Key::NUM_0] = false;
     }
 
-    if (GLFWFunctions::keyState[Key::COMMA]) {
+    if ((*GLFWFunctions::keyState)[Key::COMMA]) {
         genVol -= 0.1f;
         bgmVol -= 0.005f;
 		sfxVol -= 0.1f;
@@ -178,10 +178,10 @@ void AudioSystem::update() {
 		soundEffectChannel->setVolume(sfxVol);
 		assetBrowserChannel->setVolume(sfxVol);
         
-        GLFWFunctions::keyState[Key::COMMA] = false;
+        (*GLFWFunctions::keyState)[Key::COMMA] = false;
 
     }
-    else if (GLFWFunctions::keyState[Key::PERIOD]) {
+    else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
         genVol += 0.1f;
         bgmVol += 0.005f;
         sfxVol += 0.1f;
@@ -198,7 +198,7 @@ void AudioSystem::update() {
         soundEffectChannel->setVolume(sfxVol);
         assetBrowserChannel->setVolume(sfxVol);
  
-        GLFWFunctions::keyState[Key::PERIOD] = false;
+        (*GLFWFunctions::keyState)[Key::PERIOD] = false;
     }
 
     assetsManager.GetAudioSystem()->update();

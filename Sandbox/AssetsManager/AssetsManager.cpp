@@ -301,8 +301,8 @@ void AssetsManager::LoadAudio(const std::string& songName, const std::string& fi
 
     std::cout << songName << std::endl;
 
-    m_Audio[songName] = audioSong;
-    m_AssetList.push_back(songName);
+    (*m_Audio)[songName] = audioSong;
+    m_AssetList->push_back(songName);
 }
 
 FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
