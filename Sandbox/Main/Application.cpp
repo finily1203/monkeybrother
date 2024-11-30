@@ -8,6 +8,10 @@
 File Contributions: Lew Zong Han Owen (50%)
 File Contributions: Joel Chu (50%)
 /*_______________________________________________________________________________________________________________*/
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 #include "EngineDefinitions.h"
 #include <GL/glew.h> //To include glew, must include it before glfw3.h
 #include <iostream>
@@ -18,13 +22,12 @@ File Contributions: Joel Chu (50%)
 #include "GlobalCoordinator.h"
 #include "Crashlog.h"
 
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
+#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
+#pragma init_seg(compiler)//global objects in this file get constructed very early on
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 365602;
+		_crtBreakAlloc = 178;
 	}
 };
 
@@ -35,8 +38,9 @@ namespace monkeybrother {
 }
 
 int main() {
+
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(410518);
+	//_CrtSetBreakAlloc(162);
 
 
 	try {
@@ -45,12 +49,14 @@ int main() {
 		Engine* engine = new Engine();
 
 		WindowSystem* windowSystem = new WindowSystem();
+		//OutputDebugStringA("Before window system\n");
 		engine->addSystem(windowSystem);
-
+		//OutputDebugStringA("Before assets manager\n");
 		engine->addSystem(&assetsManager);
-
-		//AudioSystem* audioSystem = new AudioSystem();
+		OutputDebugStringA("Before audio system initializations\n");
+		OutputDebugStringA("About to add audio system\n");
 		engine->addSystem(&audioSystem);
+		OutputDebugStringA("After audio system add\n");
 
 		engine->addSystem(&ecsCoordinator);
 
@@ -101,6 +107,6 @@ int main() {
 		CrashLog::LogDebugMessage("End Log");
 		
 	}
-	_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();  // you already have this
 	return 0;
 }

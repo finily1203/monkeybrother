@@ -58,8 +58,9 @@ GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
     m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
-    vps.push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
-    glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
+    vps = new std::vector<GLViewport>();
+    vps->push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
+    glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
 
 }
 
@@ -175,11 +176,11 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     // update viewport settings in vps only if window's dimension change
     if (w != old_w || h != old_h)
     {
-        vps[0] = { 0, 0, w , h };
+        (*vps)[0] = { 0, 0, w , h };
         old_w = w;
         old_h = h;
     }
-	glViewport(vps[0].x, vps[0].y, vps[0].width, vps[0].height);
+	glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
 }
 
 void GraphicsSystem::Render(float deltaTime) {
@@ -190,6 +191,8 @@ void GraphicsSystem::Render(float deltaTime) {
 void GraphicsSystem::cleanup() {
     ReleaseResources();
     delete m_AnimationData.release();
+    delete vps;
+    vps = nullptr;
 }
 
 void GraphicsSystem::ReleaseResources() {

@@ -97,7 +97,7 @@ private:
 	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
 	std::map<std::string, FMOD::Sound*> m_Audio;
 
-	std::vector<std::string> m_AssetList;
+	std::vector<std::string> *m_AssetList;
 
 	int m_textureWidth, m_textureHeight, nrChannels;
 

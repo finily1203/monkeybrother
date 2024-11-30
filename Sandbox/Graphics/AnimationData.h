@@ -37,7 +37,7 @@ public:
     void UpdateUVCoordinates();
 	// Get current UVs
     inline const std::vector<glm::vec2>& GetCurrentUVs() const {
-        return currentUVs;
+        return *currentUVs;
     }
 	// Get current frame
     inline int GetCurrentFrame() const {
@@ -77,7 +77,7 @@ private:
     float frameWidth;
     float frameHeight;
     Direction lastDirection;
-    std::vector<glm::vec2> currentUVs;
+    std::vector<glm::vec2> *currentUVs;
     std::map<int, std::vector<std::string>> frameEvents;
 
 };

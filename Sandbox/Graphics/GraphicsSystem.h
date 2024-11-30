@@ -68,7 +68,7 @@ public:
         GLsizei width, height;
     };
 
-    std::vector<GLViewport> vps; // container for viewports
+    std::vector<GLViewport>* vps; // container for viewports
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 	void drawDebugCircle(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 

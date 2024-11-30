@@ -24,7 +24,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false) {}
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false) {
+    m_AssetList = new std::vector<std::string>();
+}
 
 AssetsManager::~AssetsManager()
 {
@@ -51,8 +53,10 @@ void AssetsManager::cleanup()
     ClearFonts();
     ClearAudio();
 
-    m_AssetList.clear();
-    std::vector<std::string>().swap(m_AssetList);
+    delete audSystem;
+    audSystem = nullptr;
+    delete m_AssetList;
+    m_AssetList = nullptr;
 }
 
 SystemType AssetsManager::getSystem()
@@ -111,7 +115,7 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
         stbi_image_free(data);
 
         m_Textures[texName] = texID;
-        m_AssetList.push_back(texName);
+        m_AssetList->push_back(texName);
         std::cout << "texture loaded successfully!" << std::endl;
     }
     else {
@@ -199,7 +203,7 @@ void AssetsManager::LoadShader(const std::string& name, const std::string& fileP
     }
     else {
         m_Shaders[name] = std::move(shader);
-        m_AssetList.push_back(name);
+        m_AssetList->push_back(name);
         std::cout << "Shader loaded successfully!" << std::endl;
     }
 
@@ -278,7 +282,7 @@ void AssetsManager::LoadAudio(const std::string& songName, const std::string& fi
     }
 
     m_Audio[songName] = audioSong;
-    m_AssetList.push_back(songName);
+    m_AssetList->push_back(songName);
 }
 
 FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
@@ -395,7 +399,7 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
        
         m_Fonts[fontName] = std::move(tempCharacters);
         m_FontPaths[fontName] = fontPath;
-        m_AssetList.push_back(fontName);
+        m_AssetList->push_back(fontName);
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
@@ -458,7 +462,7 @@ void AssetsManager::handleDropFile(std::string filePath) {
     std::filesystem::path path(filePath);
 
     //check if file already exists
-    if (std::find(m_AssetList.begin(), m_AssetList.end(), path.filename().string()) != m_AssetList.end()) {
+    if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
 		//if it exists, delete the current one within the program
         if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
 			UnloadTexture(path.filename().string());
@@ -515,7 +519,7 @@ bool AssetsManager::checkIfAssetListChanged() const {
 }
 
 std::vector<std::string> AssetsManager::getAssetList() const {
-	return m_AssetList;
+	return *m_AssetList;
 }
 
 

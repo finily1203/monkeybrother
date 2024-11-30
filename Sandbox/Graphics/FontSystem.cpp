@@ -23,7 +23,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include FT_FREETYPE_H
 
 FontSystem::FontSystem() : VAO(0), VBO(0), isInitialized(false), projectionMatrix(1.0f) {
-    if (isInitialized) return;
+   if (isInitialized) return;
 }
 
 // Destructor

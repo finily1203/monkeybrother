@@ -29,6 +29,9 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     : totalFrames(totalFrames), frameDuration(frameDuration), columns(columns), rows(rows),
     currentFrame(0), timeAccumulator(0.0f), uvDirty(true),
     speedMultiplier(1.0f), looping(true), lastDirection(Direction::Right) {
+
+    currentUVs = new std::vector<glm::vec2>();
+
     // Validate inputs
     if (totalFrames <= 0 || columns <= 0 || rows <= 0) {
         throw std::invalid_argument("Total frames, columns, and rows must be greater than zero.");
@@ -39,13 +42,14 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     frameHeight = 1.0f / rows;
 
 
-    currentUVs.resize(4);
+    currentUVs->resize(4);
     UpdateUVCoordinates();
 }
 
 AnimationData::~AnimationData() {
-    currentUVs.clear();
-    std::vector<glm::vec2>().swap(currentUVs);
+    delete currentUVs;
+    currentUVs = nullptr;
+ 
     frameEvents.clear();
     std::map<int, std::vector<std::string>>().swap(frameEvents);
 }
@@ -95,10 +99,10 @@ void AnimationData::UpdateUVCoordinates() {
     float vMin = 1.0f - frameHeight * ((currentFrame / columns) + 1);
     float vMax = vMin + frameHeight;
     // Define UV coordinates for a quad (4 vertices)
-    currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
-    currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right
-    currentUVs[2] = glm::vec2(uMin, vMin);  // Bottom left
-    currentUVs[3] = glm::vec2(uMin, vMax);  // Top left
+    (*currentUVs)[0] = glm::vec2(uMax, vMax);  // Top right
+    (*currentUVs)[1] = glm::vec2(uMax, vMin);  // Bottom right
+    (*currentUVs)[2] = glm::vec2(uMin, vMin);  // Bottom left
+    (*currentUVs)[3] = glm::vec2(uMin, vMax);  // Top left
 }
 
 // Reset animation function implementation
