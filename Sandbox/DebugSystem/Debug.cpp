@@ -65,8 +65,8 @@ bool DebugSystem::foundECS;
 int DebugSystem::systemCount;
 ImVec2 DebugSystem::mouseWorldPos;
 char* DebugSystem::iniPath;
-std::unordered_map<std::string, double> DebugSystem::systemStartTimes;
-std::unordered_map<std::string, double> DebugSystem::accumulatedTimes;
+std::unordered_map<std::string, double>* DebugSystem::systemStartTimes;
+std::unordered_map<std::string, double>* DebugSystem::accumulatedTimes;
 double DebugSystem::loopStartTime;
 double DebugSystem::totalLoopTime;
 double DebugSystem::lastUpdateTime;
@@ -125,6 +125,15 @@ void DebugSystem::initialise() {
 		ImGui_ImplGlfw_InitForOpenGL(GLFWFunctions::pWindow, true);
 		ImGui_ImplOpenGL3_Init("#version 130");
 	}
+
+	if (!systemStartTimes) {
+		systemStartTimes = new std::unordered_map<std::string, double>();
+	}
+	if (!accumulatedTimes) {
+		accumulatedTimes = new std::unordered_map<std::string, double>();
+	}
+	systemStartTimes->clear();
+	accumulatedTimes->clear();
 
 	// Initialize subsystems
 	GameViewWindow::Initialise();
@@ -314,8 +323,10 @@ void DebugSystem::cleanup() {
 	Console::Cleanup();
 
 	// Clear containers
-	systemStartTimes.clear();
-	accumulatedTimes.clear();
+	delete systemStartTimes;
+	systemStartTimes = nullptr;
+	delete accumulatedTimes;
+	accumulatedTimes = nullptr;
 	systems.clear();
 	std::vector<const char*>(systems).swap(systems);
 	systemGameLoopPercent.clear();
@@ -342,7 +353,7 @@ SystemType DebugSystem::getSystem() {
 void DebugSystem::StartLoop() {
 	if (glfwGetTime() - lastUpdateTime >= displayBuffer) {
 		// Reset accumulated times every second
-		accumulatedTimes.clear();
+		accumulatedTimes->clear();
 		firstFrame = true;
 	}
 	loopStartTime = glfwGetTime();
@@ -363,15 +374,15 @@ void DebugSystem::StartSystemTiming(const char* systemName) {
 		systems.push_back(systemName);
 		systemCount = static_cast<int>(systems.size());
 	}
-	systemStartTimes[systemName] = glfwGetTime();
+	(*systemStartTimes)[systemName] = glfwGetTime();
 }
 
 //Capture system's end time loop
 void DebugSystem::EndSystemTiming(const char* systemName) {
-	auto it = systemStartTimes.find(systemName);
-	if (it != systemStartTimes.end()) {
+	auto it = systemStartTimes->find(systemName);
+	if (it != systemStartTimes->end()) {
 		double duration = glfwGetTime() - it->second;
-		accumulatedTimes[systemName] += duration;  // Accumulate time
+		(*accumulatedTimes)[systemName] += duration;  // Accumulate time
 	}
 }
 
@@ -382,7 +393,7 @@ void DebugSystem::UpdateSystemTimes() {
 
 		// Calculate total time spent in all systems
 		double totalSystemTime = 0.0;
-		for (const auto& pair : accumulatedTimes) {
+		for (const auto& pair : *accumulatedTimes) {
 			totalSystemTime += pair.second;
 		}
 
@@ -392,8 +403,8 @@ void DebugSystem::UpdateSystemTimes() {
 
 		for (size_t i = 0; i < systems.size(); i++) {
 			const char* systemName = systems[i];
-			auto it = accumulatedTimes.find(systemName);
-			if (it != accumulatedTimes.end()) {
+			auto it = accumulatedTimes->find(systemName);
+			if (it != accumulatedTimes->end()) {
 				double percentage = (it->second / totalSystemTime) * FULL_PERCENTAGE;
 				systemGameLoopPercent[i] = percentage;
 			}

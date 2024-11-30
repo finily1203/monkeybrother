@@ -103,8 +103,8 @@ private:
 	static float paddingPV;
 	static double ecsTotal;
 	static bool foundECS;
-	static std::unordered_map<std::string, double> systemStartTimes;
-	static std::unordered_map<std::string, double> accumulatedTimes;
+	static std::unordered_map<std::string, double>* systemStartTimes;
+	static std::unordered_map<std::string, double>* accumulatedTimes;
 	static double loopStartTime;
 	static double totalLoopTime;
 	static double lastUpdateTime;
