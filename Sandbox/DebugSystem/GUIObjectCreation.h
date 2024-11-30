@@ -9,10 +9,10 @@
 #include <GLFW/glfw3.h> 
 #include "GlobalCoordinator.h"
 
-#define constextpr MAXNAMELENGTH 15
-#define constextpr MAXBUFFERSIZE 8
-#define constextpr MAXTEXTSIZE 1000
-#define constextpr MAXOBJTYPE 4
+#define MAXNAMELENGTH 15
+#define MAXBUFFERSIZE 8
+#define MAXTEXTSIZE 1000
+#define MAXOBJTYPE 4
 
 class ObjectCreation {
 public:

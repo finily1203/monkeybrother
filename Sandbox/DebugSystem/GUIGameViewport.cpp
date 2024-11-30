@@ -957,7 +957,7 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
 
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
-	float playerRotation = 0.0f;
+	double playerRotation = 0.0;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 		if (ecsCoordinator.getEntityID(entity) == "player") {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
@@ -965,46 +965,46 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 		}
 	}
 	// Convert to radians and normalize
-	float cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
+	double cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
 	if (cameraRotation < 0) cameraRotation += 2.0f * M_PI;
 
 	// Get viewport center in screen space
-	float viewportCenterX = viewportPos.x + renderPos.x + (aspectSize.x * 0.5f);
-	float viewportCenterY = viewportPos.y + renderPos.y + (aspectSize.y * 0.5f);
+	double viewportCenterX = viewportPos.x + renderPos.x + (aspectSize.x * 0.5f);
+	double viewportCenterY = viewportPos.y + renderPos.y + (aspectSize.y * 0.5f);
 
 	// Convert screen coordinates to viewport-relative coordinates
-	float viewportX = screenX - viewportCenterX;
-	float viewportY = viewportCenterY - screenY;
+	double viewportX = screenX - viewportCenterX;
+	double viewportY = viewportCenterY - screenY;
 
 	// Scale by zoom and viewport size
-	float worldScaleX = (viewportWidth / (aspectSize.x * zoomLevel));
-	float worldScaleY = (viewportHeight / (aspectSize.y * zoomLevel));
+	double worldScaleX = (viewportWidth / (aspectSize.x * zoomLevel));
+	double worldScaleY = (viewportHeight / (aspectSize.y * zoomLevel));
 
 	viewportX *= worldScaleX;
 	viewportY *= worldScaleY;
 
 	// Calculate rotation factors
-	float cosAngle = cos(cameraRotation);
-	float sinAngle = sin(cameraRotation);
+	double cosAngle = cos(cameraRotation);
+	double sinAngle = sin(cameraRotation);
 
 	// Rotate coordinates
-	float rotatedX = viewportX * cosAngle - viewportY * sinAngle;
-	float rotatedY = viewportX * sinAngle + viewportY * cosAngle;
+	double rotatedX = viewportX * cosAngle - viewportY * sinAngle;
+	double rotatedY = viewportX * sinAngle + viewportY * cosAngle;
 
 	// Transform to world space
-	float worldX = cameraPos.GetX() + rotatedX;
-	float worldY = cameraPos.GetY() + rotatedY;
+	double worldX = cameraPos.GetX() + rotatedX;
+	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
 	if (clickedScreenPan) {
-		float panX = accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
-		float panY = accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+		double panX = accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
+		double panY = accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
 
 		worldX += panX * cosAngle - panY * sinAngle;
 		worldY += panX * sinAngle + panY * cosAngle;
 	}
 
-	return ImVec2(worldX, worldY);
+	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
 ImVec2 GameViewWindow::GetMouseWorldPosition() {
@@ -1027,7 +1027,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
 
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
-	float playerRotation = 0.0f;
+	double playerRotation = 0.0;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 		if (ecsCoordinator.getEntityID(entity) == "player") {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
@@ -1035,7 +1035,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 		}
 	}
 	// Convert to radians and normalize
-	float cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
+	double cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
 	if (cameraRotation < 0) cameraRotation += 2.0f * M_PI;
 
 	// Get viewport center
@@ -1054,16 +1054,16 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	relY *= worldScaleY;
 
 	// Calculate rotation factors
-	float cosAngle = cos(cameraRotation);
-	float sinAngle = sin(cameraRotation);
+	double cosAngle = cos(cameraRotation);
+	double sinAngle = sin(cameraRotation);
 
 	// Rotate coordinates
-	float rotatedX = relX * cosAngle - relY * sinAngle;
-	float rotatedY = relX * sinAngle + relY * cosAngle;
+	double rotatedX = relX * cosAngle - relY * sinAngle;
+	double rotatedY = relX * sinAngle + relY * cosAngle;
 
 	// Transform to world space
-	float worldX = cameraPos.GetX() + rotatedX;
-	float worldY = cameraPos.GetY() + rotatedY;
+	double worldX = cameraPos.GetX() + rotatedX;
+	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
 	if (clickedScreenPan) {
@@ -1074,7 +1074,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 		worldY += panX * sinAngle + panY * cosAngle;
 	}
 
-	return ImVec2(worldX, worldY);
+	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
 ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {

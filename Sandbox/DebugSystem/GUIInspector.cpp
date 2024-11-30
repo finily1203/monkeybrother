@@ -62,10 +62,10 @@ void Inspector::Update() {
 			height *= collisionScale;
 
 			// Calculate bounds with scaled dimensions
-			float leftBound = x - width*0.8f;
-			float rightBound = x + width*0.2f;
-			float topBound = y + height*0.2;
-			float bottomBound = y - height * 0.5; /*+ height * 0.1*/;
+			double leftBound = x - width*0.8f;
+			double rightBound = x + width*0.2f;
+			double topBound = y + height*0.2;
+			double bottomBound = y - height * 0.5; /*+ height * 0.1*/;
 
 			return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
 				centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);

@@ -210,7 +210,7 @@ void LogicSystemECS::cleanup() {
 //	}
 //}
 
-void LogicSystemECS::update(float dt) {
+void LogicSystemECS::update(float) {
 	//for each entity, update the behaviour
 	for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
 		if (behaviours.find(entity) != behaviours.end()) {

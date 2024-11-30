@@ -70,11 +70,11 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    auto& waypoints = getWaypoints();
-    int& currentWaypointIndex = getCurrentWaypointIndex();
+    auto& currentWaypoints = getWaypoints();
+    int& currentWPIndex = getCurrentWaypointIndex();
 
     // Set the current waypoint target
-    myMath::Vector2D target = waypoints[currentWaypointIndex];
+    myMath::Vector2D target = currentWaypoints[currentWPIndex];
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
@@ -94,12 +94,12 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         physics.velocity.SetY(0.f);
 
         // Move to the next waypoint
-        currentWaypointIndex++;
-        if (currentWaypointIndex >= waypoints.size()) {
-            currentWaypointIndex = 0; // Loop back to the first waypoint
+        currentWPIndex++;
+        if (currentWPIndex >= currentWaypoints.size()) {
+            currentWPIndex = 0; // Loop back to the first waypoint
         }
 
-        target = waypoints[currentWaypointIndex];
+        target = currentWaypoints[currentWPIndex];
         direction = target - transform.position;
         length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
 
@@ -107,8 +107,8 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
 
     // Normalize direction if length is not zero
     if (length != 0) {
-        direction.SetX(direction.GetX() / length);
-        direction.SetY(direction.GetY() / length);
+        direction.SetX(direction.GetX() / static_cast<float>(length));
+        direction.SetY(direction.GetY() / static_cast<float>(length));
     }
 
     // Apply movement force if not at the waypoint
