@@ -84,7 +84,7 @@ public:
 	//Load debug system configuration from JSON file
 	void LoadDebugConfigFromJSON(std::string const& filename);
 
-	static std::vector<Entity> newEntities;
+	static std::vector<Entity>* newEntities;
 
 	static ImVec2 getMouseWorldPos() {
 		return mouseWorldPos;

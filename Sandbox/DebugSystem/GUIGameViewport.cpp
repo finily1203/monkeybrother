@@ -252,7 +252,7 @@ void GameViewWindow::Update() {
 			}
 
 			// Clear newEntities since they're already saved
-			DebugSystem::newEntities.clear();
+			DebugSystem::newEntities->clear();
 
 			// Save to file
 			std::ofstream outputFile(saveFile);

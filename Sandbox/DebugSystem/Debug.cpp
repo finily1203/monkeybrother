@@ -73,7 +73,7 @@ double DebugSystem::lastUpdateTime;
 std::vector<const char*>* DebugSystem::systems;
 std::vector<double>* DebugSystem::systemGameLoopPercent;
 bool DebugSystem::firstFrame;
-std::vector<Entity> DebugSystem::newEntities;
+std::vector<Entity>* DebugSystem::newEntities;
 
 //Constructor for DebugSystem class
 DebugSystem::DebugSystem() : io{ nullptr }, font{ nullptr } {}
@@ -144,6 +144,11 @@ void DebugSystem::initialise() {
 		systemGameLoopPercent = new std::vector<double>();
 	}
 	systemGameLoopPercent->clear();
+
+	if (!newEntities) {
+		newEntities = new std::vector<Entity>();
+	}
+	newEntities->clear();
 
 	// Initialize subsystems
 	GameViewWindow::Initialise();
@@ -345,8 +350,10 @@ void DebugSystem::cleanup() {
 	//std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
 	delete systemGameLoopPercent;
 	systemGameLoopPercent = nullptr;
-	newEntities.clear();
-	std::vector<Entity>(newEntities).swap(newEntities);
+	delete newEntities;
+	newEntities = nullptr;
+	//newEntities.clear();
+	//std::vector<Entity>(newEntities).swap(newEntities);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
