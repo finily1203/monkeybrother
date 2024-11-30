@@ -2,10 +2,6 @@
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
-#include "EnemyBehaviour.h"  
-#include "GlobalCoordinator.h"  
-#include "PhyColliSystemECS.h"  
-
 EnemyBehaviour::EnemyBehaviour() {
 	currentState = PATROL;
 
@@ -78,7 +74,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
-    float length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+    float length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     // If close enough to the waypoint, move to the next one
     const float waypointThreshold = 1.0f;
@@ -101,7 +97,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
 
         target = currentWaypoints[currentWPIndex];
         direction = target - transform.position;
-        length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+        length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     }
 
