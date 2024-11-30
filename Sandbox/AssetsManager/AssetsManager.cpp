@@ -24,7 +24,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false) {
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false)
+{
     m_AssetList = new std::vector<std::string>();
 }
 
@@ -36,6 +37,15 @@ AssetsManager::~AssetsManager()
 //leave empty for now
 void AssetsManager::initialise()
 {
+    if(!m_Textures)
+		m_Textures = new std::map<std::string, GLuint>();
+
+	if (!m_Shaders)
+		m_Shaders = new std::map<std::string, std::unique_ptr<Shader>>();
+
+	if (!m_Audio)
+		m_Audio = new std::map<std::string, FMOD::Sound*>();
+
     LoadShaderAssets();
     LoadTextureAssets();
     LoadFontAssets();
@@ -87,7 +97,7 @@ void AssetsManager::LoadTextureAssets() const {
 }
 
 void AssetsManager::LoadTexture(const std::string& texName, const std::string& texPath) {
-    if (m_Textures.find(texName) != m_Textures.end()) {
+    if (m_Textures->find(texName) != m_Textures->end()) {
 		std::cerr << "Texture already loaded!" << std::endl;
 		return;
 	}
@@ -114,7 +124,7 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
 
         stbi_image_free(data);
 
-        m_Textures[texName] = texID;
+        m_Textures->operator[](texName) = texID;
         m_AssetList->push_back(texName);
         std::cout << "texture loaded successfully!" << std::endl;
     }
@@ -126,8 +136,8 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
 }
 
 GLuint AssetsManager::GetTexture(const std::string& texName) const {
-    auto iterator = m_Textures.find(texName);
-    if (iterator != m_Textures.end()) {
+    auto iterator = m_Textures->find(texName);
+    if (iterator != m_Textures->end()) {
 		return iterator->second;
 	}
     else {
@@ -137,10 +147,10 @@ GLuint AssetsManager::GetTexture(const std::string& texName) const {
 }
 
 void AssetsManager::UnloadTexture(const std::string& texName) {
-    auto iterator = m_Textures.find(texName);
-    if (iterator != m_Textures.end()) {
+    auto iterator = m_Textures->find(texName);
+    if (iterator != m_Textures->end()) {
 		glDeleteTextures(1, &iterator->second);
-		m_Textures.erase(iterator);
+		m_Textures->erase(iterator);
         std::cout << "Texture unloaded successfully!" << std::endl;
 	}
     else {
@@ -149,10 +159,11 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
 }
 
 void AssetsManager::ClearTextures() {
-    for (auto& texture : m_Textures) {
+    for (auto& texture : *m_Textures) {
 		glDeleteTextures(1, &texture.second);
 	}
-	m_Textures.clear();
+	delete m_Textures;
+	m_Textures = nullptr;
 	std::cout << "All textures cleared!" << std::endl;
 }
 
@@ -190,7 +201,7 @@ void AssetsManager::LoadShaderAssets() const {
 }
 
 void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
-    if (m_Shaders.find(name) != m_Shaders.end()) {
+    if (m_Shaders->find(name) != m_Shaders->end()) {
         std::cerr << "Shader already loaded!" << std::endl;
         return;
     }
@@ -202,7 +213,7 @@ void AssetsManager::LoadShader(const std::string& name, const std::string& fileP
 		return;
     }
     else {
-        m_Shaders[name] = std::move(shader);
+        m_Shaders->operator[](name) = std::move(shader);
         m_AssetList->push_back(name);
         std::cout << "Shader loaded successfully!" << std::endl;
     }
@@ -210,8 +221,8 @@ void AssetsManager::LoadShader(const std::string& name, const std::string& fileP
 }
 
 Shader* AssetsManager::GetShader(const std::string& name) const {
-    auto iterator = m_Shaders.find(name);
-    if (iterator != m_Shaders.end()) {
+    auto iterator = m_Shaders->find(name);
+    if (iterator != m_Shaders->end()) {
         return iterator->second.get();
     }
     else {
@@ -221,9 +232,9 @@ Shader* AssetsManager::GetShader(const std::string& name) const {
 }
 
 void AssetsManager::UnloadShader(const std::string& name) {
-    auto iterator = m_Shaders.find(name);
-    if (iterator != m_Shaders.end()) {
-		m_Shaders.erase(iterator);
+    auto iterator = m_Shaders->find(name);
+    if (iterator != m_Shaders->end()) {
+		m_Shaders->erase(iterator);
 		std::cout << "Shader unloaded successfully!" << std::endl;
 	}
     else {
@@ -232,7 +243,8 @@ void AssetsManager::UnloadShader(const std::string& name) {
 }
 
 void AssetsManager::ClearShaders() {
-	m_Shaders.clear();
+	delete m_Shaders;
+	m_Shaders = nullptr;
 	std::cout << "All shaders cleared!" << std::endl;
 }
 
@@ -281,13 +293,13 @@ void AssetsManager::LoadAudio(const std::string& songName, const std::string& fi
         return;
     }
 
-    m_Audio[songName] = audioSong;
+    m_Audio->operator[](songName) = audioSong;
     m_AssetList->push_back(songName);
 }
 
 FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
-    auto iterator = m_Audio.find(name);
-    if (iterator != m_Audio.end()) {
+    auto iterator = m_Audio->find(name);
+    if (iterator != m_Audio->end()) {
 		return iterator->second;
 	}
     else {
@@ -301,8 +313,8 @@ FMOD::System* AssetsManager::GetAudioSystem() const {
 }
 
 void AssetsManager::UnloadAudio(const std::string& name) {
-    auto iterator = m_Audio.find(name);
-    if (iterator != m_Audio.end()) {
+    auto iterator = m_Audio->find(name);
+    if (iterator != m_Audio->end()) {
         iterator->second->release();
         std::cout << "Audio unloaded successfully!" << std::endl;
     }
@@ -312,10 +324,11 @@ void AssetsManager::UnloadAudio(const std::string& name) {
 }
 
 void AssetsManager::ClearAudio() {
-    for (auto& audio : m_Audio) {
+    for (auto& audio : *m_Audio) {
 		audio.second->release();
 	}
-	m_Audio.clear();
+    delete m_Audio;
+	m_Audio = nullptr;
     if (audSystem) {
         audSystem->close();
         audSystem->release();
@@ -524,15 +537,15 @@ std::vector<std::string> AssetsManager::getAssetList() const {
 
 
 const std::map<std::string, GLuint>& AssetsManager::getTextureList() const {
-	return m_Textures;
+	return *m_Textures;
 }
 
 const std::map<std::string, std::unique_ptr<Shader>>& AssetsManager::getShaderList() const {
-	return m_Shaders;
+	return *m_Shaders;
 }
 
 const std::map<std::string, FMOD::Sound*>& AssetsManager::getAudioList() const {
-	return m_Audio;
+	return *m_Audio;
 }
 
 const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontList() const {

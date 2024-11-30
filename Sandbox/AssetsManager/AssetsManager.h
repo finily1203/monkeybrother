@@ -93,9 +93,9 @@ public:
 private:
 	FMOD::System* audSystem;
 
-	std::map<std::string, GLuint> m_Textures;
-	std::map<std::string, std::unique_ptr<Shader>> m_Shaders;
-	std::map<std::string, FMOD::Sound*> m_Audio;
+	std::map<std::string, GLuint>* m_Textures;
+	std::map<std::string, std::unique_ptr<Shader>>* m_Shaders;
+	std::map<std::string, FMOD::Sound*>* m_Audio;
 
 	std::vector<std::string> *m_AssetList;
 
