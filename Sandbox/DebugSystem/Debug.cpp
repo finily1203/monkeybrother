@@ -70,7 +70,7 @@ std::unordered_map<std::string, double>* DebugSystem::accumulatedTimes;
 double DebugSystem::loopStartTime;
 double DebugSystem::totalLoopTime;
 double DebugSystem::lastUpdateTime;
-std::vector<const char*> DebugSystem::systems;
+std::vector<const char*>* DebugSystem::systems;
 std::vector<double> DebugSystem::systemGameLoopPercent;
 bool DebugSystem::firstFrame;
 std::vector<Entity> DebugSystem::newEntities;
@@ -134,6 +134,12 @@ void DebugSystem::initialise() {
 	}
 	systemStartTimes->clear();
 	accumulatedTimes->clear();
+
+	if (!systems) {
+		systems = new std::vector<const char*>();
+	}
+	systems->clear();
+
 
 	// Initialize subsystems
 	GameViewWindow::Initialise();
@@ -203,10 +209,10 @@ void DebugSystem::update() {
 			const char* systemName;
 
 			//Show non-ECS systems
-			for (size_t i = 0; i < systems.size(); i++) {
+			for (size_t i = 0; i < (*systems).size(); i++) {
 				if (i >= systemGameLoopPercent.size()) break; // Safety check
 
-				systemName = systems[i];
+				systemName = (*systems)[i];
 
 				// Skip ECS systems
 				if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
@@ -228,10 +234,10 @@ void DebugSystem::update() {
 				ImGui::TableNextColumn();
 
 				if (ImGui::TreeNode("ECS Systems")) {
-					for (size_t i = 0; i < systems.size(); i++) {
+					for (size_t i = 0; i < (*systems).size(); i++) {
 						if (i >= systemGameLoopPercent.size()) break; // Safety check
 
-						systemName = systems[i];
+						systemName = (*systems)[i];
 						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 							ImGui::Text("%s:", systemName);
 							float normalizedPercentage = static_cast<float>((systemGameLoopPercent[i] / ecsTotal) * FULL_PERCENTAGE);
@@ -327,8 +333,10 @@ void DebugSystem::cleanup() {
 	systemStartTimes = nullptr;
 	delete accumulatedTimes;
 	accumulatedTimes = nullptr;
-	systems.clear();
-	std::vector<const char*>(systems).swap(systems);
+	delete systems;
+	systems = nullptr;
+	//systems.clear();
+	//std::vector<const char*>(systems).swap(systems);
 	systemGameLoopPercent.clear();
 	std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
 	newEntities.clear();
@@ -370,9 +378,9 @@ void DebugSystem::EndLoop() {
 
 //Capture system's start time loop
 void DebugSystem::StartSystemTiming(const char* systemName) {
-	if (std::find(systems.begin(), systems.end(), systemName) == systems.end()) {
-		systems.push_back(systemName);
-		systemCount = static_cast<int>(systems.size());
+	if (std::find((*systems).begin(), (*systems).end(), systemName) == (*systems).end()) {
+		(*systems).push_back(systemName);
+		systemCount = static_cast<int>((*systems).size());
 	}
 	(*systemStartTimes)[systemName] = glfwGetTime();
 }
@@ -399,10 +407,10 @@ void DebugSystem::UpdateSystemTimes() {
 
 		// Update percentages
 		systemGameLoopPercent.clear();
-		systemGameLoopPercent.resize(systems.size());
+		systemGameLoopPercent.resize((*systems).size());
 
-		for (size_t i = 0; i < systems.size(); i++) {
-			const char* systemName = systems[i];
+		for (size_t i = 0; i < (*systems).size(); i++) {
+			const char* systemName = (*systems)[i];
 			auto it = accumulatedTimes->find(systemName);
 			if (it != accumulatedTimes->end()) {
 				double percentage = (it->second / totalSystemTime) * FULL_PERCENTAGE;

@@ -109,7 +109,7 @@ private:
 	static double totalLoopTime;
 	static double lastUpdateTime;
 	static bool firstFrame;
-	static std::vector<const char*> systems;
+	static std::vector<const char*>* systems;
 	static std::vector<double> systemGameLoopPercent;
 	static int systemCount;
 	static ImVec2 mouseWorldPos;
