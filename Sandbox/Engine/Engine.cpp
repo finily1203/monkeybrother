@@ -121,9 +121,8 @@ void Engine::cleanupSystem() {
 			}
 		}
 	}
-
-	ecsCoordinator.cleanup();
 	
+	std::vector<GameSystems*>().swap(m_systems);
 }
 
 Engine::~Engine() {}

@@ -49,7 +49,7 @@ public:
 	//Update function to update the graphics system
 	//uses functions from GraphicsSystem class to update, draw
 	//and render objects.
-	void update(float dt) override;
+	void update(float ) override;
 
 	//For now we don't use a behaviour manager since we have little behaviours
 	//But need to expand this in the future

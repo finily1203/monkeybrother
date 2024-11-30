@@ -118,12 +118,13 @@ private:
 	static ImVec2 applicationCenter;
 	static ImVec2 renderPos;
 
-	static float newZoomLevel;
-	static float zoomDelta;
+	static float currentZoom;
 	static float zoomLevel;
 	static float MIN_ZOOM;  // minimum zoom constant
 	static float MAX_ZOOM;  // maximum zoom constant
 
+	static float headerHeight;
+	static float optionButtonHeight;
 	static float scrollY;
 
 	static bool isDragging;

@@ -156,7 +156,7 @@ void ObjectCreation::Update() {
 			ecsCoordinator.setEntityID(entityObj, entityId);
 
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
-			DebugSystem::newEntities.push_back(entityObj);
+			DebugSystem::newEntities->push_back(entityObj);
 
 
 	}
@@ -180,7 +180,7 @@ void ObjectCreation::Update() {
 			ecsCoordinator.setEntityID(entityObj, entityId);
 
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
-			DebugSystem::newEntities.push_back(entityObj);
+			DebugSystem::newEntities->push_back(entityObj);
 
 
 		}

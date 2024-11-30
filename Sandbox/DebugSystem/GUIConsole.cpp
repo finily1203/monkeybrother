@@ -21,12 +21,21 @@ File Contributions: Lew Zong Han Owen (80%)
 
 //Variables for Console
 size_t Console::MAX_LOGS;
-std::vector<std::string> Console::items;
-bool Console::autoScroll = true;
-bool Console::autoDelete = true;
+std::vector<std::string>* Console::items;
+bool Console::autoScroll;
+bool Console::autoDelete;
 float Console::lastScrollY;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
+
+Console::Console() {
+    LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+    if (!items) {
+        items = new std::vector<std::string>();
+    }
+    items->clear();
+
+}
 
 Console& Console::GetLog() {
 	if (instance == nullptr) {
@@ -40,25 +49,14 @@ void Console::Update(const char* title) {
 }
 
 void Console::Cleanup() {
-    static bool cleanupPerformed = false;
-    if (cleanupPerformed) {
-        return;
-    }
-
-
     if (instance) {
-        
-        items.clear();
 
+        delete items;
+        items = nullptr;
         currentLog.str("");
         currentLog.clear();
-
-        instance->SaveConsoleConfigToJSON(FilePathManager::GetIMGUIConsoleJSONPath());
-
         delete instance;
         instance = nullptr;
-
-        cleanupPerformed = true;
     }
 }
 
@@ -94,12 +92,12 @@ void Console::DrawImpl(const char* title) {
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -heightReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
 
     if (clear)
-        items.clear();
+        items->clear();
     if (copy)
         ImGui::LogToClipboard();
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-    for (const auto& item : items)
+    for (const auto& item : *items)
         ImGui::TextUnformatted(item.c_str()); // Render log messages
     ImGui::PopStyleVar();
 
@@ -190,20 +188,6 @@ void Console::LoadConsoleConfigFromJSON(std::string const& filename)
 	// data to every elements that needs to be initialized
 	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
 	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
-}
-//Save current console configuration to JSON file
-void Console::SaveConsoleConfigToJSON(std::string const& filename)
-{
-	JSONSerializer serializer;
-
-	if (!serializer.Open(filename))
-	{
-		Console::GetLog() << "Error: could not open file " << filename << std::endl;
-		return;
-	}
-
-	nlohmann::json jsobObj = serializer.GetJSONObject();
-
-	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs", filename);
-	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY", filename);
+    serializer.ReadBool(autoScroll, "GUIConsole.autoScroll");
+    serializer.ReadBool(autoDelete, "GUIConsole.autoDelete");
 }

@@ -59,9 +59,13 @@ void ECSCoordinator::update() {
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
-	entityManager->cleanup();
-	componentManager->cleanup();
-	systemManager->cleanup();
+	if (systemManager) systemManager->cleanup();
+	if (componentManager) componentManager->cleanup();
+	if (entityManager) entityManager->cleanup();
+
+	delete systemManager.release();
+	delete componentManager.release();
+	delete entityManager.release();
 }
 
 SystemType ECSCoordinator::getSystem() {
@@ -137,11 +141,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
 		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
 		//}
-
-		if (entityId == "quitButton" || entityId == "retryButton")
-		{
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
-		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -304,6 +303,8 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("button"))
 		{
 			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
 			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
 
 			ecs.addComponent(entityObj, button);
@@ -488,6 +489,8 @@ void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::
 			{
 				ButtonComponent button = getComponent<ButtonComponent>(entity);
 
+				serializer.WriteObject(button.originalScale, entityId, "entities.transform.scale");
+				serializer.WriteObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
 				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
 			}
 		}

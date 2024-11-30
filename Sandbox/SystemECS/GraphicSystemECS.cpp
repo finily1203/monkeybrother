@@ -5,13 +5,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   GraphicSystemECS.cpp
 @brief:  This source file defines the functions in GraphicSystemECS class.
-		 This class is used to handle the communication between ECS and graphic
-		 system.
-		 Joel Chu (c.weiyuan): Defined the functions in GraphicSystemECS class.
-							   Most of the content in this file is taken from
-							   WindowSystem.cpp and modified to fit the scope
-							   for creating object in ECS.
-							   100%
+         This class is used to handle the communication between ECS and graphic
+         system.
+         Joel Chu (c.weiyuan): Defined the functions in GraphicSystemECS class.
+                               Most of the content in this file is taken from
+                               WindowSystem.cpp and modified to fit the scope
+                               for creating object in ECS.
+                               100%
 *//*___________________________________________________________________________-*/
 #include "GraphicSystemECS.h"
 
@@ -44,7 +44,7 @@ void GraphicSystemECS::initialise() {
 //uses functions from GraphicsSystem class to update, draw
 //and render objects.
 void GraphicSystemECS::update(float dt) {
-   
+
 
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         // Check if the entity has a transform component
@@ -63,15 +63,15 @@ void GraphicSystemECS::update(float dt) {
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
         bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
         //bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
-		if (ecsCoordinator.getEntityID(entity) == "background") {
+        if (ecsCoordinator.getEntityID(entity) == "background") {
             /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
             transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
         }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
-		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
-		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
-		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+        bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
+        bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
+        bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
 
         auto& behavior = ecsCoordinator.getComponent<BehaviourComponent>(entity);
@@ -102,7 +102,7 @@ void GraphicSystemECS::update(float dt) {
 
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) != "player") {
+        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
@@ -127,7 +127,7 @@ void GraphicSystemECS::update(float dt) {
         else if (isPump) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
         }
-        else if(isPlatform){
+        else if (isPlatform) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
         else if (isButton) {
@@ -143,13 +143,13 @@ void GraphicSystemECS::update(float dt) {
             }
         }
         else if (isCollectable) {
-			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
         }
         else if (isExit) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
         }
         else if (isBackground) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
         else if (isUI) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
@@ -181,5 +181,5 @@ void GraphicSystemECS::update(float dt) {
 void GraphicSystemECS::cleanup() {}
 
 std::string GraphicSystemECS::getSystemECS() {
-	return "GraphicsSystemECS";
+    return "GraphicsSystemECS";
 }

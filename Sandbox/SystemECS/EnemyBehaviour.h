@@ -11,6 +11,10 @@ public:
 	};
 
 	EnemyBehaviour();
+	~EnemyBehaviour() {
+		waypoints.clear();
+		std::vector<myMath::Vector2D>().swap(waypoints);
+	}
 
 	void update(Entity entity) override;
 	void switchState(STATE newState);

@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h> 
 #include "GlobalCoordinator.h"
 
-#define MAXTEXTSIZE 1000
+#define constextptr MAXTEXTSIZE 1000
 
 class Inspector {
 public:
@@ -29,4 +29,5 @@ private:
 	static float objAttributeSliderMaxLength;
 	static char textBuffer[MAXTEXTSIZE];
 	static ImVec2 mouseWorldPos;
+	static std::vector<std::pair<int, std::string>>* overlappingEntities;
 };

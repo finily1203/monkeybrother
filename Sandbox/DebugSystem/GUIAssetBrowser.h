@@ -18,7 +18,7 @@ public:
 	static std::string cutString(const std::string& str, float maxWidth);
 
 private:
-	static std::vector<std::string> assetNames;
+	static std::vector<std::string>* assetNames;
 	static bool showTextures;
 	static bool showShaders;
 	static bool showAudio;

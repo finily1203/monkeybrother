@@ -2,10 +2,6 @@
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
-#include "EnemyBehaviour.h"  
-#include "GlobalCoordinator.h"  
-#include "PhyColliSystemECS.h"  
-
 EnemyBehaviour::EnemyBehaviour() {
 	currentState = PATROL;
 
@@ -26,20 +22,20 @@ void EnemyBehaviour::update(Entity entity) {
 
 	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
-	if (GLFWFunctions::keyState[Key::LEFT]) {
+	if ((*GLFWFunctions::keyState)[Key::LEFT]) {
 		transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
 	}
-	else if (GLFWFunctions::keyState[Key::RIGHT]) {
+	else if ((*GLFWFunctions::keyState)[Key::RIGHT]) {
 		transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
 	}
 
-	if (GLFWFunctions::keyState[Key::UP]) {
+	if ((*GLFWFunctions::keyState)[Key::UP]) {
 		if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
 			transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
 		}
 	}
-	else if (GLFWFunctions::keyState[Key::DOWN]) {
+	else if ((*GLFWFunctions::keyState)[Key::DOWN]) {
 		if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
 			transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);
@@ -70,15 +66,15 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    auto& waypoints = getWaypoints();
-    int& currentWaypointIndex = getCurrentWaypointIndex();
+    auto& currentWaypoints = getWaypoints();
+    int& currentWPIndex = getCurrentWaypointIndex();
 
     // Set the current waypoint target
-    myMath::Vector2D target = waypoints[currentWaypointIndex];
+    myMath::Vector2D target = currentWaypoints[currentWPIndex];
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
-    float length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+    float length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     // If close enough to the waypoint, move to the next one
     const float waypointThreshold = 1.0f;
@@ -94,21 +90,21 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         physics.velocity.SetY(0.f);
 
         // Move to the next waypoint
-        currentWaypointIndex++;
-        if (currentWaypointIndex >= waypoints.size()) {
-            currentWaypointIndex = 0; // Loop back to the first waypoint
+        currentWPIndex++;
+        if (currentWPIndex >= currentWaypoints.size()) {
+            currentWPIndex = 0; // Loop back to the first waypoint
         }
 
-        target = waypoints[currentWaypointIndex];
+        target = currentWaypoints[currentWPIndex];
         direction = target - transform.position;
-        length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+        length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     }
 
     // Normalize direction if length is not zero
     if (length != 0) {
-        direction.SetX(direction.GetX() / length);
-        direction.SetY(direction.GetY() / length);
+        direction.SetX(direction.GetX() / static_cast<float>(length));
+        direction.SetY(direction.GetY() / static_cast<float>(length));
     }
 
     // Apply movement force if not at the waypoint

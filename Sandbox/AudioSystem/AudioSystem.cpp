@@ -151,14 +151,14 @@ void AudioSystem::update() {
         GLFWFunctions::collectAudio = false;
     }
 
-    if (GLFWFunctions::keyState[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
+    if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
         playSoundEffect("bubbleButton");
-        GLFWFunctions::keyState[Key::NUM_9] = false;
+        (*GLFWFunctions::keyState)[Key::NUM_9] = false;
     }
 
-    if (GLFWFunctions::keyState[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
+    if ((*GLFWFunctions::keyState)[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
         playSoundEffect("bubbleSingle");
-        GLFWFunctions::keyState[Key::NUM_0] = false;
+        (*GLFWFunctions::keyState)[Key::NUM_0] = false;
     }
 
     if (GLFWFunctions::keyState[Key::COMMA]) {
