@@ -71,7 +71,7 @@ double DebugSystem::loopStartTime;
 double DebugSystem::totalLoopTime;
 double DebugSystem::lastUpdateTime;
 std::vector<const char*>* DebugSystem::systems;
-std::vector<double> DebugSystem::systemGameLoopPercent;
+std::vector<double>* DebugSystem::systemGameLoopPercent;
 bool DebugSystem::firstFrame;
 std::vector<Entity> DebugSystem::newEntities;
 
@@ -140,6 +140,10 @@ void DebugSystem::initialise() {
 	}
 	systems->clear();
 
+	if (!systemGameLoopPercent) {
+		systemGameLoopPercent = new std::vector<double>();
+	}
+	systemGameLoopPercent->clear();
 
 	// Initialize subsystems
 	GameViewWindow::Initialise();
@@ -210,14 +214,14 @@ void DebugSystem::update() {
 
 			//Show non-ECS systems
 			for (size_t i = 0; i < (*systems).size(); i++) {
-				if (i >= systemGameLoopPercent.size()) break; // Safety check
+				if (i >= (*systemGameLoopPercent).size()) break; // Safety check
 
 				systemName = (*systems)[i];
 
 				// Skip ECS systems
 				if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 					foundECS = true;
-					ecsTotal += systemGameLoopPercent[i];
+					ecsTotal += (*systemGameLoopPercent)[i];
 					continue;
 				}
 
@@ -225,7 +229,7 @@ void DebugSystem::update() {
 				ImGui::TableNextColumn();
 				ImGui::Text("%s", systemName);
 				ImGui::TableNextColumn();
-				ImGui::Text("%.2f%%", systemGameLoopPercent[i]);
+				ImGui::Text("%.2f%%", (*systemGameLoopPercent)[i]);
 			}
 
 			// Show ECS systems
@@ -235,12 +239,12 @@ void DebugSystem::update() {
 
 				if (ImGui::TreeNode("ECS Systems")) {
 					for (size_t i = 0; i < (*systems).size(); i++) {
-						if (i >= systemGameLoopPercent.size()) break; // Safety check
+						if (i >= (*systemGameLoopPercent).size()) break; // Safety check
 
 						systemName = (*systems)[i];
 						if (strstr(systemName, "ECS") || strcmp(systemName, "EntityComponentSystem") == 0) {
 							ImGui::Text("%s:", systemName);
-							float normalizedPercentage = static_cast<float>((systemGameLoopPercent[i] / ecsTotal) * FULL_PERCENTAGE);
+							float normalizedPercentage = static_cast<float>(((*systemGameLoopPercent)[i] / ecsTotal) * FULL_PERCENTAGE);
 							ImGui::SameLine(paddingPV);
 							ImGui::Text("%6.2f%%", normalizedPercentage);
 						}
@@ -337,8 +341,10 @@ void DebugSystem::cleanup() {
 	systems = nullptr;
 	//systems.clear();
 	//std::vector<const char*>(systems).swap(systems);
-	systemGameLoopPercent.clear();
-	std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
+	//(*systemGameLoopPercent).clear();
+	//std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
+	delete systemGameLoopPercent;
+	systemGameLoopPercent = nullptr;
 	newEntities.clear();
 	std::vector<Entity>(newEntities).swap(newEntities);
 
@@ -406,18 +412,18 @@ void DebugSystem::UpdateSystemTimes() {
 		}
 
 		// Update percentages
-		systemGameLoopPercent.clear();
-		systemGameLoopPercent.resize((*systems).size());
+		(*systemGameLoopPercent).clear();
+		(*systemGameLoopPercent).resize((*systems).size());
 
 		for (size_t i = 0; i < (*systems).size(); i++) {
 			const char* systemName = (*systems)[i];
 			auto it = accumulatedTimes->find(systemName);
 			if (it != accumulatedTimes->end()) {
 				double percentage = (it->second / totalSystemTime) * FULL_PERCENTAGE;
-				systemGameLoopPercent[i] = percentage;
+				(*systemGameLoopPercent)[i] = percentage;
 			}
 			else {
-				systemGameLoopPercent[i] = 0.0;
+				(*systemGameLoopPercent)[i] = 0.0;
 			}
 		}
 
