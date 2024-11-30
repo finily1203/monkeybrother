@@ -2,7 +2,7 @@
 #include "GlobalCoordinator.h"
 
 
-std::vector<std::string> AssetBrowser::assetNames;
+std::vector<std::string>* AssetBrowser::assetNames;
 static float thumbnailSize = 64.0f;
 static float paddingSize = 16.0f;
 bool AssetBrowser::showTextures = false;
@@ -12,8 +12,13 @@ bool AssetBrowser::showFonts = false;
 
 void AssetBrowser::Initialise() {
 	//initialise all asset name
+	if (!assetNames) {
+		assetNames = new std::vector<std::string>();
+	}
+	assetNames->clear();
+
 	for (auto& asset : assetsManager.getAssetList()) {
-		assetNames.push_back(asset);
+		assetNames->push_back(asset);
 		std::cout << asset << std::endl;
 	}
 }
@@ -21,9 +26,9 @@ void AssetBrowser::Initialise() {
 void AssetBrowser::Update() {
 	//check if any assets has been added and update the asset list if so
 	if (assetsManager.checkIfAssetListChanged()) {
-		assetNames.clear();
+		assetNames->clear();
 		for (auto& asset : assetsManager.getAssetList()) {
-			assetNames.push_back(asset);
+			assetNames->push_back(asset);
 		}
 	}
 
@@ -39,7 +44,7 @@ void AssetBrowser::Update() {
 	}
 	if (showTextures) {
 		if (columns < 1) columns = 1;
-		for (auto& asset : assetNames) {
+		for (auto& asset : *assetNames) {
 			if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -72,7 +77,7 @@ void AssetBrowser::Update() {
 	}
 	if (showShaders) {
 		if (columns < 1) columns = 1;
-		for (auto& asset : assetNames) {
+		for (auto& asset : *assetNames) {
 			if (assetsManager.getShaderList().find(asset) != assetsManager.getShaderList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -105,7 +110,7 @@ void AssetBrowser::Update() {
 	}
 	if (showAudio) {
 		if (columns < 1) columns = 1;
-		for (auto& asset : assetNames) {
+		for (auto& asset : *assetNames) {
 			if (assetsManager.getAudioList().find(asset) != assetsManager.getAudioList().end()) {
 				ImGui::BeginGroup();
 				if (ImGui::ImageButton(asset.c_str(), (void*)assetsManager.GetTexture("fileIcon"), {thumbnailSize, thumbnailSize}, {0, 1}, {1, 0})) {
@@ -140,7 +145,7 @@ void AssetBrowser::Update() {
 	}
 	if (showFonts) {
 		if (columns < 1) columns = 1;
-		for (auto& asset : assetNames) {
+		for (auto& asset : *assetNames) {
 			if (assetsManager.getFontList().find(asset) != assetsManager.getFontList().end()) {
 				ImGui::BeginGroup();
 				ImGui::Image((void*)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -202,8 +207,8 @@ void AssetBrowser::Update() {
 }
 
 void AssetBrowser::Cleanup() {
-	assetNames.clear();
-	std::vector<std::string>(assetNames).swap(assetNames);
+	delete assetNames;
+	assetNames = nullptr;
 }
 
 std::string AssetBrowser::cutString(const std::string& str, float maxWidth) {

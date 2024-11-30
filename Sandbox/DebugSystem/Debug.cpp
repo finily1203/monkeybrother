@@ -344,16 +344,10 @@ void DebugSystem::cleanup() {
 	accumulatedTimes = nullptr;
 	delete systems;
 	systems = nullptr;
-	//systems.clear();
-	//std::vector<const char*>(systems).swap(systems);
-	//(*systemGameLoopPercent).clear();
-	//std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
 	delete systemGameLoopPercent;
 	systemGameLoopPercent = nullptr;
 	delete newEntities;
 	newEntities = nullptr;
-	//newEntities.clear();
-	//std::vector<Entity>(newEntities).swap(newEntities);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
