@@ -71,7 +71,7 @@ float GLFWFunctions::delta_time = 0.0;
 
 
 bool GLFWFunctions::allow_camera_movement = false;
-GLboolean GLFWFunctions::debug_flag = false;
+bool GLFWFunctions::debug_flag = false;
 GLboolean GLFWFunctions::isGuiOpen = false;
 GLboolean GLFWFunctions::audioPaused = false;
 GLboolean GLFWFunctions::audioStopped = false;
@@ -260,7 +260,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             allow_camera_movement = !allow_camera_movement;
 
         if ((*keyState)[Key::NUM_1]) {
-            debug_flag = ~debug_flag;
+            debug_flag = !debug_flag;
             isGuiOpen = ~isGuiOpen;
         }
     }

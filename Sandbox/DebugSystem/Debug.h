@@ -90,28 +90,25 @@ public:
 		return mouseWorldPos;
 	}
 private:
-	static char* iniPath;
+	char* iniPath;
 	ImGuiIO* io;
 	ImFont* font;
-	static float fontSize;
-	static float textBorderSize;
-	static ImVec4 clearColor;
-	static float displayBuffer;
-	static float initialZoom;
-	static bool isZooming;
-	static bool isPanning;
-	static float paddingPV;
-	static double ecsTotal;
-	static bool foundECS;
-	static std::unordered_map<std::string, double>* systemStartTimes;
-	static std::unordered_map<std::string, double>* accumulatedTimes;
-	static double loopStartTime;
-	static double totalLoopTime;
-	static double lastUpdateTime;
-	static bool firstFrame;
-	static std::vector<const char*>* systems;
-	static std::vector<double>* systemGameLoopPercent;
-	static int systemCount;
+	float fontSize;
+	float textBorderSize;
+	ImVec4 clearColor;
+	float displayBuffer;
+	float paddingPV;
+	double ecsTotal;
+	bool foundECS;
+	std::unordered_map<std::string, double>* systemStartTimes;
+	std::unordered_map<std::string, double>* accumulatedTimes;
+	double loopStartTime;
+	double totalLoopTime;
+	double lastUpdateTime;
+	bool firstFrame;
+	std::vector<const char*>* systems;
+	std::vector<double>* systemGameLoopPercent;
+	int systemCount;
 	static ImVec2 mouseWorldPos;
 };
 

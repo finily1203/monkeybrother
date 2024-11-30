@@ -51,28 +51,8 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "GUIInspector.h"
 #include <cmath>
 
-//Variables for DebugSystem
-float DebugSystem::fontSize;
-ImVec4 DebugSystem::clearColor;
-float DebugSystem::textBorderSize;
-float DebugSystem::initialZoom;
-float DebugSystem::displayBuffer;
-bool DebugSystem::isZooming;
-bool DebugSystem::isPanning;
-float DebugSystem::paddingPV;
-double DebugSystem::ecsTotal;
-bool DebugSystem::foundECS;
-int DebugSystem::systemCount;
+
 ImVec2 DebugSystem::mouseWorldPos;
-char* DebugSystem::iniPath;
-std::unordered_map<std::string, double>* DebugSystem::systemStartTimes;
-std::unordered_map<std::string, double>* DebugSystem::accumulatedTimes;
-double DebugSystem::loopStartTime;
-double DebugSystem::totalLoopTime;
-double DebugSystem::lastUpdateTime;
-std::vector<const char*>* DebugSystem::systems;
-std::vector<double>* DebugSystem::systemGameLoopPercent;
-bool DebugSystem::firstFrame;
 std::vector<Entity>* DebugSystem::newEntities;
 
 //Constructor for DebugSystem class
@@ -449,9 +429,6 @@ void DebugSystem::LoadDebugConfigFromJSON(std::string const& filename)
 	// read all of the data from the JSON object, assign every read
 	// data to every elements that needs to be initialized
 	serializer.ReadFloat(displayBuffer, "Debug.displayBuffer");
-	serializer.ReadFloat(initialZoom, "Debug.initialZoom");
-	serializer.ReadBool(isZooming, "Debug.isZooming");
-	serializer.ReadBool(isPanning, "Debug.isPanning");
 	serializer.ReadBool(firstFrame, "Debug.firstFrame");
 	serializer.ReadBool(foundECS, "Debug.foundECS");
 
