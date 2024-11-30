@@ -458,7 +458,9 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
     keyState.clear();
+    std::unordered_map<Key, bool>().swap(keyState);
     mouseButtonState.clear();
+    std::unordered_map<MouseButton, bool>().swap(mouseButtonState);
     glfwTerminate();
 }
 

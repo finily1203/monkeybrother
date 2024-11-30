@@ -90,7 +90,7 @@ public:
 		return mouseWorldPos;
 	}
 private:
-	static std::string iniPath;
+	static char* iniPath;
 	ImGuiIO* io;
 	ImFont* font;
 	static float fontSize;

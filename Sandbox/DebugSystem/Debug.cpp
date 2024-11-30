@@ -64,7 +64,7 @@ double DebugSystem::ecsTotal;
 bool DebugSystem::foundECS;
 int DebugSystem::systemCount;
 ImVec2 DebugSystem::mouseWorldPos;
-std::string DebugSystem::iniPath;
+char* DebugSystem::iniPath;
 std::unordered_map<std::string, double> DebugSystem::systemStartTimes;
 std::unordered_map<std::string, double> DebugSystem::accumulatedTimes;
 double DebugSystem::loopStartTime;
@@ -96,8 +96,14 @@ void DebugSystem::initialise() {
 	std::filesystem::create_directories(iniFilePath.parent_path());
 
 	// Convert to C-string for ImGui
-	iniPath = iniFilePath.string();
-	io->IniFilename = iniPath.empty() ? nullptr : iniPath.c_str();
+	std::string pathString = iniFilePath.string();  // Convert path to std::string
+	iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
+
+	// Use std::copy to copy the string safely
+	std::copy(pathString.begin(), pathString.end(), iniPath);
+	iniPath[pathString.size()] = '\0';  // Ensure null terminator at the end
+
+	io->IniFilename = iniPath;
 
 	// Configure ImGui
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -316,12 +322,16 @@ void DebugSystem::cleanup() {
 	std::vector<double>(systemGameLoopPercent).swap(systemGameLoopPercent);
 	newEntities.clear();
 	std::vector<Entity>(newEntities).swap(newEntities);
-	iniPath.clear();
-	std::string().swap(iniPath);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+
+	// Free dynamically allocated memory for iniPath
+	if (iniPath != nullptr) {
+		delete[] iniPath;  // Deallocate memory for iniPath
+		iniPath = nullptr;  // Nullify the pointer
+	}
 }
 //For performance viewer
 SystemType DebugSystem::getSystem() {

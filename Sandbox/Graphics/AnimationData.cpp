@@ -43,6 +43,12 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     UpdateUVCoordinates();
 }
 
+AnimationData::~AnimationData() {
+    currentUVs.clear();
+    std::vector<glm::vec2>().swap(currentUVs);
+    frameEvents.clear();
+    std::map<int, std::vector<std::string>>().swap(frameEvents);
+}
 // Update function implementation
 void AnimationData::Update(float deltaTime) {
     if (deltaTime < 0.0f) {

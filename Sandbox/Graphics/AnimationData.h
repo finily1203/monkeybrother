@@ -30,6 +30,7 @@ class AnimationData {
 public:
 	// Constructor
     AnimationData(int totalFrames, float frameDuration, int columns, int rows);
+    ~AnimationData();
 	// Update function
     void Update(float deltaTime);
 	// Update UV coordinates
