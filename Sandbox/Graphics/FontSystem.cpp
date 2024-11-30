@@ -128,8 +128,8 @@ void FontSystem::renderText(const std::string& fontId, const std::string& text, 
         return;
     }
 
-    auto it = assetsManager.m_Fonts.find(fontId);
-    if (it == assetsManager.m_Fonts.end()) {
+    auto it = assetsManager.m_Fonts->find(fontId);
+    if (it == assetsManager.m_Fonts->end()) {
 		std::cerr << "ERROR: Font not loaded: " << fontId << std::endl;
 		return;
 	}
@@ -269,7 +269,7 @@ void FontSystem::cleanup() {
     glDeleteBuffers(1, &VBO);
     //textShader.reset(); 
 
-    assetsManager.ClearFonts();
+    //assetsManager.ClearFonts();
 
     isInitialized = false;
 

@@ -46,6 +46,12 @@ void AssetsManager::initialise()
 	if (!m_Audio)
 		m_Audio = new std::map<std::string, FMOD::Sound*>();
 
+	if (!m_Fonts)
+		m_Fonts = new std::map<std::string, std::map<char, Character>>();
+
+    if(!m_FontPaths)
+		m_FontPaths = new std::map<std::string, std::string>();
+
     LoadShaderAssets();
     LoadTextureAssets();
     LoadFontAssets();
@@ -410,8 +416,8 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
 
     if (fontLoaded) {
        
-        m_Fonts[fontName] = std::move(tempCharacters);
-        m_FontPaths[fontName] = fontPath;
+        m_Fonts->operator[](fontName) = std::move(tempCharacters);
+        m_FontPaths->operator[](fontName) = fontPath;
         m_AssetList->push_back(fontName);
     }
     else {
@@ -419,12 +425,12 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
     }
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts[fontName].size() << std::endl;
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts->operator[](fontName).size() << std::endl;
 }
 
 std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) const {
-	auto iterator = m_Fonts.find(fontPath);
-    if (iterator != m_Fonts.end()) {
+	auto iterator = m_Fonts->find(fontPath);
+    if (iterator != m_Fonts->end()) {
 		return iterator->second;
 	}
     else {
@@ -434,8 +440,8 @@ std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) co
 }
 
 std::string AssetsManager::GetFontPath(const std::string& fontName) const {
-    auto iterator = m_FontPaths.find(fontName);
-    if (iterator != m_FontPaths.end()) {
+    auto iterator = m_FontPaths->find(fontName);
+    if (iterator != m_FontPaths->end()) {
 		return iterator->second;
 	}
     else {
@@ -445,12 +451,12 @@ std::string AssetsManager::GetFontPath(const std::string& fontName) const {
 }
 
 void AssetsManager::UnloadFont(const std::string& fontPath) {
-	auto iterator = m_Fonts.find(fontPath);
-    if (iterator != m_Fonts.end()) {
+	auto iterator = m_Fonts->find(fontPath);
+    if (iterator != m_Fonts->end()) {
         for (auto& character : iterator->second) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
-		m_Fonts.erase(iterator);
+		m_Fonts->erase(iterator);
 		std::cout << "Font unloaded successfully!" << std::endl;
 	}
     else {
@@ -459,13 +465,15 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
 }
 
 void AssetsManager::ClearFonts() {
-    for (auto& font : m_Fonts) {
+    for (auto& font : *m_Fonts) {
         for (auto& character : font.second) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
 	}
-	m_Fonts.clear();
-    m_FontPaths.clear();
+    delete m_Fonts;
+	m_Fonts = nullptr;
+    delete m_FontPaths;
+	m_FontPaths = nullptr;
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
@@ -549,7 +557,7 @@ const std::map<std::string, FMOD::Sound*>& AssetsManager::getAudioList() const {
 }
 
 const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontList() const {
-	return m_Fonts;
+	return *m_Fonts;
 }
 
 void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath) {

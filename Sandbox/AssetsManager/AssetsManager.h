@@ -68,8 +68,8 @@ public:
 	std::string GetFontPath(const std::string& fontName) const;
 	void UnloadFont(const std::string& fontPath);
 	void ClearFonts();
-	std::map<std::string, std::string> m_FontPaths;
-	std::map<std::string, std::map<char, Character>> m_Fonts;
+	std::map<std::string, std::string>* m_FontPaths;
+	std::map<std::string, std::map<char, Character>>* m_Fonts;
 
 	//For Drag and Drop files from file explorer
 	void handleDropFile(std::string filePath);
