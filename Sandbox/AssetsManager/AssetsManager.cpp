@@ -270,6 +270,8 @@ void AssetsManager::LoadAudio(const std::string& songName, const std::string& fi
         return;
     }
 
+    std::cout << songName << std::endl;
+
     m_Audio[songName] = audioSong;
     m_AssetList.push_back(songName);
 }

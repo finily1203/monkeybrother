@@ -6,10 +6,11 @@ public:
 	void update(Entity entity) override;
 
 	EffectPumpBehaviour()
-		: isPumpOn(true), hasForceAdded(false), timer(0.0f), offDuration(3.0f), onDuration(5.0f) {}
+		: hasForceAdded(false), timer(0.0f), offDuration(3.0f), onDuration(5.0f) {}
+
+	void managePumpSound(bool isPumpOn);
 
 private:
-	bool isPumpOn;
 	bool hasForceAdded;
 	float timer;
 	float offDuration;

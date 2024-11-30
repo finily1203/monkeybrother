@@ -83,6 +83,8 @@ GLboolean GLFWFunctions::skipToNextLevel = false;
 GLboolean GLFWFunctions::skipToEnd = false;
 GLboolean GLFWFunctions::godMode = false;
 GLboolean GLFWFunctions::fullscreen = false;
+GLboolean GLFWFunctions::isPumpOn = true;
+GLboolean GLFWFunctions::playPumpSong = true;
 
 
 

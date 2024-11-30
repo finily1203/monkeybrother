@@ -401,7 +401,7 @@ Entity closestPlatformEntity = {};
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt)
 {
-    std::cout << "Physics System Update" << std::endl;
+    //std::cout << "Physics System Update" << std::endl;
     (void)dt;
     //let it be the first entity
     
@@ -424,7 +424,7 @@ void PhysicsSystemECS::update(float dt)
     if(count > 2)
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
 
-    std::cout << "count " << count << std::endl;
+    //std::cout << "count " << count << std::endl;
 
     //Entity closestPlatformEntity;
     //playerEntity = ecsCoordinator.hasComponent<PlayerComponent>(playerEntity);

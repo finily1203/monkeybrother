@@ -6,18 +6,18 @@
 	
 void EffectPumpBehaviour::update(Entity entity) {
 	timer += GLFWFunctions::delta_time;
-	if (isPumpOn && timer >= onDuration) {
-		isPumpOn = false;
+	if (GLFWFunctions::isPumpOn && timer >= onDuration) {
+		GLFWFunctions::isPumpOn = false;
 		timer = 0.0f;
 		std::cout << "Pump off" << std::endl;
 	}
-	else if (!isPumpOn && timer >= offDuration) {
-		isPumpOn = true;
+	else if (!GLFWFunctions::isPumpOn && timer >= offDuration) {
+		GLFWFunctions::isPumpOn = true;
 		timer = 0.0f;
 		std::cout << "Pump on" << std::endl;
 	}
 
-	if (isPumpOn) {
+	if (GLFWFunctions::isPumpOn) {
 		auto playerEntity = ecsCoordinator.getEntityFromID("player");;
 		auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 		auto collisionSystem = PhysicsSystemRef->getCollisionSystem();

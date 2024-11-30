@@ -42,6 +42,10 @@ public:
 	//void playSong(int index);
 	void playSong(const std::string& songName);
 
+	void playBgm(const std::string& songName);
+
+	void playPumpSound(const std::string& songName);
+
 	//Function to play sound effect
 	void playSoundEffect(const std::string& soundEffectName);
 
@@ -53,6 +57,9 @@ public:
 	//Setter for currentSongIndex
 	void setSongIndex(int index);
 
+	FMOD::Channel* getPumpChannel() const { return pumpChannel; }	
+	void setPumpChannelToNull() { pumpChannel = nullptr; }
+
 	void loadAudioAssets() const;
 
 	//get audioSystem
@@ -60,10 +67,15 @@ public:
 
 private:
 	//FMOD::System* audioSystem;
-	FMOD::Channel* audioChannel;
+	FMOD::Channel* bgmChannel;
 	FMOD::Channel* soundEffectChannel;
 	FMOD::Channel* assetBrowserChannel;
+	FMOD::Channel* ambienceChannel;
+	FMOD::Channel* pumpChannel;
+
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
-	float volume;
+	float genVol; // general volume
+	float bgmVol; // bgm volume
+	float sfxVol; // sound effect volume
 };
