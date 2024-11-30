@@ -22,8 +22,8 @@ File Contributions: Lew Zong Han Owen (80%)
 //Variables for Console
 size_t Console::MAX_LOGS;
 std::vector<std::string>* Console::items;
-bool Console::autoScroll = true;
-bool Console::autoDelete = true;
+bool Console::autoScroll;
+bool Console::autoDelete;
 float Console::lastScrollY;
 Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
@@ -188,20 +188,6 @@ void Console::LoadConsoleConfigFromJSON(std::string const& filename)
 	// data to every elements that needs to be initialized
 	serializer.ReadUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs");
 	serializer.ReadFloat(lastScrollY, "GUIConsole.lastScrollY");
-}
-//Save current console configuration to JSON file
-void Console::SaveConsoleConfigToJSON(std::string const& filename)
-{
-	JSONSerializer serializer;
-
-	if (!serializer.Open(filename))
-	{
-		Console::GetLog() << "Error: could not open file " << filename << std::endl;
-		return;
-	}
-
-	nlohmann::json jsobObj = serializer.GetJSONObject();
-
-	serializer.WriteUnsignedLongLong(MAX_LOGS, "GUIConsole.maxLogs", filename);
-	serializer.WriteFloat(lastScrollY, "GUIConsole.lastScrollY", filename);
+    serializer.ReadBool(autoScroll, "GUIConsole.autoScroll");
+    serializer.ReadBool(autoDelete, "GUIConsole.autoDelete");
 }

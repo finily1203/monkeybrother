@@ -51,12 +51,14 @@ bool zoomTestFlag = false;
 int GameViewWindow::saveNum;
 int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
+
+float GameViewWindow::currentZoom;
 float GameViewWindow::zoomLevel;
-float GameViewWindow::newZoomLevel;
-float GameViewWindow::zoomDelta;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
 
+float GameViewWindow::headerHeight;
+float GameViewWindow::optionButtonHeight;
 float GameViewWindow::scrollY;
 
 bool GameViewWindow::clickedScreenPan = false;
@@ -105,6 +107,8 @@ void GameViewWindow::Update() {
 	globalMousePos = ImGui::GetMousePos();
 	applicationCenter = ImGui::GetMainViewport()->GetCenter();
 	renderPos = GetCenteredPosForViewport(aspectSize);
+	headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
+	optionButtonHeight = ImGui::GetFrameHeight();
 
 	ImGui::Begin("Game Viewport");
 
@@ -428,9 +432,12 @@ void GameViewWindow::Update() {
 	scrollY = io.MouseWheel;
 
 	if (insideViewport && clickedZoom) {
+		currentZoom = cameraSystem.getCameraZoom() + scrollY * mouseWheelScaleFactor;
+
+		// Clamp the new zoom value between min and max
+		currentZoom = std::clamp(currentZoom, MIN_ZOOM, MAX_ZOOM);
 		
-		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * mouseWheelScaleFactor);
-		
+		cameraSystem.setCameraZoom(currentZoom);
 	}
 
 	CaptureMainWindow();
@@ -506,7 +513,6 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport()
 	float targetAspectRatio = (float)GLFWFunctions::windowWidth / (float)GLFWFunctions::windowHeight;
 
 	// Get available space in the viewport window
-	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
 	float pauseButtonHeight = ImGui::GetFrameHeight();
 	float padding = ImGui::GetStyle().ItemSpacing.y * 2; // Add padding between elements
 
@@ -545,7 +551,6 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport()
 ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 {
 	// Calculate UI element heights and padding
-	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
 	float pauseButtonHeight = ImGui::GetFrameHeight();
 	float padding = ImGui::GetStyle().ItemSpacing.y * 2;
 
@@ -1114,9 +1119,6 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
-
-	serializer.ReadFloat(zoomDelta, "GUIViewport.zoomDelta");
-	serializer.ReadFloat(newZoomLevel, "GUIViewport.newZoomLevel");
 
 	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
 

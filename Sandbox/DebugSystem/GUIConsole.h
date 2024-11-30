@@ -66,7 +66,6 @@ public:
 	}
 
 	void LoadConsoleConfigFromJSON(std::string const& filename); //Load console configuration from JSON file
-	void SaveConsoleConfigToJSON(std::string const& filename);  //Saves console configuration to a JSON file
 
 private:
 	static size_t MAX_LOGS;
