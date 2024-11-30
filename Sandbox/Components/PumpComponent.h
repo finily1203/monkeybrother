@@ -2,7 +2,7 @@
 struct PumpComponent
 {
 	bool isPump;
-
+	bool isAnimate;
 	float pumpForce;
-	PumpComponent() : isPump(false), pumpForce(0.f) {}
+	PumpComponent() : isPump(false), isAnimate(false), pumpForce(0.f) {}
 };

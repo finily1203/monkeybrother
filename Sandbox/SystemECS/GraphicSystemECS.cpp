@@ -71,10 +71,16 @@ void GraphicSystemECS::update(float dt) {
 		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
 		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+        bool isAnimate = false;
+
+        if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
+            const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
+            isAnimate = pumpComponent.isAnimate;
+        }
 
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
-        graphicsSystem.Update(dt / 10.0f, (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
+        graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
@@ -112,7 +118,9 @@ void GraphicSystemECS::update(float dt) {
 		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
-
+        if (isAnimate) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
+        }
         // Drawing based on entity components
         if (/*hasMovement && */isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
@@ -120,9 +128,11 @@ void GraphicSystemECS::update(float dt) {
         else if (isPlayer) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
-        else if (isPump) {
+        else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
+
         }
+
         else if(isPlatform){
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
