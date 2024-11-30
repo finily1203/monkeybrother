@@ -51,13 +51,13 @@ public:
 
 	Console& operator<<(std::ostream& (*manip)(std::ostream&)) { //Handle std::endl
 		if (manip == static_cast<std::ostream & (*)(std::ostream&)>(std::endl)) {
-			items.push_back(currentLog.str());
+			items->push_back(currentLog.str());
 			currentLog.str("");
 			currentLog.clear();
 
 			// Check if we've exceeded the maximum number of logs
-			if (items.size() > MAX_LOGS && autoDelete) {
-				items.erase(items.begin(), items.begin() + (items.size() - MAX_LOGS));
+			if (items->size() > MAX_LOGS && autoDelete) {
+				items->erase(items->begin(), items->begin() + (items->size() - MAX_LOGS));
 			}
 		}
 		return *this;
@@ -69,7 +69,7 @@ public:
 	void DebugPrintState() {
 		std::cout << "\n=== Console Current State ===" << std::endl;
 		std::cout << "Instance exists: " << (instance != nullptr ? "Yes" : "No") << std::endl;
-		std::cout << "Items count: " << items.size() << std::endl;
+		std::cout << "Items count: " << items->size() << std::endl;
 		std::cout << "Auto-scroll enabled: " << (autoScroll ? "Yes" : "No") << std::endl;
 		std::cout << "Auto-delete enabled: " << (autoDelete ? "Yes" : "No") << std::endl;
 		std::cout << "Last scroll position: " << lastScrollY << std::endl;
@@ -80,12 +80,12 @@ public:
 private:
 	static size_t MAX_LOGS;
 	static Console* instance;
-	static std::vector<std::string> items;
+	static std::vector<std::string>* items;
 	static bool autoScroll;
 	static bool autoDelete;
 	static float lastScrollY;
 	static std::ostringstream currentLog;
 
-	Console() { LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath()); }
+	Console() { LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath()); if (!items) { items = new std::vector<std::string>(); } }
 	void DrawImpl(const char* title); //ImGui console GUI format
 };

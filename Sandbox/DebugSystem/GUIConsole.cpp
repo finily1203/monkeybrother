@@ -21,7 +21,7 @@ File Contributions: Lew Zong Han Owen (80%)
 
 //Variables for Console
 size_t Console::MAX_LOGS;
-std::vector<std::string> Console::items;
+std::vector<std::string>* Console::items = nullptr;
 bool Console::autoScroll = true;
 bool Console::autoDelete = true;
 float Console::lastScrollY;
@@ -51,16 +51,21 @@ void Console::Cleanup() {
     if (instance) {
         std::cout << "Instance exists, beginning cleanup..." << std::endl;
 
-        if (items.size() > MAX_LOGS) {
-            std::cout << "Warning: Items count (" << items.size()
+        if (items->size() > MAX_LOGS) {
+            std::cout << "Warning: Items count (" << items->size()
                 << ") exceeded maximum limit (" << MAX_LOGS << ")" << std::endl;
         }
 
         // Debug items vector state
-        std::cout << "Items vector size before cleanup: " << items.size() << std::endl;
-        items.clear();
-        std::vector<std::string>().swap(items);
-        std::cout << "Items vector size after cleanup: " << items.size() << std::endl;
+        std::cout << "Items vector size before cleanup: " << items->size() << std::endl;
+        //items.clear();
+        //std::vector<std::string>().swap(items);
+        if (items)
+        {
+            delete items;
+            items = nullptr;
+        }
+        //std::cout << "Items vector size after cleanup: " << items->size() << std::endl;
 
         // Debug currentLog state
         std::cout << "Current log content: '" << currentLog.str() << "'" << std::endl;
@@ -126,12 +131,17 @@ void Console::DrawImpl(const char* title) {
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -heightReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
 
     if (clear)
-        items.clear();
+        if (items)
+        {
+            delete items;
+            items = nullptr;
+        }
+        //items->clear();
     if (copy)
         ImGui::LogToClipboard();
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-    for (const auto& item : items)
+    for (const auto& item : *items)
         ImGui::TextUnformatted(item.c_str()); // Render log messages
     ImGui::PopStyleVar();
 
