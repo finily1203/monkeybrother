@@ -154,6 +154,14 @@ void GraphicSystemECS::update(float dt) {
             );
             gameover = true;
         }
+        // 
+        if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
+            if (ecsCoordinator.getEntityID(entity) == "winTextBox")
+            {
+                auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
+                font.text = "Exit!";
+            }
+        }
         // cheat code 
 		if (GLFWFunctions::instantWin)
 		{

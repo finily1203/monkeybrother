@@ -89,7 +89,7 @@ struct GLFWFunctions {
 	static GLboolean godMode;
 	static GLboolean instantWin;
 	static GLboolean instantLose;
-	static GLboolean fullscreen;
+	static bool fullscreen;
 
 
 	static int audioNum;

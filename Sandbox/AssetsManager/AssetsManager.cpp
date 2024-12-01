@@ -290,7 +290,7 @@ void AssetsManager::LoadAudioAssets() {
 
 void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* auSystem) {
     FMOD::Sound* audioSong = nullptr;
-    if (songName == "Rotation.wav" || songName == "bgm") {
+    if (songName == "Rotation.wav" || songName == "bgm" || songName == "Iris_L2_BGM_Loop.wav") {
 		FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSong);
 		if (result != FMOD_OK) {
 			std::cout << "FMOD error! (" << result << ") " << std::endl;
