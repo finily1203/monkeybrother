@@ -212,16 +212,17 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
     else if (action == GLFW_REPEAT) {
         (*keyState)[mappedKey] = true;
-    }else
+    }
+
     if ((*keyState)[Key::NUM_2])
         allow_camera_movement = !allow_camera_movement;
 
     if (!GameViewWindow::getPaused()) {
 
-        /*if ((*keyState)[Key::NUM_1]) {
+        if ((*keyState)[Key::NUM_1]) {
             debug_flag = !debug_flag;
             isGuiOpen = ~isGuiOpen;
-        }*/
+        }
     }
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
@@ -248,7 +249,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     if (action == GLFW_PRESS) {
-        (*keyState)[static_cast<Key>(key)] = true;
 
         // Cheat codes
         if ((*keyState)[Key::G] && (*keyState)[Key::O] && (*keyState)[Key::D]) {

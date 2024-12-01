@@ -184,7 +184,7 @@ void GraphicSystemECS::update(float dt) {
 		else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
-        if (isAnimate) {
+        if (isAnimate && GLFWFunctions::isPumpOn) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
         }
         // Drawing based on entity components
