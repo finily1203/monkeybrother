@@ -104,6 +104,11 @@ void AudioSystem::update() {
             if (!isPaused) {
                 // If the sound is not paused, pause it
                 result = bgmChannel->setPaused(true);
+                result = soundEffectChannel->setPaused(true);
+                result = assetBrowserChannel->setPaused(true);
+                result = ambienceChannel->setPaused(true);
+                result = pumpChannel->setPaused(true);
+                result = rotationChannel->setPaused(true);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD pause error! (" << result << ")" << std::endl;
                 }
@@ -120,6 +125,11 @@ void AudioSystem::update() {
             if (isPaused) {
                 // If the sound is paused, unpause it
                 result = bgmChannel->setPaused(false);
+                result = soundEffectChannel->setPaused(false);
+                result = assetBrowserChannel->setPaused(false);
+                result = ambienceChannel->setPaused(false);
+                result = pumpChannel->setPaused(false);
+                result = rotationChannel->setPaused(false);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD resume error! (" << result << ")" << std::endl;
                 }
@@ -147,7 +157,7 @@ void AudioSystem::update() {
             playRotationEffect("Rotation.wav");
         }
         else {
-            bool bIsPlaying = false;
+            bIsPlaying = false;
             rotationChannel->isPlaying(&bIsPlaying);
             if (!bIsPlaying) {
                 rotationChannel->setPaused(false);
@@ -197,6 +207,8 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
 		soundEffectChannel->setVolume(sfxVol);
 		assetBrowserChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol);
+        rotationChannel->setVolume(sfxVol);
         
         (*GLFWFunctions::keyState)[Key::COMMA] = false;
 
@@ -217,6 +229,8 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
         soundEffectChannel->setVolume(sfxVol);
         assetBrowserChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol);
+        rotationChannel->setVolume(sfxVol);
  
         (*GLFWFunctions::keyState)[Key::PERIOD] = false;
     }
@@ -225,20 +239,7 @@ void AudioSystem::update() {
 }
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
-void AudioSystem::cleanup() {
-    //for (auto song : audioSongList) {
-    //    if (song) {
-    //        song->release();
-    //    }
-    //}
-    //audioSongList.clear();
-
-    //if (audioSystem) {
-    //    audioSystem->close();
-    //    audioSystem->release();
-    //    audioSystem = nullptr;
-    //}
-}
+void AudioSystem::cleanup() {}
 
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);

@@ -21,7 +21,6 @@ void PlatformBehaviour::update(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
     bool isColliding = false;
-    bool alrJumped;
 
     for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
@@ -49,7 +48,6 @@ void PlatformBehaviour::update(Entity entity) {
 
             if (isColliding)
             {
-                alrJumped = true;
                 if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
                 {
                     PhysicsSystemRef->getForceManager().ClearForce(playerEntity);

@@ -80,7 +80,7 @@ void GraphicSystemECS::update(float dt) {
             isAnimate = pumpComponent.isAnimate;
         }
 
-        auto& behavior = ecsCoordinator.getComponent<BehaviourComponent>(entity);
+        //auto& behavior = ecsCoordinator.getComponent<BehaviourComponent>(entity);
 
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
@@ -183,8 +183,6 @@ void GraphicSystemECS::update(float dt) {
            
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
-
-        std::cout << GLFWFunctions::collectableCount << std::endl;
     }
 }
 
