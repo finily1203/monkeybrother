@@ -138,27 +138,53 @@ void ObjectCreation::Update() {
 	Entity entityObj;
 	std::string entityId;
 
+	static bool shouldShowPopup = false;
+
 	if (ImGui::Button("Create Entity")) {
+		bool playerExists = false;
 
-		for (int i = 0; i < numEntitiesToCreate; i++) {
-
-			entityObj = ecsCoordinator.createEntity();
-
-			entityId = sigBuffer;
-
-			TransformComponent transform{};
-
-			transform.position.SetX(xCoordinates);
-			transform.position.SetY(yCoordinates);
-			transform.scale.SetX(defaultObjScaleX);
-			transform.scale.SetY(defaultObjScaleY);
-			ecsCoordinator.addComponent(entityObj, transform);
-			ecsCoordinator.setEntityID(entityObj, entityId);
-
-			ObjectCreationCondition(items, currentItem, entityObj, entityId);
-			DebugSystem::newEntities->push_back(entityObj);
+		// Check if player already exists
+		for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+				playerExists = true;
+				break;
+			}
 		}
 
+		// Set flag to show popup if trying to create duplicate player
+		if (currentItem == 0 && playerExists) {
+			shouldShowPopup = true;
+			ImGui::OpenPopup("Player Exists##popup");
+		}
+		// Only proceed if either not creating player or no player exists
+		else if (currentItem != 0 || !playerExists) {
+			for (int i = 0; i < numEntitiesToCreate; i++) {
+				entityObj = ecsCoordinator.createEntity();
+				entityId = sigBuffer;
+				TransformComponent transform{};
+				transform.position.SetX(xCoordinates);
+				transform.position.SetY(yCoordinates);
+				transform.scale.SetX(defaultObjScaleX);
+				transform.scale.SetY(defaultObjScaleY);
+				ecsCoordinator.addComponent(entityObj, transform);
+				ecsCoordinator.setEntityID(entityObj, entityId);
+				ObjectCreationCondition(items, currentItem, entityObj, entityId);
+				DebugSystem::newEntities->push_back(entityObj);
+			}
+		}
+	}
+
+	// Draw popup (this needs to be after the button but in the same window context)
+	if (shouldShowPopup) {
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		if (ImGui::Begin("Player Exists", &shouldShowPopup, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup)) {
+			ImGui::Text("A player entity already exists!");
+			if (ImGui::Button("OK")) {
+				shouldShowPopup = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::End();
+		}
 	}
 	ImGui::SameLine();
 
