@@ -5,15 +5,18 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   WindowSystem.cpp
 @brief:  This source file defines the WindowSystem class. The WindowSystem class is
-		 used to handle the window application for the game engine. It will initialise,
-		 update and cleanup the window system.
-		 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
-									for the WindowSystem class as well as the init, update,
-									and rendering of those objects
-									(50%)
-		 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
-							   initialise, update and cleanup the window system.
-							   (50%)
+	 used to handle the window application for the game engine. It will initialise,
+	 update and cleanup the window system.
+	 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
+				  for the WindowSystem class as well as the init, update,
+				  and rendering of those objects
+				  (27.5%)
+	 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
+				 initialise, update and cleanup the window system.
+				 (27.5%)
+	 Lee Jing Wen (jingwen.lee): Defined the function to handle window focus
+				   (interruption handling)
+				   (45%)
 *//*___________________________________________________________________________-*/
 #include <GraphicsSystem.h>
 #include "Debug.h"
@@ -24,6 +27,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
+//Variable for WindowSystem handleWindowFocus
 bool WindowSystem::altTab = false;
 bool WindowSystem::ctrlAltDel = false;
 //HWND WindowSystem::foreground = nullptr;
@@ -128,7 +132,7 @@ void WindowSystem::initialise() {
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
 }
 
-
+//Handle interruption, when window is not focused
 void WindowSystem::handleWindowFocus()
 {
 	static bool securityScreenActive = false;

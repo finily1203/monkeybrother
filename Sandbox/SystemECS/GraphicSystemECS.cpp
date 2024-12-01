@@ -80,8 +80,6 @@ void GraphicSystemECS::update(float dt) {
             isAnimate = pumpComponent.isAnimate;
         }
 
-        //auto& behavior = ecsCoordinator.getComponent<BehaviourComponent>(entity);
-
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
         graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true

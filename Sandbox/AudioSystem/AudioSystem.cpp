@@ -16,11 +16,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AudioSystem.h"
 #include "GlfwFunctions.h"
 #include <iostream>
+#include "GUIGameViewport.h"
 
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-                           , currSongIndex(0), genVol(0.5f), bgmVol(0.045f), sfxVol(1.0f) {}
+                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
@@ -96,7 +97,7 @@ void AudioSystem::update() {
             playSong("Ambience.wav");
         }
 
-        if (GLFWFunctions::audioPaused) {
+        if (GLFWFunctions::audioPaused || GameViewWindow::getPaused()) {
             // Check if the channel is already paused
             bool isPaused = false;
             bgmChannel->getPaused(&isPaused);

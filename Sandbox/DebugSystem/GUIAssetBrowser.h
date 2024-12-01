@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lee Jing Wen (jingwen.lee)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIAssetBrowser.h
+@brief  :  This file contains the function declaration of ImGui asset browser
+
+*Lee Jing Wen (jingwen.lee):
+	- Integrated ImGui asset browser to allow users to view and interact with assets
+	- Integrated to allow drag and drop, delete and update of assets
+
+File Contributions: Lee Jing Wen (100%)
+
+/*_______________________________________________________________________________________________________________*/
+
 #pragma once
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -7,7 +23,7 @@
 #include <filesystem>
 
 
-
+//Class for ImGui asset browser in debugging mode
 class AssetBrowser {
 public:
 	

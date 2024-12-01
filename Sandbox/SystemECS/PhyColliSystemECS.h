@@ -65,7 +65,7 @@ public:
     bool GetAlrJumped() const { return alrJumped; }
     void SetAlrJumped(bool newAlrJumped) { alrJumped = newAlrJumped; }
 
-    ForceManager getForceManager() const { return forceManager; }
+    //ForceManager getForceManager() const { return forceManager; }
 	CollisionSystemECS getCollisionSystem() const { return collisionSystem; }
 
     bool getIsColliding() const { return isColliding; }
@@ -100,5 +100,5 @@ private:
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
-    ForceManager forceManager;
+   // ForceManager forceManager;
 };
