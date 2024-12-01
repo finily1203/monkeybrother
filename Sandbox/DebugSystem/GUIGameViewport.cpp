@@ -894,7 +894,8 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		pump.pumpForce = 3.0f;
 		entityJSON["pump"] = {
 			{"isPump", pump.isPump},
-			{"pumpForce", pump.pumpForce}
+			{"pumpForce", pump.pumpForce},
+			{"isAnimate", pump.isAnimate }
 		};
 	}
 

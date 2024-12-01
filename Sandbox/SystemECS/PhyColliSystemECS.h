@@ -100,5 +100,5 @@ private:
     std::shared_ptr<Observer> eventObserver;
 
     CollisionSystemECS collisionSystem;
-   // ForceManager forceManager;
+    ForceManager forceManager;
 };

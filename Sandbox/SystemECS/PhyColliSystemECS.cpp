@@ -225,6 +225,8 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 
     //isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
 
+    //
+
     //forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
 
     //if (isColliding)

@@ -176,11 +176,10 @@ void GraphicSystemECS::update(float dt) {
         }
 
         else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
-            ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
-            ecsCoordinator.getEntitySignature(entity).count() == 2) {
-           
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-        }
+                 ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+                 ecsCoordinator.getEntitySignature(entity).count() == 2) {
+                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+       }
     }
 }
 
