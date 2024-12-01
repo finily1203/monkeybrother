@@ -178,7 +178,7 @@ void ObjectCreation::Update() {
 	if (shouldShowPopup) {
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 		if (ImGui::Begin("Player Exists", &shouldShowPopup, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup)) {
-			ImGui::Text("A player entity already exists!");
+			ImGui::Text("A player entity already exists");
 			if (ImGui::Button("OK")) {
 				shouldShowPopup = false;
 				ImGui::CloseCurrentPopup();
