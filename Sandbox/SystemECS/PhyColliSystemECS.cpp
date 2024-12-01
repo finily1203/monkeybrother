@@ -204,60 +204,61 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
 // Handle OBB collision
 void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 {
-    //myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-    ////myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
-    //float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
-    //float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
-    //myMath::Vector2D direction = directionalVector(rotation);
-    //myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
-    //float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
-    //float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(player).maxAccumulatedForce;
-    //float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
-    //float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
-    //Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
-    //CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
-    //CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
+    myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
+    //myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
+    float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
+    float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
+    myMath::Vector2D direction = directionalVector(rotation);
+    myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(player).gravityScale;
+    float mass = ecsCoordinator.getComponent<PhysicsComponent>(player).mass;
+    float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(player).maxAccumulatedForce;
+    float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
+    float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
+    Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
+    ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(player).forceManager;
+    CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
+    CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
 
-    //myMath::Vector2D normal{};
-    //float penetration{};
+    myMath::Vector2D normal{};
+    float penetration{};
 
-    //force.SetDirection(direction);
+    force.SetDirection(direction);
 
-    //isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
+    isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
 
-    //
+    
 
-    //forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
+    forceManager.AddForce(player, gravity * mass * GLFWFunctions::delta_time);
 
-    //if (isColliding)
-    //{
-    //    alrJumped = true;
-    //    if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
-    //    {
-    //        forceManager.ClearForce(player);
-    //    }
+    if (isColliding)
+    {
+        alrJumped = true;
+        if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
+        {
+            forceManager.ClearForce(player);
+        }
 
-    //    targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
-    //}
+        targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
+    }
 
-    //forceManager.ApplyForce(player, force.GetDirection(), targetForce);
+    forceManager.ApplyForce(player, force.GetDirection(), targetForce);
 
-    //prevForce = targetForce;
+    prevForce = targetForce;
 
-    //if (isColliding)
-    //{
-    //    if (GLFWFunctions::firstCollision == false)
-    //    {
-    //        GLFWFunctions::bumpAudio = true;
-    //        GLFWFunctions::firstCollision = true;
-    //        std::cout << "First time collide with platform" << std::endl;
-    //    }
-    //    collisionSystem.CollisionResponse(player, normal, penetration);
-    //}
-    //else
-    //{
-    //    GLFWFunctions::firstCollision = false;
-    //}
+    if (isColliding)
+    {
+        if (GLFWFunctions::firstCollision == false)
+        {
+            GLFWFunctions::bumpAudio = true;
+            GLFWFunctions::firstCollision = true;
+            std::cout << "First time collide with platform" << std::endl;
+        }
+        collisionSystem.CollisionResponse(player, normal, penetration);
+    }
+    else
+    {
+        GLFWFunctions::firstCollision = false;
+    }
 
 
 }
@@ -425,20 +426,20 @@ void PhysicsSystemECS::update(float dt)
 
     std::vector<Entity> collidingPlatforms;
     // Count entities and find the player entity
-    Entity playerEntity = NULL;
+    Entity playEntity = NULL;
     for (auto& entity : entities)
     {
         if (ecsCoordinator.hasComponent<PlayerComponent>(entity))
         {
-            playerEntity = entity;
+            playEntity = entity;
         }
     }
 
     // Early exit if no player is found
-    if (playerEntity == NULL) return;
+    if (playEntity == NULL) return;
 
     // Get the player position and radius
-    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playEntity);
     myMath::Vector2D playerPos = playerTransform.position;
     float playerRadius = playerTransform.scale.GetX() * 0.5f;
 
@@ -447,15 +448,14 @@ void PhysicsSystemECS::update(float dt)
     {
         if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
         {
-            auto& platformTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
             // Check for collision between player and platform
             CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
             myMath::Vector2D normal{};
             float penetration{};
-            bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, playerRadius, platformOBB, normal, penetration);
+            bool isCollide = collisionSystem.checkCircleOBBCollision(playerPos, playerRadius, platformOBB, normal, penetration);
 
-            if (isColliding)
+            if (isCollide)
             {
                 collidingPlatforms.push_back(entity);
             }

@@ -43,7 +43,6 @@ void EffectPumpBehaviour::update(Entity entity) {
 		float radius = playerTransform.scale.GetX() * 0.5f;
 
 		CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
-		//CollisionSystemECS::OBB pumpOBB = collisionSystem.createOBBFromEntity(entity);
 		CollisionSystemECS::OBB bubblesOBB = collisionSystem.createOBBFromEntity(entity);
 
 		myMath::Vector2D normal{};
@@ -53,7 +52,6 @@ void EffectPumpBehaviour::update(Entity entity) {
 		if (isColliding) {
 			myMath::Vector2D bubblesDirectionalVec = PhysicsSystemRef->directionalVector(bubblesTransform.orientation.GetX());
 
-			auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
 			float pumpForce = ecsCoordinator.getComponent<PumpComponent>(entity).pumpForce;
 			ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
 

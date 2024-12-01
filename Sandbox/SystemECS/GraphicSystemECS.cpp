@@ -35,14 +35,14 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 bool gameover = false;
 
 void createTextEntity(
-    ECSCoordinator& ecsCoordinator,
+    ECSCoordinator& ecs,
     const std::string& text,
     const std::string& fontId,
     const myMath::Vector3D& color,
     const myMath::Vector2D& position,
     const std::string& entityId
 ) {
-    Entity textEntity = ecsCoordinator.createEntity();
+    Entity textEntity = ecs.createEntity();
 
     // Font Component
     FontComponent font{};
