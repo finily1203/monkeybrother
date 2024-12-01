@@ -46,7 +46,7 @@ void ExitBehaviour::update(Entity entity) {
 		bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, exitOBB, normal, penetration);
 		GLFWFunctions::exitCollision = isColliding;
 		if (isColliding) {
-			std::cout << "Game Won" << std::endl;
+			//std::cout << "Game Won" << std::endl;
 		}
 	}
 }
