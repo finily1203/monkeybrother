@@ -129,65 +129,70 @@ void WindowSystem::initialise() {
 }
 
 
-void WindowSystem::handleWindowFocus() 
+void WindowSystem::handleWindowFocus()
 {
-	bool previousFocusState = isFocused;
+	static bool securityScreenActive = false;
 	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
+	HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
 
 	// Check for Ctrl+Alt+Del press
 	bool keysArePressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
 		(GetAsyncKeyState(VK_MENU) & 0x8000) &&
 		(GetAsyncKeyState(VK_DELETE) & 0x8000);
 
-	// Handle initial Ctrl+Alt+Del press
-	if (keysArePressed && !keysWerePressed && isFocused) 
+	// When Ctrl+Alt+Del is pressed
+	if (keysArePressed && !keysWerePressed)
 	{
-		onCtrlAltDelPage = true;
-		wasFocused = previousFocusState;  // Store the previous focus state
-		isFocused = false;
+		securityScreenActive = true;
 		GLFWFunctions::audioPaused = true;
 		glfwIconifyWindow(GLFWFunctions::pWindow);
 		ctrlAltDel = true;
+		altTab = false;
 	}
 
-	// Handle Ctrl+Alt+Del page exit
-	if (onCtrlAltDelPage) 
+	// When returning from security screen
+	if (securityScreenActive && !keysArePressed)
 	{
+		//Get the currently active window
+		HWND activeWindow = GetForegroundWindow();
 
-		HWND foreground = GetForegroundWindow();
-		HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
-
-		if (foreground != appWindow && !keysArePressed) 
+		//If we're back to desktop/game window, restore
+		if (activeWindow != NULL && activeWindow != appWindow)
 		{
-			// Only restore if we were focused before Ctrl+Alt+Del
-			if (wasFocused) 
-			{
-				onCtrlAltDelPage = false;
-				SetForegroundWindow(appWindow);
-				Sleep(300);
-			}
+			securityScreenActive = false;
+
+			//// This code restores screen when returning from security screen (rubrics ask to minimze of true hence commented out)
+			//// Uncomment this code if you want to restore window when returning from security screen
+			//ShowWindow(appWindow, SW_RESTORE);
+			//BringWindowToTop(appWindow);
+			//SetForegroundWindow(appWindow);
+			//GLFWFunctions::audioPaused = false;
+			//ctrlAltDel = false;
+
+			//// Ensure we have input focus
+			//SetFocus(appWindow);
 		}
 	}
 
-	// Handle normal focus changes (when not on Ctrl+Alt+Del page)
-	if (!onCtrlAltDelPage) 
+	// Handle normal focus changes
+	if (!securityScreenActive)
 	{
-		if (isFocused) 
+		if (isFocused)
 		{
 			GLFWFunctions::audioPaused = false;
-			glfwRestoreWindow(GLFWFunctions::pWindow);
+			glfwRestoreWindow(GLFWFunctions::pWindow); // Comment this if want to restore window when returning from security screen
 			altTab = false;
 			ctrlAltDel = false;
 		}
-
-		else 
+		else
 		{
 			GLFWFunctions::audioPaused = true;
-			glfwIconifyWindow(GLFWFunctions::pWindow);
+			glfwIconifyWindow(GLFWFunctions::pWindow); // Comment this if want to restore window when returning from security screen
 			altTab = true;
 		}
 	}
 
+	// Update previous key state
 	keysWerePressed = keysArePressed;
 }
 
@@ -207,7 +212,7 @@ void WindowSystem::update() {
 
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
-	// TODO:: Set the viewport incase the window was resized
+	// TODO:: Set the viewport incase the window t resized
 	//GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
 
 	//keyboardInputUpdateFlag();
