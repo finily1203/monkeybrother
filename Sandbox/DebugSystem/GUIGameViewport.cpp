@@ -54,7 +54,7 @@ int GameViewWindow::saveNum;
 int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
 
-float GameViewWindow::currentZoom;
+float GameViewWindow::currentZoom = 1.0f;
 float GameViewWindow::zoomLevel;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
@@ -1013,8 +1013,8 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	double viewportY = viewportCenterY - screenY;
 
 	// Scale by zoom and viewport size
-	double worldScaleX = (viewportWidth / (aspectSize.x * zoomLevel));
-	double worldScaleY = (viewportHeight / (aspectSize.y * zoomLevel));
+	double worldScaleX = (viewportWidth / (aspectSize.x * currentZoom));
+	double worldScaleY = (viewportHeight / (aspectSize.y * currentZoom));
 
 	viewportX *= worldScaleX;
 	viewportY *= worldScaleY;
@@ -1033,8 +1033,8 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 
 	// Apply pan offset
 	if (clickedScreenPan) {
-		double panX = accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
-		double panY = accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+		double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+		double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
 		worldX += panX * cosAngle - panY * sinAngle;
 		worldY += panX * sinAngle + panY * cosAngle;
