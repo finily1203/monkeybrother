@@ -19,7 +19,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIGameViewport.h"
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr), ambienceChannel(nullptr), pumpChannel(nullptr)
+AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
+                           , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
                            , currSongIndex(0), genVol(0.5f), bgmVol(0.045f), sfxVol(1.0f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
@@ -142,6 +143,25 @@ void AudioSystem::update() {
         }
     }
 
+    if (GLFWFunctions::isRotating) {
+        if (!rotationChannel) {
+            playRotationEffect("Rotation.wav");
+        }
+        else {
+            bool bIsPlaying = false;
+            rotationChannel->isPlaying(&bIsPlaying);
+            if (!bIsPlaying) {
+                rotationChannel->setPaused(false);
+            }
+        }
+    }
+    else {
+        if (rotationChannel) {
+            rotationChannel->setPaused(true);
+        }
+        rotationChannel = nullptr;
+    }
+
     if (GLFWFunctions::bumpAudio) {
         playSoundEffect("Mossball_Bounce.wav");
         GLFWFunctions::bumpAudio = false;
@@ -157,9 +177,9 @@ void AudioSystem::update() {
         (*GLFWFunctions::keyState)[Key::NUM_9] = false;
     }
 
-    if ((*GLFWFunctions::keyState)[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
-        playSoundEffect("bubbleSingle");
-        (*GLFWFunctions::keyState)[Key::NUM_0] = false;
+     else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
+            playSoundEffect("bubbleSingle");
+            (*GLFWFunctions::keyState)[Key::NUM_8] = false;
     }
 
     if ((*GLFWFunctions::keyState)[Key::COMMA]) {
@@ -301,6 +321,22 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
     if (soundEffectChannel) {
         soundEffectChannel->setVolume(sfxVol);
         soundEffectChannel->setPaused(false);
+    }
+}
+
+void AudioSystem::playRotationEffect(const std::string& soundEffectName)
+{
+    FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
+    rotationChannel = nullptr;
+	//assetsManager.GetAudioSystem()->createSound(soundEffectName.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSound);
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &rotationChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
+
+    if (rotationChannel) {
+        rotationChannel->setVolume(sfxVol);
+        rotationChannel->setPaused(false);
     }
 }
 

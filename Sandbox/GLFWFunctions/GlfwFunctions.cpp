@@ -85,6 +85,7 @@ GLboolean GLFWFunctions::godMode = false;
 GLboolean GLFWFunctions::fullscreen = false;
 GLboolean GLFWFunctions::isPumpOn = true;
 GLboolean GLFWFunctions::playPumpSong = true;
+GLboolean GLFWFunctions::isRotating = false;
 
 
 
@@ -266,6 +267,14 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             isGuiOpen = ~isGuiOpen;
         }
     }
+
+    if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
+        isRotating = true;
+    }
+    else {
+		isRotating = false;
+    }
+        
 
 
     if ((*keyState)[Key::P])

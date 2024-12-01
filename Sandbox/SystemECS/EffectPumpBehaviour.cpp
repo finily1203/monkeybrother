@@ -1,3 +1,17 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   EffectPumpBehaviour.cpp
+@brief:  This source file includes the implementation of the EffectPumpBehaviour
+		 that logicSystemECS uses to handle the behaviour of the pump entities.
+		 Pump entities will push the player entity and has a on and off duration
+
+		 Joel Chu (c.weiyuan): defined the functions of EffectPumpBehaviour class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "EffectPumpBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"

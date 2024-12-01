@@ -29,12 +29,9 @@ AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textur
     m_AssetList = new std::vector<std::string>();
 }
 
-AssetsManager::~AssetsManager()
-{
-    
-}
+AssetsManager::~AssetsManager(){}
 
-//leave empty for now
+//Initialise the assets manager
 void AssetsManager::initialise()
 {
     if(!m_Textures)
@@ -58,10 +55,10 @@ void AssetsManager::initialise()
     LoadAudioAssets();
 }
 
-void AssetsManager::update()
-{
-}
+void AssetsManager::update(){}
 
+
+//Clean up the assets manager
 void AssetsManager::cleanup()
 {
     ClearTextures();
