@@ -128,6 +128,7 @@ struct GLFWFunctions {
 	static GLboolean audioNext;
 	static GLboolean isPumpOn;
 	static GLboolean playPumpSong;
+	static GLboolean isRotating;
 
 	// Cheat codes
 	static GLboolean skipToNextLevel;

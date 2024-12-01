@@ -28,10 +28,10 @@ public:
 	AssetsManager();
 	~AssetsManager();
 
-	void initialise() override;
-	void update() override;
-	void cleanup() override;
-	SystemType getSystem() override;
+	void initialise() override; //Initialise the assets manager
+	void update() override; // Update the assets manager
+	void cleanup() override; // Clean up the assets manager
+	SystemType getSystem() override; // Get the system type
 
 	//For loading textures
 	void LoadTextureAssets() const;

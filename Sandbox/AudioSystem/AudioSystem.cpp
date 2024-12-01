@@ -18,7 +18,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 
 //Default constructor and destructor for AudioSystem class
-AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr), ambienceChannel(nullptr), pumpChannel(nullptr)
+AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
+                           , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
                            , currSongIndex(0), genVol(0.5f), bgmVol(0.045f), sfxVol(1.0f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
@@ -139,6 +140,25 @@ void AudioSystem::update() {
             }
             GLFWFunctions::audioNext = false;
         }
+    }
+
+    if (GLFWFunctions::isRotating) {
+        if (!rotationChannel) {
+            playRotationEffect("Rotation.wav");
+        }
+        else {
+            bool bIsPlaying = false;
+            rotationChannel->isPlaying(&bIsPlaying);
+            if (!bIsPlaying) {
+                rotationChannel->setPaused(false);
+            }
+        }
+    }
+    else {
+        if (rotationChannel) {
+            rotationChannel->setPaused(true);
+        }
+        rotationChannel = nullptr;
     }
 
     if (GLFWFunctions::bumpAudio) {
@@ -300,6 +320,22 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
     if (soundEffectChannel) {
         soundEffectChannel->setVolume(sfxVol);
         soundEffectChannel->setPaused(false);
+    }
+}
+
+void AudioSystem::playRotationEffect(const std::string& soundEffectName)
+{
+    FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
+    rotationChannel = nullptr;
+	//assetsManager.GetAudioSystem()->createSound(soundEffectName.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSound);
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &rotationChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
+
+    if (rotationChannel) {
+        rotationChannel->setVolume(sfxVol);
+        rotationChannel->setPaused(false);
     }
 }
 

@@ -49,6 +49,9 @@ public:
 	//Function to play sound effect
 	void playSoundEffect(const std::string& soundEffectName);
 
+	//Function to play rotation sound effect
+	void playRotationEffect(const std::string& soundEffectName);
+
 	//Function to play sound from asset browser
 	void playSoundAssetBrowser(const std::string& soundName);
 
@@ -72,6 +75,7 @@ private:
 	FMOD::Channel* assetBrowserChannel;
 	FMOD::Channel* ambienceChannel;
 	FMOD::Channel* pumpChannel;
+	FMOD::Channel* rotationChannel;
 
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
