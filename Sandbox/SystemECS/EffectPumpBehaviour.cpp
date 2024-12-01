@@ -52,13 +52,20 @@ void EffectPumpBehaviour::update(Entity entity) {
 
 		if (isColliding) {
 			myMath::Vector2D bubblesDirectionalVec = PhysicsSystemRef->directionalVector(bubblesTransform.orientation.GetX());
+
 			auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
 			float pumpForce = ecsCoordinator.getComponent<PumpComponent>(entity).pumpForce;
-			//float mag = playerPhysics.force.GetMagnitude() * pumpForce;
 			ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
 
 			//forceManager.AddForce(playerEntity, myMath::Vector2D(-mag, -mag));
-			forceManager.AddForce(playerEntity, bubblesDirectionalVec * pumpForce);
+			if (bubblesTransform.orientation.GetX() == 90.f) {
+				forceManager.AddForce(playerEntity, bubblesDirectionalVec * -(pumpForce));
+			}
+			else {
+				forceManager.AddForce(playerEntity, bubblesDirectionalVec * pumpForce);
+			}
+
+			
 
 			std::cout << "Collision" << std::endl;
 		}

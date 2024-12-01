@@ -55,11 +55,6 @@ public:
 	//Function to play sound from asset browser
 	void playSoundAssetBrowser(const std::string& soundName);
 
-	//Getter for currentSongIndex
-	int getSongIndex();
-	//Setter for currentSongIndex
-	void setSongIndex(int index);
-
 	FMOD::Channel* getPumpChannel() const { return pumpChannel; }	
 	void setPumpChannelToNull() { pumpChannel = nullptr; }
 

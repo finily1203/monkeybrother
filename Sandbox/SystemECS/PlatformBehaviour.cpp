@@ -57,7 +57,7 @@ void PlatformBehaviour::update(Entity entity) {
                 targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
             }
 
-           forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
+            forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
 
             prevForce = targetForce;
 
