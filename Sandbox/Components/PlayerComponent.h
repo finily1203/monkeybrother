@@ -9,7 +9,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
  in many other game object systems to handle logic of players and other
  entities.
  Joel Chu (c.weiyuan): declared the struct component
-   100%
+					   100%
 *//*___________________________________________________________________________-*/
 
 #pragma once

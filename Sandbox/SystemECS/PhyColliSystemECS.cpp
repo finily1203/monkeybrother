@@ -50,7 +50,6 @@ PhysicsSystemECS::PhysicsSystemECS() : eventSource("PlayerEventSource"), eventOb
 void PhysicsSystemECS::initialise()
 {
     LoadPhysicsConfigFromJSON(FilePathManager::GetPhysicsPath());
-    //std::cout << friction << " nwihediwwwwwwwwwwwwwwww" << std::endl;
 }
 
 void PhysicsSystemECS::cleanup() {
@@ -206,7 +205,6 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
 void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 {
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
-    //myMath::Vector2D& accForce          = ecsCoordinator.getComponent<PhysicsComponent>(player).accumulatedForce;
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
     float rotation = ecsCoordinator.getComponent<TransformComponent>(player).orientation.GetX();
     myMath::Vector2D direction = directionalVector(rotation);
@@ -396,17 +394,13 @@ void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D norma
 }
 
 int count = 0;
-Entity playerEntity = {};/* = ecsCoordinator.getFirstEntity();*/
+Entity playerEntity = {};
 Entity closestPlatformEntity = {};
 
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt)
 {
-    //std::cout << "Physics System Update" << std::endl;
     (void)dt;
-    //let it be the first entity
-    
-    //Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
     count = 0;
     for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
 
@@ -422,15 +416,8 @@ void PhysicsSystemECS::update(float dt)
         }
     }
 
-    if(count > 2)
+    if(count > 1)
     HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
-
-    //std::cout << "count " << count << std::endl;
-
-    //Entity closestPlatformEntity;
-    //playerEntity = ecsCoordinator.hasComponent<PlayerComponent>(playerEntity);
-
-
 
 }
 

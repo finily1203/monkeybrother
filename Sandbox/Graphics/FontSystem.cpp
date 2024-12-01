@@ -267,9 +267,6 @@ void FontSystem::cleanup() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //textShader.reset(); 
-
-    //assetsManager.ClearFonts();
 
     isInitialized = false;
 

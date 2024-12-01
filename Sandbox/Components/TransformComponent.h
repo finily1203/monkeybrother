@@ -6,6 +6,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @file:   TransformComponent.h
 @brief:  This header file is the Transform Component used by the ECS to handle
 		 the transformation of the game objects.
+
 		 Joel Chu (c.weiyuan): declared the struct component
 							   100%
 *//*___________________________________________________________________________-*/

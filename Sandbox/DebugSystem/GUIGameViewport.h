@@ -14,8 +14,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Integrated serialization & deserialization functions to initialize variables from json file, which
 		  allows saving and loading feature in the level editor
 
-File Contributions: Lew Zong Han Owen (90%)
+*Liu YaoTing (yaoting.liu) :
+		- Integrated save and load function for multiple files
+		- Updated "Pause", "Zoom", and "Pan" buttons
+
+File Contributions: Lew Zong Han Owen (60%)
 					Ian Loi           (10%)
+					Liu YaoTing       (30%)
 
 /*_______________________________________________________________________________________________________________*/
 #pragma once

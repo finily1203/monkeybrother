@@ -14,8 +14,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Integrated serialization & deserialization functions to initialize variables from json file, which
 		  allows saving and loading feature in the level editor
 
-File Contributions: Lew Zong Han Owen (90%)
+*Liu YaoTing (yaoting.liu) :
+		- Integrated save and load function for multiple files
+		- Updated "Pause", "Zoom", and "Pan" buttons
+
+File Contributions: Lew Zong Han Owen (60%)
 					Ian Loi           (10%)
+					Liu YaoTing       (30%)
 
 /*_______________________________________________________________________________________________________________*/
 #define _USE_MATH_DEFINES
@@ -376,8 +381,6 @@ void GameViewWindow::Update() {
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
-		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
-		//GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
 
@@ -413,13 +416,6 @@ void GameViewWindow::Update() {
 		myMath::Vector2D initialCamPos{};
 
 		initialCamPos = { 0,0 };
-
-		/*for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
-			}
-		}*/
 
 		cameraSystem.setCameraPosition(initialCamPos);
 		// Reset camera zoom to default value
@@ -649,17 +645,14 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 	// Add the appropriate components based on the specifier
 	switch (specifier) {
 	case TEXTURE:
-		//if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
 			if (strcmp(assetName, "goldfish") == 0) {
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
 
 				PhysicsComponent physics;
-				//behaviour.enemy = true;
 
 				ecsCoordinator.addComponent(dropEntity, enemy);
 				ecsCoordinator.addComponent(dropEntity, physics);
-				//ecsCoordinator.addComponent(dropEntity, behaviour);
 			}
 			if (strcmp(assetName, "mossball") == 0) {
 				PlayerComponent player;
@@ -667,57 +660,9 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 				ecsCoordinator.addComponent(dropEntity, player);
 
 				PhysicsComponent physics;
-				//behaviour.enemy = true;
-
-				//ecsCoordinator.addComponent(dropEntity, enemy);
 				ecsCoordinator.addComponent(dropEntity, physics);
-				//ecsCoordinator.addComponent(dropEntity, behaviour);
 			}
 
-		//	AABBComponent aabb;
-		//	serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
-		//	serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
-		//	serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
-		//	serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
-		//	ecsCoordinator.addComponent(dropEntity, aabb);
-
-		//	PhysicsComponent physics;
-
-		//	myMath::Vector2D direction = physics.force.GetDirection();
-		//	float magnitude = physics.force.GetMagnitude();
-
-		//	serializer.ReadObject(physics.mass,assetName, "entities.forces.mass");
-		//	serializer.ReadObject(physics.gravityScale,assetName, "entities.forces.gravityScale");
-		//	serializer.ReadObject(physics.jump,assetName, "entities.forces.jump");
-		//	serializer.ReadObject(physics.dampening,assetName, "entities.forces.dampening");
-		//	serializer.ReadObject(physics.velocity,	assetName, "entities.forces.velocity");
-		//	serializer.ReadObject(physics.maxVelocity,assetName, "entities.forces.maxVelocity");
-		//	serializer.ReadObject(physics.acceleration,	assetName, "entities.forces.acceleration");
-		//	serializer.ReadObject(direction,assetName, "entities.forces.force.direction");
-		//	serializer.ReadObject(magnitude,assetName, "entities.forces.force.magnitude");
-		//	serializer.ReadObject(physics.accumulatedForce,assetName, "entities.forces.accumulatedForce");
-		//	serializer.ReadObject(physics.maxAccumulatedForce,assetName, "entities.forces.maxAccumulatedForce");
-		//	serializer.ReadObject(physics.prevForce,assetName, "entities.forces.prevForces");
-		//	serializer.ReadObject(physics.targetForce,assetName, "entities.forces.targetForce");
-
-		//	physics.force.SetDirection(direction);
-		//	physics.force.SetMagnitude(magnitude);
-
-		//	ecsCoordinator.addComponent(dropEntity, physics);
-		//}
-		//else if (strcmp(assetName, "woodtile") == 0) {
-		//	AABBComponent aabb{};
-		//	serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
-		//	serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
-		//	serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
-		//	serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
-
-		//	ClosestPlatform closestPlatform{};
-		//	serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
-
-		//	ecsCoordinator.addComponent(dropEntity, aabb);
-		//	ecsCoordinator.addComponent(dropEntity, closestPlatform);
-		//}
 		break;
 	case FONT:
 		FontComponent font;

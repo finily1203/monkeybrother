@@ -23,47 +23,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <algorithm>
 #include <iostream>
 #include <Windows.h>
-//#include <chrono>
-//#include <thread>
-
-//bool GLFWFunctions::isAKeyPressed = false;
-//float GLFWFunctions::volume = 0.5f;
-//float GLFWFunctions::zoomMouseCoordX = 0.0f;
-//float GLFWFunctions::zoomMouseCoordY = 0.0f;
-//float GLFWFunctions::objMoveMouseCoordX = 0.0f;
-//float GLFWFunctions::objMoveMouseCoordY = 0.0f;
-//bool GLFWFunctions::audioPaused = false;
-//bool GLFWFunctions::audioNext = false;
-
-//bool GLFWFunctions::audioStopped = false;
-//bool GLFWFunctions::isGuiOpen = false;
-//bool GLFWFunctions::zoomViewport = false;
-//bool GLFWFunctions::isAtMaxZoom = false;
-//bool GLFWFunctions::cloneObject = false;
-//bool GLFWFunctions::goNextMode = false;
-//bool GLFWFunctions::slideAudio = false;
-//bool GLFWFunctions::bubblePopping = false;
-
-//bool GLFWFunctions::enemyMoveLeft = false;
-//bool GLFWFunctions::enemyMoveRight = false;
-//bool GLFWFunctions::enemyMoveUp = false;
-//bool GLFWFunctions::enemyMoveDown = false;
-
-//GLboolean GLFWFunctions::left_turn_flag = false;
-//GLboolean GLFWFunctions::right_turn_flag = false;
-//GLboolean GLFWFunctions::scale_up_flag = false;
-//GLboolean GLFWFunctions::scale_down_flag = false;
-//GLboolean GLFWFunctions::move_up_flag = false;
-//GLboolean GLFWFunctions::move_down_flag = false;
-//GLboolean GLFWFunctions::move_left_flag = false;
-//GLboolean GLFWFunctions::move_right_flag = false;
-
-//GLboolean GLFWFunctions::move_jump_flag = false;
-
-//GLboolean GLFWFunctions::camera_zoom_in_flag = false;
-//GLboolean GLFWFunctions::camera_zoom_out_flag = false;
-//GLboolean GLFWFunctions::camera_rotate_left_flag = false;
-//GLboolean GLFWFunctions::camera_rotate_right_flag = false;
 
 GLFWwindow* GLFWFunctions::pWindow = nullptr;
 double GLFWFunctions::fps = 0.0;
@@ -109,11 +68,6 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     /* Initialize the library */
     if (!glfwInit())
         return false;
-
-    //// Set window hints for OpenGL version and profile
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     if(!keyState)
 		keyState = new std::unordered_map<Key, bool>();
@@ -322,7 +276,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
         if ((*keyState)[Key::F] && action == GLFW_PRESS) {
             fullscreen = ~fullscreen;
-            //GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
             GLFWmonitor* monitor = fullscreen ? nullptr : glfwGetPrimaryMonitor();
 
             if (!fullscreen) {
@@ -475,10 +428,7 @@ void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths)
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
-    //keyState.clear();
-    //std::unordered_map<Key, bool>().swap(keyState);
-    //mouseButtonState.clear();
-    //std::unordered_map<MouseButton, bool>().swap(mouseButtonState);
+    
     if (keyState) {
         delete keyState;
         keyState = nullptr;

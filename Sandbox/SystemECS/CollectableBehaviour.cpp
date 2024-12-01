@@ -49,7 +49,7 @@ void CollectableBehaviour::update(Entity entity) {
 				playerPhysics.mass += 0.5f;
 
 				GLFWFunctions::collectAudio = true;
-
+			
 
 				ecsCoordinator.destroyEntity(entity);
 				GLFWFunctions::collectableCount--;

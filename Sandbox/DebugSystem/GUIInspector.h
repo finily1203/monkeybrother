@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIInspector.h
+@brief  :  This file contains the function declaration of ImGui Inspector system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui inspector window to capture selected entity's transformation data
+		- Integrated entity to mouse interaction to drag, scale, rotate, and delete
+		- Integrated the feature to allow re-assigning of pre-existing entity behavior
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #pragma once
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

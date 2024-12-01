@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIInspector.cpp
+@brief  :  This file contains the function definition of ImGui Inspector system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui inspector window to capture selected entity's transformation data
+		- Integrated entity to mouse interaction to drag, scale, rotate, and delete
+		- Integrated the feature to allow re-assigning of pre-existing entity behavior
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "GUIInspector.h"
 #include "GUIGameViewport.h"
 #include "Debug.h"
@@ -31,7 +47,6 @@ void Inspector::Update() {
 
 	ImVec2 viewportPos = GameViewWindow::getViewportPos(); // Get viewport's position
 	ImVec2 mouseScreenPos = ImGui::GetMousePos();
-	//std::cout << "Mouse Screen: " << mouseScreenPos.x << ", " << mouseScreenPos.y << std::endl;
 	mouseScreenPos.x -= viewportPos.x;  // Adjust for viewport offset
 	mouseScreenPos.y -= viewportPos.y;
 
@@ -134,8 +149,6 @@ void Inspector::Update() {
 	mousePos = ImGui::GetMousePos();
 
 	static bool initiatedByDoubleClick = false;
-	//static bool openDeletePopup = false;
-	//static int chosenEntityID = -1;
 
 	// Handle entity selection with Ctrl+Left Click
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
@@ -234,7 +247,7 @@ void Inspector::Update() {
 		float scaleFactor = 1.0f + (wheel_delta * 0.1f);
 
 		if (withinX && withinY) {
-			if (ecsCoordinator.getEntityID(selectedEntityID) != "player") {
+			if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
 				if (ImGui::GetIO().KeyShift) {
 					float rotationDelta = wheel_delta * 15.0f;
 					transform.orientation.SetX(transform.orientation.GetX() + rotationDelta);

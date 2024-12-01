@@ -55,7 +55,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 
 // Function to load a texture from a file
 GraphicsSystem::GraphicsSystem()
-    : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
+    : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0), is_animated(0), m_Texture2(0), m_Texture3(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
     m_AnimationData = std::make_unique<AnimationData>(48, 0.03f, 4, 6);
     vps = new std::vector<GLViewport>();

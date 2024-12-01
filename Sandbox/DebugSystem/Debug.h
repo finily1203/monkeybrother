@@ -3,23 +3,15 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @author :  Lew Zong Han Owen (z.lew)
 @team   :  MonkeHood
 @course :  CSD2401
-@file   :  Debug.h
+@file   :  Debug.cpp
 @brief  :  This file contains the function declaration of ImGui main GUI debugging window and it also coordinates the
-		   the other ImGui sub systems' such as game viewport, console, and crash logging. It also includes the game's
-		   level editor systems such as game viewport camera controls, object creation, hierarchy list, and save
-		   and load feature
+		   the other ImGui sub systems' such as game viewport, console, crash logging, game viewport, object creation,
+		   hierarchy list, and save and load feature, asset browser, and inspector window
 
 *Lew Zong Han Owen (z.lew) :
 		- Integrated ImGui debug window to display FPS, performance viewer, mouse coordinates, and key/mouse input
 		  indication
 		- Designed the display synergy between all of ImGui's sub systems in the main debugging window
-		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
-		  properties' data
-		- Integrated ImGui Hierarchy List system to display all existing game objects and also allow data modification to
-		  them
-		- Integrated ImGui game viewport camera controls to zoom and pan current game scene
-		- Integrated serialization & deserialization with ImGui to create a saving and loading feature in level
-		  editor
 
 *Ian Loi (ian.loi) :
 		- Integrated serialization & deserialization functions to initialize variables from json file, which allows

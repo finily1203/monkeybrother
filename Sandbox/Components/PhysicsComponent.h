@@ -6,6 +6,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @file:   PhysicsComponent.h
 @brief:  This source file contains struct for Physics Component to be used by ECS
 		 and Physics and Collision Systems.
+
 		 Lee Jing Wen (jingwen.lee): Declared the struct component
 									 100%
 *//*____________________________________________________________________________-*/

@@ -20,7 +20,6 @@ public:
 	EffectPumpBehaviour()
 		: hasForceAdded(false), timer(0.0f), offDuration(3.0f), onDuration(5.0f) {}
 
-	void managePumpSound(bool isPumpOn);
 
 private:
 	bool hasForceAdded;

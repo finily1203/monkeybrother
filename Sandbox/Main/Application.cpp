@@ -49,7 +49,6 @@ int main() {
 
 		engine->addSystem(&assetsManager);
 
-		//AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(&audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
@@ -64,16 +63,8 @@ int main() {
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
-		//ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			//DebugSystem::StartLoop(); //Get time for start of gameloop
-
-			//If user presses clone button ("C"), clone first object
-			//if (GLFWFunctions::cloneObject) {
-			//	ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
-			//	GLFWFunctions::cloneObject = false;
-			//}
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);

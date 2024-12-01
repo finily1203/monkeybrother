@@ -27,77 +27,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-//Variable for WindowSystem handleWindowFocus
 bool WindowSystem::altTab = false;
 bool WindowSystem::ctrlAltDel = false;
-//HWND WindowSystem::foreground = nullptr;
-//GraphicsSystem graphicsSystem;
-//GraphicsSystem::GLObject gameObject, gameObject2, 
-// , blackBox;
-//Shader* shader = nullptr;
-//Shader* shader2 = nullptr;
-//std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
-
-//void WindowSystem::logicUpdate() {
-//
-//	if (GLFWFunctions::testMode == 1) {
-//		// Rotation logic
-//		if (GLFWFunctions::left_turn_flag) {
-//			gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time * 2;
-//		}
-//		else if (GLFWFunctions::right_turn_flag) {
-//			gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time * 2;
-//		}
-//		else {
-//			gameObject.orientation.y = 0.0f;
-//		}
-//
-//		// Scaling logic
-//		if (GLFWFunctions::scale_up_flag) {
-//			if (gameObject.scaling.x < 600.0f && gameObject.scaling.y < 600.0f) {
-//				gameObject.scaling.x += 300.0f * GLFWFunctions::delta_time;
-//				gameObject.scaling.y += 300.0f * GLFWFunctions::delta_time;
-//			}
-//			graphicsSystem.SetCurrentAction(2);
-//		}
-//		else if (GLFWFunctions::scale_down_flag) {
-//			if (gameObject.scaling.x > 50.0f && gameObject.scaling.y > 50.0f) {
-//				gameObject.scaling.x -= 300.f * GLFWFunctions::delta_time;
-//				gameObject.scaling.y -= 300.0f * GLFWFunctions::delta_time;
-//			}
-//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-//		}
-//
-//		// Movement logic
-//		bool isMoving = false;
-//		if (GLFWFunctions::move_up_flag) {
-//			gameObject.position.y += 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-//		}
-//		if (GLFWFunctions::move_down_flag) {
-//			gameObject.position.y -= 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-//		}
-//		if (GLFWFunctions::move_left_flag) {
-//			gameObject.position.x -= 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
-//		}
-//		if (GLFWFunctions::move_right_flag) {
-//			gameObject.position.x += 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
-//		}
-//
-//
-//		if (!isMoving) {
-//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-//		}
-//	}
-//}
-
 
 void WindowSystem::initialise() {
 	nlohmann::json windowConfigJSON;
@@ -164,17 +95,6 @@ void WindowSystem::handleWindowFocus()
 		if (activeWindow != NULL && activeWindow != appWindow)
 		{
 			securityScreenActive = false;
-
-			//// This code restores screen when returning from security screen (rubrics ask to minimze of true hence commented out)
-			//// Uncomment this code if you want to restore window when returning from security screen
-			//ShowWindow(appWindow, SW_RESTORE);
-			//BringWindowToTop(appWindow);
-			//SetForegroundWindow(appWindow);
-			//GLFWFunctions::audioPaused = false;
-			//ctrlAltDel = false;
-
-			//// Ensure we have input focus
-			//SetFocus(appWindow);
 		}
 	}
 
@@ -216,48 +136,8 @@ void WindowSystem::update() {
 
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
-	// TODO:: Set the viewport incase the window t resized
-	//GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
-
-	//keyboardInputUpdateFlag();
-
-	//logicUpdate();
-
-	//DebugSystem::StartSystemTiming("Graphics"); 
-
-	//graphicsSystem.Update(GLFWFunctions::delta_time, false);
-	//graphicsSystem.Render(GLFWFunctions::delta_time);
-
-	//background.update(GLFWFunctions::delta_time);
-	//gameObject.update(GLFWFunctions::delta_time);
-	//gameObject2.update(GLFWFunctions::delta_time);
-	//blackBox.update(GLFWFunctions::delta_time);
-
-	////graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-
-	//if (GLFWFunctions::testMode == 1) {
-	//	// Draw non-animated object (background)
-	//	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
-
-	//	// Update animated objects before drawing them
-	//	graphicsSystem.Update(GLFWFunctions::delta_time, true);
-
-	//	// Draw game objects
-	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-
-	//	if (GLFWFunctions::debug_flag) {
-	//		// Draw debug lines if debug mode is on
-	//		graphicsSystem.drawDebugLines(gameObject);
-	//		graphicsSystem.drawDebugLines(gameObject2);
-	//	}
-
-
-	//DebugSystem::EndSystemTiming("Graphics"); 
-
 	GLFWFunctions::getFps();
 
-	//glfwSwapBuffers(GLFWFunctions::pWindow);
 
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;

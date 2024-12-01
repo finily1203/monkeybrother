@@ -7,8 +7,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @brief:  This header file includes a multitude of bool variables used by ECS to
  determine which entity has which specific behaviour. Note that the entity
  can only have one behaviour at a time despite the multiple bool variables.
+
  Joel Chu (c.weiyuan): declared the struct component
-   100%
+					   100%
 *//*___________________________________________________________________________-*/
 
 #pragma once

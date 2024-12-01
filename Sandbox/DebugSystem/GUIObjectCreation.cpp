@@ -1,3 +1,18 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIObjectCreation.cpp
+@brief  :  This file contains the function definition of ImGui object creation system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
+		  properties' data
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "Debug.h"
 #include "GUIObjectCreation.h"
 #include "LogicSystemECS.h"
@@ -215,17 +230,10 @@ void ObjectCreation::Update() {
 	//Button to destroy all existing entity
 	if (ImGui::Button("Remove All Entity")) {
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
-				if (ecsCoordinator.hasComponent<TransformComponent>(entity)) {
-					ecsCoordinator.removeComponent<TransformComponent>(entity);
-				}
-				// ... clean up other components
-
 				ecsCoordinator.destroyEntity(entity);
-			}
+			
 		}
 	}
-
 
 	ImGui::NewLine();
 	ImGui::End();

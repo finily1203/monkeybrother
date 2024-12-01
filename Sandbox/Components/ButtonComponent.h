@@ -6,6 +6,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @file:   ButtonComponent.h
 @brief:  This header file includes the ButtonComponent used by ECS to handle mouse
 		 on-click and on-hover 
+
 		 Ian Loi (ian.loi): Declared the ButtonComponent struct
 							100%
 *//*___________________________________________________________________________-*/

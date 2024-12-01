@@ -63,7 +63,7 @@ void Console::Cleanup() {
 Console::~Console() {
 
 }
-
+//Implements the ImGui console window drawing and interaction logic
 void Console::DrawImpl(const char* title) {
     ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(title)) {

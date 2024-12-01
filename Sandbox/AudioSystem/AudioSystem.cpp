@@ -32,21 +32,6 @@ SystemType AudioSystem::getSystem() {
 
 //Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
-    //FMOD_RESULT result;
-
-    //result = FMOD::System_Create(&audioSystem);
-    //if (result != FMOD_OK) {
-    //    std::cout << "FMOD error! (" << result << ") " << std::endl;
-    //    return;
-    //}
-
-    //result = audioSystem->init(32, FMOD_INIT_NORMAL, nullptr);
-    //if (result != FMOD_OK) {
-    //    std::cout << "FMOD error! (" << result << ") " << std::endl;
-    //    return;
-    //}
-
-    //loadAudioAssets();
 
     playSong("Ambience.wav");
     playBgm("Iris_L2_BGM_Loop.wav");
@@ -226,20 +211,7 @@ void AudioSystem::update() {
 }
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
-void AudioSystem::cleanup() {
-    //for (auto song : audioSongList) {
-    //    if (song) {
-    //        song->release();
-    //    }
-    //}
-    //audioSongList.clear();
-
-    //if (audioSystem) {
-    //    audioSystem->close();
-    //    audioSystem->release();
-    //    audioSystem = nullptr;
-    //}
-}
+void AudioSystem::cleanup() {}
 
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
@@ -354,25 +326,3 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
     }
 }
 
-
-void AudioSystem::loadAudioAssets() const
-{
-    //std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
-    //std::ifstream file(jsonFilePath);
-    //nlohmann::json jsonObj;
-
-    //if (file.is_open())
-    //{
-    //    file >> jsonObj;
-    //    file.close();
-    //}
-
-    //for (const auto& audioAsset : jsonObj["audioAssets"])
-    //{
-    //    std::string audioName = audioAsset["audioName"].get<std::string>();
-    //    std::string relativePath = audioAsset["filePath"].get<std::string>();
-
-    //    std::string audioFilePath = FilePathManager::GetExecutablePath() + "\\..\\..\\..\\" + relativePath;
-    //    assetsManager.LoadAudio(audioName, audioFilePath, audioSystem);
-    //}
-}

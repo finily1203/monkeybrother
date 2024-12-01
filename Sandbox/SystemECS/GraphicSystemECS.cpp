@@ -57,16 +57,10 @@ void GraphicSystemECS::update(float dt) {
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
-        //if (GLFWFunctions::testMode == 0) {
         bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
         bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
         bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
-        //bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
-        if (ecsCoordinator.getEntityID(entity) == "background") {
-            /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
-            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
-        }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
 		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
@@ -81,19 +75,9 @@ void GraphicSystemECS::update(float dt) {
         }
 
         // Use hasMovement for the update parameter
-        //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
         graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
-
-        //auto entitySig = ecsCoordinator.getEntitySignature(entity);
-
-        /*if (ecsCoordinator.getEntityID(entity) == "background") {
-            transform.scale.SetX(GLFWFunctions::windowWidth);
-            transform.scale.SetY(GLFWFunctions::windowHeight);
-        }
-        std::cout << "Window X : " << GLFWFunctions::windowWidth << std::endl;
-        std::cout << "Window Y : " << GLFWFunctions::windowHeight << std::endl;*/
 
         // Compute view matrix
         if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
@@ -117,14 +101,14 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag/* && *//*!ecsCoordinator.hasComponent<FontComponent>(entity)*/ && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+		else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
         if (isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
         }
         // Drawing based on entity components
-        if (/*hasMovement && */isEnemy) {
+        if (isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {

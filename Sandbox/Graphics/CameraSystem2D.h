@@ -21,7 +21,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <glm/glm.hpp>
 #include "Systems.h"            // Include GameSystems
 #include "ECSCoordinator.h"     // Include ECS Coordinator
-//#include "GlobalCoordinator.h"  // Include system type enum
 #include "GlfwFunctions.h"
 
 
