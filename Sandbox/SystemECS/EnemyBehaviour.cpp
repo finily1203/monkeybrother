@@ -84,6 +84,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
+    ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
 
     // Set the current waypoint target
     myMath::Vector2D target = currentWaypoints[currentWPIndex];
@@ -127,7 +128,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     if (length >= waypointThreshold) {
         const float movementForceMagnitude = 5.0f; // Example value
         myMath::Vector2D movementForce = direction * movementForceMagnitude;
-        PhysicsSystemRef->getForceManager().AddForce(entity, movementForce);
+        forceManager.AddForce(entity, movementForce);
     }
 
     // Physics calculations

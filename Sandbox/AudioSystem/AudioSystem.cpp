@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AudioSystem.h"
 #include "GlfwFunctions.h"
 #include <iostream>
+#include "GUIGameViewport.h"
 
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
@@ -96,7 +97,7 @@ void AudioSystem::update() {
             playSong("Ambience.wav");
         }
 
-        if (GLFWFunctions::audioPaused) {
+        if (GLFWFunctions::audioPaused || GameViewWindow::getPaused()) {
             // Check if the channel is already paused
             bool isPaused = false;
             bgmChannel->getPaused(&isPaused);
@@ -147,9 +148,9 @@ void AudioSystem::update() {
             playRotationEffect("Rotation.wav");
         }
         else {
-            bool bIsPlaying = false;
-            rotationChannel->isPlaying(&bIsPlaying);
-            if (!bIsPlaying) {
+            bool bgmIsPlaying = false;
+            rotationChannel->isPlaying(&bgmIsPlaying);
+            if (!bgmIsPlaying) {
                 rotationChannel->setPaused(false);
             }
         }
@@ -327,7 +328,6 @@ void AudioSystem::playRotationEffect(const std::string& soundEffectName)
 {
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
     rotationChannel = nullptr;
-	//assetsManager.GetAudioSystem()->createSound(soundEffectName.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSound);
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &rotationChannel);
     if (result != FMOD_OK) {
         std::cout << "FMOD playSound error! (" << result << ") " << std::endl;

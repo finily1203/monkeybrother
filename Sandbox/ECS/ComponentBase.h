@@ -62,13 +62,40 @@ public:
 	{
 		assert(entity < MAX_ENTITIES && entity >= 0 && "Entity is not valid!");
 
+		// First check if entity exists in the map
 		auto it = entityToIndexMap.find(entity);
-		assert(it != entityToIndexMap.end() && "Component does not exist in the entity");
+		if (it == entityToIndexMap.end()) {
+			return; // Entity doesn't have this component, nothing to remove
+		}
+
 		size_t removedIndex = it->second;
-		componentArray[removedIndex] = T{};
+		// Check if the index is valid
+		if (removedIndex >= MAX_ENTITIES) {
+			return; // Invalid index, prevent array out of bounds
+		}
+
+		// Move last component to fill the gap
+		size_t lastIndex = nextComponentIndex - 1;
+		if (removedIndex != lastIndex && lastIndex < MAX_ENTITIES) {
+			// Copy the last component to the removed slot
+			componentArray[removedIndex] = componentArray[lastIndex];
+
+			// Update the mappings for the moved component
+			Entity lastEntity = indexToEntityMap[lastIndex];
+			entityToIndexMap[lastEntity] = removedIndex;
+			indexToEntityMap[removedIndex] = lastEntity;
+
+			// Clear the last slot
+			componentArray[lastIndex] = T{};
+		}
+		else {
+			// If we're removing the last component or there's only one
+			componentArray[removedIndex] = T{};
+		}
+
 		entityToIndexMap.erase(entity);
 		indexToEntityMap.erase(removedIndex);
-		if (nextComponentIndex != 0) {
+		if (nextComponentIndex > 0) {
 			nextComponentIndex--;
 		}
 	}

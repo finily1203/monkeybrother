@@ -377,7 +377,7 @@ void GameViewWindow::Update() {
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
 		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
-		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
+		//GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
 
@@ -405,18 +405,21 @@ void GameViewWindow::Update() {
 	}
 
 
+
 	ImGui::SameLine(0, optionsButtonPadding);
 
 
 	if (ImGui::Button("Reset Perspective")) {
 		myMath::Vector2D initialCamPos{};
 
-		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		initialCamPos = { 0,0 };
+
+		/*for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
 			}
-		}
+		}*/
 
 		cameraSystem.setCameraPosition(initialCamPos);
 		// Reset camera zoom to default value

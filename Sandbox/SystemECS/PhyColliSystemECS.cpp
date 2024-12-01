@@ -216,6 +216,7 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
     float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
     Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
+    ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(player).forceManager;
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
 
