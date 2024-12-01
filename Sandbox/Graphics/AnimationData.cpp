@@ -64,25 +64,10 @@ void AnimationData::Update(float deltaTime) {
     if (timeAccumulator >= frameDuration) {
         timeAccumulator -= frameDuration;
 
-        if ((*GLFWFunctions::keyState)[Key::J]) {
-            currentFrame = 24 + (currentFrame + 1) % 24;
-            lastDirection = Direction::Left;
-        }
-        else if ((*GLFWFunctions::keyState)[Key::L]) {
-            currentFrame = (currentFrame + 1) % 24;
-            lastDirection = Direction::Right;
-        }
-        else {
-            
-            if (lastDirection == Direction::Left) {
-                currentFrame = 24 + (currentFrame + 1) % 24;
-            }
-            else if (lastDirection == Direction::Right) {
-                currentFrame = (currentFrame + 1) % 24;
-            }
-        }
+        // Always loop through the first 14 frames
+        currentFrame = (currentFrame + 1) % 24;
 
-        uvDirty = true; 
+        uvDirty = true;
     }
 
     if (uvDirty) {
@@ -90,6 +75,7 @@ void AnimationData::Update(float deltaTime) {
         uvDirty = false;
     }
 }
+
 
 // pdate UV coordinates function implementation
 void AnimationData::UpdateUVCoordinates() {

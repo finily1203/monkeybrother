@@ -57,7 +57,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(48, 0.02f, 4, 12);
+    m_AnimationData = std::make_unique<AnimationData>(48, 0.03f, 4, 6);
     vps = new std::vector<GLViewport>();
     vps->push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
     glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
