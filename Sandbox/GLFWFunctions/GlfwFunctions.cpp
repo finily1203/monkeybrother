@@ -86,6 +86,7 @@ GLboolean GLFWFunctions::fullscreen = false;
 GLboolean GLFWFunctions::isPumpOn = true;
 GLboolean GLFWFunctions::playPumpSong = true;
 GLboolean GLFWFunctions::isRotating = false;
+GLboolean GLFWFunctions::exitCollision = false;
 
 
 
