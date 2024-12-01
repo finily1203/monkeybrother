@@ -366,6 +366,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
 		ecsCoordinator.addComponent(entityObj, behaviour);
+
+		GLFWFunctions::collectableCount++;
 	}
 	else if (!strcmp(items[itemIndex], "Background")) {
 		BackgroundComponent background{};

@@ -1,3 +1,17 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   CollectableBehaviour.cpp
+@brief:  This source file includes the implementation of the CollectableBehaviour
+		 that logicSystemECS uses to handle the behaviour of the collectable entities.
+		 Note that Collectables are affected by the Player entity
+
+		 Joel Chu (c.weiyuan): defined the functions of CollectableBehaviour class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "CollectableBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"

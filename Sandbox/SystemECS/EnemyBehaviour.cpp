@@ -1,3 +1,19 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   EnemyBehaviour.cpp
+@brief:  This source file includes the implementation of the EnemyBehaviour
+         that logicSystemECS uses to handle the behaviour of the Enemy entities.
+         Note that in the enum there are 3 states. However, only the patrol state
+         is implemented. The other states will be defined in future implementations.
+         Waypoints are also current set to a fixed path for all enemies.
+
+         Joel Chu (c.weiyuan): defined the functions of EnemyBehaviour class
+                               100%
+*//*___________________________________________________________________________-*/
+
 #include "EnemyBehaviour.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"

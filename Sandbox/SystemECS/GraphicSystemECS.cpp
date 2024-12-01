@@ -183,6 +183,8 @@ void GraphicSystemECS::update(float dt) {
            
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
+
+        std::cout << GLFWFunctions::collectableCount << std::endl;
     }
 }
 

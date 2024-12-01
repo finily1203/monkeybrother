@@ -156,9 +156,9 @@ void AudioSystem::update() {
         (*GLFWFunctions::keyState)[Key::NUM_9] = false;
     }
 
-    if ((*GLFWFunctions::keyState)[Key::NUM_0] && (GLFWFunctions::debug_flag == false)) {
-        playSoundEffect("bubbleSingle");
-        (*GLFWFunctions::keyState)[Key::NUM_0] = false;
+     else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
+            playSoundEffect("bubbleSingle");
+            (*GLFWFunctions::keyState)[Key::NUM_8] = false;
     }
 
     if ((*GLFWFunctions::keyState)[Key::COMMA]) {

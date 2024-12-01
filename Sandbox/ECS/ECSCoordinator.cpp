@@ -108,6 +108,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 // open the JSON file and initialize the entity data based on the values read
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
 
 	// checks if JSON file could be opened

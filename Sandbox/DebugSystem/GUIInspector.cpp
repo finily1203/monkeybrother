@@ -546,6 +546,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						break;
 					case 4:
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
+						GLFWFunctions::collectableCount++;
 						break;
 					case 5:
 						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);

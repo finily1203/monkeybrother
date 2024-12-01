@@ -1,3 +1,20 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   PlayerBehaviour.cpp
+@brief:  This source file includes the implementation of the PlayerBehaviour
+		 that logicSystemECS uses to handle the behaviour of the player entity.
+		 Note that the camera behaviour is also included as part of the player
+		 since in our game the camera is locked onto the player entity unless
+		 told otherwise. This code is similar to what we implemented in LogicSystemECS
+		 in Milestone 2.
+
+		 Joel Chu (c.weiyuan): defined the functions of PlayerBehaviour class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "PlayerBehaviour.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
