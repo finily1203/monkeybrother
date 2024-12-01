@@ -21,7 +21,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-                           , currSongIndex(0), genVol(0.5f), bgmVol(0.045f), sfxVol(1.0f) {}
+                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f) {}
 AudioSystem::~AudioSystem() {
     cleanup();
 }
@@ -90,6 +90,11 @@ void AudioSystem::update() {
             if (!isPaused) {
                 // If the sound is not paused, pause it
                 result = bgmChannel->setPaused(true);
+                result = soundEffectChannel->setPaused(true);
+                result = assetBrowserChannel->setPaused(true);
+                result = ambienceChannel->setPaused(true);
+                result = pumpChannel->setPaused(true);
+                result = rotationChannel->setPaused(true);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD pause error! (" << result << ")" << std::endl;
                 }
@@ -106,6 +111,11 @@ void AudioSystem::update() {
             if (isPaused) {
                 // If the sound is paused, unpause it
                 result = bgmChannel->setPaused(false);
+                result = soundEffectChannel->setPaused(false);
+                result = assetBrowserChannel->setPaused(false);
+                result = ambienceChannel->setPaused(false);
+                result = pumpChannel->setPaused(false);
+                result = rotationChannel->setPaused(false);
                 if (result != FMOD_OK) {
                     std::cout << "FMOD resume error! (" << result << ")" << std::endl;
                 }
@@ -133,9 +143,9 @@ void AudioSystem::update() {
             playRotationEffect("Rotation.wav");
         }
         else {
-            bool bgmIsPlaying = false;
-            rotationChannel->isPlaying(&bgmIsPlaying);
-            if (!bgmIsPlaying) {
+            bIsPlaying = false;
+            rotationChannel->isPlaying(&bIsPlaying);
+            if (!bIsPlaying) {
                 rotationChannel->setPaused(false);
             }
         }
@@ -183,6 +193,8 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
 		soundEffectChannel->setVolume(sfxVol);
 		assetBrowserChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol);
+        rotationChannel->setVolume(sfxVol);
         
         (*GLFWFunctions::keyState)[Key::COMMA] = false;
 
@@ -203,6 +215,8 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
         soundEffectChannel->setVolume(sfxVol);
         assetBrowserChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol);
+        rotationChannel->setVolume(sfxVol);
  
         (*GLFWFunctions::keyState)[Key::PERIOD] = false;
     }

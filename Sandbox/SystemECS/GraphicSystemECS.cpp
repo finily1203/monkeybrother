@@ -32,7 +32,44 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
+bool gameover = false;
 
+void createTextEntity(
+    ECSCoordinator& ecsCoordinator,
+    const std::string& text,
+    const std::string& fontId,
+    const myMath::Vector3D& color,
+    const myMath::Vector2D& position,
+    const std::string& entityId
+) {
+    Entity textEntity = ecsCoordinator.createEntity();
+
+    // Font Component
+    FontComponent font{};
+    font.text = text;
+    font.textScale = 1.0f;
+    font.color = color;
+    font.fontId = fontId;
+    ecsCoordinator.addComponent(textEntity, font);
+
+    // Transform Component
+    TransformComponent transform{};
+    transform.position = position;
+    transform.scale.SetX(0); // Initial scale (could be animated later)
+    transform.scale.SetY(0);
+    ecsCoordinator.addComponent(textEntity, transform);
+
+    // Behaviour Component
+    BehaviourComponent behaviour{};
+    behaviour.none = true;
+    ecsCoordinator.addComponent(textEntity, behaviour);
+
+    // Assign an ID for reference
+    ecsCoordinator.setEntityID(textEntity, entityId);
+
+    // Debugging log (optional)
+    // std::cout << entityId << " Text Created" << std::endl;
+}
 
 //std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
@@ -88,6 +125,41 @@ void GraphicSystemECS::update(float dt) {
             cameraSystem.update();
         }
 
+        /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
+        /*--------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------*/
+
+		// check if the player has collected all the collectables
+		// Created a win text entity
+        if (GLFWFunctions::collectableCount == 0 && gameover == false) {
+            createTextEntity(
+                ecsCoordinator,
+                "You Win!",
+                "Antonio",
+                myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
+                myMath::Vector2D(-30, 40),         // Position
+                "winTextBox"                       // Unique ID
+            );
+            gameover = true;
+        }
+		// lose text entity
+        if (GLFWFunctions::instantLose && gameover == false) {
+            createTextEntity(
+                ecsCoordinator,
+                "You Lose!",
+                "Antonio",
+                myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
+                myMath::Vector2D(-30, 40),          // Position
+                "loseTextBox"                       // Unique ID
+            );
+            gameover = true;
+        }
+        // cheat code 
+		if (GLFWFunctions::instantWin)
+		{
+			GLFWFunctions::collectableCount = 0;
+		}
+        
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
@@ -160,13 +232,10 @@ void GraphicSystemECS::update(float dt) {
         }
 
         else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
-            ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
-            ecsCoordinator.getEntitySignature(entity).count() == 2) {
-           
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-        }
-
-        std::cout << GLFWFunctions::collectableCount << std::endl;
+                 ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+                 ecsCoordinator.getEntitySignature(entity).count() == 2) {
+                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+       }
     }
 }
 
