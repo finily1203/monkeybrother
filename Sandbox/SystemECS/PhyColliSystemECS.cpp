@@ -404,22 +404,74 @@ void PhysicsSystemECS::update(float dt)
 {
     (void)dt;
     count = 0;
-    for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-
-        count++;
-       
+    for (auto& entity : entities)
+    {
         if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            
             playerEntity = entity;
-            
-            closestPlatformEntity = FindClosestPlatform(playerEntity);
+            count++;
+        }
 
-           
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
+        {
+            count++;
         }
     }
 
-    if(count > 1)
-    HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+    if (count > 1)
+    {
+        closestPlatformEntity = FindClosestPlatform(playerEntity);
+        HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+    }
+
+    std::vector<Entity> collidingPlatforms;
+    // Count entities and find the player entity
+    Entity playerEntity = NULL;
+    for (auto& entity : entities)
+    {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity))
+        {
+            playerEntity = entity;
+        }
+    }
+
+    // Early exit if no player is found
+    if (playerEntity == NULL) return;
+
+    // Get the player position and radius
+    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+    myMath::Vector2D playerPos = playerTransform.position;
+    float playerRadius = playerTransform.scale.GetX() * 0.5f;
+
+    // Detect all colliding platforms
+    for (auto& entity : entities)
+    {
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
+        {
+            auto& platformTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+            // Check for collision between player and platform
+            CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
+            myMath::Vector2D normal{};
+            float penetration{};
+            bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, playerRadius, platformOBB, normal, penetration);
+
+            if (isColliding)
+            {
+                collidingPlatforms.push_back(entity);
+            }
+        }
+    }
+
+    // Resolve collisions
+    if (collidingPlatforms.size() > 1)
+    {
+        for (auto& platformEntity : collidingPlatforms)
+        {
+            HandleCircleOBBCollision(playerEntity, platformEntity);
+        }
+    }
+
+
 
 }
 

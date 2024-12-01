@@ -54,10 +54,14 @@ void PlatformBehaviour::update(Entity entity) {
                     forceManager.ClearForce(playerEntity);
                 }
 
-                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
+                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
+            }
+            else
+            {
+                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
             }
 
-           forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
+            forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
 
             prevForce = targetForce;
 
