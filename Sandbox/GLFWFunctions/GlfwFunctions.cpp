@@ -321,7 +321,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         }
 
         if ((*keyState)[Key::F] && action == GLFW_PRESS) {
-            fullscreen = !fullscreen;
+            fullscreen = ~fullscreen;
             //GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
             GLFWmonitor* monitor = fullscreen ? nullptr : glfwGetPrimaryMonitor();
 

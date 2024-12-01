@@ -327,7 +327,6 @@ void AudioSystem::playRotationEffect(const std::string& soundEffectName)
 {
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
     rotationChannel = nullptr;
-	//assetsManager.GetAudioSystem()->createSound(soundEffectName.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSound);
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &rotationChannel);
     if (result != FMOD_OK) {
         std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
