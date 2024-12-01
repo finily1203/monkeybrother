@@ -412,12 +412,14 @@ void GameViewWindow::Update() {
 	if (ImGui::Button("Reset Perspective")) {
 		myMath::Vector2D initialCamPos{};
 
-		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		initialCamPos = { 0,0 };
+
+		/*for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
 			}
-		}
+		}*/
 
 		cameraSystem.setCameraPosition(initialCamPos);
 		// Reset camera zoom to default value

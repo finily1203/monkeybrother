@@ -148,9 +148,9 @@ void AudioSystem::update() {
             playRotationEffect("Rotation.wav");
         }
         else {
-            bool bIsPlaying = false;
-            rotationChannel->isPlaying(&bIsPlaying);
-            if (!bIsPlaying) {
+            bool bgmIsPlaying = false;
+            rotationChannel->isPlaying(&bgmIsPlaying);
+            if (!bgmIsPlaying) {
                 rotationChannel->setPaused(false);
             }
         }
