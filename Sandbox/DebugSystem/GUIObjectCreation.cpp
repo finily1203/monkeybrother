@@ -140,7 +140,7 @@ void ObjectCreation::Update() {
 
 	if (ImGui::Button("Create Entity")) {
 
-		/*for (int i = 0; i < numEntitiesToCreate; i++) {*/
+		for (int i = 0; i < numEntitiesToCreate; i++) {
 
 			entityObj = ecsCoordinator.createEntity();
 
@@ -157,7 +157,7 @@ void ObjectCreation::Update() {
 
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
 			DebugSystem::newEntities->push_back(entityObj);
-
+		}
 
 	}
 	ImGui::SameLine();
@@ -190,6 +190,11 @@ void ObjectCreation::Update() {
 	if (ImGui::Button("Remove All Entity")) {
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 			if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
+				if (ecsCoordinator.hasComponent<TransformComponent>(entity)) {
+					ecsCoordinator.removeComponent<TransformComponent>(entity);
+				}
+				// ... clean up other components
+
 				ecsCoordinator.destroyEntity(entity);
 			}
 		}

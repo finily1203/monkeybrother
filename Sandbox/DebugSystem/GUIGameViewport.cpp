@@ -377,7 +377,7 @@ void GameViewWindow::Update() {
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
 		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
-		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
+		//GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
 
@@ -403,6 +403,7 @@ void GameViewWindow::Update() {
 		
 		clickedScreenPan = !clickedScreenPan;
 	}
+
 
 
 	ImGui::SameLine(0, optionsButtonPadding);

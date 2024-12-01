@@ -23,6 +23,7 @@ void PlatformBehaviour::update(Entity entity) {
             float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).targetForce;
             float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).prevForce;
             Force force = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+            ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
             CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
             CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
 
@@ -32,20 +33,20 @@ void PlatformBehaviour::update(Entity entity) {
             force.SetDirection(direction);
 
             isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
-            PhysicsSystemRef->getForceManager().AddForce(playerEntity, gravity * mass * GLFWFunctions::delta_time);
+            forceManager.AddForce(playerEntity, gravity * mass * GLFWFunctions::delta_time);
 
             if (isColliding)
             {
                 alrJumped = true;
                 if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
                 {
-                    PhysicsSystemRef->getForceManager().ClearForce(playerEntity);
+                    forceManager.ClearForce(playerEntity);
                 }
 
-                targetForce = PhysicsSystemRef->getForceManager().ResultantForce(force.GetDirection(), normal, maxAccForce);
+                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce);
             }
 
-            PhysicsSystemRef->getForceManager().ApplyForce(playerEntity, force.GetDirection(), targetForce);
+           forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
 
             prevForce = targetForce;
 
