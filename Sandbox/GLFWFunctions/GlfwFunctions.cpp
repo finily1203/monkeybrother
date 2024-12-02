@@ -219,10 +219,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     if (!GameViewWindow::getPaused()) {
 
-       /* if ((*keyState)[Key::NUM_1]) {
+        if ((*keyState)[Key::NUM_1]) {
             debug_flag = !debug_flag;
             isGuiOpen = ~isGuiOpen;
-        }*/
+        }
     }
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
