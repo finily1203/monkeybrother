@@ -18,7 +18,7 @@ public:
 	void update(Entity entity) override;
 
 	EffectPumpBehaviour()
-		: hasForceAdded(false), timer(0.0f), offDuration(3.0f), onDuration(5.0f) {}
+		: hasForceAdded(false), timer(0.0f), offDuration(5.0f), onDuration(5.0f) {}
 
 
 private:

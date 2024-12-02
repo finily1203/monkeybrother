@@ -42,7 +42,7 @@ void CameraSystem2D::initialise()
     // Set initial camera position, rotation, and zoom if needed
     m_CameraPosition = myMath::Vector2D(0.0f, 0.0f);
     m_CameraRotation = 0.0f;
-    m_CameraZoom = 1.0f;
+    m_CameraZoom = 0.2f;
 }
 // Update function implementation
 void CameraSystem2D::update()

@@ -41,7 +41,7 @@ GLboolean GLFWFunctions::instantLose = false;
 GLboolean GLFWFunctions::skipToNextLevel = false;
 GLboolean GLFWFunctions::skipToEnd = false;
 GLboolean GLFWFunctions::godMode = false;
-GLboolean GLFWFunctions::fullscreen = false;
+bool GLFWFunctions::fullscreen = false;
 GLboolean GLFWFunctions::isPumpOn = true;
 GLboolean GLFWFunctions::playPumpSong = true;
 GLboolean GLFWFunctions::isRotating = false;
@@ -213,14 +213,16 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else if (action == GLFW_REPEAT) {
         (*keyState)[mappedKey] = true;
     }
-    if (!GameViewWindow::getPaused()) {
-        if ((*keyState)[Key::NUM_2])
-            allow_camera_movement = !allow_camera_movement;
 
-        if ((*keyState)[Key::NUM_1]) {
+    if ((*keyState)[Key::NUM_2])
+        allow_camera_movement = !allow_camera_movement;
+
+    if (!GameViewWindow::getPaused()) {
+
+       /* if ((*keyState)[Key::NUM_1]) {
             debug_flag = !debug_flag;
             isGuiOpen = ~isGuiOpen;
-        }
+        }*/
     }
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
@@ -247,7 +249,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     if (action == GLFW_PRESS) {
-        (*keyState)[static_cast<Key>(key)] = true;
 
         // Cheat codes
         if ((*keyState)[Key::G] && (*keyState)[Key::O] && (*keyState)[Key::D]) {
@@ -276,10 +277,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         }
 
         if ((*keyState)[Key::F] && action == GLFW_PRESS) {
-            fullscreen = ~fullscreen;
-            GLFWmonitor* monitor = fullscreen ? nullptr : glfwGetPrimaryMonitor();
+            fullscreen = !fullscreen;
+            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
-            if (!fullscreen) {
+            if (fullscreen) {
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
                 glfwSetWindowMonitor(
                     pWindow,
