@@ -1,3 +1,18 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ExitBehaviour.cpp
+@brief:  This source file includes the implementation of the ExitBehaviour
+		 that logicSystemECS uses to handle the behaviour of the exit entity.
+		 Note that exit entity is affect by the collectable entities and the player
+		 entity.
+
+		 Joel Chu (c.weiyuan): defined the functions of ExitBehaviour class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "ExitBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
@@ -29,9 +44,9 @@ void ExitBehaviour::update(Entity entity) {
 		float penetration{};
 
 		bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, exitOBB, normal, penetration);
-
+		GLFWFunctions::exitCollision = isColliding;
 		if (isColliding) {
-			std::cout << "Game Won" << std::endl;
+			//std::cout << "Game Won" << std::endl;
 		}
 	}
 }

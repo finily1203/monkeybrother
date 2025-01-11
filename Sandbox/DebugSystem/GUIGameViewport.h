@@ -14,8 +14,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Integrated serialization & deserialization functions to initialize variables from json file, which
 		  allows saving and loading feature in the level editor
 
-File Contributions: Lew Zong Han Owen (90%)
+*Liu YaoTing (yaoting.liu) :
+		- Integrated save and load function for multiple files
+		- Updated "Pause", "Zoom", and "Pan" buttons
+
+File Contributions: Lew Zong Han Owen (60%)
 					Ian Loi           (10%)
+					Liu YaoTing       (30%)
 
 /*_______________________________________________________________________________________________________________*/
 #pragma once
@@ -118,12 +123,13 @@ private:
 	static ImVec2 applicationCenter;
 	static ImVec2 renderPos;
 
-	static float newZoomLevel;
-	static float zoomDelta;
+	static float currentZoom;
 	static float zoomLevel;
 	static float MIN_ZOOM;  // minimum zoom constant
 	static float MAX_ZOOM;  // maximum zoom constant
 
+	static float headerHeight;
+	static float optionButtonHeight;
 	static float scrollY;
 
 	static bool isDragging;
@@ -131,13 +137,13 @@ private:
 	static ImVec2 currentMouseDragDist;
 	static ImVec2 initialMousePos;
 	static ImVec2 mouseDragDist;
+	static float mouseDragSpeed;
 
 	static float aspectRatioXScale;
 	static float aspectRatioYScale;
 	static float aspectRatioWidth;
 	static float aspectRatioHeight;
 
-	static GLuint pausedTexture;
 	static bool isPaused;
 
 	static int saveCount;
@@ -147,6 +153,11 @@ private:
 	static float fileWindowWidth;
 	static float saveWindowHeight;
 	static float fileWindowHeight;
+	static float slotWindowWidth;
+	static float clearSlotWindowWidth;
+	static float optionsButtonPadding;
+	static float initialZoom;
+	static float mouseWheelScaleFactor;
 
 	static bool isSelectingSaveFile;
 	static bool isSelectingFile;

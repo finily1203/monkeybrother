@@ -5,15 +5,18 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   WindowSystem.cpp
 @brief:  This source file defines the WindowSystem class. The WindowSystem class is
-		 used to handle the window application for the game engine. It will initialise,
-		 update and cleanup the window system.
-		 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
-									for the WindowSystem class as well as the init, update,
-									and rendering of those objects
-									(50%)
-		 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
-							   initialise, update and cleanup the window system.
-							   (50%)
+	 used to handle the window application for the game engine. It will initialise,
+	 update and cleanup the window system.
+	 Liu YaoTing (yaoting.liu): Defined the logic for objects for graphics system
+				  for the WindowSystem class as well as the init, update,
+				  and rendering of those objects
+				  (27.5%)
+	 Joel Chu (c.weiyuan): Defined the functions for the WindowSystem class to
+				 initialise, update and cleanup the window system.
+				 (27.5%)
+	 Lee Jing Wen (jingwen.lee): Defined the function to handle window focus
+				   (interruption handling)
+				   (45%)
 *//*___________________________________________________________________________-*/
 #include <GraphicsSystem.h>
 #include "Debug.h"
@@ -26,74 +29,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 bool WindowSystem::altTab = false;
 bool WindowSystem::ctrlAltDel = false;
-//HWND WindowSystem::foreground = nullptr;
-//GraphicsSystem graphicsSystem;
-//GraphicsSystem::GLObject gameObject, gameObject2, 
-// , blackBox;
-//Shader* shader = nullptr;
-//Shader* shader2 = nullptr;
-//std::vector<GraphicsSystem::GLViewport> GraphicsSystem::vps;
-
-//void WindowSystem::logicUpdate() {
-//
-//	if (GLFWFunctions::testMode == 1) {
-//		// Rotation logic
-//		if (GLFWFunctions::left_turn_flag) {
-//			gameObject.orientation.y = 180.0f * GLFWFunctions::delta_time * 2;
-//		}
-//		else if (GLFWFunctions::right_turn_flag) {
-//			gameObject.orientation.y = -180.0f * GLFWFunctions::delta_time * 2;
-//		}
-//		else {
-//			gameObject.orientation.y = 0.0f;
-//		}
-//
-//		// Scaling logic
-//		if (GLFWFunctions::scale_up_flag) {
-//			if (gameObject.scaling.x < 600.0f && gameObject.scaling.y < 600.0f) {
-//				gameObject.scaling.x += 300.0f * GLFWFunctions::delta_time;
-//				gameObject.scaling.y += 300.0f * GLFWFunctions::delta_time;
-//			}
-//			graphicsSystem.SetCurrentAction(2);
-//		}
-//		else if (GLFWFunctions::scale_down_flag) {
-//			if (gameObject.scaling.x > 50.0f && gameObject.scaling.y > 50.0f) {
-//				gameObject.scaling.x -= 300.f * GLFWFunctions::delta_time;
-//				gameObject.scaling.y -= 300.0f * GLFWFunctions::delta_time;
-//			}
-//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-//		}
-//
-//		// Movement logic
-//		bool isMoving = false;
-//		if (GLFWFunctions::move_up_flag) {
-//			gameObject.position.y += 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-//		}
-//		if (GLFWFunctions::move_down_flag) {
-//			gameObject.position.y -= 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(0);  // Action 2 for idle (third row)
-//		}
-//		if (GLFWFunctions::move_left_flag) {
-//			gameObject.position.x -= 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(1);  // Action 0 for move left (second row)
-//		}
-//		if (GLFWFunctions::move_right_flag) {
-//			gameObject.position.x += 100.0f * GLFWFunctions::delta_time;
-//			isMoving = true;
-//			graphicsSystem.SetCurrentAction(3);  // Action 1 for move right (fourth row)
-//		}
-//
-//
-//		if (!isMoving) {
-//			graphicsSystem.SetCurrentAction(2);  // Action 2 for idle (third row)
-//		}
-//	}
-//}
-
 
 void WindowSystem::initialise() {
 	nlohmann::json windowConfigJSON;
@@ -111,7 +46,7 @@ void WindowSystem::initialise() {
 	int windowWidth = windowConfigJSON["width"].get<int>();
 	int windowHeight = windowConfigJSON["height"].get<int>();
 	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
-	bool startFullscreen = windowConfigJSON.value("fullscreen", false); // Default to fullscreen
+	bool startFullscreen = windowConfigJSON["fullscreen"].get<bool>();
 
 	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle, startFullscreen)) {
 		std::cout << "Failed to initialise GLFW" << std::endl;
@@ -128,66 +63,60 @@ void WindowSystem::initialise() {
 	int width, height; glfwGetFramebufferSize(GLFWFunctions::pWindow, &width, &height);
 }
 
-
-void WindowSystem::handleWindowFocus() 
+//Handle interruption, when window is not focused
+void WindowSystem::handleWindowFocus()
 {
-	bool previousFocusState = isFocused;
+	static bool securityScreenActive = false;
 	isFocused = glfwGetWindowAttrib(GLFWFunctions::pWindow, GLFW_FOCUSED);
+	HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
 
 	// Check for Ctrl+Alt+Del press
 	bool keysArePressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
 		(GetAsyncKeyState(VK_MENU) & 0x8000) &&
 		(GetAsyncKeyState(VK_DELETE) & 0x8000);
 
-	// Handle initial Ctrl+Alt+Del press
-	if (keysArePressed && !keysWerePressed && isFocused) 
+	// When Ctrl+Alt+Del is pressed
+	if (keysArePressed && !keysWerePressed)
 	{
-		onCtrlAltDelPage = true;
-		wasFocused = previousFocusState;  // Store the previous focus state
-		isFocused = false;
+		securityScreenActive = true;
 		GLFWFunctions::audioPaused = true;
 		glfwIconifyWindow(GLFWFunctions::pWindow);
 		ctrlAltDel = true;
+		altTab = false;
 	}
 
-	// Handle Ctrl+Alt+Del page exit
-	if (onCtrlAltDelPage) 
+	// When returning from security screen
+	if (securityScreenActive && !keysArePressed)
 	{
+		//Get the currently active window
+		HWND activeWindow = GetForegroundWindow();
 
-		HWND foreground = GetForegroundWindow();
-		HWND appWindow = glfwGetWin32Window(GLFWFunctions::pWindow);
-
-		if (foreground != appWindow && !keysArePressed) 
+		//If we're back to desktop/game window, restore
+		if (activeWindow != NULL && activeWindow != appWindow)
 		{
-			// Only restore if we were focused before Ctrl+Alt+Del
-			if (wasFocused) 
-			{
-				onCtrlAltDelPage = false;
-				SetForegroundWindow(appWindow);
-				Sleep(300);
-			}
+			securityScreenActive = false;
 		}
 	}
 
-	// Handle normal focus changes (when not on Ctrl+Alt+Del page)
-	if (!onCtrlAltDelPage) 
+	// Handle normal focus changes
+	if (!securityScreenActive)
 	{
-		if (isFocused) 
+		if (isFocused)
 		{
 			GLFWFunctions::audioPaused = false;
-			glfwRestoreWindow(GLFWFunctions::pWindow);
+			glfwRestoreWindow(GLFWFunctions::pWindow); // Comment this if want to restore window when returning from security screen
 			altTab = false;
 			ctrlAltDel = false;
 		}
-
-		else 
+		else
 		{
 			GLFWFunctions::audioPaused = true;
-			glfwIconifyWindow(GLFWFunctions::pWindow);
+			glfwIconifyWindow(GLFWFunctions::pWindow); // Comment this if want to restore window when returning from security screen
 			altTab = true;
 		}
 	}
 
+	// Update previous key state
 	keysWerePressed = keysArePressed;
 }
 
@@ -207,48 +136,8 @@ void WindowSystem::update() {
 
 	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
 
-	// TODO:: Set the viewport incase the window was resized
-	//GraphicsSystem::vps.push_back({ 0, 0, 1400, 700 });// TODO::change this to be calculated based on the window size
-
-	//keyboardInputUpdateFlag();
-
-	//logicUpdate();
-
-	//DebugSystem::StartSystemTiming("Graphics"); 
-
-	//graphicsSystem.Update(GLFWFunctions::delta_time, false);
-	//graphicsSystem.Render(GLFWFunctions::delta_time);
-
-	//background.update(GLFWFunctions::delta_time);
-	//gameObject.update(GLFWFunctions::delta_time);
-	//gameObject2.update(GLFWFunctions::delta_time);
-	//blackBox.update(GLFWFunctions::delta_time);
-
-	////graphicsSystem.Update(GLFWFunctions::delta_time, true);// TODO:: Check if object is animated and update accordingly
-
-	//if (GLFWFunctions::testMode == 1) {
-	//	// Draw non-animated object (background)
-	//	background.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture3());
-
-	//	// Update animated objects before drawing them
-	//	graphicsSystem.Update(GLFWFunctions::delta_time, true);
-
-	//	// Draw game objects
-	//	gameObject.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture());
-	//	gameObject2.draw(shader, graphicsSystem.GetVAO(), graphicsSystem.GetTexture2());
-
-	//	if (GLFWFunctions::debug_flag) {
-	//		// Draw debug lines if debug mode is on
-	//		graphicsSystem.drawDebugLines(gameObject);
-	//		graphicsSystem.drawDebugLines(gameObject2);
-	//	}
-
-
-	//DebugSystem::EndSystemTiming("Graphics"); 
-
 	GLFWFunctions::getFps();
 
-	//glfwSwapBuffers(GLFWFunctions::pWindow);
 
 	GLenum error = glGetError(); if (error != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error: " << error << std::endl;

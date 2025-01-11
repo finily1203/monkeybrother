@@ -25,7 +25,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 CameraSystem2D::CameraSystem2D()
 	: m_CameraPosition(0.0f, 0.0f), m_CameraRotation(0.0f), m_CameraZoom(1.0f), ecsCoordinator(ecsCoordinator), m_LockedComponent(nullptr), m_ViewMatrix(), m_ProjectionMatrix()
 {
-    // Constructor implementation
+ 
 }
 // Destructor implementation
 CameraSystem2D::~CameraSystem2D()
@@ -42,7 +42,7 @@ void CameraSystem2D::initialise()
     // Set initial camera position, rotation, and zoom if needed
     m_CameraPosition = myMath::Vector2D(0.0f, 0.0f);
     m_CameraRotation = 0.0f;
-    m_CameraZoom = 1.0f;
+    m_CameraZoom = 0.2f;
 }
 // Update function implementation
 void CameraSystem2D::update()
@@ -88,7 +88,6 @@ void CameraSystem2D::update()
 // Cleanup function implementation
 void CameraSystem2D::cleanup()
 {
-    // Cleanup code
 }
 // GetSystem function implementation
 SystemType CameraSystem2D::getSystem()

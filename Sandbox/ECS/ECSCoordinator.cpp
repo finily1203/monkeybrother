@@ -33,6 +33,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
 #include "UIComponent.h"
+#include "PlatformBehaviour.h"
 
 #include <Windows.h>
 
@@ -58,9 +59,13 @@ void ECSCoordinator::update() {
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
-	entityManager->cleanup();
-	componentManager->cleanup();
-	systemManager->cleanup();
+	if (systemManager) systemManager->cleanup();
+	if (componentManager) componentManager->cleanup();
+	if (entityManager) entityManager->cleanup();
+
+	delete systemManager.release();
+	delete componentManager.release();
+	delete entityManager.release();
 }
 
 SystemType ECSCoordinator::getSystem() {
@@ -82,9 +87,9 @@ Entity ECSCoordinator::getFirstEntity() {
 Entity ECSCoordinator::createEntity()
 {
 	Entity newEntity = entityManager->createEntity();
-	if (!firstEntity) {
+	/*if (!firstEntity) {
 		firstEntity = newEntity;
-	}
+	}*/
 	return newEntity;
 }
 
@@ -103,6 +108,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 // open the JSON file and initialize the entity data based on the values read
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
 
 	// checks if JSON file could be opened
@@ -128,14 +134,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
-
-		//FOR NOW WE DO ASSIGNING OF BEHAVIOUR FOR PLAYER MANUALLY
-		//if (entityId == "player") {
-		//	logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
-		//	//FOR NOW CAMERA BEHAVIOUR IS ASSIGNED TO PLAYER BUT IF GOT MORE THAN ONE PLAYER
-		//	//IT SHOULD ONLY BE ASSIGNED TO ONLY ONE PLAYER OBJECT
-		//	//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CameraBehaviour>());
-		//}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -194,13 +192,13 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, movement);
 		}
 
-		/*if (entityData.contains("animation") && entityId == "player")
+		if (entityData.contains("animation"))
 		{
 			AnimationComponent animation{};
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
 			ecs.addComponent(entityObj, animation);
-		}*/
+		}
 
 		if (entityData.contains("player")) {
 			PlayerComponent player{};
@@ -208,7 +206,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			ecs.addComponent(entityObj, player);
 
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 		}
 
 		if (entityData.contains("enemy"))
@@ -218,8 +215,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			ecs.addComponent(entityObj, enemy);
 
-			//ASSIGN ENEMY BEHAVIOUR
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 		}
 
 		if (entityData.contains("collectable")) {
@@ -229,7 +224,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			ecs.addComponent(entityObj, collectable);
 
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
 
 			GLFWFunctions::collectableCount++;
 		}
@@ -238,10 +232,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			PumpComponent pump{};
 			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
 			serializer.ReadObject(pump.pumpForce, entityId, "entities.pump.pumpForce");
+			serializer.ReadObject(pump.isAnimate, entityId, "entities.pump.isAnimate");
 
 			ecs.addComponent(entityObj, pump);
 
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
 		}
 
 		if (entityData.contains("exit")) {
@@ -250,7 +244,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			ecs.addComponent(entityObj, exit);
 
-			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
 		}
 
 		if (entityData.contains("forces"))
@@ -312,60 +305,41 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			if (entityData["behaviour"].contains("none")) {
 				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
 				logicSystemRef->unassignBehaviour(entityObj);
-			}
+			}else
 			if (entityData["behaviour"].contains("player")) {
 				serializer.ReadObject(behaviour.player, entityId, "entities.behaviour.player");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 			}
+			else
 			if (entityData["behaviour"].contains("enemy")) {
 				serializer.ReadObject(behaviour.enemy, entityId, "entities.behaviour.enemy");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 			}
+			else
 			if (entityData["behaviour"].contains("pump")) {
 				serializer.ReadObject(behaviour.pump, entityId, "entities.behaviour.pump");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
 			}
+			else
 			if (entityData["behaviour"].contains("exit")) {
 				serializer.ReadObject(behaviour.exit, entityId, "entities.behaviour.exit");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
 			}
+			else
 			if (entityData["behaviour"].contains("collectable")) {
 				serializer.ReadObject(behaviour.collectable, entityId, "entities.behaviour.collectable");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
 			}
+			else
 			if (entityData["behaviour"].contains("button")) {
 				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
 			}
-
-			/*serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
-			serializer.ReadObject(behaviour.player, entityId, "entities.behaviour.player");
-			serializer.ReadObject(behaviour.enemy, entityId, "entities.behaviour.enemy");
-			serializer.ReadObject(behaviour.pump, entityId, "entities.behaviour.pump");
-			serializer.ReadObject(behaviour.exit, entityId, "entities.behaviour.exit");
-			serializer.ReadObject(behaviour.collectable, entityId, "entities.behaviour.collectable");
-			serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");*/
-
-			/*if (behaviour.none) {
-				logicSystemRef->unassignBehaviour(entityObj);
-			}else if (behaviour.player) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
+			else
+			if (entityData["behaviour"].contains("platform")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.platform");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
 			}
-			else if (behaviour.enemy) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
-			}
-			else if (behaviour.pump) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<EffectPumpBehaviour>());
-			}
-			else if (behaviour.exit) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<ExitBehaviour>());
-			}
-			else if (behaviour.collectable) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
-			}
-			else if (behaviour.button) {
-				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
-			}*/
 
 			ecs.addComponent(entityObj, behaviour);
 		}

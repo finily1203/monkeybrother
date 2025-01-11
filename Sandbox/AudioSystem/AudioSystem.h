@@ -41,31 +41,35 @@ public:
 	//Function to play song at the given index
 	//void playSong(int index);
 	void playSong(const std::string& songName);
+
 	void playBgm(const std::string& songName);
+
+	void playPumpSound(const std::string& songName);
 
 	//Function to play sound effect
 	void playSoundEffect(const std::string& soundEffectName);
 
+	//Function to play rotation sound effect
+	void playRotationEffect(const std::string& soundEffectName);
+
 	//Function to play sound from asset browser
 	void playSoundAssetBrowser(const std::string& soundName);
 
-	//Getter for currentSongIndex
-	int getSongIndex();
-	//Setter for currentSongIndex
-	void setSongIndex(int index);
-
-	void loadAudioAssets() const;
-
-	//get audioSystem
-	//FMOD::System* getAudioSystem() const { return audioSystem; }
+	FMOD::Channel* getPumpChannel() const { return pumpChannel; }	
+	void setPumpChannelToNull() { pumpChannel = nullptr; }
 
 private:
 	//FMOD::System* audioSystem;
-	FMOD::Channel* audioChannel;
+	FMOD::Channel* bgmChannel;
 	FMOD::Channel* soundEffectChannel;
 	FMOD::Channel* assetBrowserChannel;
-	FMOD::Channel* bgmChannel;
+	FMOD::Channel* ambienceChannel;
+	FMOD::Channel* pumpChannel;
+	FMOD::Channel* rotationChannel;
+
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
-	float volume;
+	float genVol; // general volume
+	float bgmVol; // bgm volume
+	float sfxVol; // sound effect volume
 };

@@ -29,6 +29,9 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     : totalFrames(totalFrames), frameDuration(frameDuration), columns(columns), rows(rows),
     currentFrame(0), timeAccumulator(0.0f), uvDirty(true),
     speedMultiplier(1.0f), looping(true), lastDirection(Direction::Right) {
+
+    currentUVs = new std::vector<glm::vec2>();
+
     // Validate inputs
     if (totalFrames <= 0 || columns <= 0 || rows <= 0) {
         throw std::invalid_argument("Total frames, columns, and rows must be greater than zero.");
@@ -39,10 +42,17 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     frameHeight = 1.0f / rows;
 
 
-    currentUVs.resize(4);
+    currentUVs->resize(4);
     UpdateUVCoordinates();
 }
 
+AnimationData::~AnimationData() {
+    delete currentUVs;
+    currentUVs = nullptr;
+ 
+    frameEvents.clear();
+    std::map<int, std::vector<std::string>>().swap(frameEvents);
+}
 // Update function implementation
 void AnimationData::Update(float deltaTime) {
     if (deltaTime < 0.0f) {
@@ -54,25 +64,10 @@ void AnimationData::Update(float deltaTime) {
     if (timeAccumulator >= frameDuration) {
         timeAccumulator -= frameDuration;
 
-        if (GLFWFunctions::keyState[Key::J]) {
-            currentFrame = 24 + (currentFrame + 1) % 24;
-            lastDirection = Direction::Left;
-        }
-        else if (GLFWFunctions::keyState[Key::L]) {
-            currentFrame = (currentFrame + 1) % 24;
-            lastDirection = Direction::Right;
-        }
-        else {
-            
-            if (lastDirection == Direction::Left) {
-                currentFrame = 24 + (currentFrame + 1) % 24;
-            }
-            else if (lastDirection == Direction::Right) {
-                currentFrame = (currentFrame + 1) % 24;
-            }
-        }
+        // Always loop through the first 14 frames
+        currentFrame = (currentFrame + 1) % 24;
 
-        uvDirty = true; 
+        uvDirty = true;
     }
 
     if (uvDirty) {
@@ -80,6 +75,7 @@ void AnimationData::Update(float deltaTime) {
         uvDirty = false;
     }
 }
+
 
 // pdate UV coordinates function implementation
 void AnimationData::UpdateUVCoordinates() {
@@ -89,10 +85,10 @@ void AnimationData::UpdateUVCoordinates() {
     float vMin = 1.0f - frameHeight * ((currentFrame / columns) + 1);
     float vMax = vMin + frameHeight;
     // Define UV coordinates for a quad (4 vertices)
-    currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
-    currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right
-    currentUVs[2] = glm::vec2(uMin, vMin);  // Bottom left
-    currentUVs[3] = glm::vec2(uMin, vMax);  // Top left
+    (*currentUVs)[0] = glm::vec2(uMax, vMax);  // Top right
+    (*currentUVs)[1] = glm::vec2(uMax, vMin);  // Bottom right
+    (*currentUVs)[2] = glm::vec2(uMin, vMin);  // Bottom left
+    (*currentUVs)[3] = glm::vec2(uMin, vMax);  // Top left
 }
 
 // Reset animation function implementation

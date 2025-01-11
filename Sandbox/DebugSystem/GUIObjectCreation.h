@@ -1,3 +1,18 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIObjectCreation.cpp
+@brief  :  This file contains the function definition of ImGui object creation system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
+		  properties' data
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #pragma once
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

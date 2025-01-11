@@ -1,10 +1,22 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   EnemyBehaviour.cpp
+@brief:  This source file includes the implementation of the EnemyBehaviour
+         that logicSystemECS uses to handle the behaviour of the Enemy entities.
+         Note that in the enum there are 3 states. However, only the patrol state
+         is implemented. The other states will be defined in future implementations.
+         Waypoints are also current set to a fixed path for all enemies.
+
+         Joel Chu (c.weiyuan): defined the functions of EnemyBehaviour class
+                               100%
+*//*___________________________________________________________________________-*/
+
 #include "EnemyBehaviour.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
-
-#include "EnemyBehaviour.h"  
-#include "GlobalCoordinator.h"  
-#include "PhyColliSystemECS.h"  
 
 EnemyBehaviour::EnemyBehaviour() {
 	currentState = PATROL;
@@ -26,20 +38,20 @@ void EnemyBehaviour::update(Entity entity) {
 
 	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
-	if (GLFWFunctions::keyState[Key::LEFT]) {
+	if ((*GLFWFunctions::keyState)[Key::LEFT]) {
 		transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
 	}
-	else if (GLFWFunctions::keyState[Key::RIGHT]) {
+	else if ((*GLFWFunctions::keyState)[Key::RIGHT]) {
 		transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
 	}
 
-	if (GLFWFunctions::keyState[Key::UP]) {
+	if ((*GLFWFunctions::keyState)[Key::UP]) {
 		if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
 			transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
 		}
 	}
-	else if (GLFWFunctions::keyState[Key::DOWN]) {
+	else if ((*GLFWFunctions::keyState)[Key::DOWN]) {
 		if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
 			transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
 			transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);
@@ -70,15 +82,16 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    auto& waypoints = getWaypoints();
-    int& currentWaypointIndex = getCurrentWaypointIndex();
+    auto& currentWaypoints = getWaypoints();
+    int& currentWPIndex = getCurrentWaypointIndex();
+    ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
 
     // Set the current waypoint target
-    myMath::Vector2D target = waypoints[currentWaypointIndex];
+    myMath::Vector2D target = currentWaypoints[currentWPIndex];
 
     // Compute direction towards the target
     myMath::Vector2D direction = target - transform.position;
-    float length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+    float length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     // If close enough to the waypoint, move to the next one
     const float waypointThreshold = 1.0f;
@@ -94,28 +107,28 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         physics.velocity.SetY(0.f);
 
         // Move to the next waypoint
-        currentWaypointIndex++;
-        if (currentWaypointIndex >= waypoints.size()) {
-            currentWaypointIndex = 0; // Loop back to the first waypoint
+        currentWPIndex++;
+        if (currentWPIndex >= currentWaypoints.size()) {
+            currentWPIndex = 0; // Loop back to the first waypoint
         }
 
-        target = waypoints[currentWaypointIndex];
+        target = currentWaypoints[currentWPIndex];
         direction = target - transform.position;
-        length = std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2));
+        length = static_cast<float>(std::sqrt(std::pow(direction.GetX(), 2) + std::pow(direction.GetY(), 2)));
 
     }
 
     // Normalize direction if length is not zero
     if (length != 0) {
-        direction.SetX(direction.GetX() / length);
-        direction.SetY(direction.GetY() / length);
+        direction.SetX(direction.GetX() / static_cast<float>(length));
+        direction.SetY(direction.GetY() / static_cast<float>(length));
     }
 
     // Apply movement force if not at the waypoint
     if (length >= waypointThreshold) {
         const float movementForceMagnitude = 5.0f; // Example value
         myMath::Vector2D movementForce = direction * movementForceMagnitude;
-        PhysicsSystemRef->getForceManager().AddForce(entity, movementForce);
+        forceManager.AddForce(entity, movementForce);
     }
 
     // Physics calculations
@@ -136,105 +149,4 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    //std::cout << "Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
-    //std::cout << "Distance to Target: " << length << std::endl;
-    //std::cout << "Direction: " << direction.GetX() << ", " << direction.GetY() << std::endl;
 }
-
-
-
-//void EnemyBehaviour::update(Entity entity) {
-//	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
-//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-//
-//	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
-//
-//	if (GLFWFunctions::keyState[Key::LEFT]) {
-//		transform.orientation.SetY(transform.orientation.GetY() + (180.f * GLFWFunctions::delta_time));
-//	}
-//	else if (GLFWFunctions::keyState[Key::RIGHT]) {
-//		transform.orientation.SetY(transform.orientation.GetY() - (180.0f * GLFWFunctions::delta_time));
-//	}
-//
-//	if (GLFWFunctions::keyState[Key::UP]) {
-//		if (transform.scale.GetX() < 500.0f && transform.scale.GetY() < 500.0f) {
-//			transform.scale.SetX(transform.scale.GetX() + 53.4f * GLFWFunctions::delta_time);
-//			transform.scale.SetY(transform.scale.GetY() + 30.0f * GLFWFunctions::delta_time);
-//		}
-//	}
-//	else if (GLFWFunctions::keyState[Key::DOWN]) {
-//		if (transform.scale.GetX() > 100.0f && transform.scale.GetY() > 100.0f) {
-//			transform.scale.SetX(transform.scale.GetX() - 53.4f * GLFWFunctions::delta_time);
-//			transform.scale.SetY(transform.scale.GetY() - 30.0f * GLFWFunctions::delta_time);
-//		}
-//	}
-//
-//	myMath::Vector2D& ePos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-//	myMath::Vector2D eAcceleration = ecsCoordinator.getComponent<PhysicsComponent>(entity).acceleration;
-//	//myMath::Vector2D eForce		   = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-//	myMath::Vector2D& eVel = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
-//	myMath::Vector2D& eAccForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).accumulatedForce;
-//	float eMass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
-//	//float e
-// Scale			   = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
-//	float eMagnitude = ecsCoordinator.getComponent<PhysicsComponent>(entity).force.GetMagnitude();
-//
-//	if (GLFWFunctions::keyState[Key::I]) {
-//		PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, eMagnitude));
-//	}
-//	else if (GLFWFunctions::keyState[Key::K]) {
-//		PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, -eMagnitude));
-//	}
-//	else if (GLFWFunctions::keyState[Key::J]) {
-//		PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(-eMagnitude, 0.0f));
-//	}
-//	else if (GLFWFunctions::keyState[Key::L]) {
-//		PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(eMagnitude, 0.0f));
-//	}
-//	else {
-//
-//		//Apply friction to gradually slow down
-//		if (eAccForce.GetX() > 0) {
-//			PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(-eMagnitude, 0.0f));
-//		}
-//		else if (eAccForce.GetX() < 0) {
-//			PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(eMagnitude, 0.0f));
-//		}
-//		else if (eAccForce.GetY() > 0) {
-//			PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, -eMagnitude));
-//		}
-//		else if (eAccForce.GetY() < 0) {
-//			PhysicsSystemRef->getForceManager().AddForce(entity, myMath::Vector2D(0.0f, eMagnitude));
-//		}
-//
-//		if (std::abs(eAccForce.GetX()) < 0.01f) { // threshold
-//			eVel.SetX(0.f);
-//			eAccForce.SetX(0.f);
-//		}
-//		if (std::abs(eAccForce.GetY()) < 0.01f) { // threshold
-//			eVel.SetY(0.f);
-//			eAccForce.SetY(0.f);
-//		}
-//	}
-//
-//	float invMass = eMass > 0.f ? 1.f / eMass : 0.f;
-//	eAcceleration = eAccForce * invMass;
-//	const float maxSpeed = 0.6f;
-//
-//	// Clamp speed without interfering with velocity
-//	if (eVel.GetX() > maxSpeed) {
-//		eAcceleration.SetX(0);
-//	}
-//	else if (eVel.GetX() < -maxSpeed) {
-//		eAcceleration.SetX(0);
-//	}
-//
-//	eVel.SetX(eVel.GetX() + eAcceleration.GetX() * GLFWFunctions::delta_time);
-//	eVel.SetY(eVel.GetY() + eAcceleration.GetY() * GLFWFunctions::delta_time);
-//
-//	eVel.SetX(eVel.GetX() * 0.9f);
-//	eVel.SetY(eVel.GetY() * 0.9f);
-//
-//	ePos.SetX(ePos.GetX() + eVel.GetX());
-//	ePos.SetY(ePos.GetY() + eVel.GetY());
-//}

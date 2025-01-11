@@ -50,7 +50,6 @@ PhysicsSystemECS::PhysicsSystemECS() : eventSource("PlayerEventSource"), eventOb
 void PhysicsSystemECS::initialise()
 {
     LoadPhysicsConfigFromJSON(FilePathManager::GetPhysicsPath());
-    //std::cout << friction << " nwihediwwwwwwwwwwwwwwww" << std::endl;
 }
 
 void PhysicsSystemECS::cleanup() {
@@ -216,6 +215,7 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(player).targetForce;
     float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
     Force force = ecsCoordinator.getComponent<PhysicsComponent>(player).force;
+    ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(player).forceManager;
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(player);
     CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
 
@@ -257,7 +257,6 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
     {
         GLFWFunctions::firstCollision = false;
     }
-
 
 }
 
@@ -394,26 +393,80 @@ void CollisionSystemECS::CollisionResponse(Entity player, myMath::Vector2D norma
     playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
 }
 
+int count = 0;
+Entity playerEntity = {};
+Entity closestPlatformEntity = {};
+
 // Update function for Physics System
 void PhysicsSystemECS::update(float dt)
 {
     (void)dt;
-    //let it be the first entity
-    Entity playerEntity;/* = ecsCoordinator.getFirstEntity();*/
-    Entity closestPlatformEntity;
-    //Entity closestPlatformEntity = ecsCoordinator.getFirstEntity();
-
-    for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+    count = 0;
+    for (auto& entity : entities)
+    {
         if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             playerEntity = entity;
-            closestPlatformEntity = entity;
-            closestPlatformEntity = FindClosestPlatform(playerEntity);
+            count++;
+        }
 
-            HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
+        {
+            count++;
         }
     }
-    //Entity closestPlatformEntity;
-    //playerEntity = ecsCoordinator.hasComponent<PlayerComponent>(playerEntity);
+
+    if (count > 1)
+    {
+        closestPlatformEntity = FindClosestPlatform(playerEntity);
+        HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
+    }
+
+    std::vector<Entity> collidingPlatforms;
+    // Count entities and find the player entity
+    Entity playEntity = NULL;
+    for (auto& entity : entities)
+    {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity))
+        {
+            playEntity = entity;
+        }
+    }
+
+    // Early exit if no player is found
+    if (playEntity == NULL) return;
+
+    // Get the player position and radius
+    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playEntity);
+    myMath::Vector2D playerPos = playerTransform.position;
+    float playerRadius = playerTransform.scale.GetX() * 0.5f;
+
+    // Detect all colliding platforms
+    for (auto& entity : entities)
+    {
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
+        {
+
+            // Check for collision between player and platform
+            CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
+            myMath::Vector2D normal{};
+            float penetration{};
+            bool isCollide = collisionSystem.checkCircleOBBCollision(playerPos, playerRadius, platformOBB, normal, penetration);
+
+            if (isCollide)
+            {
+                collidingPlatforms.push_back(entity);
+            }
+        }
+    }
+
+    // Resolve collisions
+    if (collidingPlatforms.size() > 1)
+    {
+        for (auto& platformEntity : collidingPlatforms)
+        {
+            HandleCircleOBBCollision(playerEntity, platformEntity);
+        }
+    }
 
 
 

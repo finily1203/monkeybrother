@@ -24,7 +24,7 @@ File Contributions: Joel Chu (50%)
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		_crtBreakAlloc = 588259;
+		//_crtBreakAlloc = 160;
 	}
 };
 
@@ -35,8 +35,10 @@ namespace monkeybrother {
 }
 
 int main() {
+	ShowWindow(GetConsoleWindow(), SW_HIDE); // Hide the console window
+
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(281756);
+	//_CrtSetBreakAlloc(410518);
 
 
 	try {
@@ -49,7 +51,6 @@ int main() {
 
 		engine->addSystem(&assetsManager);
 
-		//AudioSystem* audioSystem = new AudioSystem();
 		engine->addSystem(&audioSystem);
 
 		engine->addSystem(&ecsCoordinator);
@@ -64,16 +65,8 @@ int main() {
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
-		//ecsCoordinator.test3();
 
 		while (!glfwWindowShouldClose(GLFWFunctions::pWindow)) {
-			//DebugSystem::StartLoop(); //Get time for start of gameloop
-
-			//If user presses clone button ("C"), clone first object
-			//if (GLFWFunctions::cloneObject) {
-			//	ecsCoordinator.cloneEntity(ecsCoordinator.getFirstEntity());
-			//	GLFWFunctions::cloneObject = false;
-			//}
 
 			engine->updateSystem();
 			glfwSwapBuffers(GLFWFunctions::pWindow);

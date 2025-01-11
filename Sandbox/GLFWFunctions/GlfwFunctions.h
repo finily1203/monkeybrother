@@ -65,67 +65,23 @@ struct GLFWFunctions {
 
 	static bool isMouseButtonPressed(MouseButton button);
 
-	// key state
-
-
-
-	//static bool isAKeyPressed;
-
-	//static float volume;
-	//static float zoomMouseCoordX;
-	//static float zoomMouseCoordY;
-	//static float objMoveMouseCoordX;
-	//static float objMoveMouseCoordY;
-	//static bool isAtMaxZoom;
-	//static bool audioPaused;
-	//static bool audioNext;
-
-	//static bool audioStopped;
-	//static bool cloneObject;
-	//static bool goNextMode;
-
-	//static bool slideAudio;
-	//static bool bubblePopping;
-
-	//static bool enemyMoveLeft;
-	//static bool enemyMoveRight;
-	//static bool enemyMoveUp;
-	//static bool enemyMoveDown;
-
-	//static GLboolean left_turn_flag;
-	//static GLboolean right_turn_flag;
-	//static GLboolean scale_up_flag;
-	//static GLboolean scale_down_flag;
-	//static GLboolean move_up_flag;
-	//static GLboolean move_down_flag;
-	//static GLboolean move_left_flag;
-	//static GLboolean move_right_flag;
-
-	//static GLboolean move_jump_flag;
-
-	//static GLboolean camera_zoom_in_flag;
-	//static GLboolean camera_zoom_out_flag;
-	//static GLboolean camera_rotate_left_flag;
-	//static GLboolean camera_rotate_right_flag;
-
-	//static bool isGuiOpen;
-	//static bool zoomViewport;
-	//static int testMode;
-	// key state
-
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
 	static double fps;
 	static float delta_time;
 
 
-	static GLboolean debug_flag;
+	static bool debug_flag;
 	static GLboolean isGuiOpen;
 	static bool allow_camera_movement;
 	static GLboolean audioPaused;
 	static GLboolean audioStopped;
 	static GLboolean adjustVol;
 	static GLboolean audioNext;
+	static GLboolean isPumpOn;
+	static GLboolean playPumpSong;
+	static GLboolean isRotating;
+	static GLboolean exitCollision;
 
 	// Cheat codes
 	static GLboolean skipToNextLevel;
@@ -133,7 +89,7 @@ struct GLFWFunctions {
 	static GLboolean godMode;
 	static GLboolean instantWin;
 	static GLboolean instantLose;
-	static GLboolean fullscreen;
+	static bool fullscreen;
 
 
 	static int audioNum;
@@ -148,8 +104,8 @@ struct GLFWFunctions {
 	static bool firstCollision;
 
 
-	static std::unordered_map<Key, bool> keyState;
-	static std::unordered_map<MouseButton, bool> mouseButtonState;
+	static std::unordered_map<Key, bool>* keyState;
+	static std::unordered_map<MouseButton, bool>* mouseButtonState;
 };
 
 #endif

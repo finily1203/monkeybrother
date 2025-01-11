@@ -14,8 +14,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Integrated serialization & deserialization functions to initialize variables from json file, which
 		  allows saving and loading feature in the level editor
 
-File Contributions: Lew Zong Han Owen (90%)
+*Liu YaoTing (yaoting.liu) :
+		- Integrated save and load function for multiple files
+		- Updated "Pause", "Zoom", and "Pan" buttons
+
+File Contributions: Lew Zong Han Owen (60%)
 					Ian Loi           (10%)
+					Liu YaoTing       (30%)
 
 /*_______________________________________________________________________________________________________________*/
 #define _USE_MATH_DEFINES
@@ -25,6 +30,7 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "GUIConsole.h"
 #include "Debug.h"
 #include "GlobalCoordinator.h"
+#include "GUIInspector.h"
 #include "BehaviourComponent.h"
 #include "LogicSystemECS.h"
 #include "PlayerBehaviour.h"
@@ -33,6 +39,8 @@ File Contributions: Lew Zong Han Owen (90%)
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
 #include "BackgroundComponent.h"
+#include "PlatformBehaviour.h"
+#include "UIComponent.h"
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -50,18 +58,21 @@ bool zoomTestFlag = false;
 int GameViewWindow::saveNum;
 int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
+
+float GameViewWindow::currentZoom = 1.0f;
 float GameViewWindow::zoomLevel;
-float GameViewWindow::newZoomLevel;
-float GameViewWindow::zoomDelta;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
 
+float GameViewWindow::headerHeight;
+float GameViewWindow::optionButtonHeight;
 float GameViewWindow::scrollY;
 
 bool GameViewWindow::clickedScreenPan = false;
 bool GameViewWindow::isDragging = false;
 ImVec2 GameViewWindow::initialMousePos;
 ImVec2 GameViewWindow::mouseDragDist;
+float GameViewWindow::mouseDragSpeed;
 ImVec2 GameViewWindow::accumulatedMouseDragDist;
 ImVec2 GameViewWindow::currentMouseDragDist;
 
@@ -79,9 +90,14 @@ int GameViewWindow::saveLimit;
 float GameViewWindow::lastPosX;
 float GameViewWindow::saveWindowWidth;
 float GameViewWindow::fileWindowWidth;
+float GameViewWindow::slotWindowWidth;
+float GameViewWindow::clearSlotWindowWidth;
 float GameViewWindow::saveWindowHeight;
 float GameViewWindow::fileWindowHeight;
+float GameViewWindow::optionsButtonPadding;
 int GameViewWindow::scene;
+float GameViewWindow::initialZoom;
+float GameViewWindow::mouseWheelScaleFactor;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
@@ -98,6 +114,8 @@ void GameViewWindow::Update() {
 	globalMousePos = ImGui::GetMousePos();
 	applicationCenter = ImGui::GetMainViewport()->GetCenter();
 	renderPos = GetCenteredPosForViewport(aspectSize);
+	headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
+	optionButtonHeight = ImGui::GetFrameHeight();
 
 	ImGui::Begin("Game Viewport");
 
@@ -118,14 +136,14 @@ void GameViewWindow::Update() {
 
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
-		if (ImGui::Button("Slot 1", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 1", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 1", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 1", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 1;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -140,14 +158,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 2", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 2", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 2", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 2", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 2;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -162,14 +180,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 3", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 3", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 3", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 3", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 3;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -184,14 +202,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 4", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 4", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 4", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 4", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 4;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -206,14 +224,14 @@ void GameViewWindow::Update() {
 			}
 		}
 
-		if (ImGui::Button("Slot 5", ImVec2(fileWindowWidth - 80, fileWindowHeight))) {
+		if (ImGui::Button("Slot 5", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
 			ImGui::CloseCurrentPopup();
 		}
-		ImGui::SameLine(0, 5);
-		if (ImGui::Button("Clear 5", ImVec2(80, fileWindowHeight))) {
+		ImGui::SameLine(0, optionsButtonPadding);
+		if (ImGui::Button("Clear 5", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
 			fileNum = 5;
 			std::string saveFile = GenerateSaveJSONFile(fileNum);
 			nlohmann::ordered_json jsonData;
@@ -252,7 +270,7 @@ void GameViewWindow::Update() {
 			}
 
 			// Clear newEntities since they're already saved
-			DebugSystem::newEntities.clear();
+			DebugSystem::newEntities->clear();
 
 			// Save to file
 			std::ofstream outputFile(saveFile);
@@ -359,24 +377,22 @@ void GameViewWindow::Update() {
 		ImGui::EndPopup();
 	}
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
-		//GLFWFunctions::allow_camera_movement = ~GLFWFunctions::allow_camera_movement;
-		GLFWFunctions::audioPaused = ~GLFWFunctions::audioPaused;
 		TogglePause();
 	}
 
 	ImGui::PopStyleVar();
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	if (ImGui::Button(clickedZoom ? "UnZoom" : "Zoom")) {
 		clickedZoom = !clickedZoom;
 	}
 
-	ImGui::SameLine(0, 5);
+	ImGui::SameLine(0, optionsButtonPadding);
 
 	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
 		if (clickedScreenPan) {
@@ -392,21 +408,16 @@ void GameViewWindow::Update() {
 	}
 
 
-	ImGui::SameLine(0, 5);
+
+	ImGui::SameLine(0, optionsButtonPadding);
 
 
 	if (ImGui::Button("Reset Perspective")) {
 		myMath::Vector2D initialCamPos{};
 
-		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.getEntityID(entity) == "player") {
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				initialCamPos = myMath::Vector2D{ transform.position.GetX(), transform.position.GetY() };
-			}
-		}
+		initialCamPos = { 0,0 };
 
 		cameraSystem.setCameraPosition(initialCamPos);
-		float initialZoom = 1.0f;
 		// Reset camera zoom to default value
 		cameraSystem.setCameraZoom(initialZoom);
 	}
@@ -422,9 +433,12 @@ void GameViewWindow::Update() {
 	scrollY = io.MouseWheel;
 
 	if (insideViewport && clickedZoom) {
+		currentZoom = cameraSystem.getCameraZoom() + scrollY * mouseWheelScaleFactor;
+
+		// Clamp the new zoom value between min and max
+		currentZoom = std::clamp(currentZoom, MIN_ZOOM, MAX_ZOOM);
 		
-		cameraSystem.setCameraZoom(cameraSystem.getCameraZoom() + scrollY * 0.1f);
-		
+		cameraSystem.setCameraZoom(currentZoom);
 	}
 
 	CaptureMainWindow();
@@ -459,20 +473,10 @@ void GameViewWindow::Update() {
 }
 //Clean up resources
 void GameViewWindow::Cleanup() {
-	// First destroy all entities
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		ecsCoordinator.destroyEntity(entity);
-	}
-
 	// Then cleanup viewport texture
 	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 		viewportTexture = 0;
-	}
-
-	if (pausedTexture != 0) {
-		glDeleteTextures(1, &pausedTexture);
-		pausedTexture = 0;
 	}
 }
 //Set up Opengl texture to store game scene
@@ -490,8 +494,6 @@ void GameViewWindow::SetupViewportTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-//Capture rendered game scene
-GLuint GameViewWindow::pausedTexture = 0;
 
 void GameViewWindow::CaptureMainWindow() {
 
@@ -512,7 +514,6 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport()
 	float targetAspectRatio = (float)GLFWFunctions::windowWidth / (float)GLFWFunctions::windowHeight;
 
 	// Get available space in the viewport window
-	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
 	float pauseButtonHeight = ImGui::GetFrameHeight();
 	float padding = ImGui::GetStyle().ItemSpacing.y * 2; // Add padding between elements
 
@@ -551,7 +552,6 @@ ImVec2 GameViewWindow::GetLargestSizeForViewport()
 ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 {
 	// Calculate UI element heights and padding
-	float headerHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
 	float pauseButtonHeight = ImGui::GetFrameHeight();
 	float padding = ImGui::GetStyle().ItemSpacing.y * 2;
 
@@ -575,10 +575,9 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 		currentMouseDragDist = { initialMousePos.x - globalMousePos.x, initialMousePos.y - globalMousePos.y };
 
 		// Move camera position
-		float dragSpeed = 1.5f;
 		myMath::Vector2D camPos = cameraSystem.getCameraPosition();
-		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * dragSpeed);
-		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * dragSpeed);
+		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * mouseDragSpeed);
+		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * mouseDragSpeed);
 		cameraSystem.setCameraPosition(camPos);
 
 		mouseDragDist = currentMouseDragDist;
@@ -627,69 +626,43 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
 	Entity dropEntity = ecsCoordinator.createEntity();
 
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
+
 	TransformComponent transform;
-	transform.position = { 300.0f, 300.0f };
+	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
 	transform.orientation = { 0.0f, 0.0f };
 	
 	ecsCoordinator.addComponent(dropEntity, transform);
+
+	BehaviourComponent behaviour;
+	behaviour.none = true;
+	ecsCoordinator.addComponent(dropEntity, behaviour);
 
 	JSONSerializer serializer;
 
 	// Add the appropriate components based on the specifier
 	switch (specifier) {
 	case TEXTURE:
-		if (strcmp(assetName, "goldfish") == 0 || strcmp(assetName, "mossball") == 0) {
 			if (strcmp(assetName, "goldfish") == 0) {
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
+
+				PhysicsComponent physics;
+
 				ecsCoordinator.addComponent(dropEntity, enemy);
+				ecsCoordinator.addComponent(dropEntity, physics);
+			}
+			if (strcmp(assetName, "mossball") == 0) {
+				PlayerComponent player;
+				serializer.ReadObject(player.isPlayer, assetName, "entities.player.isPlayer");
+				ecsCoordinator.addComponent(dropEntity, player);
+
+				PhysicsComponent physics;
+				ecsCoordinator.addComponent(dropEntity, physics);
 			}
 
-			AABBComponent aabb;
-			serializer.ReadObject(aabb.left, assetName, "entities.enemy.aabb.left");
-			serializer.ReadObject(aabb.right, assetName, "entities.enemy.aabb.right");
-			serializer.ReadObject(aabb.top, assetName, "entities.enemy.aabb.top");
-			serializer.ReadObject(aabb.bottom, assetName, "entities.enemy.aabb.bottom");
-			ecsCoordinator.addComponent(dropEntity, aabb);
-
-			PhysicsComponent physics;
-
-			myMath::Vector2D direction = physics.force.GetDirection();
-			float magnitude = physics.force.GetMagnitude();
-
-			serializer.ReadObject(physics.mass,assetName, "entities.forces.mass");
-			serializer.ReadObject(physics.gravityScale,assetName, "entities.forces.gravityScale");
-			serializer.ReadObject(physics.jump,assetName, "entities.forces.jump");
-			serializer.ReadObject(physics.dampening,assetName, "entities.forces.dampening");
-			serializer.ReadObject(physics.velocity,	assetName, "entities.forces.velocity");
-			serializer.ReadObject(physics.maxVelocity,assetName, "entities.forces.maxVelocity");
-			serializer.ReadObject(physics.acceleration,	assetName, "entities.forces.acceleration");
-			serializer.ReadObject(direction,assetName, "entities.forces.force.direction");
-			serializer.ReadObject(magnitude,assetName, "entities.forces.force.magnitude");
-			serializer.ReadObject(physics.accumulatedForce,assetName, "entities.forces.accumulatedForce");
-			serializer.ReadObject(physics.maxAccumulatedForce,assetName, "entities.forces.maxAccumulatedForce");
-			serializer.ReadObject(physics.prevForce,assetName, "entities.forces.prevForces");
-			serializer.ReadObject(physics.targetForce,assetName, "entities.forces.targetForce");
-
-			physics.force.SetDirection(direction);
-			physics.force.SetMagnitude(magnitude);
-
-			ecsCoordinator.addComponent(dropEntity, physics);
-		}
-		else if (strcmp(assetName, "woodtile") == 0) {
-			AABBComponent aabb{};
-			serializer.ReadObject(aabb.left, assetName, "entities.aabb.left");
-			serializer.ReadObject(aabb.right, assetName, "entities.aabb.right");
-			serializer.ReadObject(aabb.top, assetName, "entities.aabb.top");
-			serializer.ReadObject(aabb.bottom, assetName, "entities.aabb.bottom");
-
-			ClosestPlatform closestPlatform{};
-			serializer.ReadObject(closestPlatform.isClosest, assetName, "entities.closestPlatform.isClosest");
-
-			ecsCoordinator.addComponent(dropEntity, aabb);
-			ecsCoordinator.addComponent(dropEntity, closestPlatform);
-		}
 		break;
 	case FONT:
 		FontComponent font;
@@ -866,7 +839,8 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		pump.pumpForce = 3.0f;
 		entityJSON["pump"] = {
 			{"isPump", pump.isPump},
-			{"pumpForce", pump.pumpForce}
+			{"pumpForce", pump.pumpForce},
+			{"isAnimate", pump.isAnimate }
 		};
 	}
 
@@ -893,6 +867,13 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		collectable.isCollectable = true;
 		entityJSON["collectable"] = { {"isCollectable", collectable.isCollectable} };
 	}
+
+	if (ecs.hasComponent<UIComponent>(entity)) {
+		auto& UI = ecs.getComponent<UIComponent>(entity);
+		UI.isUI = true;
+		entityJSON["UI"] = { {"isUI", UI.isUI} };
+	}
+
 	//std::cout << "Has Behaviour:" << ecs.hasComponent<BehaviourComponent>(entity) << std::endl;
 	if (ecs.hasComponent<BehaviourComponent>(entity)) {
 		auto& behaviour = ecs.getComponent<BehaviourComponent>(entity);
@@ -924,6 +905,10 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		else if (logicSystemRef->hasBehaviour<MouseBehaviour>(entity)) {
 			behaviour.button = true;
 			entityJSON["behaviour"] = { {"button", behaviour.button} };
+		}
+		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(entity)) {
+			behaviour.platform = true;
+			entityJSON["behaviour"] = { {"platform", behaviour.platform} };
 		}
 	}
 
@@ -957,54 +942,54 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
 
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
-	float playerRotation = 0.0f;
+	double playerRotation = 0.0;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.getEntityID(entity) == "player") {
+		if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
 			break;
 		}
 	}
 	// Convert to radians and normalize
-	float cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
+	double cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
 	if (cameraRotation < 0) cameraRotation += 2.0f * M_PI;
 
 	// Get viewport center in screen space
-	float viewportCenterX = viewportPos.x + renderPos.x + (aspectSize.x * 0.5f);
-	float viewportCenterY = viewportPos.y + renderPos.y + (aspectSize.y * 0.5f);
+	double viewportCenterX = viewportPos.x + renderPos.x + (aspectSize.x * 0.5f);
+	double viewportCenterY = viewportPos.y + renderPos.y + (aspectSize.y * 0.5f);
 
 	// Convert screen coordinates to viewport-relative coordinates
-	float viewportX = screenX - viewportCenterX;
-	float viewportY = viewportCenterY - screenY;
+	double viewportX = screenX - viewportCenterX;
+	double viewportY = viewportCenterY - screenY;
 
 	// Scale by zoom and viewport size
-	float worldScaleX = (viewportWidth / (aspectSize.x * zoomLevel));
-	float worldScaleY = (viewportHeight / (aspectSize.y * zoomLevel));
+	double worldScaleX = (viewportWidth / (aspectSize.x * currentZoom));
+	double worldScaleY = (viewportHeight / (aspectSize.y * currentZoom));
 
 	viewportX *= worldScaleX;
 	viewportY *= worldScaleY;
 
 	// Calculate rotation factors
-	float cosAngle = cos(cameraRotation);
-	float sinAngle = sin(cameraRotation);
+	double cosAngle = cos(cameraRotation);
+	double sinAngle = sin(cameraRotation);
 
 	// Rotate coordinates
-	float rotatedX = viewportX * cosAngle - viewportY * sinAngle;
-	float rotatedY = viewportX * sinAngle + viewportY * cosAngle;
+	double rotatedX = viewportX * cosAngle - viewportY * sinAngle;
+	double rotatedY = viewportX * sinAngle + viewportY * cosAngle;
 
 	// Transform to world space
-	float worldX = cameraPos.GetX() + rotatedX;
-	float worldY = cameraPos.GetY() + rotatedY;
+	double worldX = cameraPos.GetX() + rotatedX;
+	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
 	if (clickedScreenPan) {
-		float panX = accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
-		float panY = accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+		double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+		double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
 		worldX += panX * cosAngle - panY * sinAngle;
 		worldY += panX * sinAngle + panY * cosAngle;
 	}
 
-	return ImVec2(worldX, worldY);
+	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
 ImVec2 GameViewWindow::GetMouseWorldPosition() {
@@ -1027,15 +1012,15 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
 
 	// Get rotation in radians, normalize it to keep it between 0 and 2PI
-	float playerRotation = 0.0f;
+	double playerRotation = 0.0;
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.getEntityID(entity) == "player") {
+		if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			playerRotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation.GetX();
 			break;
 		}
 	}
 	// Convert to radians and normalize
-	float cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
+	double cameraRotation = fmod(playerRotation * (M_PI / 180.0f), 2.0f * M_PI);
 	if (cameraRotation < 0) cameraRotation += 2.0f * M_PI;
 
 	// Get viewport center
@@ -1054,16 +1039,16 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	relY *= worldScaleY;
 
 	// Calculate rotation factors
-	float cosAngle = cos(cameraRotation);
-	float sinAngle = sin(cameraRotation);
+	double cosAngle = cos(cameraRotation);
+	double sinAngle = sin(cameraRotation);
 
 	// Rotate coordinates
-	float rotatedX = relX * cosAngle - relY * sinAngle;
-	float rotatedY = relX * sinAngle + relY * cosAngle;
+	double rotatedX = relX * cosAngle - relY * sinAngle;
+	double rotatedY = relX * sinAngle + relY * cosAngle;
 
 	// Transform to world space
-	float worldX = cameraPos.GetX() + rotatedX;
-	float worldY = cameraPos.GetY() + rotatedY;
+	double worldX = cameraPos.GetX() + rotatedX;
+	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
 	if (clickedScreenPan) {
@@ -1074,7 +1059,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 		worldY += panX * sinAngle + panY * cosAngle;
 	}
 
-	return ImVec2(worldX, worldY);
+	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
 ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {
@@ -1115,9 +1100,6 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(MIN_ZOOM, "GUIViewport.minZoom");
 	serializer.ReadFloat(MAX_ZOOM, "GUIViewport.maxZoom");
 
-	serializer.ReadFloat(zoomDelta, "GUIViewport.zoomDelta");
-	serializer.ReadFloat(newZoomLevel, "GUIViewport.newZoomLevel");
-
 	serializer.ReadFloat(scrollY, "GUIViewport.scrollY");
 
 	serializer.ReadFloat(globalMousePos.x, "GUIViewport.currentMousePosX");
@@ -1131,6 +1113,7 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 	serializer.ReadFloat(mouseDragDist.x, "GUIViewport.mouseDragDist.x");
 	serializer.ReadFloat(mouseDragDist.y, "GUIViewport.mouseDragDist.y");
+	serializer.ReadFloat(mouseDragSpeed, "GUIViewport.mouseDragSpeed");
 
 	serializer.ReadFloat(aspectRatioWidth, "GUIViewport.aspectRatioWidth");
 	serializer.ReadFloat(aspectRatioHeight, "GUIViewport.aspectRatioHeight");
@@ -1140,6 +1123,12 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 	serializer.ReadFloat(fileWindowWidth, "GUIViewport.fileWindowWidth");
 	serializer.ReadFloat(saveWindowHeight, "GUIViewport.saveWindowHeight");
 	serializer.ReadFloat(fileWindowHeight, "GUIViewport.fileWindowHeight");
+	serializer.ReadFloat(slotWindowWidth, "GUIViewport.slotWindowWidth");
+	serializer.ReadFloat(clearSlotWindowWidth, "GUIViewport.clearSlotWindowWidth");
+	serializer.ReadFloat(optionsButtonPadding, "GUIViewport.optionsButtonPadding");
+
+	serializer.ReadFloat(mouseWheelScaleFactor, "GUIViewport.mouseWheelScaleFactor");
+	serializer.ReadFloat(initialZoom, "GUIViewport.initialZoom");
 	serializer.ReadInt(saveLimit, "GUIViewport.saveLimit");
 
 }

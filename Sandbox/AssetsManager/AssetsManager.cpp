@@ -24,26 +24,41 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include FT_FREETYPE_H
 
 
-AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false) {}
-
-AssetsManager::~AssetsManager()
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false)
 {
-    
+    m_AssetList = new std::vector<std::string>();
 }
 
-//leave empty for now
+AssetsManager::~AssetsManager(){}
+
+//Initialise the assets manager
 void AssetsManager::initialise()
 {
+    if(!m_Textures)
+		m_Textures = new std::map<std::string, GLuint>();
+
+	if (!m_Shaders)
+		m_Shaders = new std::map<std::string, std::unique_ptr<Shader>>();
+
+	if (!m_Audio)
+		m_Audio = new std::map<std::string, FMOD::Sound*>();
+
+	if (!m_Fonts)
+		m_Fonts = new std::map<std::string, std::map<char, Character>>();
+
+    if(!m_FontPaths)
+		m_FontPaths = new std::map<std::string, std::string>();
+
     LoadShaderAssets();
     LoadTextureAssets();
     LoadFontAssets();
     LoadAudioAssets();
 }
 
-void AssetsManager::update()
-{
-}
+void AssetsManager::update(){}
 
+
+//Clean up the assets manager
 void AssetsManager::cleanup()
 {
     ClearTextures();
@@ -51,8 +66,10 @@ void AssetsManager::cleanup()
     ClearFonts();
     ClearAudio();
 
-    m_AssetList.clear();
-	std::vector<std::string>().swap(m_AssetList);
+    delete audSystem;
+    audSystem = nullptr;
+    delete m_AssetList;
+    m_AssetList = nullptr;
 }
 
 SystemType AssetsManager::getSystem()
@@ -83,7 +100,7 @@ void AssetsManager::LoadTextureAssets() const {
 }
 
 void AssetsManager::LoadTexture(const std::string& texName, const std::string& texPath) {
-    if (m_Textures.find(texName) != m_Textures.end()) {
+    if (m_Textures->find(texName) != m_Textures->end()) {
 		std::cerr << "Texture already loaded!" << std::endl;
 		return;
 	}
@@ -110,8 +127,8 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
 
         stbi_image_free(data);
 
-        m_Textures[texName] = texID;
-        m_AssetList.push_back(texName);
+        m_Textures->operator[](texName) = texID;
+        m_AssetList->push_back(texName);
         std::cout << "texture loaded successfully!" << std::endl;
     }
     else {
@@ -122,8 +139,8 @@ void AssetsManager::LoadTexture(const std::string& texName, const std::string& t
 }
 
 GLuint AssetsManager::GetTexture(const std::string& texName) const {
-    auto iterator = m_Textures.find(texName);
-    if (iterator != m_Textures.end()) {
+    auto iterator = m_Textures->find(texName);
+    if (iterator != m_Textures->end()) {
 		return iterator->second;
 	}
     else {
@@ -133,11 +150,10 @@ GLuint AssetsManager::GetTexture(const std::string& texName) const {
 }
 
 void AssetsManager::UnloadTexture(const std::string& texName) {
-    auto iterator = m_Textures.find(texName);
-    if (iterator != m_Textures.end()) {
+    auto iterator = m_Textures->find(texName);
+    if (iterator != m_Textures->end()) {
 		glDeleteTextures(1, &iterator->second);
-        delete &iterator->second;
-		m_Textures.erase(iterator);
+		m_Textures->erase(iterator);
         std::cout << "Texture unloaded successfully!" << std::endl;
 	}
     else {
@@ -146,11 +162,11 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
 }
 
 void AssetsManager::ClearTextures() {
-    for (auto& texture : m_Textures) {
+    for (auto& texture : *m_Textures) {
 		glDeleteTextures(1, &texture.second);
-        
 	}
-	m_Textures.clear();
+	delete m_Textures;
+	m_Textures = nullptr;
 	std::cout << "All textures cleared!" << std::endl;
 }
 
@@ -188,7 +204,7 @@ void AssetsManager::LoadShaderAssets() const {
 }
 
 void AssetsManager::LoadShader(const std::string& name, const std::string& filePath) {
-    if (m_Shaders.find(name) != m_Shaders.end()) {
+    if (m_Shaders->find(name) != m_Shaders->end()) {
         std::cerr << "Shader already loaded!" << std::endl;
         return;
     }
@@ -200,16 +216,16 @@ void AssetsManager::LoadShader(const std::string& name, const std::string& fileP
 		return;
     }
     else {
-        m_Shaders[name] = std::move(shader);
-        m_AssetList.push_back(name);
+        m_Shaders->operator[](name) = std::move(shader);
+        m_AssetList->push_back(name);
         std::cout << "Shader loaded successfully!" << std::endl;
     }
 
 }
 
 Shader* AssetsManager::GetShader(const std::string& name) const {
-    auto iterator = m_Shaders.find(name);
-    if (iterator != m_Shaders.end()) {
+    auto iterator = m_Shaders->find(name);
+    if (iterator != m_Shaders->end()) {
         return iterator->second.get();
     }
     else {
@@ -219,10 +235,9 @@ Shader* AssetsManager::GetShader(const std::string& name) const {
 }
 
 void AssetsManager::UnloadShader(const std::string& name) {
-    auto iterator = m_Shaders.find(name);
-    if (iterator != m_Shaders.end()) {
-        delete& iterator->second;
-		m_Shaders.erase(iterator);
+    auto iterator = m_Shaders->find(name);
+    if (iterator != m_Shaders->end()) {
+		m_Shaders->erase(iterator);
 		std::cout << "Shader unloaded successfully!" << std::endl;
 	}
     else {
@@ -231,7 +246,8 @@ void AssetsManager::UnloadShader(const std::string& name) {
 }
 
 void AssetsManager::ClearShaders() {
-	m_Shaders.clear();
+	delete m_Shaders;
+	m_Shaders = nullptr;
 	std::cout << "All shaders cleared!" << std::endl;
 }
 
@@ -274,19 +290,30 @@ void AssetsManager::LoadAudioAssets() {
 
 void AssetsManager::LoadAudio(const std::string& songName, const std::string& filePath, FMOD::System* auSystem) {
     FMOD::Sound* audioSong = nullptr;
-    FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
-    if (result != FMOD_OK) {
-        std::cout << "FMOD error! (" << result << ") " << std::endl;
-        return;
+    if (songName == "Rotation.wav" || songName == "bgm" || songName == "Iris_L2_BGM_Loop.wav") {
+		FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_LOOP_NORMAL, nullptr, &audioSong);
+		if (result != FMOD_OK) {
+			std::cout << "FMOD error! (" << result << ") " << std::endl;
+			return;
+		}
+    }
+    else {
+        FMOD_RESULT result = auSystem->createSound(filePath.c_str(), FMOD_DEFAULT, nullptr, &audioSong);
+        if (result != FMOD_OK) {
+            std::cout << "FMOD error! (" << result << ") " << std::endl;
+            return;
+        }
     }
 
-    m_Audio[songName] = audioSong;
-    m_AssetList.push_back(songName);
+    std::cout << songName << std::endl;
+
+    (*m_Audio)[songName] = audioSong;
+    m_AssetList->push_back(songName);
 }
 
 FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
-    auto iterator = m_Audio.find(name);
-    if (iterator != m_Audio.end()) {
+    auto iterator = m_Audio->find(name);
+    if (iterator != m_Audio->end()) {
 		return iterator->second;
 	}
     else {
@@ -300,8 +327,8 @@ FMOD::System* AssetsManager::GetAudioSystem() const {
 }
 
 void AssetsManager::UnloadAudio(const std::string& name) {
-    auto iterator = m_Audio.find(name);
-    if (iterator != m_Audio.end()) {
+    auto iterator = m_Audio->find(name);
+    if (iterator != m_Audio->end()) {
         iterator->second->release();
         std::cout << "Audio unloaded successfully!" << std::endl;
     }
@@ -311,10 +338,11 @@ void AssetsManager::UnloadAudio(const std::string& name) {
 }
 
 void AssetsManager::ClearAudio() {
-    for (auto& audio : m_Audio) {
+    for (auto& audio : *m_Audio) {
 		audio.second->release();
 	}
-	m_Audio.clear();
+    delete m_Audio;
+	m_Audio = nullptr;
     if (audSystem) {
         audSystem->close();
         audSystem->release();
@@ -396,21 +424,21 @@ void AssetsManager::LoadFont(const std::string& fontName, const std::string& fon
 
     if (fontLoaded) {
        
-        m_Fonts[fontName] = std::move(tempCharacters);
-        m_FontPaths[fontName] = fontPath;
-        m_AssetList.push_back(fontName);
+        m_Fonts->operator[](fontName) = std::move(tempCharacters);
+        m_FontPaths->operator[](fontName) = fontPath;
+        m_AssetList->push_back(fontName);
     }
     else {
         std::cerr << "ERROR: Not all glyphs were loaded for font: " << fontPath << std::endl;
     }
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts[fontName].size() << std::endl;
+    std::cout << "Font loaded successfully: " << fontPath << " with total glyphs loaded: " << m_Fonts->operator[](fontName).size() << std::endl;
 }
 
 std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) const {
-	auto iterator = m_Fonts.find(fontPath);
-    if (iterator != m_Fonts.end()) {
+	auto iterator = m_Fonts->find(fontPath);
+    if (iterator != m_Fonts->end()) {
 		return iterator->second;
 	}
     else {
@@ -420,8 +448,8 @@ std::map<char, Character> AssetsManager::GetFont(const std::string& fontPath) co
 }
 
 std::string AssetsManager::GetFontPath(const std::string& fontName) const {
-    auto iterator = m_FontPaths.find(fontName);
-    if (iterator != m_FontPaths.end()) {
+    auto iterator = m_FontPaths->find(fontName);
+    if (iterator != m_FontPaths->end()) {
 		return iterator->second;
 	}
     else {
@@ -431,13 +459,12 @@ std::string AssetsManager::GetFontPath(const std::string& fontName) const {
 }
 
 void AssetsManager::UnloadFont(const std::string& fontPath) {
-	auto iterator = m_Fonts.find(fontPath);
-    if (iterator != m_Fonts.end()) {
+	auto iterator = m_Fonts->find(fontPath);
+    if (iterator != m_Fonts->end()) {
         for (auto& character : iterator->second) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
-        delete& iterator->second;
-		m_Fonts.erase(iterator);
+		m_Fonts->erase(iterator);
 		std::cout << "Font unloaded successfully!" << std::endl;
 	}
     else {
@@ -446,13 +473,15 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
 }
 
 void AssetsManager::ClearFonts() {
-    for (auto& font : m_Fonts) {
+    for (auto& font : *m_Fonts) {
         for (auto& character : font.second) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
 	}
-    m_FontPaths.clear();
-	m_Fonts.clear();
+    delete m_Fonts;
+	m_Fonts = nullptr;
+    delete m_FontPaths;
+	m_FontPaths = nullptr;
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
@@ -462,7 +491,7 @@ void AssetsManager::handleDropFile(std::string filePath) {
     std::filesystem::path path(filePath);
 
     //check if file already exists
-    if (std::find(m_AssetList.begin(), m_AssetList.end(), path.filename().string()) != m_AssetList.end()) {
+    if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
 		//if it exists, delete the current one within the program
         if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
 			UnloadTexture(path.filename().string());
@@ -519,24 +548,24 @@ bool AssetsManager::checkIfAssetListChanged() const {
 }
 
 std::vector<std::string> AssetsManager::getAssetList() const {
-	return m_AssetList;
+	return *m_AssetList;
 }
 
 
 const std::map<std::string, GLuint>& AssetsManager::getTextureList() const {
-	return m_Textures;
+	return *m_Textures;
 }
 
 const std::map<std::string, std::unique_ptr<Shader>>& AssetsManager::getShaderList() const {
-	return m_Shaders;
+	return *m_Shaders;
 }
 
 const std::map<std::string, FMOD::Sound*>& AssetsManager::getAudioList() const {
-	return m_Audio;
+	return *m_Audio;
 }
 
 const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontList() const {
-	return m_Fonts;
+	return *m_Fonts;
 }
 
 void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath) {

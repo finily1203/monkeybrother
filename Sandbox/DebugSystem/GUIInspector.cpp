@@ -1,3 +1,19 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIInspector.cpp
+@brief  :  This file contains the function definition of ImGui Inspector system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui inspector window to capture selected entity's transformation data
+		- Integrated entity to mouse interaction to drag, scale, rotate, and delete
+		- Integrated the feature to allow re-assigning of pre-existing entity behavior
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "GUIInspector.h"
 #include "GUIGameViewport.h"
 #include "Debug.h"
@@ -8,15 +24,20 @@
 #include "CollectableBehaviour.h"
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
+#include "PlatformBehaviour.h"
 #include <memory>
 
+std::vector<std::pair<int, std::string>>* Inspector::overlappingEntities;
 float Inspector::objAttributeSliderMaxLength;
 char Inspector::textBuffer[MAXTEXTSIZE];
-ImVec2 mouseWorldPos;
+ImVec2 Inspector::mouseWorldPos;
 glm::mat4 projectionMatrix(1.0f);
 int currentItem = 0;
 
+
+
 void Inspector::Initialise() {
+	overlappingEntities = new std::vector<std::pair<int, std::string>>();
 	LoadInspectorFromJSON(FilePathManager::GetIMGUIInspectorJSONPath());
 }
 
@@ -26,7 +47,6 @@ void Inspector::Update() {
 
 	ImVec2 viewportPos = GameViewWindow::getViewportPos(); // Get viewport's position
 	ImVec2 mouseScreenPos = ImGui::GetMousePos();
-	//std::cout << "Mouse Screen: " << mouseScreenPos.x << ", " << mouseScreenPos.y << std::endl;
 	mouseScreenPos.x -= viewportPos.x;  // Adjust for viewport offset
 	mouseScreenPos.y -= viewportPos.y;
 
@@ -52,15 +72,15 @@ void Inspector::Update() {
 			float height = transform.scale.GetY();
 
 			// Increase collision area by scaling the width and height
-			float collisionScale = 1.1f;  // Adjust this value to make area bigger/smaller
+			float collisionScale = 1.8f;  // Adjust this value to make area bigger/smaller
 			width *= collisionScale;
 			height *= collisionScale;
 
 			// Calculate bounds with scaled dimensions
-			float leftBound = x - width*0.8f;
-			float rightBound = x + width*0.2f;
-			float topBound = y + height*0.8;
-			float bottomBound = y + height * 0.4;
+			double leftBound = x - width*0.8f;
+			double rightBound = x + width*0.2f;
+			double topBound = y + height*0.2;
+			double bottomBound = y - height * 0.5; /*+ height * 0.1*/;
 
 			return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
 				centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
@@ -77,8 +97,8 @@ void Inspector::Update() {
 			// Center the collision box horizontally relative to the position
 			float leftBound = x;
 			float rightBound = x + (width * 0.4f);
-			float topBound = y + height * 0.4f;    // Increased upper bound
-			float bottomBound = y - height * 0.8f;  // Lowered bottom bound
+			float topBound = y + height * 0.8f;    // Increased upper bound
+			float bottomBound = y - height * 0.2f;  // Lowered bottom bound
 
 			// Calculate distance for circular collision from centered position
 			float centerX = x;  // Use position directly since bounds are centered
@@ -120,8 +140,7 @@ void Inspector::Update() {
 
 	Console::GetLog() << mouseWorldPos.x << "," << mouseWorldPos.y << std::endl;
 
-	std::string selEntityID; // Store selected entity ID instead of Entity handle
-	static std::vector<std::pair<int, std::string>> overlappingEntities;
+	//std::string selEntityID; // Store selected entity ID instead of Entity handle
 
 	static bool isSelectingEntity = false;
 	static bool isInitialClickAfterSelection = true;
@@ -130,35 +149,33 @@ void Inspector::Update() {
 	mousePos = ImGui::GetMousePos();
 
 	static bool initiatedByDoubleClick = false;
-	//static bool openDeletePopup = false;
-	//static int chosenEntityID = -1;
 
 	// Handle entity selection with Ctrl+Left Click
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
 		selectedEntityID = -1;
 		isSelectingEntity = true;
 		isInitialClickAfterSelection = true;
-		overlappingEntities.clear();
+		overlappingEntities->clear();
 
 		// Get all entities and check for collision
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 			if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
 				float distSq;
 				if (isMouseOverEntity(entity, distSq)) {
-					overlappingEntities.push_back({ entity, ecsCoordinator.getEntityID(entity) });
+					overlappingEntities->push_back({ entity, ecsCoordinator.getEntityID(entity) });
 				}
 			}
 		}
 
 		// Sort overlapping entities by distance if needed
-		if (overlappingEntities.size() > 1) {
-			std::sort(overlappingEntities.begin(), overlappingEntities.end(),
+		if (overlappingEntities->size() > 1) {
+			std::sort(overlappingEntities->begin(), overlappingEntities->end(),
 				[](const auto& a, const auto& b) {
 					return a.second < b.second;
 				});
 		}
 
-		if (!overlappingEntities.empty()) {
+		if (!overlappingEntities->empty()) {
 			ImGui::OpenPopup("Select Entity");
 		}
 		else {
@@ -176,7 +193,7 @@ void Inspector::Update() {
 		ImGui::Text("Select Entity:");
 		ImGui::Separator();
 
-		for (const auto& [entity, name] : overlappingEntities) {
+		for (const auto& [entity, name] : *overlappingEntities) {
 			if (ImGui::MenuItem(name.c_str())) {
 				selectedEntityID = entity;
 				draggedEntityID = entity;
@@ -230,7 +247,7 @@ void Inspector::Update() {
 		float scaleFactor = 1.0f + (wheel_delta * 0.1f);
 
 		if (withinX && withinY) {
-			if (ecsCoordinator.getEntityID(selectedEntityID) != "player") {
+			if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
 				if (ImGui::GetIO().KeyShift) {
 					float rotationDelta = wheel_delta * 15.0f;
 					transform.orientation.SetX(transform.orientation.GetX() + rotationDelta);
@@ -309,6 +326,7 @@ void Inspector::Update() {
 	}
 
 	RenderInspectorWindow(ecsCoordinator, selectedEntityID);
+	
 }
 
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
@@ -458,7 +476,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 
 
-		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player" };
+		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform"};
 
 
 		if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
@@ -475,6 +493,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		}
 		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
 			currentItem = 5;
+		}
+		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
+			currentItem = 6;
 		}
 		else {
 			currentItem = 0;
@@ -526,6 +547,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					case 1:
 						//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
 						physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
+						if(!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
 						break;
@@ -537,6 +559,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						break;
 					case 4:
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
+						GLFWFunctions::collectableCount++;
 						break;
 					case 5:
 						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
@@ -545,8 +568,13 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						physics.maxVelocity = 200.0f;
 						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
 						physics.maxAccumulatedForce = 40.0f;
+						if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
 						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+						break;
+					case 6:
+						
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
 						break;
 					}
 
@@ -612,5 +640,7 @@ void Inspector::LoadInspectorFromJSON(std::string const& filename)
 }
 
 void Inspector::Cleanup() {
-
+	memset(textBuffer, 0, MAXTEXTSIZE);
+	delete overlappingEntities;
+	overlappingEntities = nullptr;
 }

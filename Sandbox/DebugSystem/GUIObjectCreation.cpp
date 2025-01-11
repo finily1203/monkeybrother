@@ -1,3 +1,18 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Lew Zong Han Owen (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIObjectCreation.cpp
+@brief  :  This file contains the function definition of ImGui object creation system
+
+*Lew Zong Han Owen (z.lew) :
+		- Integrated ImGui Object Creation system to allow custom game objects to be created by inputing object-specific
+		  properties' data
+
+File Contributions: Lew Zong Han Owen (100%)
+
+/*_______________________________________________________________________________________________________________*/
 #include "Debug.h"
 #include "GUIObjectCreation.h"
 #include "LogicSystemECS.h"
@@ -138,30 +153,53 @@ void ObjectCreation::Update() {
 	Entity entityObj;
 	std::string entityId;
 
+	static bool shouldShowPopup = false;
+
 	if (ImGui::Button("Create Entity")) {
+		bool playerExists = false;
 
-		for (int i = 0; i < numEntitiesToCreate; i++) {
-
-			entityObj = ecsCoordinator.createEntity();
-
-			entityId = sigBuffer;
-
-			TransformComponent transform{};
-
-			transform.position.SetX(xCoordinates);
-			transform.position.SetY(yCoordinates);
-			transform.scale.SetX(defaultObjScaleX);
-			transform.scale.SetY(defaultObjScaleY);
-			ecsCoordinator.addComponent(entityObj, transform);
-			ecsCoordinator.setEntityID(entityObj, entityId);
-
-			ObjectCreationCondition(items, currentItem, entityObj, entityId);
-			DebugSystem::newEntities.push_back(entityObj);
-
-
+		// Check if player already exists
+		for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+				playerExists = true;
+				break;
+			}
 		}
 
+		// Set flag to show popup if trying to create duplicate player
+		if (currentItem == 0 && playerExists) {
+			shouldShowPopup = true;
+			ImGui::OpenPopup("Player Exists##popup");
+		}
+		// Only proceed if either not creating player or no player exists
+		else if (currentItem != 0 || !playerExists) {
+			for (int i = 0; i < numEntitiesToCreate; i++) {
+				entityObj = ecsCoordinator.createEntity();
+				entityId = sigBuffer;
+				TransformComponent transform{};
+				transform.position.SetX(xCoordinates);
+				transform.position.SetY(yCoordinates);
+				transform.scale.SetX(defaultObjScaleX);
+				transform.scale.SetY(defaultObjScaleY);
+				ecsCoordinator.addComponent(entityObj, transform);
+				ecsCoordinator.setEntityID(entityObj, entityId);
+				ObjectCreationCondition(items, currentItem, entityObj, entityId);
+				DebugSystem::newEntities->push_back(entityObj);
+			}
+		}
+	}
 
+	// Draw popup (this needs to be after the button but in the same window context)
+	if (shouldShowPopup) {
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		if (ImGui::Begin("Player Exists", &shouldShowPopup, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup)) {
+			ImGui::Text("A player entity already exists");
+			if (ImGui::Button("OK")) {
+				shouldShowPopup = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::End();
+		}
 	}
 	ImGui::SameLine();
 
@@ -183,7 +221,7 @@ void ObjectCreation::Update() {
 			ecsCoordinator.setEntityID(entityObj, entityId);
 
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
-			DebugSystem::newEntities.push_back(entityObj);
+			DebugSystem::newEntities->push_back(entityObj);
 
 
 		}
@@ -192,12 +230,10 @@ void ObjectCreation::Update() {
 	//Button to destroy all existing entity
 	if (ImGui::Button("Remove All Entity")) {
 		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-			if (ecsCoordinator.getEntityID(entity) != "placeholderentity") {
 				ecsCoordinator.destroyEntity(entity);
-			}
+			
 		}
 	}
-
 
 	ImGui::NewLine();
 	ImGui::End();
@@ -248,11 +284,24 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 	}
 	else if (!strcmp(items[itemIndex], "Player")) {
+		PhysicsComponent forces{};
+		forces.mass = 1.0f;
+		forces.gravityScale = { 9.8f, 9.8f };  // Match JSON values
+		forces.jump = 0.0f;
+		forces.dampening = 0.9f;
+		forces.maxVelocity = 200.0f;
+		forces.force.SetDirection({ 0.0f, 0.0f });  // Match JSON
+		forces.force.SetMagnitude(10.0f);
+		forces.maxAccumulatedForce = 40.0f;
+		forces.velocity = { 0.0f, 0.0f };
+		forces.acceleration = { 0.0f, 0.0f };
+		forces.accumulatedForce = { 0.0f, 0.0f };
+		forces.prevForce = 0.0f;
+		forces.targetForce = 0.0f;
 
-		/*AnimationComponent animation{};
-		animation.isAnimated = true;*/
+	
 
-		// Calculate AABB based on transform
+		// Add AABB component like in JSON
 		AABBComponent aabb{};
 		float halfWidth = transform.scale.GetX() / 2.0f;
 		float halfHeight = transform.scale.GetY() / 2.0f;
@@ -260,29 +309,22 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		aabb.right = transform.position.GetX() + halfWidth;
 		aabb.top = transform.position.GetY() + halfHeight;
 		aabb.bottom = transform.position.GetY() - halfHeight;
+		ecsCoordinator.addComponent(entityObj, aabb);
 
-		PhysicsComponent forces{};
-		forces.mass = 1.0f;
-		forces.gravityScale = { 9.8f, 9.8f };
-		forces.jump = 0.0f;
-		forces.dampening = 0.9f;
-		forces.maxVelocity = 200.0f;
-		forces.force.SetDirection({ 0.0f, 0.0f });
-		forces.force.SetMagnitude(10.0f);
-		forces.maxAccumulatedForce = 40.0f;
+		// Add physics component
+		ecsCoordinator.addComponent(entityObj, forces);
 
-		BehaviourComponent behaviour{};
-		behaviour.player = true;
-
+		// Add player component
 		PlayerComponent player{};
 		player.isPlayer = true;
-
-		//ecsCoordinator.addComponent(entityObj, animation);
-		ecsCoordinator.addComponent(entityObj, aabb);
-		ecsCoordinator.addComponent(entityObj, forces);
-		ecsCoordinator.addComponent(entityObj, behaviour);
 		ecsCoordinator.addComponent(entityObj, player);
 
+		// Add behaviour component
+		BehaviourComponent behaviour{};
+		behaviour.player = true;
+		ecsCoordinator.addComponent(entityObj, behaviour);
+
+		// Assign behaviour last, just like in JSON loading
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlayerBehaviour>());
 
 	}
@@ -363,6 +405,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<CollectableBehaviour>());
 		ecsCoordinator.addComponent(entityObj, behaviour);
+
+		GLFWFunctions::collectableCount++;
 	}
 	else if (!strcmp(items[itemIndex], "Background")) {
 		BackgroundComponent background{};

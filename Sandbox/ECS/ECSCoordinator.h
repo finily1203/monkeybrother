@@ -186,8 +186,6 @@ void ECSCoordinator::removeComponent(Entity entity)
 template <typename T>
 T& ECSCoordinator::getComponent(Entity entity)
 {
-	//std::cout << "entity: " << entity << std::endl;
-	//std::cout << "T: " << typeid(T).name() << std::endl;
 	return componentManager->getComponent<T>(entity);
 }
 

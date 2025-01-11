@@ -31,15 +31,12 @@ void Engine::initialiseSystem() {
 	for (auto& system : m_systems) {
 		system->initialise();
 	}
-
-	//ecsCoordinator.initialise();
 	
 }
 
 //Update all systems. Should be used after all systems are initialised
 void Engine::updateSystem() {
 	debugSystem.StartLoop();
-	//ecsCoordinator.update();
 
 	for (auto& system : m_systems) {
 		switch (system->getSystem()) {
@@ -121,9 +118,8 @@ void Engine::cleanupSystem() {
 			}
 		}
 	}
-
-	ecsCoordinator.cleanup();
 	
+	std::vector<GameSystems*>().swap(m_systems);
 }
 
 Engine::~Engine() {}

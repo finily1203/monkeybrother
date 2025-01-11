@@ -6,6 +6,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @file:   PhysicsComponent.h
 @brief:  This source file contains struct for Physics Component to be used by ECS
 		 and Physics and Collision Systems.
+
 		 Lee Jing Wen (jingwen.lee): Declared the struct component
 									 100%
 *//*____________________________________________________________________________-*/
@@ -29,6 +30,7 @@ struct PhysicsComponent
 	float targetForce;
 	Force force;
 
+	ForceManager forceManager;
 	PhysicsComponent() : velocity(0.0f, 0.0f), gravityScale(0.0f, 0.0f), acceleration(0.0f, 0.0f),
 		accumulatedForce(0.0f, 0.0f), jump(0.0f), dampening(0.0f), mass(1.0f),
 		maxVelocity(0.0f), maxAccumulatedForce(0.0f), prevForce(0.0f), targetForce(0.0f),

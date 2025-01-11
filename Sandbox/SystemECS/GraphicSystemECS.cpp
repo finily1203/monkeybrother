@@ -5,13 +5,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   GraphicSystemECS.cpp
 @brief:  This source file defines the functions in GraphicSystemECS class.
-		 This class is used to handle the communication between ECS and graphic
-		 system.
-		 Joel Chu (c.weiyuan): Defined the functions in GraphicSystemECS class.
-							   Most of the content in this file is taken from
-							   WindowSystem.cpp and modified to fit the scope
-							   for creating object in ECS.
-							   100%
+         This class is used to handle the communication between ECS and graphic
+         system.
+         Joel Chu (c.weiyuan): Defined the functions in GraphicSystemECS class.
+                               Most of the content in this file is taken from
+                               WindowSystem.cpp and modified to fit the scope
+                               for creating object in ECS.
+                               100%
 *//*___________________________________________________________________________-*/
 #include "GraphicSystemECS.h"
 
@@ -32,7 +32,44 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
+bool gameover = false;
 
+void createTextEntity(
+    ECSCoordinator& ecs,
+    const std::string& text,
+    const std::string& fontId,
+    const myMath::Vector3D& color,
+    const myMath::Vector2D& position,
+    const std::string& entityId
+) {
+    Entity textEntity = ecs.createEntity();
+
+    // Font Component
+    FontComponent font{};
+    font.text = text;
+    font.textScale = 1.0f;
+    font.color = color;
+    font.fontId = fontId;
+    ecsCoordinator.addComponent(textEntity, font);
+
+    // Transform Component
+    TransformComponent transform{};
+    transform.position = position;
+    transform.scale.SetX(0); // Initial scale (could be animated later)
+    transform.scale.SetY(0);
+    ecsCoordinator.addComponent(textEntity, transform);
+
+    // Behaviour Component
+    BehaviourComponent behaviour{};
+    behaviour.none = true;
+    ecsCoordinator.addComponent(textEntity, behaviour);
+
+    // Assign an ID for reference
+    ecsCoordinator.setEntityID(textEntity, entityId);
+
+    // Debugging log (optional)
+    // std::cout << entityId << " Text Created" << std::endl;
+}
 
 //std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
@@ -44,7 +81,7 @@ void GraphicSystemECS::initialise() {
 //uses functions from GraphicsSystem class to update, draw
 //and render objects.
 void GraphicSystemECS::update(float dt) {
-   
+
 
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         // Check if the entity has a transform component
@@ -57,50 +94,83 @@ void GraphicSystemECS::update(float dt) {
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
-        //if (GLFWFunctions::testMode == 0) {
         bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
         bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
         bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
         bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
-        //bool hasEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
-		if (ecsCoordinator.getEntityID(entity) == "background") {
-            /*transform.scale.SetX(GLFWFunctions::windowWidth * 4.0f);
-            transform.scale.SetY(GLFWFunctions::windowHeight * 4.0f);*/
-        }
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
 		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
 		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
+        bool isAnimate = false;
+
+        if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
+            const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
+            isAnimate = pumpComponent.isAnimate;
+        }
 
         // Use hasMovement for the update parameter
-        //graphicsSystem.Update(dt / 10.0f, hasMovement); // Use hasMovement instead of true
-        graphicsSystem.Update(dt / 10.0f, (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
+        graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
-
-        //auto entitySig = ecsCoordinator.getEntitySignature(entity);
-
-        /*if (ecsCoordinator.getEntityID(entity) == "background") {
-            transform.scale.SetX(GLFWFunctions::windowWidth);
-            transform.scale.SetY(GLFWFunctions::windowHeight);
-        }
-        std::cout << "Window X : " << GLFWFunctions::windowWidth << std::endl;
-        std::cout << "Window Y : " << GLFWFunctions::windowHeight << std::endl;*/
 
         // Compute view matrix
         if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
             cameraSystem.update();
         }
-        else if (ecsCoordinator.getEntityID(entity) == "player") {
+        else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             cameraSystem.lockToComponent(transform);
             cameraSystem.update();
         }
 
+        /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
+        /*--------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------*/
+
+		// check if the player has collected all the collectables
+		// Created a win text entity
+        if (GLFWFunctions::collectableCount == 0 && gameover == false) {
+            createTextEntity(
+                ecsCoordinator,
+                "You Win!",
+                "Antonio",
+                myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
+                myMath::Vector2D(-30, 40),         // Position
+                "winTextBox"                       // Unique ID
+            );
+            gameover = true;
+        }
+		// lose text entity
+        if (GLFWFunctions::instantLose && gameover == false) {
+            createTextEntity(
+                ecsCoordinator,
+                "You Lose!",
+                "Antonio",
+                myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
+                myMath::Vector2D(-30, 40),          // Position
+                "loseTextBox"                       // Unique ID
+            );
+            gameover = true;
+        }
+        // 
+        if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
+            if (ecsCoordinator.getEntityID(entity) == "winTextBox")
+            {
+                auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
+                font.text = "Exit!";
+            }
+        }
+        // cheat code 
+		if (GLFWFunctions::instantWin)
+		{
+			GLFWFunctions::collectableCount = 0;
+		}
+        
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.getEntityID(entity) != "player") {
+        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
@@ -111,29 +181,30 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+		else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
-
+        if (isAnimate && GLFWFunctions::isPumpOn) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
+        }
         // Drawing based on entity components
-        if (/*hasMovement && */isEnemy) {
+        if (isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
-        else if (isPump) {
+        else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
+
         }
-        else if(isPlatform){
+        else if (isPlatform) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
         }
-        else if (isButton) 
-        {
+        else if (isButton) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            if (ecsCoordinator.getEntityID(entity) == "quitButton") 
-            {
+            if (ecsCoordinator.getEntityID(entity) == "quitButton") {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
             }
 
@@ -143,16 +214,16 @@ void GraphicSystemECS::update(float dt) {
             }
         }
         else if (isCollectable) {
-			graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
         }
         else if (isExit) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
         }
         else if (isBackground) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
         else if (isUI) {
-            //transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (GLFWFunctions::collectableCount == 0) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-3"), transform.mdl_xform);
@@ -168,12 +239,11 @@ void GraphicSystemECS::update(float dt) {
             }
         }
 
-        else if (entitySig.test(0) && entitySig.count() == 1) {
-            if (ecsCoordinator.getEntityID(entity) == "placeholderentity")
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-            else
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-        }
+        else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
+                 ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+                 ecsCoordinator.getEntitySignature(entity).count() == 2) {
+                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+       }
     }
 }
 
@@ -181,5 +251,5 @@ void GraphicSystemECS::update(float dt) {
 void GraphicSystemECS::cleanup() {}
 
 std::string GraphicSystemECS::getSystemECS() {
-	return "GraphicsSystemECS";
+    return "GraphicsSystemECS";
 }

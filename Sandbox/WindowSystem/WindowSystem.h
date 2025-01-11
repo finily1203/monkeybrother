@@ -35,7 +35,6 @@ public:
 
 	static bool GetAltTab() { return altTab; }
 	static bool GetCtrlAltDel() { return ctrlAltDel; }
-	//static HWND GetForeground() { return foreground; }
 	void handleWindowFocus();
 
 private:
@@ -47,7 +46,5 @@ private:
 	bool keysWerePressed = false;
 	static bool altTab;
 	static bool ctrlAltDel;
-	//static HWND foreground;
-	//void logicUpdate();
 
 };
