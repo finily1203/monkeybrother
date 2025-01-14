@@ -290,6 +290,24 @@ void AssetBrowser::Update()
 		}
 		ImGui::EndDragDropTarget();
 	}
+
+	if (assetsManager.checkOverwritePopUp()) {
+		ImGui::OpenPopup("Overwrite Asset?");
+	}
+
+	if (ImGui::BeginPopupModal("Overwrite Asset?", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Asset already exists. Overwrite?");
+		if (ImGui::Button("Yes")) {
+			assetsManager.setOverwriteFile(true);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("No")) {
+			ImGui::CloseCurrentPopup();
+		}
+		assetsManager.setOverwritePopUp(false);
+		ImGui::EndPopup();
+	}
 }
 
 //Cleanup the asset browser
