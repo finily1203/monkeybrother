@@ -99,6 +99,7 @@ Entity PhysicsSystemECS::FindClosestPlatform(Entity player)
 // Clamp the player's velocity
 void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
     myMath::Vector2D& velocity = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
+    //myMath::Vector2D vel;
     float speed = myMath::LengthVector2D(velocity);
 
     if (speed > maxVelocity)
@@ -106,6 +107,17 @@ void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
         myMath::NormalizeVector2D(velocity, velocity);
         velocity = velocity * maxVelocity;
     }
+
+    //if (std::abs(velocity.GetX()) > maxVelocity) {
+    //    velocity.SetX(velocity.GetX() > 0 ? maxVelocity : -maxVelocity);
+
+    //}
+
+    //// Clamp y component
+    //if (std::abs(velocity.GetY()) > maxVelocity) {
+    //    velocity.SetY(velocity.GetY() > 0 ? maxVelocity : -maxVelocity);
+
+    //}
 }
 
 // Calculate the directional vector based on the orientation of player
@@ -186,12 +198,6 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
     //Dampening
     vel.SetX(vel.GetX() * dampen);
     vel.SetY(vel.GetY() * dampen);
-
-    float speed = myMath::LengthVector2D(vel);
-    if (speed > maxVelocity) {
-        myMath::NormalizeVector2D(vel, vel);
-        vel = vel * maxVelocity;
-    }
 
     ecsCoordinator.getSpecificSystem<PhysicsSystemECS>()->clampVelocity(player, maxVelocity);
 
@@ -402,7 +408,7 @@ void PhysicsSystemECS::update(float dt)
 {
     (void)dt;
     count = 0;
-    for (auto& entity : entities)
+    for (auto& entity : ecsCoordinator.getAllLiveEntities())
     {
         if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
             playerEntity = entity;

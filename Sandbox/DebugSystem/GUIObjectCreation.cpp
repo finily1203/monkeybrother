@@ -342,7 +342,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		closestPlatform.isClosest = (transform.orientation.GetX() == 0); // Set true only for flat platform
 
 		BehaviourComponent behaviour{};
-		behaviour.none = true;
+		//behaviour.none = true;
+		behaviour.platform = true;
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, closestPlatform);

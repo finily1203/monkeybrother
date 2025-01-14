@@ -196,10 +196,16 @@ void GraphicSystemECS::update(float dt) {
         }
         else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
-
         }
-        else if (isPlatform) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
+        //else if (isPlatform) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
+        //}
+        else if (isPlatform
+            || (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
+                ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+                ecsCoordinator.getEntitySignature(entity).count() == 2)
+            ) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
         }
         else if (isButton) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
@@ -239,11 +245,11 @@ void GraphicSystemECS::update(float dt) {
             }
         }
 
-        else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
-                 ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
-                 ecsCoordinator.getEntitySignature(entity).count() == 2) {
-                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-       }
+       // else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
+       //          ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+       //          ecsCoordinator.getEntitySignature(entity).count() == 2) {
+       //          graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+       //}
     }
 }
 
