@@ -45,7 +45,7 @@ void PlatformBehaviour::update(Entity entity) {
             force.SetDirection(direction);
 
             isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
-            forceManager.AddForce(playerEntity, gravity * mass * GLFWFunctions::delta_time);
+            forceManager.AddForce(playerEntity, force.GetMagnitude()*gravity * mass * GLFWFunctions::delta_time);
 
             if (isColliding)
             {
