@@ -102,11 +102,17 @@ void PhysicsSystemECS::clampVelocity(Entity player, float maxVelocity) {
     //myMath::Vector2D vel;
     float speed = myMath::LengthVector2D(velocity);
 
-    if (speed > maxVelocity)
+    if (speed >= maxVelocity)
     {
         myMath::NormalizeVector2D(velocity, velocity);
         velocity = velocity * maxVelocity;
     }
+
+    //if (std::abs(velocity.GetX()) >= maxVelocity) {
+    //    // Store the current values - they will not increase further
+    //    velocity.SetX(velocity.GetX() < 0 ? -maxVelocity : maxVelocity);
+    //    velocity.SetY(velocity.GetY());
+    //}
 
     //if (std::abs(velocity.GetX()) > maxVelocity) {
     //    velocity.SetX(velocity.GetX() > 0 ? maxVelocity : -maxVelocity);
@@ -181,6 +187,7 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
     float dampen = ecsCoordinator.getComponent<PhysicsComponent>(player).dampening;
     float maxVelocity = ecsCoordinator.getComponent<PhysicsComponent>(player).maxVelocity;
     float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(player).prevForce;
+    float magnitude = ecsCoordinator.getComponent<PhysicsComponent>(player).force.GetMagnitude();
 
     if (prevForce != targetForce) {
         accForce.SetX(targetForce);
@@ -190,8 +197,8 @@ void ForceManager::ApplyForce(Entity player, myMath::Vector2D direction, float t
     float invMass = mass > 0.f ? 1.f / mass : 0.f;
     acceleration = accForce * invMass;
 
-    vel.SetX(vel.GetX() + direction.GetX() * acceleration.GetX());
-    vel.SetY(vel.GetY() + direction.GetY() * acceleration.GetY());
+    vel.SetX(vel.GetX() + direction.GetX() * acceleration.GetX() * magnitude);
+    vel.SetY(vel.GetY() + direction.GetY() * acceleration.GetY() * magnitude);
 
     Console::GetLog() << "force:" << acceleration.GetX() << " " << acceleration.GetY() << std::endl;
 
