@@ -110,8 +110,10 @@ public:
 
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
+	std::string getTextureID(Entity entity);
 	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
+	void setTextureID(Entity entity, std::string ID);
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file

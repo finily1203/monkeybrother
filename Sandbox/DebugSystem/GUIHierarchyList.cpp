@@ -13,6 +13,7 @@ File Contributions: Lew Zong Han Owen (100%)
 
 /*_______________________________________________________________________________________________________________*/
 #include "GUIHierarchyList.h"
+#include "GUIInspector.h"
 
 float HierarchyList::objAttributeSliderMaxLength;
 char HierarchyList::textBuffer[MAXTEXTSIZE];
@@ -41,11 +42,12 @@ void HierarchyList::Update() {
 				{
 					textBuffer[i] = tempStr[i];
 				}
-
 				ImGui::PushID(entity);
-
+			;
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-
+					
+					//Inspector::selectedEntityID = entity;
+					
 					float colour[3] = { fontComp.color.GetX(),fontComp.color.GetY(),fontComp.color.GetZ() };
 					if (ImGui::DragFloat3("Colour", colour, 0.01f, 0.0f, 1.0f)) {
 						fontComp.color.SetX(colour[0]);
@@ -88,6 +90,7 @@ void HierarchyList::Update() {
 					ImGui::TreePop();
 
 				}
+				
 				ImGui::PopID();
 				ImGui::Separator();
 
@@ -96,11 +99,13 @@ void HierarchyList::Update() {
 				&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				auto signature = ecsCoordinator.getEntityID(entity);
-
+				
 				ImGui::PushID(entity);
 
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-
+					
+					//Inspector::selectedEntityID = entity;
+					
 					float pos[2] = { transform.position.GetX(), transform.position.GetY() };
 					if (ImGui::DragFloat2("Position", pos, 5.f)) {
 						transform.position.SetX(pos[0]);
@@ -125,6 +130,7 @@ void HierarchyList::Update() {
 					ImGui::TreePop();
 
 				}
+				
 
 				ImGui::PopID();
 				ImGui::Separator();
@@ -133,11 +139,13 @@ void HierarchyList::Update() {
 			{ //Remaining object's data modification features
 				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 				auto signature = ecsCoordinator.getEntityID(entity);
-
+				
 				ImGui::PushID(entity);
 
 				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-
+					
+					//Inspector::selectedEntityID = entity;
+					
 					float pos[2] = { transform.position.GetX(), transform.position.GetY() };
 					if (ImGui::DragFloat2("Position", pos, 5.f)) {
 						transform.position.SetX(pos[0]);
@@ -162,6 +170,7 @@ void HierarchyList::Update() {
 					ImGui::TreePop();
 
 				}
+				
 
 				ImGui::PopID();
 				ImGui::Separator();

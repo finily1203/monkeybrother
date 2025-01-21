@@ -171,7 +171,7 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton")
+            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || ecsCoordinator.getEntityID(entity) == "collectableUI")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
             }
@@ -184,45 +184,45 @@ void GraphicSystemECS::update(float dt) {
 		else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
 			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
 		}
-        if (isAnimate && GLFWFunctions::isPumpOn) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
-        }
-        // Drawing based on entity components
-        if (isEnemy) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
-        }
-        else if (isPlayer) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
-        }
-        else if (isPump && !isAnimate) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
+        //if (isAnimate && GLFWFunctions::isPumpOn) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
+        //}
+        //// Drawing based on entity components
+        //if (isEnemy) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
+        //}
+        ///*else if (ecsCoordinator.getTextureID(entity) == "mossball") {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
+        //}*/
+        //else if (isPump && !isAnimate) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
 
-        }
-        else if (isPlatform) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
-        }
-        else if (isButton) {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+        //}
+        //else if (isPlatform) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform);
+        //}
+        //else if (isButton) {
+        //    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            if (ecsCoordinator.getEntityID(entity) == "quitButton") {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
-            }
+        //    if (ecsCoordinator.getEntityID(entity) == "quitButton") {
+        //        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
+        //    }
 
-            else if (ecsCoordinator.getEntityID(entity) == "retryButton")
-            {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
-            }
-        }
-        else if (isCollectable) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
-        }
-        else if (isExit) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
-        }
-        else if (isBackground) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
-        }
-        else if (isUI) {
+        //    else if (ecsCoordinator.getEntityID(entity) == "retryButton")
+        //    {
+        //        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
+        //    }
+        //}
+        //else if (isCollectable) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+        //}
+        //else if (isExit) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
+        //}
+        //else if (isBackground) {
+        //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+        //}
+        /*if (isUI) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (GLFWFunctions::collectableCount == 0) {
@@ -237,13 +237,36 @@ void GraphicSystemECS::update(float dt) {
             else if (GLFWFunctions::collectableCount >= 3) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-0"), transform.mdl_xform);
             }
-        }
+        }*/
 
-        else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
+       /* if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
                  ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
                  ecsCoordinator.getEntitySignature(entity).count() == 2) {
                  graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-       }
+        }*/
+
+        if (isUI) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+            if (GLFWFunctions::collectableCount == 0) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-3");
+            }
+            else if (GLFWFunctions::collectableCount == 1) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-2");
+            }
+            else if (GLFWFunctions::collectableCount == 2) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-1");
+            }
+            else if (GLFWFunctions::collectableCount >= 3) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-0");
+            }
+        }
+        
+        if (isButton) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+        } 
+
+        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
     }
 }
 

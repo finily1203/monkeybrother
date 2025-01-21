@@ -134,6 +134,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = "none";
+		if (entityData.contains("textureId")) {
+			textureId = entityData["textureId"].get<std::string>();
+		}
+		//std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -346,6 +351,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 }
 
@@ -588,12 +594,20 @@ std::string ECSCoordinator::getEntityID(Entity entity) {
 	return entityManager->getEntityId(entity);
 }
 
+std::string ECSCoordinator::getTextureID(Entity entity) {
+	return entityManager->getTextureId(entity);
+}
+
 Entity ECSCoordinator::getEntityFromID(std::string ID) {
 	return entityManager->getEntityById(ID);
 }
 
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
+}
+
+void ECSCoordinator::setTextureID(Entity entity, std::string ID) {
+	entityManager->setTextureId(entity, ID);
 }
 
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
