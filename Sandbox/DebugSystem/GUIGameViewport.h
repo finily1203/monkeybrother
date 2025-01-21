@@ -95,6 +95,7 @@ public:
 	static bool getPaused() { return isPaused; }
 
 	static int getSceneNum() { return scene; }
+
 	static void setSceneNum(int sceneNum) { scene = sceneNum; }
 
 	static std::string GenerateSaveJSONFile(int& saveNumber);
