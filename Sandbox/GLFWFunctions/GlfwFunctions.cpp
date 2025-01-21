@@ -415,15 +415,17 @@ void GLFWFunctions::getFps() {
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
     (void)window;
-    for (int i = 0; i < count; i++) {
-        std::string filePath = paths[i];
-        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
-            //seperate window to inform not allowed to drop type of file
-            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
-        }
-        else {
-            assetsManager.handleDropFile(filePath);
+    if (debug_flag) {
+        for (int i = 0; i < count; i++) {
+            std::string filePath = paths[i];
+            std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+            if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+                //seperate window to inform not allowed to drop type of file
+                MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+            }
+            else {
+                assetsManager.handleDropFile(filePath);
+            }
         }
     }
 }
