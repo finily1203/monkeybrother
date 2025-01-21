@@ -138,6 +138,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
 		if (entityId != "placeholderentity") {
+
 			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
 			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
 			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
@@ -192,13 +193,26 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, movement);
 		}
 
-		if (entityData.contains("animation"))
-		{
+		if (entityData.contains("animation")) {
 			AnimationComponent animation{};
-			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 
+			// Read animation properties from JSON
+			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
+			serializer.ReadObject(animation.totalFrames, entityId, "entities.animation.totalFrames");
+			serializer.ReadObject(animation.frameTime, entityId, "entities.animation.frameTime");
+
+			// Read columns and rows from JSON as floats
+			serializer.ReadObject(animation.columns, entityId, "entities.animation.columns");
+			serializer.ReadObject(animation.rows, entityId, "entities.animation.rows");
+
+
+			// Add AnimationComponent to ECS
 			ecs.addComponent(entityObj, animation);
+			graphicsSystem.InitializeAnimation(entityObj, animation);
 		}
+
+
+
 
 		if (entityData.contains("player")) {
 			PlayerComponent player{};

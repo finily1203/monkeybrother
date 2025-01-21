@@ -149,38 +149,23 @@ void GraphicsSystem::initialise() {
 void GraphicsSystem::update() {}
 
 void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
-    if (isAnimated == GL_TRUE) {
+    if (isAnimated == GL_TRUE && m_AnimationData) {
         if (!GameViewWindow::getPaused()) {
             m_AnimationData->Update(deltaTime);
         }
-        //m_AnimationData->Update(deltaTime);
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
-    }
-    else {
-        // Update the UV coordinates for the current frame
-        float uvCoord[] = {
-            1.0f, 1.0f,  // top right
-            1.0f, 0.0f,  // bottom right
-            0.0f, 0.0f,  // bottom left
-            0.0f, 1.0f   // top left
-        };
-        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
     }
 
     GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
     static GLint old_w{}, old_h{};
-    // update viewport settings in vps only if window's dimension change
-    if (w != old_w || h != old_h)
-    {
+    if (w != old_w || h != old_h) {
         (*vps)[0] = { 0, 0, w , h };
         old_w = w;
         old_h = h;
     }
-	glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
+    glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
 }
 
 void GraphicsSystem::Render(float deltaTime) {
@@ -189,11 +174,22 @@ void GraphicsSystem::Render(float deltaTime) {
 }
 
 void GraphicsSystem::cleanup() {
+    // Clear animation data for all entities
+    entityAnimations.clear();
+
+    // Release OpenGL resources
     ReleaseResources();
-    delete m_AnimationData.release();
-    delete vps;
-    vps = nullptr;
+
+    // Reset animation data
+    m_AnimationData.reset();
+
+    // Delete viewports vector and set to nullptr
+    if (vps) {
+        delete vps;
+        vps = nullptr;
+    }
 }
+
 
 void GraphicsSystem::ReleaseResources() {
     glDeleteBuffers(1, &m_EBO);
@@ -372,15 +368,92 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
-    // load shader program in use by this object
+    // Always bind the shader first
+    auto shader = (mode == DrawMode::TEXTURE) ?
+        assetsManager.GetShader("shader1") :
+        assetsManager.GetShader("shader2");
+
+    shader->Bind();
+    glBindVertexArray(m_VAO);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
+    GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
+    if (uniformLoc != -1) {
+        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
+    }
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+    // Clean up
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    shader->Unbind();
+}
+
+void GraphicsSystem::InitializeAnimation(Entity entity, const AnimationComponent& animComp) {
+    // Remove existing animation data if it exists
+    auto it = entityAnimations.find(entity);
+    if (it != entityAnimations.end()) {
+        entityAnimations.erase(it);
+    }
+    
+    // Create new animation data
+    entityAnimations[entity] = std::make_unique<AnimationData>(
+        static_cast<int>(animComp.totalFrames),
+        animComp.frameTime,
+        static_cast<int>(animComp.columns),
+        static_cast<int>(animComp.rows)
+    );
+}
+
+
+void GraphicsSystem::UpdateAnimation(Entity entity, float deltaTime, bool isAnimated) {
+    if (isAnimated && entityAnimations.count(entity) > 0) {  // Changed from currentEntity to entity
+        if (!GameViewWindow::getPaused()) {
+            entityAnimations[entity]->Update(deltaTime);  // Changed from currentEntity to entity
+        }
+
+        // Get UV coordinates for this specific entity's animation
+        const auto& uvCoords = entityAnimations[entity]->GetCurrentUVs();  // Changed from currentEntity to entity
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+    }
+    else {
+        // Default UV coordinates for non-animated entities
+        float uvCoord[] = {
+            1.0f, 1.0f,  // top right
+            1.0f, 0.0f,  // bottom right
+            0.0f, 0.0f,  // bottom left
+            0.0f, 1.0f   // top left
+        };
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
+    }
+
+    // Update viewport if window size changed
+    GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
+    static GLint old_w{}, old_h{};
+    if (w != old_w || h != old_h) {
+        (*vps)[0] = { 0, 0, w , h };
+        old_w = w;
+        old_h = h;
+    }
+    glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
+}
+
+void GraphicsSystem::DrawAnimatedObject(Entity entity, DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
+    // Similar to existing DrawObject but uses entity-specific animation data
     if (mode == DrawMode::TEXTURE)
         assetsManager.GetShader("shader1")->Bind();
     else
         assetsManager.GetShader("shader2")->Bind();
+
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glm::mat3 mdl_xform(1.0f);
-    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
+
+    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
@@ -389,10 +462,7 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
-    // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     assetsManager.GetShader("shader2")->Unbind();
 }
-
-

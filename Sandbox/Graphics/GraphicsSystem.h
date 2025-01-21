@@ -38,8 +38,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector3D.h"
 #include "matrix3x3.h"
 #include "TransformComponent.h"
-
-
+#include <unordered_map>
+#include "ECSDefinitions.h"
+#include "AnimationComponent.h"
 class GraphicsSystem : public GameSystems
 {
 public:
@@ -50,6 +51,9 @@ public:
         COLOR,
         TEXTURE
     };
+    bool HasAnimationData(Entity entity) const {
+        return entityAnimations.find(entity) != entityAnimations.end();
+    }
 
     void initialise() override;
     void update() override;
@@ -60,6 +64,9 @@ public:
 
     myMath::Matrix3x3 UpdateObject(myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
+    void InitializeAnimation(Entity entity, const AnimationComponent& animComp);
+    void UpdateAnimation(Entity entity, float deltaTime, bool isAnimated);
+    void DrawAnimatedObject(Entity entity, DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
     GLuint GetVAO() const { return m_VAO; }
 
@@ -82,7 +89,7 @@ private:
     std::unique_ptr<Shader> m_Shader, m_Shader2;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
     std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
-
+    std::unordered_map<Entity, std::unique_ptr<AnimationData>> entityAnimations;
     void ReleaseResources();
 };
 

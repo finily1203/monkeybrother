@@ -89,8 +89,17 @@ void GraphicSystemECS::update(float dt) {
         Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
         // Check if the entity has an animation component
-        auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-        Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
+        bool isAnimated = false; // Default is false
+        if (ecsCoordinator.hasComponent<AnimationComponent>(entity)) {
+            auto& animationComponent = ecsCoordinator.getComponent<AnimationComponent>(entity);
+            isAnimated = animationComponent.isAnimated;
+
+            // Initialize animation if it hasn't been initialized yet
+            if (isAnimated && !graphicsSystem.HasAnimationData(entity)) {
+                graphicsSystem.InitializeAnimation(entity, animationComponent);
+            }
+        }
+        Console::GetLog() << "Entity: " << entity << " Animation: " << (isAnimated ? "True" : "False") << std::endl;
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -110,9 +119,30 @@ void GraphicSystemECS::update(float dt) {
             const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
             isAnimate = pumpComponent.isAnimate;
         }
+        bool shouldAnimate = false;  // Start with false
 
+        // For pump components
+        if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
+            const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
+            shouldAnimate = pumpComponent.isAnimate && pumpComponent.isPump;
+        }
+        // For regular animated entities (player/enemy)
+        else if (isAnimated) {  // Only check these if the base isAnimated is true
+            if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                shouldAnimate = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
+            }
+            else if (ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
+                shouldAnimate = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
+            }
+        }
         // Use hasMovement for the update parameter
-        graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
+        if (shouldAnimate) {
+            graphicsSystem.UpdateAnimation(entity, dt , true);
+        }
+        else {
+            // Set default UV coordinates for non-animated entities
+            graphicsSystem.UpdateAnimation(entity, dt , false);
+        }
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
@@ -191,7 +221,7 @@ void GraphicSystemECS::update(float dt) {
         if (isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
-        else if (isPlayer) {
+        else if (isPlayer && isAnimated) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
         else if (isPump && !isAnimate) {
@@ -241,7 +271,7 @@ void GraphicSystemECS::update(float dt) {
 
         else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
                  ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
-                 ecsCoordinator.getEntitySignature(entity).count() == 2) {
+                 ecsCoordinator.getEntitySignature(entity).count() == 3) {
                  graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
        }
     }
