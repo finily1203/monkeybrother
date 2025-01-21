@@ -44,7 +44,6 @@ void EntityManager::destroyEntity(Entity entity) {
 		return;
 	}
 	entityIds.erase(entity); //erase the entity id
-	textureIds.erase(entity); //erase the texture id
 	entitySig[entity].reset(); //destroy entity from entitySig
 	availableEnt.push(entity); //push back the number to availableEnt
 
@@ -116,28 +115,10 @@ void EntityManager::setEntityId(Entity entity, std::string const& id)
 	entityIds[entity] = id;
 }
 
-void EntityManager::setTextureId(Entity entity, std::string const& id)
-{
-	textureIds[entity] = id;
-}
-
 // retrieve the entity Id
 std::string EntityManager::getEntityId(Entity entity)
 {
 	for (const auto& pair : entityIds)
-	{
-		if (pair.first == entity)
-		{
-			return pair.second;
-		}
-	}
-
-	return "";
-}
-
-std::string EntityManager::getTextureId(Entity entity)
-{
-	for (const auto& pair : textureIds)
 	{
 		if (pair.first == entity)
 		{
@@ -171,7 +152,6 @@ void EntityManager::cleanup() {
 	availableEnt = std::queue<Entity>();
 	liveEntCount = 0;
 	entityIds.clear();
-	textureIds.clear();
 }
 
 

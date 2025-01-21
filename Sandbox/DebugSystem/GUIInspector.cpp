@@ -25,7 +25,6 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
 #include "PlatformBehaviour.h"
-#include "GUIAssetBrowser.h"
 #include <memory>
 
 std::vector<std::pair<int, std::string>>* Inspector::overlappingEntities;
@@ -34,27 +33,12 @@ char Inspector::textBuffer[MAXTEXTSIZE];
 ImVec2 Inspector::mouseWorldPos;
 glm::mat4 projectionMatrix(1.0f);
 int currentItem = 0;
-std::vector<std::string>* Inspector::assetNames;
-int Inspector::selectedEntityID = -1;
-int Inspector::draggedEntityID = -1;
-bool Inspector::isSelectingEntity = false;
 
 
 
 void Inspector::Initialise() {
 	overlappingEntities = new std::vector<std::pair<int, std::string>>();
 	LoadInspectorFromJSON(FilePathManager::GetIMGUIInspectorJSONPath());
-	if (!assetNames)
-	{
-		assetNames = new std::vector<std::string>();
-	}
-	assetNames->clear();
-
-	for (auto& asset : assetsManager.getAssetList())
-	{
-		assetNames->push_back(asset);
-		std::cout << asset << std::endl;
-	}
 }
 
 void Inspector::Update() {
@@ -69,6 +53,8 @@ void Inspector::Update() {
 	mouseScreenPos.x = (2.0f * mouseScreenPos.x / GLFWFunctions::windowWidth) - 1.0f;
 	mouseScreenPos.y = 1.0f - (2.0f * mouseScreenPos.y / GLFWFunctions::windowHeight);
 
+	static int selectedEntityID = -1; // -1 means no entity is selected
+	static int draggedEntityID = -1;  // -1 means no entity is being dragged
 	static int chosenEntityID = -1;   // Entity selected for potential deletion
 	bool openDeletePopup = false;
 
@@ -156,7 +142,7 @@ void Inspector::Update() {
 
 	//std::string selEntityID; // Store selected entity ID instead of Entity handle
 
-	
+	static bool isSelectingEntity = false;
 	static bool isInitialClickAfterSelection = true;
 
 	static ImVec2 mousePos;
@@ -164,6 +150,7 @@ void Inspector::Update() {
 
 	static bool initiatedByDoubleClick = false;
 
+	// Handle entity selection with Ctrl+Left Click
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
 		selectedEntityID = -1;
 		isSelectingEntity = true;
@@ -208,14 +195,11 @@ void Inspector::Update() {
 
 		for (const auto& [entity, name] : *overlappingEntities) {
 			if (ImGui::MenuItem(name.c_str())) {
-				if (!GameViewWindow::getPaused()) {
-					GameViewWindow::TogglePause();
-				}
 				selectedEntityID = entity;
 				draggedEntityID = entity;
 				isSelectingEntity = false;
 				isInitialClickAfterSelection = true;
-				//initiatedByDoubleClick = false;  // Reset double-click state on new selection
+				initiatedByDoubleClick = false;  // Reset double-click state on new selection
 				ImGui::CloseCurrentPopup();
 				break;
 			}
@@ -225,13 +209,13 @@ void Inspector::Update() {
 
 	// Handle dragging with double-click
 	if (draggedEntityID != -1 && !isSelectingEntity) {
-		if (isInitialClickAfterSelection /*|| !initiatedByDoubleClick*/) {
-			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		if (isInitialClickAfterSelection || !initiatedByDoubleClick) {
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				isInitialClickAfterSelection = false;
-				//initiatedByDoubleClick = true;
+				initiatedByDoubleClick = true;
 			}
 		}
-		else if (/*initiatedByDoubleClick && */ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+		else if (initiatedByDoubleClick && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
 			auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
 			if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID)) {
@@ -249,7 +233,7 @@ void Inspector::Update() {
 	}
 
 	// Handle mouse wheel scaling for selected entity
-	if (selectedEntityID != -1 && ImGui::GetIO().MouseWheel != 0.0f && GameViewWindow::IsPointInViewport(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) {
+	if (selectedEntityID != -1 && ImGui::GetIO().MouseWheel != 0.0f) {
 		float wheel_delta = ImGui::GetIO().MouseWheel;
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
 		float dx = mouseWorldPos.x - transform.position.GetX();
@@ -414,40 +398,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			ImGui::Text("Text");
 			fontComp.text = textBuffer;
 
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
-
 			if (ImGui::Button("Remove")) {
 				ecsCoordinator.destroyEntity(selectedEntityID);
 			}
@@ -481,40 +431,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 				transform.orientation.SetX(rotation[0]);
 			}
 
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
-
 			if (ImGui::Button("Remove")) {
 				ecsCoordinator.destroyEntity(selectedEntityID);
 			}
@@ -546,40 +462,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
 				transform.orientation.SetX(rotation[0]);
 			}
-
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
 
 			if (ImGui::Button("Remove")) {
 				ecsCoordinator.destroyEntity(selectedEntityID);
@@ -626,6 +508,32 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 				const bool typeSelected = (currentItem == i);
 				if (ImGui::Selectable(items[i], typeSelected)) {
 
+					/*switch (currentItem) {
+					case 1: ecsCoordinator.removeComponent<EnemyComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+						break;
+					case 2: ecsCoordinator.removeComponent<PumpComponent>(selectedEntityID); break;
+					case 3: ecsCoordinator.removeComponent<ExitComponent>(selectedEntityID); break;
+					case 4: ecsCoordinator.removeComponent<CollectableComponent>(selectedEntityID); break;
+					case 5: ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+						ecsCoordinator.removeComponent<AnimationComponent>(selectedEntityID);
+						break;
+					}*/
+
+					/*if (ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<EnemyComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PumpComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PumpComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<ExitComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<ExitComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<CollectableComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<CollectableComponent>(selectedEntityID);
+					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID))
+						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);*/
+
 					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
 						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
 
@@ -670,6 +578,37 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 						break;
 					}
 
+					//// Add new component
+					//switch (i) {
+					//case 0: 
+					//	if(logicSystemRef->hasBehaviour(selectedEntityID))
+					//	logicSystemRef->unassignBehaviour(selectedEntityID);
+					//	break;
+					//case 1: 
+					//	ecsCoordinator.addComponent<EnemyComponent>(selectedEntityID, EnemyComponent{});
+					//	if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
+					//		ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, PhysicsComponent{});
+					//	}
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>()); 
+					//	break;
+					//case 2: 
+					//	ecsCoordinator.addComponent<PumpComponent>(selectedEntityID, PumpComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>()); 
+					//	break;
+					//case 3: 
+					//	ecsCoordinator.addComponent<ExitComponent>(selectedEntityID, ExitComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>()); 
+					//	break;
+					//case 4: 
+					//	ecsCoordinator.addComponent<CollectableComponent>(selectedEntityID, CollectableComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>()); 
+					//	break;
+					//case 5: 
+					//	ecsCoordinator.addComponent<PlayerComponent>(selectedEntityID, PlayerComponent{}); 
+					//	logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>()); 
+					//	break;
+					//}
+
 					currentItem = i;
 				}
 			}
@@ -677,45 +616,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		}
 		ImGui::SameLine();
 		ImGui::Text("Behaviour");
-
-		if (assetsManager.checkIfAssetListChanged())
-		{
-			assetNames->clear();
-			for (auto& asset : assetsManager.getAssetList())
-			{
-				assetNames->push_back(asset);
-			}
-		}
-		// Add a static string to store the current selected item
-		static char selectedTexture[256] = "Select a texture..."; 
-		strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
-
-		// Create the dropdown
-		ImGui::SetNextItemWidth(200);
-		if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
-		{
-			for (auto& asset : *assetNames)
-			{
-				if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end())
-				{
-					bool is_selected = (strcmp(selectedTexture, asset.c_str()) == 0);
-					if (ImGui::Selectable(asset.c_str(), is_selected))
-					{
-						strcpy_s(selectedTexture, asset.c_str());
-
-						ecsCoordinator.setTextureID(selectedEntityID, selectedTexture);
-					}
-
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-			}
-			ImGui::EndCombo();
-		}
-		ImGui::SameLine();
-		ImGui::Text("Texture");
 
 
 	ImGui::End();
@@ -743,6 +643,4 @@ void Inspector::Cleanup() {
 	memset(textBuffer, 0, MAXTEXTSIZE);
 	delete overlappingEntities;
 	overlappingEntities = nullptr;
-	delete assetNames;
-	assetNames = nullptr;
 }

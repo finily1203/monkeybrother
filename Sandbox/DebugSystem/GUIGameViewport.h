@@ -95,11 +95,10 @@ public:
 	static bool getPaused() { return isPaused; }
 
 	static int getSceneNum() { return scene; }
-	static void setSceneNum(int sceneNum) { scene = sceneNum; }
 
 	static std::string GenerateSaveJSONFile(int& saveNumber);
 
-	static nlohmann::ordered_json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, std::string const& textureId, ECSCoordinator& ecs, Entity& entity);
+	static nlohmann::ordered_json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
 
 	static ImVec2 GetLargestSizeForViewport(); //Resize viewport dynamically while preserving aspect ratio
 
@@ -165,6 +164,5 @@ private:
 	static bool saveFileChosen;
 	static bool loadFileChosen;
 	static int scene;
-	static int objectCounter;
 
 };

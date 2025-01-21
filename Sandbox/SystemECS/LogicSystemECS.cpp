@@ -26,7 +26,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #include "Debug.h"
 #include "GUIConsole.h"
-#include "GUIGameViewport.h"
 
 void LogicSystemECS::initialise() {}
 
@@ -97,7 +96,6 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
-	bool isHovering = false;
 
 	for (auto& entity : allEntities)
 	{
@@ -108,10 +106,8 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
-				glfwSetCursor(GLFWFunctions::pWindow, cursor);
 				transform.scale.SetX(button.hoveredScale.GetX());
 				transform.scale.SetY(button.hoveredScale.GetY());
-				isHovering = true;
 			}
 
 			else
@@ -120,11 +116,6 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 				transform.scale.SetY(button.originalScale.GetY());
 			}
 		}
-	}
-
-	if (!isHovering)
-	{
-		glfwSetCursor(GLFWFunctions::pWindow, nullptr);
 	}
 }
 
@@ -144,7 +135,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	std::string entityId = ecsCoordinator.getEntityID(entity);
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
 
-	if (entityId == "quitButton" || entityId == "quitWindowButton")
+	if (entityId == "quitButton")
 	{
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
 
@@ -159,51 +150,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		GLFWFunctions::gameOver = false;
 
-		//ecsCoordinator.test5();
-
-		if (GameViewWindow::getSceneNum() != 0)
-		{
-			int scene = GameViewWindow::getSceneNum();
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		}
-
-		else
-		{
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		}
-	}
-
-	else if (entityId == "startButton")
-	{
-		for (auto currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		GameViewWindow::setSceneNum(1);
-		GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-
-		if (GameViewWindow::getSceneNum() != 0)
-		{
-			int scene = GameViewWindow::getSceneNum();
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		}
-
-		else
-		{
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		}
-	}
-}
-
-MouseBehaviour::~MouseBehaviour()
-{
-	if (cursor)
-	{
-		glfwDestroyCursor(cursor);
+		ecsCoordinator.test5();
 	}
 }
 
