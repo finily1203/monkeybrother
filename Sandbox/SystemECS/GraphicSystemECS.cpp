@@ -172,7 +172,9 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || ecsCoordinator.getEntityID(entity) == "collectableUI")
+            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || ecsCoordinator.getEntityID(entity) == "collectableUI" || 
+                ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" || ecsCoordinator.getEntityID(entity) == "tutorialButton" ||
+                ecsCoordinator.getEntityID(entity) == "quitWindowButton1")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
             }

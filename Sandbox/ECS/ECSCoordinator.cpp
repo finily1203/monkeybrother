@@ -495,6 +495,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -548,6 +549,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 		}
 
 		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 	 
 	GameViewWindow::setSceneNum(-1);
