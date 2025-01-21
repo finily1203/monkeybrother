@@ -119,6 +119,8 @@ public:
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 
+	void LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
 

@@ -58,6 +58,7 @@ int GLFWFunctions::collectableCount = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
+bool GLFWFunctions::gameOver = false;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
