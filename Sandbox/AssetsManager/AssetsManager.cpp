@@ -677,7 +677,6 @@ void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string 
 
 
 void AssetsManager::DeleteAssetFromJSON(std::string const& assetName, std::string assetType) {
-
     //read assets.json file
     nlohmann::json jsonData;
     std::ifstream inputFile(FilePathManager::GetAssetsJSONPath());
