@@ -383,7 +383,10 @@ void GameViewWindow::Update() {
 	ImGui::SameLine(0, optionsButtonPadding);
 
 	// Add pause button to viewport
-	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
+	if (ImGui::Button(isPaused ? "Resume" : "Pause") || ImGui::IsKeyPressed(ImGuiKey_Q)) {
+		Inspector::selectedEntityID = -1;
+		Inspector::draggedEntityID = -1;
+		Inspector::isSelectingEntity = false;
 		TogglePause();
 	}
 
@@ -391,24 +394,31 @@ void GameViewWindow::Update() {
 
 	ImGui::SameLine(0, optionsButtonPadding);
 
-	if (ImGui::Button(clickedZoom ? "UnZoom" : "Zoom")) {
+	if (/*ImGui::Button(clickedZoom ? "UnZoom" : "Zoom") || */ImGui::IsKeyPressed(ImGuiKey_W)) {
 		clickedZoom = !clickedZoom;
 	}
 
 	ImGui::SameLine(0, optionsButtonPadding);
 
-	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
-		if (clickedScreenPan) {
-			// Clicking "UnPan" - enable camera movement
-			GLFWFunctions::allow_camera_movement = true;
-		}
-		else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
-			// Clicking "Pan" - disable camera movement
-			GLFWFunctions::allow_camera_movement = true;
-		}
-		
-		clickedScreenPan = !clickedScreenPan;
+	if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+		GLFWFunctions::allow_camera_movement = true;
 	}
+	else {
+		GLFWFunctions::allow_camera_movement == false;
+	}
+
+	//if (/*ImGui::Button(clickedScreenPan ? "UnPan" : "Pan") || */ImGui::IsKeyPressed(ImGuiKey_E)) {
+	//	if (clickedScreenPan) {
+	//		// Clicking "UnPan" - enable camera movement
+	//		GLFWFunctions::allow_camera_movement = true;
+	//	}
+	//	else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
+	//		// Clicking "Pan" - disable camera movement
+	//		GLFWFunctions::allow_camera_movement = true;
+	//	}
+	//	
+	//	clickedScreenPan = !clickedScreenPan;
+	//}
 
 
 
@@ -571,7 +581,7 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 	float viewportY = startY + (remainingHeight - size.y) * 0.5f;
 
 	// Handle panning logic
-	if (clickedScreenPan && insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+	if (/*clickedScreenPan && */insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
 		if (!isDragging) {
 			isDragging = true;
 			initialMousePos = globalMousePos;
@@ -993,13 +1003,13 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
-	if (clickedScreenPan) {
+	//if (clickedScreenPan) {
 		double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
 		double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
 		worldX += panX * cosAngle - panY * sinAngle;
 		worldY += panX * sinAngle + panY * cosAngle;
-	}
+	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
@@ -1063,13 +1073,13 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
-	if (clickedScreenPan) {
+	//if (clickedScreenPan) {
 		float panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
 		float panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
 		worldX += panX * cosAngle - panY * sinAngle;
 		worldY += panX * sinAngle + panY * cosAngle;
-	}
+	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }

@@ -36,6 +36,8 @@ glm::mat4 projectionMatrix(1.0f);
 int currentItem = 0;
 std::vector<std::string>* Inspector::assetNames;
 int Inspector::selectedEntityID = -1;
+int Inspector::draggedEntityID = -1;
+bool Inspector::isSelectingEntity = false;
 
 
 
@@ -67,7 +69,6 @@ void Inspector::Update() {
 	mouseScreenPos.x = (2.0f * mouseScreenPos.x / GLFWFunctions::windowWidth) - 1.0f;
 	mouseScreenPos.y = 1.0f - (2.0f * mouseScreenPos.y / GLFWFunctions::windowHeight);
 
-	static int draggedEntityID = -1;  // -1 means no entity is being dragged
 	static int chosenEntityID = -1;   // Entity selected for potential deletion
 	bool openDeletePopup = false;
 
@@ -155,7 +156,7 @@ void Inspector::Update() {
 
 	//std::string selEntityID; // Store selected entity ID instead of Entity handle
 
-	static bool isSelectingEntity = false;
+	
 	static bool isInitialClickAfterSelection = true;
 
 	static ImVec2 mousePos;
@@ -207,11 +208,14 @@ void Inspector::Update() {
 
 		for (const auto& [entity, name] : *overlappingEntities) {
 			if (ImGui::MenuItem(name.c_str())) {
+				if (!GameViewWindow::getPaused()) {
+					GameViewWindow::TogglePause();
+				}
 				selectedEntityID = entity;
 				draggedEntityID = entity;
 				isSelectingEntity = false;
 				isInitialClickAfterSelection = true;
-				initiatedByDoubleClick = false;  // Reset double-click state on new selection
+				//initiatedByDoubleClick = false;  // Reset double-click state on new selection
 				ImGui::CloseCurrentPopup();
 				break;
 			}
@@ -221,13 +225,13 @@ void Inspector::Update() {
 
 	// Handle dragging with double-click
 	if (draggedEntityID != -1 && !isSelectingEntity) {
-		if (isInitialClickAfterSelection || !initiatedByDoubleClick) {
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		if (isInitialClickAfterSelection /*|| !initiatedByDoubleClick*/) {
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 				isInitialClickAfterSelection = false;
-				initiatedByDoubleClick = true;
+				//initiatedByDoubleClick = true;
 			}
 		}
-		else if (initiatedByDoubleClick && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+		else if (/*initiatedByDoubleClick && */ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
 			auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
 			if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID)) {

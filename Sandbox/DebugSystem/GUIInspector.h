@@ -42,7 +42,8 @@ public:
 
 	static void LoadInspectorFromJSON(std::string const& filename);
 	static int selectedEntityID;
-private:
+	static int draggedEntityID;
+	static bool isSelectingEntity;
 	
 	static std::vector<std::string>* assetNames;
 	static float objAttributeSliderMaxLength;

@@ -14,6 +14,7 @@ File Contributions: Lew Zong Han Owen (100%)
 /*_______________________________________________________________________________________________________________*/
 #include "GUIHierarchyList.h"
 #include "GUIInspector.h"
+#include "GUIGameViewport.h"
 
 float HierarchyList::objAttributeSliderMaxLength;
 char HierarchyList::textBuffer[MAXTEXTSIZE];
@@ -29,153 +30,85 @@ void HierarchyList::Update() {
 		if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {
 		}
 		else
-			if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
-				auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				auto signature = ecsCoordinator.getEntityID(entity);
+		{
+			auto signature = ecsCoordinator.getEntityID(entity);
 
-				size_t maxSize = 1000;
-				std::string tempStr = fontComp.text;
-				memset(textBuffer, 0, MAXTEXTSIZE);
-				size_t length = std::min(tempStr.length(), maxSize);
-				for (size_t i = 0; i < length; i++)
-				{
-					textBuffer[i] = tempStr[i];
+			ImGui::PushID(entity);
+
+			char buttonLabel[64];
+			snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+			ImGui::PushItemWidth(-1);
+			if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+				if (!GameViewWindow::getPaused()) {
+					GameViewWindow::TogglePause();
 				}
-				ImGui::PushID(entity);
-			;
-				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-					
-					//Inspector::selectedEntityID = entity;
-					
-					float colour[3] = { fontComp.color.GetX(),fontComp.color.GetY(),fontComp.color.GetZ() };
-					if (ImGui::DragFloat3("Colour", colour, 0.01f, 0.0f, 1.0f)) {
-						fontComp.color.SetX(colour[0]);
-						fontComp.color.SetY(colour[1]);
-						fontComp.color.SetZ(colour[2]);
-					}
-
-					float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-					if (ImGui::DragFloat2("Position", pos, 5.f)) {
-						transform.position.SetX(pos[0]);
-						transform.position.SetY(pos[1]);
-					}
-
-					float scale[1] = { fontComp.textScale };
-					if (ImGui::DragFloat("Scale", scale, 0.5f)) {
-						fontComp.textScale = scale[0];
-					}
-
-					float rotation[1] = { transform.orientation.GetX() };
-					if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-						transform.orientation.SetX(rotation[0]);
-					}
-
-					float textBox[1] = { fontComp.textBoxWidth };
-					if (ImGui::DragFloat("TextBox", textBox, 1.f)) {
-						fontComp.textBoxWidth = textBox[0];
-					}
-
-					ImGui::SetNextItemWidth(objAttributeSliderMaxLength);  // Set width of input field
-					ImGui::InputText("##Text", textBuffer, IM_ARRAYSIZE(textBuffer));
-					std::cout << textBuffer << std::endl;
-					ImGui::SameLine();
-					ImGui::Text("Text");
-					fontComp.text = textBuffer;
-
-					if (ImGui::Button("Remove")) {
-						ecsCoordinator.destroyEntity(entity);
-					}
-
-					ImGui::TreePop();
-
-				}
-				
-				ImGui::PopID();
-				ImGui::Separator();
-
+				Inspector::selectedEntityID = entity;
 			}
-			else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
-				&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				auto signature = ecsCoordinator.getEntityID(entity);
-				
-				ImGui::PushID(entity);
+			ImGui::PopItemWidth();
 
-				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-					
-					//Inspector::selectedEntityID = entity;
-					
-					float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-					if (ImGui::DragFloat2("Position", pos, 5.f)) {
-						transform.position.SetX(pos[0]);
-						transform.position.SetY(pos[1]);
-					}
+			ImGui::PopID();
+		}
+			//if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
+			//	auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
+			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			//	auto signature = ecsCoordinator.getEntityID(entity);
 
-					float scale[1] = { transform.scale.GetX() };
-					if (ImGui::DragFloat("Scale", scale, 1.f)) {
-						transform.scale.SetX(scale[0]);
-						transform.scale.SetY(scale[0]);
-					}
+			//	size_t maxSize = 1000;
+			//	std::string tempStr = fontComp.text;
+			//	memset(textBuffer, 0, MAXTEXTSIZE);
+			//	size_t length = std::min(tempStr.length(), maxSize);
+			//	for (size_t i = 0; i < length; i++)
+			//	{
+			//		textBuffer[i] = tempStr[i];
+			//	}
+			//	ImGui::PushID(entity);
 
-					float rotation[1] = { transform.orientation.GetX() };
-					if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-						transform.orientation.SetX(rotation[0]);
-					}
+			//	char buttonLabel[64];
+			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+			//	ImGui::PushItemWidth(-1);
+			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+			//		Inspector::selectedEntityID = entity;
+			//	}
+			//	ImGui::PopItemWidth();
 
-					if (ImGui::Button("Remove")) {
-						ecsCoordinator.destroyEntity(entity);
-					}
+			//	ImGui::PopID();
 
-					ImGui::TreePop();
+			//}
+			//else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
+			//	&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
+			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			//	auto signature = ecsCoordinator.getEntityID(entity);
+			//	
+			//	ImGui::PushID(entity);
 
-				}
-				
+			//	char buttonLabel[64];
+			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+			//	ImGui::PushItemWidth(-1);
+			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+			//		Inspector::selectedEntityID = entity;
+			//	}
+			//	ImGui::PopItemWidth();
 
-				ImGui::PopID();
-				ImGui::Separator();
-			}
-			else
-			{ //Remaining object's data modification features
-				auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				auto signature = ecsCoordinator.getEntityID(entity);
-				
-				ImGui::PushID(entity);
+			//	ImGui::PopID();
+			//}
+			//else
+			//{ //Remaining object's data modification features
+			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			//	auto signature = ecsCoordinator.getEntityID(entity);
 
-				if (ImGui::TreeNode("Signature: %s", signature.c_str())) {
-					
-					//Inspector::selectedEntityID = entity;
-					
-					float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-					if (ImGui::DragFloat2("Position", pos, 5.f)) {
-						transform.position.SetX(pos[0]);
-						transform.position.SetY(pos[1]);
-					}
+			//	ImGui::PushID(entity);
 
-					float scale[2] = { transform.scale.GetX(), transform.scale.GetY() };
-					if (ImGui::DragFloat2("Scale", scale, 1.f)) {
-						transform.scale.SetX(scale[0]);
-						transform.scale.SetY(scale[1]);
-					}
+			//	char buttonLabel[64];
+			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+			//	ImGui::PushItemWidth(-1); 
+			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {  
+			//		Inspector::selectedEntityID = entity;
+			//	}
+			//	ImGui::PopItemWidth();
 
-					float rotation[1] = { transform.orientation.GetX() };
-					if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-						transform.orientation.SetX(rotation[0]);
-					}
+			//	ImGui::PopID();
 
-					if (ImGui::Button("Remove")) {
-						ecsCoordinator.destroyEntity(entity);
-					}
-
-					ImGui::TreePop();
-
-				}
-				
-
-				ImGui::PopID();
-				ImGui::Separator();
-
-			}
+			//}
 	}
 
 
