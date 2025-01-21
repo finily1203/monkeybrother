@@ -25,6 +25,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
 #include "UIComponent.h"
+#include "GUIGameViewport.h"
 
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
@@ -32,7 +33,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIConsole.h"
 #include "vector"
 
-bool gameover = false;
 
 void createTextEntity(
     ECSCoordinator& ecs,
@@ -131,7 +131,7 @@ void GraphicSystemECS::update(float dt) {
 
 		// check if the player has collected all the collectables
 		// Created a win text entity
-        if (GLFWFunctions::collectableCount == 0 && gameover == false) {
+        if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::gameOver == false && GameViewWindow::getSceneNum() > -1) {
             createTextEntity(
                 ecsCoordinator,
                 "You Win!",
@@ -140,10 +140,10 @@ void GraphicSystemECS::update(float dt) {
                 myMath::Vector2D(-30, 40),         // Position
                 "winTextBox"                       // Unique ID
             );
-            gameover = true;
+            GLFWFunctions::gameOver = true;
         }
 		// lose text entity
-        if (GLFWFunctions::instantLose && gameover == false) {
+        if (GLFWFunctions::instantLose && GLFWFunctions::gameOver == false) {
             createTextEntity(
                 ecsCoordinator,
                 "You Lose!",
@@ -152,7 +152,7 @@ void GraphicSystemECS::update(float dt) {
                 myMath::Vector2D(-30, 40),          // Position
                 "loseTextBox"                       // Unique ID
             );
-            gameover = true;
+            GLFWFunctions::gameOver = true;
         }
         // 
         if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
@@ -212,6 +212,26 @@ void GraphicSystemECS::update(float dt) {
             {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
             }
+
+            else if (ecsCoordinator.getEntityID(entity) == "startButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveStartButton"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "optionsButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveOptionsButton"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "tutorialButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
+            }
         }
         else if (isCollectable) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
@@ -220,7 +240,20 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
         }
         else if (isBackground) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            if (ecsCoordinator.getEntityID(entity) == "background")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "mainMenuBg")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mainScreenBg"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform);
+            }
         }
         else if (isUI) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);

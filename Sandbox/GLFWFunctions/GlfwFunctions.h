@@ -102,6 +102,7 @@ struct GLFWFunctions {
 	static bool bumpAudio;
 	static bool collectAudio;
 	static bool firstCollision;
+	static bool gameOver;
 
 
 	static std::unordered_map<Key, bool>* keyState;
