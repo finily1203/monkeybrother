@@ -103,6 +103,7 @@ struct GLFWFunctions {
 	static bool collectAudio;
 	static bool firstCollision;
 
+	static double mouseXDelta; // Add this to track mouse movement
 
 	static std::unordered_map<Key, bool>* keyState;
 	static std::unordered_map<MouseButton, bool>* mouseButtonState;
