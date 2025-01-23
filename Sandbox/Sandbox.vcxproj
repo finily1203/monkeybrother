@@ -158,6 +158,7 @@
     <ClCompile Include="SystemECS\EffectPumpBehaviour.cpp" />
     <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
     <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
+    <ClCompile Include="SystemECS\FilterBehaviour.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="SystemECS\EffectPumpBehaviour.h" />
     <ClInclude Include="SystemECS\EnemyBehaviour.h" />
     <ClInclude Include="SystemECS\ExitBehaviour.h" />
+    <ClInclude Include="SystemECS\FilterBehaviour.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
