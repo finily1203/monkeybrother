@@ -96,6 +96,8 @@ public:
 
 	static int getSceneNum() { return scene; }
 
+	static void setSceneNum(int sceneNum) { scene = sceneNum; }
+
 	static std::string GenerateSaveJSONFile(int& saveNumber);
 
 	static nlohmann::ordered_json AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity);
