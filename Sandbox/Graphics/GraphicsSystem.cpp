@@ -65,7 +65,9 @@ GraphicsSystem::GraphicsSystem()
 }
 
 GraphicsSystem::~GraphicsSystem() {
-    cleanup();
+    if (!isCleanedUp) {
+        cleanup();
+    }
 }
 
 //For perfomance viewer
@@ -174,22 +176,34 @@ void GraphicsSystem::Render(float deltaTime) {
 }
 
 void GraphicsSystem::cleanup() {
-    // Clear animation data for all entities
-    entityAnimations.clear();
+    if (isCleanedUp) {
+        return;
+    }
 
-    // Release OpenGL resources
-    ReleaseResources();
+    std::cout << "Starting GraphicsSystem cleanup with " << entityAnimations.size()
+        << " animations" << std::endl;
 
-    // Reset animation data
-    m_AnimationData.reset();
+    try {
+        // Clear animations first
+        for (auto it = entityAnimations.begin(); it != entityAnimations.end(); ) {
+            LogAnimationOperation("cleanup", it->first);
+            it = entityAnimations.erase(it);
+        }
 
-    // Delete viewports vector and set to nullptr
-    if (vps) {
+        // Release other resources
+        ReleaseResources();
+        m_AnimationData.reset();
+
         delete vps;
         vps = nullptr;
     }
-}
+    catch (const std::exception& e) {
+        std::cerr << "Error during GraphicsSystem cleanup: " << e.what() << std::endl;
+    }
 
+    isCleanedUp = true;
+    std::cout << "Completed GraphicsSystem cleanup" << std::endl;
+}
 
 void GraphicsSystem::ReleaseResources() {
     glDeleteBuffers(1, &m_EBO);
@@ -392,19 +406,28 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
 }
 
 void GraphicsSystem::InitializeAnimation(Entity entity, const AnimationComponent& animComp) {
-    // Remove existing animation data if it exists
-    auto it = entityAnimations.find(entity);
-    if (it != entityAnimations.end()) {
-        entityAnimations.erase(it);
+    try {
+        // Remove existing animation if it exists
+        entityAnimations.erase(entity);
+
+        // Create the animation data first
+        auto animData = std::make_unique<AnimationData>(
+            static_cast<int>(animComp.totalFrames),
+            animComp.frameTime,
+            static_cast<int>(animComp.columns),
+            static_cast<int>(animComp.rows)
+        );
+
+        // Only insert if creation was successful
+        if (animData) {
+            entityAnimations.insert(std::make_pair(entity, std::move(animData)));
+            LogAnimationOperation("initialized", entity);
+        }
     }
-    
-    // Create new animation data
-    entityAnimations[entity] = std::make_unique<AnimationData>(
-        static_cast<int>(animComp.totalFrames),
-        animComp.frameTime,
-        static_cast<int>(animComp.columns),
-        static_cast<int>(animComp.rows)
-    );
+    catch (const std::exception& e) {
+        std::cerr << "Failed to initialize animation for entity " << entity
+            << ": " << e.what() << std::endl;
+    }
 }
 
 

@@ -96,6 +96,7 @@ void GraphicSystemECS::update(float dt) {
 
             // Initialize animation if it hasn't been initialized yet
             if (isAnimated && !graphicsSystem.HasAnimationData(entity)) {
+                std::cout << "Late initialization of animation for entity " << entity << std::endl;
                 graphicsSystem.InitializeAnimation(entity, animationComponent);
             }
         }

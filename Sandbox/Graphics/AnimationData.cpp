@@ -30,20 +30,28 @@ AnimationData::AnimationData(int totalFrames, float frameDuration, int columns, 
     currentFrame(0), timeAccumulator(0.0f), uvDirty(true),
     speedMultiplier(1.0f), looping(true), lastDirection(Direction::Right) {
 
-    currentUVs = new std::vector<glm::vec2>();
+    try {
+        // Allocate currentUVs
+        currentUVs = new std::vector<glm::vec2>();
+        currentUVs->reserve(4);  // Pre-reserve space for 4 vertices
 
-    // Validate inputs
-    if (totalFrames <= 0 || columns <= 0 || rows <= 0) {
-        throw std::invalid_argument("Total frames, columns, and rows must be greater than zero.");
+        // Validate inputs
+        if (totalFrames <= 0 || columns <= 0 || rows <= 0) {
+            throw std::invalid_argument("Total frames, columns, and rows must be greater than zero.");
+        }
+
+        frameWidth = 1.0f / columns;
+        frameHeight = 1.0f / rows;
+
+        currentUVs->resize(4);
+        UpdateUVCoordinates();
     }
-
-
-    frameWidth = 1.0f / columns;
-    frameHeight = 1.0f / rows;
-
-
-    currentUVs->resize(4);
-    UpdateUVCoordinates();
+    catch (...) {
+        // Clean up if constructor fails
+        delete currentUVs;
+        currentUVs = nullptr;
+        throw;  // Re-throw the exception
+    }
 }
 
 AnimationData::~AnimationData() {

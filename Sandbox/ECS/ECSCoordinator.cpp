@@ -208,7 +208,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			// Add AnimationComponent to ECS
 			ecs.addComponent(entityObj, animation);
-			graphicsSystem.InitializeAnimation(entityObj, animation);
+			//graphicsSystem.InitializeAnimation(entityObj, animation);
 		}
 
 

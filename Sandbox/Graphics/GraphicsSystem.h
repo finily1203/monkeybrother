@@ -78,8 +78,19 @@ public:
     std::vector<GLViewport>* vps; // container for viewports
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
 	void drawDebugCircle(const TransformComponent transform, const myMath::Matrix3x3 viewMatrix);
-
+    void CleanupEntityAnimation(Entity entity) {
+        auto it = entityAnimations.find(entity);
+        if (it != entityAnimations.end()) {
+            LogAnimationOperation("cleanup", entity);
+            entityAnimations.erase(it);
+        }
+    }
 private:
+    void LogAnimationOperation(const char* operation, Entity entity) {
+        std::cout << "Animation " << operation << " for entity " << entity
+            << " (total animations: " << entityAnimations.size() << ")" << std::endl;
+    }
+    bool isCleanedUp = false;
     GLuint m_VAO;
     GLuint m_VBO;       // VBO for vertex positions
     GLuint m_UVBO;      // Separate VBO for texture coordinates (UVs)
@@ -89,7 +100,7 @@ private:
     std::unique_ptr<Shader> m_Shader, m_Shader2;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
     std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
-    std::unordered_map<Entity, std::unique_ptr<AnimationData>> entityAnimations;
+    std::map<Entity, std::unique_ptr<AnimationData>> entityAnimations;
     void ReleaseResources();
 };
 
