@@ -25,6 +25,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "BehaviourComponent.h"
 #include "BackgroundComponent.h"
 #include "UIComponent.h"
+#include "FilterComponent.h"   
 
 #include "GlobalCoordinator.h"
 #include "GraphicsSystem.h"
@@ -104,6 +105,7 @@ void GraphicSystemECS::update(float dt) {
 		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
 		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
+		bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
         bool isAnimate = false;
 
         if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
@@ -192,7 +194,11 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
+			//check if isVisible is true
+			auto& player = ecsCoordinator.getComponent<PlayerComponent>(entity);
+            if (player.isVisible) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
+            }
         }
         else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
@@ -219,6 +225,9 @@ void GraphicSystemECS::update(float dt) {
         else if (isExit) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
         }
+        else if (isFilter) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
+        }
         else if (isBackground) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
         }
@@ -243,7 +252,31 @@ void GraphicSystemECS::update(float dt) {
                  ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
                  ecsCoordinator.getEntitySignature(entity).count() == 2) {
                  graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-       }
+        }
+
+        if (isUI) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+            if (GLFWFunctions::collectableCount == 0) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-3");
+            }
+            else if (GLFWFunctions::collectableCount == 1) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-2");
+            }
+            else if (GLFWFunctions::collectableCount == 2) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-1");
+            }
+            else if (GLFWFunctions::collectableCount >= 3) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-0");
+            }
+        }
+        
+        if (isButton) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+        } 
+
+        if (ecsCoordinator.getTextureID(entity) != "")
+        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
     }
 }
 

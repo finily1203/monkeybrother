@@ -22,9 +22,12 @@ File Contributions: Joel Chu (50%)
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#pragma warning(disable:4074)
+#pragma init_seg(compiler)
+
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 160;
+		//_crtBreakAlloc = 174;
 	}
 };
 

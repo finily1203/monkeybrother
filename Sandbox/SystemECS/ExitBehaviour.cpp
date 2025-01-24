@@ -32,7 +32,7 @@ void ExitBehaviour::update(Entity entity) {
 			}
 		}
 
-		//get the position of the player and the collectable
+		//get the position of the player and the exit
 		auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
 		myMath::Vector2D& playerPos = playerTransform.position;
 		float radius = playerTransform.scale.GetX() * 0.5f;

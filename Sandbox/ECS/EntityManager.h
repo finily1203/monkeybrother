@@ -42,6 +42,9 @@ public:
 	std::string getEntityId(Entity entity);
 	Entity getEntityFromId(std::string const& id);
 
+	void setTextureId(Entity entity, std::string const& id);
+	std::string getTextureId(Entity entity);
+
 	std::unordered_map<Entity, std::string> getEntityMap() const;
 
 	void cleanup();
@@ -51,5 +54,6 @@ private:
 	std::queue<Entity> availableEnt; //use queue to add and remove entities
 	std::array<ComponentSig, MAX_ENTITIES> entitySig; 
 	std::unordered_map<Entity, std::string> entityIds;
+	std::unordered_map<Entity, std::string> textureIds;
 	unsigned int liveEntCount = 0; 
 };

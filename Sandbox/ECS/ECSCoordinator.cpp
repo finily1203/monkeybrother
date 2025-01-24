@@ -34,6 +34,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "BackgroundComponent.h"
 #include "UIComponent.h"
 #include "PlatformBehaviour.h"
+#include "FilterBehaviour.h"
+#include "MovPlatformBehaviour.h"
 
 #include <Windows.h>
 
@@ -134,6 +136,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+		/*std::string textureId = "";
+		if (entityData.contains("textureId")) {
+			textureId = entityData["textureId"].get<std::string>();
+		}*/
+		std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -184,6 +191,27 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, closestPlatform);
 		}
 
+
+		if (entityData.contains("movPlatform"))
+		{
+			MovPlatformComponent movPlatform{};
+			/*
+			float speed;
+			float maxDistance;
+			bool movForward;
+
+			myMath::Vector2D startPos;
+			myMath::Vector2D direction;
+			*/
+			serializer.ReadObject(movPlatform.speed, entityId, "entities.movPlatform.speed");
+			serializer.ReadObject(movPlatform.maxDistance, entityId, "entities.movPlatform.maxDistance");
+			serializer.ReadObject(movPlatform.movForward, entityId, "entities.movPlatform.movForward");
+			serializer.ReadObject(movPlatform.startPos, entityId, "entities.movPlatform.startPos");
+			serializer.ReadObject(movPlatform.direction, entityId, "entities.movPlatform.direction");
+
+			ecs.addComponent(entityObj, movPlatform);
+		}
+
 		if (entityData.contains("movement"))
 		{
 			MovementComponent movement{};
@@ -203,6 +231,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("player")) {
 			PlayerComponent player{};
 			serializer.ReadObject(player.isPlayer, entityId, "entities.player.isPlayer");
+			serializer.ReadObject(player.isVisible, entityId, "entities.player.isVisible");
 
 			ecs.addComponent(entityObj, player);
 
@@ -244,6 +273,12 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 			ecs.addComponent(entityObj, exit);
 
+		}
+
+		if (entityData.contains("filter")) {
+			FilterComponent filter{};
+			serializer.ReadObject(filter.isFilter, entityId, "entities.filter.isFilter");
+			ecs.addComponent(entityObj, filter);
 		}
 
 		if (entityData.contains("forces"))
@@ -340,6 +375,17 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.platform");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
 			}
+			else
+			if (entityData["behaviour"].contains("filter")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.filter");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<FilterBehaviour>());
+			}
+			else
+			if (entityData["behaviour"].contains("movPlatform")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.movPlatform");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MovPlatformBehaviour>());
+			}
+
 
 			ecs.addComponent(entityObj, behaviour);
 		}
@@ -520,6 +566,8 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<BehaviourComponent>();
 	registerComponent<BackgroundComponent>();
 	registerComponent<UIComponent>();
+	registerComponent<FilterComponent>();
+	registerComponent<MovPlatformComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 
@@ -594,6 +642,14 @@ Entity ECSCoordinator::getEntityFromID(std::string ID) {
 
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
+}
+
+void ECSCoordinator::setTextureID(Entity entity, std::string ID) {
+	entityManager->setTextureId(entity, ID);
+}
+
+std::string ECSCoordinator::getTextureID(Entity entity) {
+	return entityManager->getTextureId(entity);
 }
 
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {

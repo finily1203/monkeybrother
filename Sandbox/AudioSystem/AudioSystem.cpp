@@ -160,6 +160,8 @@ void AudioSystem::update() {
     if (GLFWFunctions::bumpAudio) {
         playSoundEffect("Mossball_Bounce.wav");
         GLFWFunctions::bumpAudio = false;
+
+		std::cout << "Bump audio played." << std::endl;
     }
 
     if (GLFWFunctions::collectAudio) {
@@ -179,7 +181,7 @@ void AudioSystem::update() {
 
     if ((*GLFWFunctions::keyState)[Key::COMMA]) {
         genVol -= 0.1f;
-        bgmVol -= 0.005f;
+        bgmVol -= 0.05f;
 		sfxVol -= 0.1f;
 
         if (genVol < 0.0f) 
@@ -201,15 +203,15 @@ void AudioSystem::update() {
     }
     else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
         genVol += 0.1f;
-        bgmVol += 0.005f;
+        bgmVol += 0.05f;
         sfxVol += 0.1f;
 
         if (genVol > 1.0f) 
             genVol = 1.0f;
-        if (bgmVol > 0.1f) 
-            bgmVol = 0.1f;
-        if (sfxVol < 0.0f)
-            sfxVol = 0.0f;
+        if (bgmVol > 0.5f) 
+            bgmVol = 0.5f;
+        if (sfxVol > 0.0f)
+            sfxVol = 1.0f;
 
         ambienceChannel->setVolume(genVol);
         bgmChannel->setVolume(bgmVol);
