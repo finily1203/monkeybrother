@@ -258,7 +258,8 @@ void GameViewWindow::Update() {
 
 			// Add placeholder entity using ordered_json
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 
 			// Save all currently live entities
