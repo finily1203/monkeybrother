@@ -7,4 +7,5 @@ public:
 
 private:
 	bool isClogged = false;
+	std::chrono::time_point<std::chrono::steady_clock> collisionTime;
 };

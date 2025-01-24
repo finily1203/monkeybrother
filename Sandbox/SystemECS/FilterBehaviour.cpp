@@ -47,6 +47,28 @@ void FilterBehaviour::update(Entity entity) {
 			mossballTransform.scale.SetX(mossballTransform.scale.GetX() - 50.f);
 			mossballTransform.scale.SetY(mossballTransform.scale.GetY() - 50.f);
 			isClogged = true;
+
+			//set player visibility to false
+			auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+			player.isVisible = false;
+
+			collisionTime = std::chrono::steady_clock::now();
+		}
+
+		if (isClogged) {
+			auto currentTime = std::chrono::steady_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::seconds>(currentTime - collisionTime).count();
+			if (duration >= 2) {
+				auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+				player.isVisible = true;
+
+				//auto& filterPos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
+				//playerPos = filterPos + myMath::Vector2D(50.0f, 50.0f);
+			}
+
+			auto& filterPos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
+			playerPos = filterPos + myMath::Vector2D(50.0f, 50.0f);
+			//isClogged = false;
 		}
 	}
 }

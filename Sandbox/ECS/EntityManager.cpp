@@ -141,6 +141,12 @@ Entity EntityManager::getEntityFromId(std::string const& id)
 	return entity;
 }
 
+// Set the texture Id based on the entity object
+void EntityManager::setTextureId(Entity entity, std::string const& id)
+{
+	textureIds[entity] = id;
+}
+
 // Retrieve the entity map
 std::unordered_map<Entity, std::string> EntityManager::getEntityMap() const
 {

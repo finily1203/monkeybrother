@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 struct PlayerComponent
 {
 	bool isPlayer;
+	bool isVisible;
 
-	PlayerComponent() : isPlayer(false) {}
+	PlayerComponent() : isPlayer(false), isVisible(true) {}
 };

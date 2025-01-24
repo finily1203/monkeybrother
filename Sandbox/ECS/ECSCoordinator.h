@@ -46,6 +46,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "CollectableComponent.h"
 #include "PumpComponent.h"
 #include "ExitComponent.h"
+#include "FilterComponent.h"
+#include "MovPlatformComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -120,6 +122,7 @@ public:
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
 
+	void setTextureID(Entity entity, std::string ID);
 
 	//System Manager Functions
 	//Register the system
