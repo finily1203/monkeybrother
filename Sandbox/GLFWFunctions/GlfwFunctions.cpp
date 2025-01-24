@@ -366,6 +366,8 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
+	(void)window;
+	(void)ypos;
     static double lastX = xpos;
     mouseXDelta = xpos - lastX;
     lastX = xpos;
