@@ -134,11 +134,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
-		std::string textureId = "none";
+		/*std::string textureId = "";
 		if (entityData.contains("textureId")) {
 			textureId = entityData["textureId"].get<std::string>();
-		}
-		//std::string textureId = entityData["textureId"].get<std::string>();
+		}*/
+		std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity

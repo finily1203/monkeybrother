@@ -43,6 +43,7 @@ void HierarchyList::Update() {
 					GameViewWindow::TogglePause();
 				}
 				Inspector::selectedEntityID = entity;
+				Inspector::draggedEntityID = entity;
 			}
 			ImGui::PopItemWidth();
 

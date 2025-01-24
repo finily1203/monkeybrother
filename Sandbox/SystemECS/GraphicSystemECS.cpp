@@ -269,6 +269,7 @@ void GraphicSystemECS::update(float dt) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
         } 
 
+        if (ecsCoordinator.getTextureID(entity) != "")
         graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
     }
 }
