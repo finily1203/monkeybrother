@@ -694,7 +694,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 
 	std::string entityId = "Object" + std::to_string(objectCounter);
 	objectCounter++;
-
+	
 	ecsCoordinator.setTextureID(dropEntity, assetName);
 	ecsCoordinator.setEntityID(dropEntity, entityId);
 }

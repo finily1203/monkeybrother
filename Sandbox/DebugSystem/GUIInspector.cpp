@@ -38,6 +38,7 @@ std::vector<std::string>* Inspector::assetNames;
 int Inspector::selectedEntityID = -1;
 int Inspector::draggedEntityID = -1;
 bool Inspector::isSelectingEntity = false;
+bool moveable = false;
 
 
 
@@ -223,8 +224,17 @@ void Inspector::Update() {
 		ImGui::EndPopup();
 	}
 
-	// Handle dragging with double-click
+	// Handle dragging
 	if (draggedEntityID != -1 && !isSelectingEntity) {
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
+		float dx = mouseWorldPos.x - transform.position.GetX();
+		float dy = mouseWorldPos.y - transform.position.GetY();
+		float halfWidth = std::abs(transform.scale.GetX() / 2.0f);
+		float halfHeight = std::abs(transform.scale.GetY() / 2.0f);
+
+
+		bool withinX = std::abs(dx) <= halfWidth;
+		bool withinY = std::abs(dy) <= halfHeight;
 		if (isInitialClickAfterSelection /*|| !initiatedByDoubleClick*/) {
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 				isInitialClickAfterSelection = false;
@@ -233,18 +243,25 @@ void Inspector::Update() {
 		}
 		else if (/*initiatedByDoubleClick && */ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
-			auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
-			if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID)) {
-				transform.position.SetX(centeredMouse.x);
-				transform.position.SetY(centeredMouse.y);
+
+			if (withinX && withinY) {
+				moveable = true;
+				
 			}
-			else {
-				transform.position.SetX(mouseWorldPos.x);
-				transform.position.SetY(mouseWorldPos.y);
+
+			if (moveable == true) {
+				if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID)) {
+					transform.position.SetX(centeredMouse.x);
+					transform.position.SetY(centeredMouse.y);
+				}
+				else {
+					transform.position.SetX(mouseWorldPos.x);
+					transform.position.SetY(mouseWorldPos.y);
+				}
 			}
 		}
-		else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-			initiatedByDoubleClick = false;
+		else {
+			moveable = false;
 		}
 	}
 
