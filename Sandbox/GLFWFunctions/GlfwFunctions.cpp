@@ -58,6 +58,7 @@ int GLFWFunctions::collectableCount = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
+bool GLFWFunctions::gameOver = false;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -275,46 +276,47 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
         }
+        if (!GameViewWindow::getPaused())
+        {
+            if ((*keyState)[Key::F] && action == GLFW_PRESS) {
+                fullscreen = !fullscreen;
+                GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
-        if ((*keyState)[Key::F] && action == GLFW_PRESS) {
-            fullscreen = !fullscreen;
-            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+                if (fullscreen) {
+                    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+                    glfwSetWindowMonitor(
+                        pWindow,
+                        monitor,
+                        0, 0,
+                        mode->width,
+                        mode->height,
+                        mode->refreshRate
+                    );
+                }
+                else {
+                    // Switch to windowed mode
+                    int windowedWidth = defultWindowWidth;  // Desired windowed mode width
+                    int windowedHeight = defultWindowHeight; // Desired windowed mode height
+                    int x = 150;             // Desired X position for the window
+                    int y = 150;             // Desired Y position for the window
 
-            if (fullscreen) {
-                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-                glfwSetWindowMonitor(
-                    pWindow,
-                    monitor,
-                    0, 0,
-                    mode->width,
-                    mode->height,
-                    mode->refreshRate
-                );
+                    glfwSetWindowMonitor(
+                        pWindow,
+                        nullptr,
+                        x, y,
+                        windowedWidth,
+                        windowedHeight,
+                        0
+                    );
+
+                    // Restore window decorations
+                    glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
+                    glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
+                }
+
+                std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
             }
-            else {
-                // Switch to windowed mode
-                int windowedWidth = defultWindowWidth;  // Desired windowed mode width
-                int windowedHeight = defultWindowHeight; // Desired windowed mode height
-                int x = 150;             // Desired X position for the window
-                int y = 150;             // Desired Y position for the window
-
-                glfwSetWindowMonitor(
-                    pWindow,
-                    nullptr,
-                    x, y,
-                    windowedWidth,
-                    windowedHeight,
-                    0
-                );
-
-                // Restore window decorations
-                glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
-                glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
-            }
-
-            std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
         }
-
     }
     else if (action == GLFW_RELEASE) {
         (*keyState)[static_cast<Key>(key)] = false;
@@ -415,15 +417,17 @@ void GLFWFunctions::getFps() {
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
     (void)window;
-    for (int i = 0; i < count; i++) {
-        std::string filePath = paths[i];
-        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
-            //seperate window to inform not allowed to drop type of file
-            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
-        }
-        else {
-            assetsManager.handleDropFile(filePath);
+    if (debug_flag) {
+        for (int i = 0; i < count; i++) {
+            std::string filePath = paths[i];
+            std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+            if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+                //seperate window to inform not allowed to drop type of file
+                MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+            }
+            else {
+                assetsManager.handleDropFile(filePath);
+            }
         }
     }
 }

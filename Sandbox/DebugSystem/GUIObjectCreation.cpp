@@ -245,9 +245,12 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 	// Get transform for AABB calculations
 	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entityObj);
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+	std::string textureId = "";
 
 	if (!strcmp(items[itemIndex], "Enemy")) {
 		// For a new enemy entity, set default values
+		textureId = "goldfish";
+
 		EnemyComponent enemy{};
 		enemy.isEnemy = true;  // Set default for new enemy
 
@@ -280,6 +283,7 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		ecsCoordinator.addComponent(entityObj, forces);
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, behaviour);
+		ecsCoordinator.setTextureID(entityObj, textureId);
 
 		logicSystemRef->assignBehaviour(entityObj, std::make_shared<EnemyBehaviour>());
 	}
@@ -299,7 +303,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		forces.prevForce = 0.0f;
 		forces.targetForce = 0.0f;
 
-	
+		textureId = "mossball";
+		ecsCoordinator.setTextureID(entityObj, textureId);
 
 		// Add AABB component like in JSON
 		AABBComponent aabb{};
@@ -329,6 +334,9 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 	}
 	else if (!strcmp(items[itemIndex], "Platform")) {
+		textureId = "woodtile";
+		ecsCoordinator.setTextureID(entityObj, textureId);
+
 		// Calculate AABB based on transform
 		AABBComponent aabb{};
 		float halfWidth = transform.scale.GetX() / 2.0f;
@@ -367,6 +375,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		ecsCoordinator.addComponent(entityObj, behaviour);
 	}
 	else if (!strcmp(items[itemIndex], "Pump")) {
+		textureId = "airVent";
+		ecsCoordinator.setTextureID(entityObj, textureId);
 		PumpComponent pump{};
 		pump.isPump = true;
 		pump.pumpForce = 3.0f;
@@ -385,6 +395,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 	}
 	else if (!strcmp(items[itemIndex], "Exit")) {
+		textureId = "exitFilter";
+		ecsCoordinator.setTextureID(entityObj, textureId);
 		ExitComponent exit{};
 		exit.isExit = true;
 		ecsCoordinator.addComponent(entityObj, exit);
@@ -397,6 +409,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 	}
 	else if (!strcmp(items[itemIndex], "Collectable")) {
+		textureId = "collectMoss";
+		ecsCoordinator.setTextureID(entityObj, textureId);
 		CollectableComponent collectable{};
 		collectable.isCollectable = true;
 		ecsCoordinator.addComponent(entityObj, collectable);
@@ -410,6 +424,8 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		GLFWFunctions::collectableCount++;
 	}
 	else if (!strcmp(items[itemIndex], "Background")) {
+		textureId = "background";
+		ecsCoordinator.setTextureID(entityObj, textureId);
 		BackgroundComponent background{};
 		background.isBackground = true;
 

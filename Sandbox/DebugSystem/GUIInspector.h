@@ -41,7 +41,11 @@ public:
 	static void RenderInspectorWindow(ECSCoordinator& ecsCoordinator, int selectedEntityID);
 
 	static void LoadInspectorFromJSON(std::string const& filename);
-private:
+	static int selectedEntityID;
+	static int draggedEntityID;
+	static bool isSelectingEntity;
+	
+	static std::vector<std::string>* assetNames;
 	static float objAttributeSliderMaxLength;
 	static char textBuffer[MAXTEXTSIZE];
 	static ImVec2 mouseWorldPos;

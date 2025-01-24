@@ -73,7 +73,16 @@ public:
 
 	//For Drag and Drop files from file explorer
 	void handleDropFile(std::string filePath);
+	void loadAsset(std::string filePath);
+	void delExistingAsset(std::string filePath);
 	bool checkIfAssetListChanged() const;
+	bool checkOverwritePopUp() const;
+	void setOverwritePopUp(bool value);
+	bool checkOverwriteFile() const;
+	void setOverwriteFile(bool value);
+
+	void renderImGui(std::string filePath);
+
 	std::vector<std::string> getAssetList() const;
 
 	//When adding in new assets
@@ -102,4 +111,8 @@ private:
 	int m_textureWidth, m_textureHeight, nrChannels;
 
 	bool hasAssetsListChanged;
+	bool overwritePopUp;
+	bool overwriteFile;
+
+	static std::string* overwritePath;
 };

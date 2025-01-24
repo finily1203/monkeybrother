@@ -82,7 +82,9 @@ void AssetBrowser::Update()
 			if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end())
 			{
 				ImGui::BeginGroup();
-				ImGui::Image((void*)(intptr_t)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				GLuint textureID = assetsManager.GetTexture(asset);
+
+				ImGui::Image((void*)(intptr_t)textureID, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 				{
 					ImGui::SetDragDropPayload("TEXTURE_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
@@ -289,6 +291,24 @@ void AssetBrowser::Update()
 			}
 		}
 		ImGui::EndDragDropTarget();
+	}
+
+	if (assetsManager.checkOverwritePopUp()) {
+		ImGui::OpenPopup("Overwrite Asset?");
+	}
+
+	if (ImGui::BeginPopupModal("Overwrite Asset?", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Asset already exists. Overwrite?");
+		if (ImGui::Button("Yes")) {
+			assetsManager.setOverwriteFile(true);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("No")) {
+			ImGui::CloseCurrentPopup();
+		}
+		assetsManager.setOverwritePopUp(false);
+		ImGui::EndPopup();
 	}
 }
 

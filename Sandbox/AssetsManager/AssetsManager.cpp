@@ -23,8 +23,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+std::string* AssetsManager::overwritePath = nullptr;
 
-AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0), hasAssetsListChanged(false)
+
+AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0),
+                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false)
 {
     m_AssetList = new std::vector<std::string>();
 }
@@ -55,7 +58,12 @@ void AssetsManager::initialise()
     LoadAudioAssets();
 }
 
-void AssetsManager::update(){}
+void AssetsManager::update(){
+    if (overwriteFile) {
+		loadAsset(*overwritePath);
+		setOverwriteFile(false);
+    }
+}
 
 
 //Clean up the assets manager
@@ -492,59 +500,86 @@ void AssetsManager::handleDropFile(std::string filePath) {
 
     //check if file already exists
     if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
-		//if it exists, delete the current one within the program
-        if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
-			UnloadTexture(path.filename().string());
-			DeleteAssetFromJSON(path.filename().string(), "textureAssets");
-		}
-		else if (path.extension() == ".shader") {
-			UnloadShader(path.filename().string());
-			DeleteAssetFromJSON(path.filename().string(), "shaderAssets");
-		}
-		else if (path.extension() == ".ttf") {
-			UnloadFont(path.filename().string());
-			DeleteAssetFromJSON(path.filename().string(), "fontAssets");
-		}
-		else if (path.extension() == ".wav" || path.extension() == ".mp3") {
-			UnloadAudio(path.filename().string());
-			DeleteAssetFromJSON(path.filename().string(), "audioAssets");
-		}
-		else {
-			std::cerr << "File type not supported!" << std::endl;
-        }
-
+		delExistingAsset(filePath);
+		overwritePopUp = true;
+		*overwritePath = filePath;
         std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
     }
 
-    if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
-		LoadTexture(path.filename().string().c_str(), path.string());
-        AddNewAssetToJSON(path.filename().string(), "textureAssets", path.string());
-        std::cout << "Texture loaded from drag and drop!" << std::endl;
-	}
-    else if (path.extension() == ".shader") {
-        LoadShader(path.filename().string(), path.string());
-        AddNewAssetToJSON(path.filename().string(), "shaderAssets", path.string());
-        std::cout << "Shader loaded from drag and drop!" << std::endl;
-    }
-    else if (path.extension() == ".ttf") {
-		LoadFont(path.filename().string(), path.string(), 48);
-        AddNewAssetToJSON(path.filename().string(), "fontAssets", path.string());
-        std::cout << "Font loaded from drag and drop!" << std::endl;
-	}
-    else if (path.extension() == ".wav" || path.extension() == ".mp3") {
-		LoadAudio(path.filename().string(), path.string(), audSystem);
-        AddNewAssetToJSON(path.filename().string(), "audioAssets", path.string());
-        std::cout << "Audio loaded from drag and drop!" << std::endl;
-	}
-    else {
-		std::cerr << "File type not supported!" << std::endl;
-	}
+	loadAsset(filePath);
 
     hasAssetsListChanged = true;
 }
 
+void AssetsManager::loadAsset(std::string filePath) {
+	std::filesystem::path path(filePath);
+	if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+		LoadTexture(path.filename().string().c_str(), path.string());
+		AddNewAssetToJSON(path.filename().string(), "textureAssets", path.string());
+		std::cout << "Texture loaded from file explorer!" << std::endl;
+	}
+	else if (path.extension() == ".shader") {
+		LoadShader(path.filename().string(), path.string());
+		AddNewAssetToJSON(path.filename().string(), "shaderAssets", path.string());
+		std::cout << "Shader loaded from file explorer!" << std::endl;
+	}
+	else if (path.extension() == ".ttf") {
+		LoadFont(path.filename().string(), path.string(), 48);
+		AddNewAssetToJSON(path.filename().string(), "fontAssets", path.string());
+		std::cout << "Font loaded from file explorer!" << std::endl;
+	}
+	else if (path.extension() == ".wav" || path.extension() == ".mp3") {
+		LoadAudio(path.filename().string(), path.string(), audSystem);
+		AddNewAssetToJSON(path.filename().string(), "audioAssets", path.string());
+		std::cout << "Audio loaded from file explorer!" << std::endl;
+	}
+	else {
+		std::cerr << "File type not supported!" << std::endl;
+	}
+}
+
+void AssetsManager::delExistingAsset(std::string filePath) {
+    std::filesystem::path path(filePath);
+    //if it exists, delete the current one within the program
+    if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+        UnloadTexture(path.filename().string());
+        DeleteAssetFromJSON(path.filename().string(), "textureAssets");
+    }
+    else if (path.extension() == ".shader") {
+        UnloadShader(path.filename().string());
+        DeleteAssetFromJSON(path.filename().string(), "shaderAssets");
+    }
+    else if (path.extension() == ".ttf") {
+        UnloadFont(path.filename().string());
+        DeleteAssetFromJSON(path.filename().string(), "fontAssets");
+    }
+    else if (path.extension() == ".wav" || path.extension() == ".mp3") {
+        UnloadAudio(path.filename().string());
+        DeleteAssetFromJSON(path.filename().string(), "audioAssets");
+    }
+    else {
+        std::cerr << "File type not supported!" << std::endl;
+    }
+}
+
 bool AssetsManager::checkIfAssetListChanged() const {
 	return hasAssetsListChanged;
+}
+
+bool AssetsManager::checkOverwritePopUp() const {
+	return overwritePopUp;
+}
+
+void AssetsManager::setOverwritePopUp(bool value) {
+	overwritePopUp = value;
+}
+
+bool AssetsManager::checkOverwriteFile() const {
+	return overwriteFile;
+}
+
+void AssetsManager::setOverwriteFile(bool value) {
+	overwriteFile = value;
 }
 
 std::vector<std::string> AssetsManager::getAssetList() const {

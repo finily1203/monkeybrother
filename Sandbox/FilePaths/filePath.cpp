@@ -188,3 +188,14 @@ std::string FilePathManager::GetSceneJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the main menu JSON file
+std::string FilePathManager::GetMainMenuJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "mainMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

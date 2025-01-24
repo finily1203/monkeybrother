@@ -22,9 +22,12 @@ File Contributions: Joel Chu (50%)
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#pragma warning(disable:4074)
+#pragma init_seg(compiler)
+
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 160;
+		//_crtBreakAlloc = 174;
 	}
 };
 
@@ -35,7 +38,7 @@ namespace monkeybrother {
 }
 
 int main() {
-	ShowWindow(GetConsoleWindow(), SW_HIDE); // Hide the console window
+	ShowWindow(GetConsoleWindow(), SW_SHOW); // Hide the console window
 
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	//_CrtSetBreakAlloc(410518);
