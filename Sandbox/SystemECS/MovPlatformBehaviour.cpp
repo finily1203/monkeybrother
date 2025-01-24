@@ -13,6 +13,8 @@ void MovPlatformBehaviour::update(Entity entity) {
 	myMath::Vector2D& position = transform.position;
 	float distance = speed * 0.1f;
 
+	std::cout << position.GetX() << " " << position.GetY() << std::endl;
+
 	if (movement.movForward) {
 		transform.position += direction * distance;
 	}
@@ -24,13 +26,17 @@ void MovPlatformBehaviour::update(Entity entity) {
 	//calculate the distance between the start position and the current position
 	//if it is greater than the maxDistance, move back
 
-	float distTravelled = (movement.startPos.GetX() - position.GetX()) * (movement.startPos.GetX() - position.GetX()) -
-						  (movement.startPos.GetY() - position.GetY()) * (movement.startPos.GetY() - position.GetY());
-
-	distTravelled = sqrt(distTravelled);
+	float distTravelled = sqrt(pow(position.GetX() - movement.startPos.GetX(), 2) +
+							   pow(position.GetY() - movement.startPos.GetY(), 2));
+	
 
 	if (distTravelled > movement.maxDistance)
 	{
 		movement.movForward = false;
+	}
+
+	if (position.GetX() < movement.startPos.GetX() || position.GetY() < movement.startPos.GetY())
+	{
+		movement.movForward = true;
 	}
 }

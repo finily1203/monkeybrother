@@ -160,6 +160,8 @@ void AudioSystem::update() {
     if (GLFWFunctions::bumpAudio) {
         playSoundEffect("Mossball_Bounce.wav");
         GLFWFunctions::bumpAudio = false;
+
+		std::cout << "Bump audio played." << std::endl;
     }
 
     if (GLFWFunctions::collectAudio) {
