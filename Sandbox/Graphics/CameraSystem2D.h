@@ -69,4 +69,6 @@ private:
     GLfloat m_CameraZoom;
     const TransformComponent* m_LockedComponent;
     ECSCoordinator& ecsCoordinator; // Reference to the ECS Coordinator
+	GLfloat m_LerpSpeed = 1.2f; // Lerp speed for camera movement
+	myMath::Vector2D m_TargetPosition; 
 };
