@@ -59,7 +59,7 @@ int GameViewWindow::saveNum;
 int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
 
-float GameViewWindow::currentZoom = 1.0f;
+float GameViewWindow::currentZoom = 0.2f;
 float GameViewWindow::zoomLevel;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
@@ -98,11 +98,13 @@ float GameViewWindow::optionsButtonPadding;
 int GameViewWindow::scene;
 float GameViewWindow::initialZoom;
 float GameViewWindow::mouseWheelScaleFactor;
+int GameViewWindow::objectCounter = 1;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
+	//currentZoom = cameraSystem.getCameraZoom();
 }
 bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
@@ -256,15 +258,17 @@ void GameViewWindow::Update() {
 
 			// Add placeholder entity using ordered_json
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 
 			// Save all currently live entities
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				std::string entityId = ecsCoordinator.getEntityID(entity);
+				std::string textureId = ecsCoordinator.getTextureID(entity);
 				if (entityId != "placeholderentity") {
 					TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					auto entityJson = AddNewEntityToJSON(transform, entityId, ecsCoordinator, entity);
+					auto entityJson = AddNewEntityToJSON(transform, entityId, textureId, ecsCoordinator, entity);
 					jsonData["entities"].push_back(entityJson);
 				}
 			}
@@ -380,7 +384,10 @@ void GameViewWindow::Update() {
 	ImGui::SameLine(0, optionsButtonPadding);
 
 	// Add pause button to viewport
-	if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
+	if (ImGui::Button(isPaused ? "Resume" : "Pause") || ImGui::IsKeyPressed(ImGuiKey_Q)) {
+		Inspector::selectedEntityID = -1;
+		Inspector::draggedEntityID = -1;
+		Inspector::isSelectingEntity = false;
 		TogglePause();
 	}
 
@@ -388,24 +395,31 @@ void GameViewWindow::Update() {
 
 	ImGui::SameLine(0, optionsButtonPadding);
 
-	if (ImGui::Button(clickedZoom ? "UnZoom" : "Zoom")) {
+	if (/*ImGui::Button(clickedZoom ? "UnZoom" : "Zoom") || */ImGui::IsKeyPressed(ImGuiKey_W)) {
 		clickedZoom = !clickedZoom;
 	}
 
 	ImGui::SameLine(0, optionsButtonPadding);
 
-	if (ImGui::Button(clickedScreenPan ? "UnPan" : "Pan")) {
-		if (clickedScreenPan) {
-			// Clicking "UnPan" - enable camera movement
-			GLFWFunctions::allow_camera_movement = true;
-		}
-		else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
-			// Clicking "Pan" - disable camera movement
-			GLFWFunctions::allow_camera_movement = true;
-		}
-		
-		clickedScreenPan = !clickedScreenPan;
+	if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+		GLFWFunctions::allow_camera_movement = true;
 	}
+	else {
+		GLFWFunctions::allow_camera_movement == false;
+	}
+
+	//if (/*ImGui::Button(clickedScreenPan ? "UnPan" : "Pan") || */ImGui::IsKeyPressed(ImGuiKey_E)) {
+	//	if (clickedScreenPan) {
+	//		// Clicking "UnPan" - enable camera movement
+	//		GLFWFunctions::allow_camera_movement = true;
+	//	}
+	//	else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
+	//		// Clicking "Pan" - disable camera movement
+	//		GLFWFunctions::allow_camera_movement = true;
+	//	}
+	//	
+	//	clickedScreenPan = !clickedScreenPan;
+	//}
 
 
 
@@ -419,7 +433,7 @@ void GameViewWindow::Update() {
 
 		cameraSystem.setCameraPosition(initialCamPos);
 		// Reset camera zoom to default value
-		cameraSystem.setCameraZoom(initialZoom);
+		cameraSystem.setCameraZoom(currentZoom);
 	}
 
 	viewportPos = ImGui::GetWindowPos();
@@ -437,7 +451,7 @@ void GameViewWindow::Update() {
 
 		// Clamp the new zoom value between min and max
 		currentZoom = std::clamp(currentZoom, MIN_ZOOM, MAX_ZOOM);
-		
+
 		cameraSystem.setCameraZoom(currentZoom);
 	}
 
@@ -453,7 +467,7 @@ void GameViewWindow::Update() {
 			const char* assetName = (const char*)payloadTex->Data;
 			createDropEntity(assetName, TEXTURE);
 			std::cout << "Dropped Texture: " << assetName << std::endl;
-			
+
 		}
 		else if (const ImGuiPayload* payloadShdr = ImGui::AcceptDragDropPayload("SHADER_PAYLOAD")) {
 			const char* assetName = (const char*)payloadShdr->Data;
@@ -469,6 +483,8 @@ void GameViewWindow::Update() {
 		ImGui::EndDragDropTarget();
 	}
 
+	Console::GetLog() << "zoom" << currentZoom << std::endl;
+
 	ImGui::End();
 }
 //Clean up resources
@@ -481,7 +497,7 @@ void GameViewWindow::Cleanup() {
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
-		if (viewportTexture != 0) {
+	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 	}
 
@@ -566,7 +582,7 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 	float viewportY = startY + (remainingHeight - size.y) * 0.5f;
 
 	// Handle panning logic
-	if (clickedScreenPan && insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+	if (/*clickedScreenPan && */insideViewport && ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
 		if (!isDragging) {
 			isDragging = true;
 			initialMousePos = globalMousePos;
@@ -576,8 +592,10 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 
 		// Move camera position
 		myMath::Vector2D camPos = cameraSystem.getCameraPosition();
-		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * mouseDragSpeed);
-		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * mouseDragSpeed);
+
+		float zoomAdjustedSpeed = mouseDragSpeed * (2.0f / currentZoom);
+		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * zoomAdjustedSpeed);
+		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * zoomAdjustedSpeed);
 		cameraSystem.setCameraPosition(camPos);
 
 		mouseDragDist = currentMouseDragDist;
@@ -633,7 +651,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
 	transform.orientation = { 0.0f, 0.0f };
-	
+
 	ecsCoordinator.addComponent(dropEntity, transform);
 
 	BehaviourComponent behaviour;
@@ -645,23 +663,23 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 	// Add the appropriate components based on the specifier
 	switch (specifier) {
 	case TEXTURE:
-			if (strcmp(assetName, "goldfish") == 0) {
-				EnemyComponent enemy;
-				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
+		if (strcmp(assetName, "goldfish") == 0) {
+			EnemyComponent enemy;
+			serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
 
-				PhysicsComponent physics;
+			PhysicsComponent physics;
 
-				ecsCoordinator.addComponent(dropEntity, enemy);
-				ecsCoordinator.addComponent(dropEntity, physics);
-			}
-			if (strcmp(assetName, "mossball") == 0) {
-				PlayerComponent player;
-				serializer.ReadObject(player.isPlayer, assetName, "entities.player.isPlayer");
-				ecsCoordinator.addComponent(dropEntity, player);
+			ecsCoordinator.addComponent(dropEntity, enemy);
+			ecsCoordinator.addComponent(dropEntity, physics);
+		}
+		if (strcmp(assetName, "mossball") == 0) {
+			PlayerComponent player;
+			serializer.ReadObject(player.isPlayer, assetName, "entities.player.isPlayer");
+			ecsCoordinator.addComponent(dropEntity, player);
 
-				PhysicsComponent physics;
-				ecsCoordinator.addComponent(dropEntity, physics);
-			}
+			PhysicsComponent physics;
+			ecsCoordinator.addComponent(dropEntity, physics);
+		}
 
 		break;
 	case FONT:
@@ -675,7 +693,11 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 		break;
 	}
 
-	ecsCoordinator.setEntityID(dropEntity, assetName);
+	std::string entityId = "Object" + std::to_string(objectCounter);
+	objectCounter++;
+
+	ecsCoordinator.setTextureID(dropEntity, assetName);
+	ecsCoordinator.setEntityID(dropEntity, entityId);
 }
 
 std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
@@ -706,12 +728,13 @@ std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
 	return jsonPath;
 }
 
-nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, ECSCoordinator& ecs, Entity& entity)
+nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, std::string const& textureId, ECSCoordinator& ecs, Entity& entity)
 {
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 	// Initialize ordered components that should always be present first
 	nlohmann::ordered_json entityJSON = {
 		{"id", entityId},
+		{"textureId", textureId},
 		{"transform", {
 			{"localTransform", {
 				{transform.mdl_xform.GetMatrixValue(0, 0), transform.mdl_xform.GetMatrixValue(0, 1), transform.mdl_xform.GetMatrixValue(0, 2)},
@@ -826,7 +849,7 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			}}
 		};
 	}
-	
+
 	if (ecs.hasComponent<PlayerComponent>(entity)) {
 		auto& player = ecs.getComponent<PlayerComponent>(entity);
 		player.isPlayer = true;
@@ -931,7 +954,7 @@ ImVec2 GameViewWindow::GetCenteredMousePosition() {
 		return ImVec2(0, 0);
 	}
 
-	// Map the coordinates to ±800 x ±450 range
+	// Map the coordinates to ?800 x ?450 range
 	float normalizedX = (sceneX / aspectSize.x) * 800.0f * 2.0f;
 	float normalizedY = (sceneY / aspectSize.y) * 450.0f * 2.0f;
 
@@ -981,13 +1004,13 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
-	if (clickedScreenPan) {
-		double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
-		double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
+	//if (clickedScreenPan) {
+	double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+	double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
-		worldX += panX * cosAngle - panY * sinAngle;
-		worldY += panX * sinAngle + panY * cosAngle;
-	}
+	worldX += panX * cosAngle - panY * sinAngle;
+	worldY += panX * sinAngle + panY * cosAngle;
+	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
@@ -1032,8 +1055,8 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	float relY = viewportCenterY - viewportY;
 
 	// Scale to world units
-	float worldScaleX = (viewportWidth / (aspectSize.x * zoomLevel));
-	float worldScaleY = (viewportHeight / (aspectSize.y * zoomLevel));
+	float worldScaleX = (viewportWidth / (aspectSize.x * currentZoom));
+	float worldScaleY = (viewportHeight / (aspectSize.y * currentZoom));
 
 	relX *= worldScaleX;
 	relY *= worldScaleY;
@@ -1051,13 +1074,13 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	double worldY = cameraPos.GetY() + rotatedY;
 
 	// Apply pan offset
-	if (clickedScreenPan) {
-		float panX = accumulatedMouseDragDist.x / (zoomLevel * GLFWFunctions::windowWidth);
-		float panY = accumulatedMouseDragDist.y / (zoomLevel * GLFWFunctions::windowHeight);
+	//if (clickedScreenPan) {
+	float panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+	float panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
-		worldX += panX * cosAngle - panY * sinAngle;
-		worldY += panX * sinAngle + panY * cosAngle;
-	}
+	worldX += panX * cosAngle - panY * sinAngle;
+	worldY += panX * sinAngle + panY * cosAngle;
+	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }

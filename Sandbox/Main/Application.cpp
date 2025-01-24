@@ -22,8 +22,8 @@ File Contributions: Joel Chu (50%)
 #include <stdlib.h>
 #include <crtdbg.h>
 
-//#pragma warning(disable:4074)
-//#pragma init_seg(compiler)
+#pragma warning(disable:4074)
+#pragma init_seg(compiler)
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {

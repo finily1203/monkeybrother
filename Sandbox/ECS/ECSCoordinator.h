@@ -124,6 +124,8 @@ public:
 
 	void setTextureID(Entity entity, std::string ID);
 
+	std::string getTextureID(Entity entity);
+
 	//System Manager Functions
 	//Register the system
 	template <typename T>

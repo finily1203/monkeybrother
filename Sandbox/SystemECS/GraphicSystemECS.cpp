@@ -252,7 +252,31 @@ void GraphicSystemECS::update(float dt) {
                  ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
                  ecsCoordinator.getEntitySignature(entity).count() == 2) {
                  graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-       }
+        }
+
+        if (isUI) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+            if (GLFWFunctions::collectableCount == 0) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-3");
+            }
+            else if (GLFWFunctions::collectableCount == 1) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-2");
+            }
+            else if (GLFWFunctions::collectableCount == 2) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-1");
+            }
+            else if (GLFWFunctions::collectableCount >= 3) {
+                ecsCoordinator.setTextureID(entity, "UI Counter-0");
+            }
+        }
+        
+        if (isButton) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+        } 
+
+        if (ecsCoordinator.getTextureID(entity) != "")
+        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
     }
 }
 

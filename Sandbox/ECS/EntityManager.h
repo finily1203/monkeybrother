@@ -43,6 +43,7 @@ public:
 	Entity getEntityFromId(std::string const& id);
 
 	void setTextureId(Entity entity, std::string const& id);
+	std::string getTextureId(Entity entity);
 
 	std::unordered_map<Entity, std::string> getEntityMap() const;
 

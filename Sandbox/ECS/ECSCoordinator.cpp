@@ -136,6 +136,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+		/*std::string textureId = "";
+		if (entityData.contains("textureId")) {
+			textureId = entityData["textureId"].get<std::string>();
+		}*/
+		std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -641,6 +646,10 @@ void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 
 void ECSCoordinator::setTextureID(Entity entity, std::string ID) {
 	entityManager->setTextureId(entity, ID);
+}
+
+std::string ECSCoordinator::getTextureID(Entity entity) {
+	return entityManager->getTextureId(entity);
 }
 
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
