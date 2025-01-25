@@ -22,6 +22,9 @@ void PlatformBehaviour::update(Entity entity) {
     auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
     bool isColliding = false;
 
+	//for collision response
+	static float timeLastCollision = 0.0f;
+
     for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
             myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
@@ -49,11 +52,11 @@ void PlatformBehaviour::update(Entity entity) {
 
             if (isColliding)
             {
+				timeLastCollision = 0.0f;
                 if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
                 {
                     forceManager.ClearForce(playerEntity);
                 }
-
                 targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
             }
             else
@@ -67,11 +70,21 @@ void PlatformBehaviour::update(Entity entity) {
 
             if (isColliding)
             {
+                if (GLFWFunctions::firstCollision == false)
+                {
+                    GLFWFunctions::bumpAudio = true;
+                    GLFWFunctions::firstCollision = true;
+                    std::cout << "First time collide with platform" << std::endl;
+                }
                 collisionSystem.CollisionResponse(playerEntity, normal, penetration);
             }
             else
             {
-                GLFWFunctions::firstCollision = false;
+				timeLastCollision += GLFWFunctions::delta_time;
+				if (timeLastCollision > 2.0f)
+				{
+					GLFWFunctions::firstCollision = false;
+				}
             }
         }
     }

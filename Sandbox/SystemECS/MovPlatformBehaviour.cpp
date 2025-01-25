@@ -13,8 +13,6 @@ void MovPlatformBehaviour::update(Entity entity) {
 	myMath::Vector2D& position = transform.position;
 	float distance = speed * 0.1f;
 
-	std::cout << position.GetX() << " " << position.GetY() << std::endl;
-
 	if (movement.movForward) {
 		transform.position += direction * distance;
 	}

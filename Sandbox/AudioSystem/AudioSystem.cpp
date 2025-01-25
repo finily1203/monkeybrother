@@ -195,7 +195,7 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
 		soundEffectChannel->setVolume(sfxVol);
 		assetBrowserChannel->setVolume(sfxVol);
-        pumpChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol * 0.1f);
         rotationChannel->setVolume(sfxVol);
         
         (*GLFWFunctions::keyState)[Key::COMMA] = false;
@@ -217,7 +217,7 @@ void AudioSystem::update() {
         bgmChannel->setVolume(bgmVol);
         soundEffectChannel->setVolume(sfxVol);
         assetBrowserChannel->setVolume(sfxVol);
-        pumpChannel->setVolume(sfxVol);
+        pumpChannel->setVolume(sfxVol * 0.1f);
         rotationChannel->setVolume(sfxVol);
  
         (*GLFWFunctions::keyState)[Key::PERIOD] = false;
@@ -244,7 +244,7 @@ void AudioSystem::playSong(const std::string& songName) {
     }
 
     if (ambienceChannel) {
-        ambienceChannel->setVolume(genVol);
+        ambienceChannel->setVolume(genVol * 5.0f);
         ambienceChannel->setPaused(false);
     }
 
@@ -292,7 +292,7 @@ void AudioSystem::playPumpSound(const std::string& soundName)
     }
 
     if (pumpChannel) {
-        pumpChannel->setVolume(genVol);
+        pumpChannel->setVolume(sfxVol * 0.1f );
         pumpChannel->setPaused(false);
     }
 }

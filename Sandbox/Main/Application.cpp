@@ -36,7 +36,6 @@ CrtBreakAllocSetter g_crtBreakAllocSetter;
 namespace monkeybrother {
 	__declspec(dllimport) void Print();
 }
-
 int main() {
 	ShowWindow(GetConsoleWindow(), SW_HIDE); // Hide the console window
 
