@@ -22,7 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
         - Implemented function to change sprite animation according to the action.
         - Implemented drawDebugLines function to draw the bounding box of the sprite,
           and the update function to update the model transformation matrix.
-        
+
  File Contributions: Liu YaoTing (50%), Javier Chua (50%)
 
 /*_______________________________________________________________________________________________________________*/
@@ -65,9 +65,7 @@ GraphicsSystem::GraphicsSystem()
 }
 
 GraphicsSystem::~GraphicsSystem() {
-    if (!isCleanedUp) {
-        cleanup();
-    }
+    cleanup();
 }
 
 //For perfomance viewer
@@ -150,19 +148,38 @@ void GraphicsSystem::initialise() {
 
 void GraphicsSystem::update() {}
 
-void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
-    if (isAnimated == GL_TRUE && m_AnimationData) {
+void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated, float totalFrames, float frameTime, float columns, float rows) {
+    if (isAnimated == GL_TRUE) {
         if (!GameViewWindow::getPaused()) {
+            m_AnimationData->SetAnimationTotalFrames(static_cast<int>(totalFrames));
+            m_AnimationData->SetAnimationFrameDuration(frameTime);
+            m_AnimationData->SetAnimationColumns(static_cast<int>(columns));
+            m_AnimationData->SetAnimationRows(static_cast<int>(rows));
             m_AnimationData->Update(deltaTime);
+            m_AnimationData->SetSpeedMultiplier(1.0f / (frameTime * totalFrames));
         }
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+    }
+    else {
+        // Update the UV coordinates for the current frame
+        float uvCoord[] = {
+            1.0f, 1.0f,  // top right
+            1.0f, 0.0f,  // bottom right
+            0.0f, 0.0f,  // bottom left
+            0.0f, 1.0f   // top left
+        };
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
     }
 
     GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
     static GLint old_w{}, old_h{};
-    if (w != old_w || h != old_h) {
+    // update viewport settings in vps only if window's dimension change
+    if (w != old_w || h != old_h)
+    {
         (*vps)[0] = { 0, 0, w , h };
         old_w = w;
         old_h = h;
@@ -176,33 +193,10 @@ void GraphicsSystem::Render(float deltaTime) {
 }
 
 void GraphicsSystem::cleanup() {
-    if (isCleanedUp) {
-        return;
-    }
-
-    std::cout << "Starting GraphicsSystem cleanup with " << entityAnimations.size()
-        << " animations" << std::endl;
-
-    try {
-        // Clear animations first
-        for (auto it = entityAnimations.begin(); it != entityAnimations.end(); ) {
-            LogAnimationOperation("cleanup", it->first);
-            it = entityAnimations.erase(it);
-        }
-
-        // Release other resources
-        ReleaseResources();
-        m_AnimationData.reset();
-
-        delete vps;
-        vps = nullptr;
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error during GraphicsSystem cleanup: " << e.what() << std::endl;
-    }
-
-    isCleanedUp = true;
-    std::cout << "Completed GraphicsSystem cleanup" << std::endl;
+    ReleaseResources();
+    delete m_AnimationData.release();
+    delete vps;
+    vps = nullptr;
 }
 
 void GraphicsSystem::ReleaseResources() {
@@ -382,101 +376,15 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
-    // Always bind the shader first
-    auto shader = (mode == DrawMode::TEXTURE) ?
-        assetsManager.GetShader("shader1") :
-        assetsManager.GetShader("shader2");
-
-    shader->Bind();
-    glBindVertexArray(m_VAO);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
-    GLint uniformLoc = shader->GetUniformLocation("uModel_to_NDC");
-    if (uniformLoc != -1) {
-        glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
-    }
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-
-    // Clean up
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    shader->Unbind();
-}
-
-void GraphicsSystem::InitializeAnimation(Entity entity, const AnimationComponent& animComp) {
-    try {
-        // Remove existing animation if it exists
-        entityAnimations.erase(entity);
-
-        // Create the animation data first
-        auto animData = std::make_unique<AnimationData>(
-            static_cast<int>(animComp.totalFrames),
-            animComp.frameTime,
-            static_cast<int>(animComp.columns),
-            static_cast<int>(animComp.rows)
-        );
-
-        // Only insert if creation was successful
-        if (animData) {
-            entityAnimations.insert(std::make_pair(entity, std::move(animData)));
-            LogAnimationOperation("initialized", entity);
-        }
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Failed to initialize animation for entity " << entity
-            << ": " << e.what() << std::endl;
-    }
-}
-
-
-void GraphicsSystem::UpdateAnimation(Entity entity, float deltaTime, bool isAnimated) {
-    if (isAnimated && entityAnimations.count(entity) > 0) {  // Changed from currentEntity to entity
-        if (!GameViewWindow::getPaused()) {
-            entityAnimations[entity]->Update(deltaTime);  // Changed from currentEntity to entity
-        }
-
-        // Get UV coordinates for this specific entity's animation
-        const auto& uvCoords = entityAnimations[entity]->GetCurrentUVs();  // Changed from currentEntity to entity
-
-        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
-    }
-    else {
-        // Default UV coordinates for non-animated entities
-        float uvCoord[] = {
-            1.0f, 1.0f,  // top right
-            1.0f, 0.0f,  // bottom right
-            0.0f, 0.0f,  // bottom left
-            0.0f, 1.0f   // top left
-        };
-        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
-    }
-
-    // Update viewport if window size changed
-    GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
-    static GLint old_w{}, old_h{};
-    if (w != old_w || h != old_h) {
-        (*vps)[0] = { 0, 0, w , h };
-        old_w = w;
-        old_h = h;
-    }
-    glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
-}
-
-void GraphicsSystem::DrawAnimatedObject(Entity entity, DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
-    // Similar to existing DrawObject but uses entity-specific animation data
+    // load shader program in use by this object
     if (mode == DrawMode::TEXTURE)
         assetsManager.GetShader("shader1")->Bind();
     else
         assetsManager.GetShader("shader2")->Bind();
-
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
-
-    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
+    glm::mat3 mdl_xform(1.0f);
+    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
@@ -485,7 +393,10 @@ void GraphicsSystem::DrawAnimatedObject(Entity entity, DrawMode mode, const GLui
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
+    // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     assetsManager.GetShader("shader2")->Unbind();
 }
+
+

@@ -4,14 +4,14 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @team   :  MonkeHood
 @course :  CSD2401
 @file   :  GraphicsSystem.h
-@brief  :  This file contains the declaration of the GraphicsSystem class, which 
+@brief  :  This file contains the declaration of the GraphicsSystem class, which
            is responsible for rendering the game objects.
 
 * Liu YaoTing (yaoting.liu) :
 * 	    - Further helped to implement the basic structure of the GraphicsSystem class that inherits from GameSystems.
-*       - Added the basic structure of the GLObject struct that is used to store the 
-          orientation, scaling, position, color, model transformation, and model-to-NDC transformation 
-		  of the game objects. ( For Milestione 1 test only)
+*       - Added the basic structure of the GLObject struct that is used to store the
+          orientation, scaling, position, color, model transformation, and model-to-NDC transformation
+          of the game objects. ( For Milestione 1 test only)
 *
 * Javier Chua (javierjunliang.chua) :
 *       - Implemented the the basic structure of the GraphicsSystem class that inherits from GameSystems,
@@ -38,9 +38,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector3D.h"
 #include "matrix3x3.h"
 #include "TransformComponent.h"
-#include <unordered_map>
-#include "ECSDefinitions.h"
-#include "AnimationComponent.h"
+
+
 class GraphicsSystem : public GameSystems
 {
 public:
@@ -51,22 +50,16 @@ public:
         COLOR,
         TEXTURE
     };
-    bool HasAnimationData(Entity entity) const {
-        return entityAnimations.find(entity) != entityAnimations.end();
-    }
 
     void initialise() override;
     void update() override;
-    void Update(float deltaTime, GLboolean isAnimated);
+    void Update(float deltaTime, GLboolean isAnimated, float totalFrames, float frameTime, float columns, float rows);
     void Render(float deltaTime);
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
     myMath::Matrix3x3 UpdateObject(myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
     void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
-    void InitializeAnimation(Entity entity, const AnimationComponent& animComp);
-    void UpdateAnimation(Entity entity, float deltaTime, bool isAnimated);
-    void DrawAnimatedObject(Entity entity, DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
 
     GLuint GetVAO() const { return m_VAO; }
 
@@ -77,20 +70,9 @@ public:
 
     std::vector<GLViewport>* vps; // container for viewports
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
-	void drawDebugCircle(const TransformComponent transform, const myMath::Matrix3x3 viewMatrix);
-    void CleanupEntityAnimation(Entity entity) {
-        auto it = entityAnimations.find(entity);
-        if (it != entityAnimations.end()) {
-            LogAnimationOperation("cleanup", entity);
-            entityAnimations.erase(it);
-        }
-    }
+    void drawDebugCircle(const TransformComponent transform, const myMath::Matrix3x3 viewMatrix);
+
 private:
-    void LogAnimationOperation(const char* operation, Entity entity) {
-        std::cout << "Animation " << operation << " for entity " << entity
-            << " (total animations: " << entityAnimations.size() << ")" << std::endl;
-    }
-    bool isCleanedUp = false;
     GLuint m_VAO;
     GLuint m_VBO;       // VBO for vertex positions
     GLuint m_UVBO;      // Separate VBO for texture coordinates (UVs)
@@ -100,7 +82,7 @@ private:
     std::unique_ptr<Shader> m_Shader, m_Shader2;
     std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
     std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
-    std::map<Entity, std::unique_ptr<AnimationData>> entityAnimations;
+
     void ReleaseResources();
 };
 

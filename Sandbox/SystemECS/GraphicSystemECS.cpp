@@ -89,18 +89,8 @@ void GraphicSystemECS::update(float dt) {
         Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
         // Check if the entity has an animation component
-        bool isAnimated = false; // Default is false
-        if (ecsCoordinator.hasComponent<AnimationComponent>(entity)) {
-            auto& animationComponent = ecsCoordinator.getComponent<AnimationComponent>(entity);
-            isAnimated = animationComponent.isAnimated;
-
-            // Initialize animation if it hasn't been initialized yet
-            if (isAnimated && !graphicsSystem.HasAnimationData(entity)) {
-                std::cout << "Late initialization of animation for entity " << entity << std::endl;
-                graphicsSystem.InitializeAnimation(entity, animationComponent);
-            }
-        }
-        Console::GetLog() << "Entity: " << entity << " Animation: " << (isAnimated ? "True" : "False") << std::endl;
+        auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+        Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -110,9 +100,9 @@ void GraphicSystemECS::update(float dt) {
         bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
         bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
         bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
-		bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
-		bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
-		bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+        bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
+        bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
+        bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
         bool isAnimate = false;
 
@@ -120,30 +110,9 @@ void GraphicSystemECS::update(float dt) {
             const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
             isAnimate = pumpComponent.isAnimate;
         }
-        bool shouldAnimate = false;  // Start with false
 
-        // For pump components
-        if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
-            const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
-            shouldAnimate = pumpComponent.isAnimate && pumpComponent.isPump;
-        }
-        // For regular animated entities (player/enemy)
-        else if (isAnimated) {  // Only check these if the base isAnimated is true
-            if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-                shouldAnimate = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-            }
-            else if (ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
-                shouldAnimate = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-            }
-        }
         // Use hasMovement for the update parameter
-        if (shouldAnimate) {
-            graphicsSystem.UpdateAnimation(entity, dt , true);
-        }
-        else {
-            // Set default UV coordinates for non-animated entities
-            graphicsSystem.UpdateAnimation(entity, dt , false);
-        }
+        graphicsSystem.Update(dt , (isAnimate && isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement), animation.totalFrames, animation.frameTime, animation.columns, animation.rows); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
@@ -160,8 +129,8 @@ void GraphicSystemECS::update(float dt) {
         /*--------------------------------------------------------------------------------
         --------------------------------------------------------------------------------*/
 
-		// check if the player has collected all the collectables
-		// Created a win text entity
+        // check if the player has collected all the collectables
+        // Created a win text entity
         if (GLFWFunctions::collectableCount == 0 && gameover == false) {
             createTextEntity(
                 ecsCoordinator,
@@ -173,7 +142,7 @@ void GraphicSystemECS::update(float dt) {
             );
             gameover = true;
         }
-		// lose text entity
+        // lose text entity
         if (GLFWFunctions::instantLose && gameover == false) {
             createTextEntity(
                 ecsCoordinator,
@@ -194,11 +163,11 @@ void GraphicSystemECS::update(float dt) {
             }
         }
         // cheat code 
-		if (GLFWFunctions::instantWin)
-		{
-			GLFWFunctions::collectableCount = 0;
-		}
-        
+        if (GLFWFunctions::instantWin)
+        {
+            GLFWFunctions::collectableCount = 0;
+        }
+
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
@@ -212,9 +181,9 @@ void GraphicSystemECS::update(float dt) {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
             }
         }
-		else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-			graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
-		}
+        else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+            graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
+        }
         if (isAnimate && GLFWFunctions::isPumpOn) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform);
         }
@@ -222,7 +191,7 @@ void GraphicSystemECS::update(float dt) {
         if (isEnemy) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
-        else if (isPlayer && isAnimated) {
+        else if (isPlayer) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
         }
         else if (isPump && !isAnimate) {
@@ -271,10 +240,10 @@ void GraphicSystemECS::update(float dt) {
         }
 
         else if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
-                 ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
-                 ecsCoordinator.getEntitySignature(entity).count() == 3) {
-                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
-       }
+            ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
+            ecsCoordinator.getEntitySignature(entity).count() == 3) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
+        }
     }
 }
 

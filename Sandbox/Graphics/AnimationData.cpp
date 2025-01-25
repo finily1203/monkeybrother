@@ -144,4 +144,22 @@ void AnimationData::TriggerFrameEvents() {
     }
 }
 
+void AnimationData::SetAnimationTotalFrames(int totalFrames) {
+    this->totalFrames = totalFrames;
+}
 
+void AnimationData::SetAnimationFrameDuration(float frameDuration) {
+    this->frameDuration = frameDuration;
+}
+
+void AnimationData::SetAnimationColumns(int columns) {
+    this->columns = columns;
+    frameWidth = 1.0f / columns; // Recalculate frame width
+    uvDirty = true; // Mark UV as dirty to update later
+}
+
+void AnimationData::SetAnimationRows(int rows) {
+    this->rows = rows;
+    frameHeight = 1.0f / rows; // Recalculate frame height
+    uvDirty = true; // Mark UV as dirty to update later
+}
