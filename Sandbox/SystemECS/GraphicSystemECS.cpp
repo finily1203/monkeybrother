@@ -192,8 +192,19 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mossball"), transform.mdl_xform);
+            graphicsSystem.Update(dt * 10, hasMovement, animation.totalFrames, animation.frameTime,
+                animation.columns, animation.rows);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture("mossball"),
+                transform.mdl_xform);
+
+            // Update and draw eyes with their own animation configuration
+            graphicsSystem.Update(dt, true, 20.0f, 0.5f, 8.0f, 3.0f);  
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture("eyes.png"),
+                transform.mdl_xform);
         }
+        
         else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
 

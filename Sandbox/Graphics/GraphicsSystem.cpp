@@ -57,7 +57,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0), is_animated(0), m_Texture2(0), m_Texture3(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(48, 0.03f, 4, 6);
+    m_AnimationData = std::make_unique<AnimationData>(18, 0.5f, 4, 6);
     vps = new std::vector<GLViewport>();
     vps->push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
     glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
@@ -155,8 +155,9 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated, float totalFr
             m_AnimationData->SetAnimationFrameDuration(frameTime);
             m_AnimationData->SetAnimationColumns(static_cast<int>(columns));
             m_AnimationData->SetAnimationRows(static_cast<int>(rows));
+            // Remove the speed multiplier calculation or set it to 1.0
+            m_AnimationData->SetSpeedMultiplier(1.0f);
             m_AnimationData->Update(deltaTime);
-            m_AnimationData->SetSpeedMultiplier(1.0f / (frameTime * totalFrames));
         }
         const auto& uvCoords = m_AnimationData->GetCurrentUVs();
 
