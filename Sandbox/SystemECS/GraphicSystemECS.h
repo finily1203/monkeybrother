@@ -36,4 +36,18 @@ public:
 	std::string getSystemECS() override;
 
 private:
+	bool isPlayingIdleTransition = false;
+	float idleTransitionTimer = 0.0f;
+	bool hasPlayedIdleTransition = false;
+	const float IDLE_TRANSITION_DURATION = 0.5f; // Adjust as needed
+	struct AnimConfig {
+		float totalFrames;
+		float frameTime;
+		float columns;
+		float rows;
+	};
+	float idleCooldownTimer = 0.0f;
+	const float IDLE_COOLDOWN_DURATION = 1.0f; // Adjust as needed
+	const AnimConfig bodyRecentreConfig{ 8.0f, 0.2f, 4.0f, 4.0f };  // Adjust these values
+	const AnimConfig eyeCloseConfig{ 4.0f, 0.2f, 4.0f, 3.0f };     // Adjust these values
 };

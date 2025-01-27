@@ -112,7 +112,7 @@ void GraphicSystemECS::update(float dt) {
         }
 
         // Use hasMovement for the update parameter
-        graphicsSystem.Update(dt , (isAnimate && isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement), animation.totalFrames, animation.frameTime, animation.columns, animation.rows); // Use hasMovement instead of true
+        graphicsSystem.Update(dt, (isAnimate && isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement), animation.totalFrames, 0.2f, animation.columns, animation.rows); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
@@ -192,19 +192,50 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {
-            graphicsSystem.Update(dt * 10, hasMovement, animation.totalFrames, animation.frameTime,
+            // First draw the base mossball sprite
+            graphicsSystem.Update(dt, hasMovement, animation.totalFrames, animation.frameTime,
                 animation.columns, animation.rows);
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture("mossball"),
                 transform.mdl_xform);
 
-            // Update and draw eyes with their own animation configuration
-            graphicsSystem.Update(dt, true, 20.0f, 0.5f, 8.0f, 3.0f);  
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
-                assetsManager.GetTexture("eyes.png"),
-                transform.mdl_xform);
+            // Then handle eyes based on movement state
+            if ((*GLFWFunctions::keyState)[Key::D] || (*GLFWFunctions::keyState)[Key::A]) {
+                // Moving state - use moving eyes animation
+                TransformComponent eyesTransform = transform;
+                const float eyesTotalFrames = 16.0f;
+                const float eyesFrameTime = 0.2f;
+                const float eyesColumns = 8.0f;
+                const float eyesRows = 2.0f;
+
+                // Update animation for moving eyes
+                graphicsSystem.Update(dt, true, eyesTotalFrames, eyesFrameTime, eyesColumns, eyesRows);
+
+                // Draw moving eyes sprite
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture("mossball_move_eyes.png"),
+                    transform.mdl_xform);
+            }
+            else {
+                // Idle state - use idle eyes animation
+                const float idleEyesTotalFrames = 8.0f;
+                const float idleEyesFrameTime = 60.0f;
+                const float idleEyesColumns = 8.0f;
+                const float idleEyesRows = 3.0f;
+
+                // Update animation for idle eyes
+                graphicsSystem.Update(dt, true, idleEyesTotalFrames, idleEyesFrameTime,
+                    idleEyesColumns, idleEyesRows);
+
+                // Draw idle eyes sprite
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture("eyes.png"),
+                    transform.mdl_xform);
+            }
+
+
         }
-        
+
         else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform);
 
