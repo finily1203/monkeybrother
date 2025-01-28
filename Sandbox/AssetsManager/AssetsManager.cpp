@@ -23,10 +23,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+std::string* AssetsManager::overwritePath = nullptr;
 
 AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0),
-                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false),
-                                 overwritePath("")
+                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false)
 {
     m_AssetList = new std::vector<std::string>();
 }
@@ -59,7 +59,7 @@ void AssetsManager::initialise()
 
 void AssetsManager::update(){
     if (overwriteFile) {
-		loadAsset(overwritePath);
+		loadAsset(*overwritePath);
 		setOverwriteFile(false);
     }
 }
@@ -501,7 +501,7 @@ void AssetsManager::handleDropFile(std::string filePath) {
     if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
 		delExistingAsset(filePath);
 		overwritePopUp = true;
-		overwritePath = filePath;
+		*overwritePath = filePath;
         std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
     }
 

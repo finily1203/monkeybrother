@@ -114,5 +114,5 @@ private:
 	bool overwritePopUp;
 	bool overwriteFile;
 
-	std::string overwritePath;
+	static std::string *overwritePath;
 };
