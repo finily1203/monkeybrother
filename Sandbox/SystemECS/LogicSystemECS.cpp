@@ -26,6 +26,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 #include "Debug.h"
 #include "GUIConsole.h"
+#include "GUIGameViewport.h"
 
 void LogicSystemECS::initialise() {}
 
@@ -96,6 +97,8 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	GLFWFunctions::isHovering = false;
+	setHoveredButton("");
 
 	for (auto& entity : allEntities)
 	{
@@ -106,28 +109,29 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
-				transform.scale.SetX(button.hoveredScale.GetX());
-				transform.scale.SetY(button.hoveredScale.GetY());
-			}
-
-			else
-			{
-				transform.scale.SetX(button.originalScale.GetX());
-				transform.scale.SetY(button.originalScale.GetY());
+				glfwSetCursor(GLFWFunctions::pWindow, cursor);
+				GLFWFunctions::isHovering = true;
+				setHoveredButton(ecsCoordinator.getEntityID(entity));
+				return;
 			}
 		}
+	}
+
+	if (!GLFWFunctions::isHovering)
+	{
+		glfwSetCursor(GLFWFunctions::pWindow, nullptr);
 	}
 }
 
 bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
 {
 	float const scalar = 0.7f;
-    float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 2.f;
-    float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 2.f;
-    float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
-    float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
+	float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 2.f;
+	float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 2.f;
+	float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
+	float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
 
-    return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
+	return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
 }
 
 void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
@@ -135,7 +139,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	std::string entityId = ecsCoordinator.getEntityID(entity);
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
 
-	if (entityId == "quitButton")
+	if (entityId == "quitButton" || entityId == "quitWindowButton")
 	{
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
 
@@ -150,8 +154,138 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		GLFWFunctions::gameOver = false;
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::pauseMenuCount = 0;
+		GLFWFunctions::optionsMenuCount = 0;
 
-		ecsCoordinator.test5();
+		//ecsCoordinator.test5();
+
+		if (GameViewWindow::getSceneNum() != 0)
+		{
+			int scene = GameViewWindow::getSceneNum();
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
+		}
+
+		else
+		{
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+		}
+	}
+
+	else if (entityId == "startButton")
+	{
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::optionsMenuCount = 0;
+		int levelOneScene = 1;
+
+		for (auto currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		GameViewWindow::setSceneNum(levelOneScene);
+		GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+
+		if (GameViewWindow::getSceneNum() != 0)
+		{
+			int scene = GameViewWindow::getSceneNum();
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
+		}
+
+		else
+		{
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+		}
+	}
+
+	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")
+	{
+		if (GLFWFunctions::pauseMenuCount == 1)
+		{
+			for (auto currEntity : allEntities)
+			{
+				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+				{
+					ecsCoordinator.destroyEntity(currEntity);
+				}
+			}
+
+			GLFWFunctions::pauseMenuCount--;
+		}
+
+		if (GLFWFunctions::optionsMenuCount < 1)
+		{
+			GLFWFunctions::optionsMenuCount++;
+			ecsCoordinator.LoadOptionsMenuFromJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+		}
+	}
+
+	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::pauseMenuCount--;
+	}
+
+	else if (entityId == "closeOptionsMenu")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "optionsMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closeOptionsMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "confirmButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::optionsMenuCount--;
+
+		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+		{
+			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+			GLFWFunctions::pauseMenuCount++;
+		}
+
+		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "pauseQuitButton")
+	{
+		for (auto currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GLFWFunctions::pauseMenuCount--;
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	}
+}
+
+MouseBehaviour::~MouseBehaviour()
+{
+	if (cursor)
+	{
+		glfwDestroyCursor(cursor);
 	}
 }
 

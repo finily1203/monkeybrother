@@ -55,9 +55,14 @@ int GLFWFunctions::windowHeight = 0;
 int GLFWFunctions::defultWindowWidth = 0;
 int GLFWFunctions::defultWindowHeight = 0;
 int GLFWFunctions::collectableCount = 0;
+int GLFWFunctions::pauseMenuCount = 0;
+int GLFWFunctions::optionsMenuCount = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
+bool GLFWFunctions::gameOver = false;
+bool GLFWFunctions::isHovering = false;
+bool GLFWFunctions::gamePaused = false;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -70,8 +75,8 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     if (!glfwInit())
         return false;
 
-    if(!keyState)
-		keyState = new std::unordered_map<Key, bool>();
+    if (!keyState)
+        keyState = new std::unordered_map<Key, bool>();
 
     fullscreen = isfullscreen;
 
@@ -229,13 +234,21 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = true;
     }
     else {
-		isRotating = false;
+        isRotating = false;
     }
-        
 
 
-    if ((*keyState)[Key::P])
+
+    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
         audioPaused = ~audioPaused;
+        GLFWFunctions::gamePaused = true;
+
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
+        {
+            GLFWFunctions::pauseMenuCount++;
+            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+        }
+    }
 
     if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;
@@ -415,32 +428,30 @@ void GLFWFunctions::getFps() {
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
     (void)window;
-    if (debug_flag) {
-        for (int i = 0; i < count; i++) {
-            std::string filePath = paths[i];
-            std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-            if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
-                //seperate window to inform not allowed to drop type of file
-                MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
-            }
-            else {
-                assetsManager.handleDropFile(filePath);
-            }
+    for (int i = 0; i < count; i++) {
+        std::string filePath = paths[i];
+        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+            //seperate window to inform not allowed to drop type of file
+            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+        }
+        else {
+            assetsManager.handleDropFile(filePath);
         }
     }
 }
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
-    
+
     if (keyState) {
         delete keyState;
         keyState = nullptr;
     }
-	if (mouseButtonState) {
-		delete mouseButtonState;
-		mouseButtonState = nullptr;
-	}
+    if (mouseButtonState) {
+        delete mouseButtonState;
+        mouseButtonState = nullptr;
+    }
 
     glfwTerminate();
 }

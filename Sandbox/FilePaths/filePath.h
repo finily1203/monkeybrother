@@ -40,4 +40,7 @@ public:
 	static std::string GetPhysicsPath();
 	static std::string GetSaveJSONPath(int& saveCount);
 	static std::string GetSceneJSONPath();
+	static std::string GetMainMenuJSONPath();
+	static std::string GetPauseMenuJSONPath();
+	static std::string GetOptionsMenuJSONPath();
 };
