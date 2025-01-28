@@ -108,6 +108,7 @@ struct GLFWFunctions {
 	static bool isHovering;
 	static bool gamePaused;
 
+	static double mouseXDelta; // Add this to track mouse movement
 
 	static std::unordered_map<Key, bool>* keyState;
 	static std::unordered_map<MouseButton, bool>* mouseButtonState;

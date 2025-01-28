@@ -26,6 +26,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ECSCoordinator.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include "PlayerBehaviour.h"
 
 bool WindowSystem::altTab = false;
 bool WindowSystem::ctrlAltDel = false;
@@ -47,6 +48,13 @@ void WindowSystem::initialise() {
 	int windowHeight = windowConfigJSON["height"].get<int>();
 	std::string windowTitle = windowConfigJSON["title"].get<std::string>();
 	bool startFullscreen = windowConfigJSON["fullscreen"].get<bool>();
+
+	// Read movement configuration
+	if (windowConfigJSON.contains("movement")) {
+		PlayerBehaviour::MOVEMENT_THRESHOLD = windowConfigJSON["movement"]["threshold"].get<float>();
+		PlayerBehaviour::BASE_ROTATION_SPEED = windowConfigJSON["movement"]["baseRotationSpeed"].get<float>();
+		PlayerBehaviour::MAX_ROTATION_PER_FRAME = windowConfigJSON["movement"]["maxRotationPerFrame"].get<float>();
+	}
 
 	if (!GLFWFunctions::init(windowWidth, windowHeight, windowTitle, startFullscreen)) {
 		std::cout << "Failed to initialise GLFW" << std::endl;

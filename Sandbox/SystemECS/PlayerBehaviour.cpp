@@ -19,6 +19,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
+float PlayerBehaviour::MOVEMENT_THRESHOLD = 0;      // Default values
+float PlayerBehaviour::BASE_ROTATION_SPEED = 0;     // Will be overwritten 
+float PlayerBehaviour::MAX_ROTATION_PER_FRAME = 0;  // during initialization
+
 void PlayerBehaviour::update(Entity entity) {
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 
@@ -28,6 +32,28 @@ void PlayerBehaviour::update(Entity entity) {
 	myMath::Vector2D& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
 	float mag = playerForce.GetMagnitude();
 
+	// Get the raw mouse movement
+	double mouseMovement = GLFWFunctions::mouseXDelta;
+
+	//// Constants for rotation control
+	//static const float MOVEMENT_THRESHOLD = 0.1f;
+	//static const float BASE_ROTATION_SPEED = 0.1f;
+	//static const float MAX_ROTATION_PER_FRAME = 3.0f;
+
+	if (std::abs(mouseMovement) > MOVEMENT_THRESHOLD) {
+		// Scale rotation by delta time to make it frame-rate independent
+		float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
+		rotationAmount *= (60.0f * GLFWFunctions::delta_time); // Normalize to 60 FPS
+
+		// Clamp the rotation amount
+		rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
+
+		// Apply the rotation
+		rotation.SetX(rotation.GetX() + rotationAmount);
+	}
+
+	// Reset the delta for next frame
+	GLFWFunctions::mouseXDelta = 0.0;
 
 	if ((*GLFWFunctions::keyState)[Key::D]) {
 		rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));

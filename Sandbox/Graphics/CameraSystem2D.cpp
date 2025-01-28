@@ -52,7 +52,12 @@ void CameraSystem2D::update()
     if (m_LockedComponent && GLFWFunctions::allow_camera_movement == false)
     {
 		myMath::Vector2D entityPosition = { m_LockedComponent->position.GetX(), m_LockedComponent->position.GetY() };
-        setCameraPosition(entityPosition);
+        m_TargetPosition = entityPosition;
+
+        // Lerp the camera position
+        float lerpFactor = m_LerpSpeed * GLFWFunctions::delta_time;
+        m_CameraPosition.SetX(m_CameraPosition.GetX() + (m_TargetPosition.GetX() - m_CameraPosition.GetX()) * lerpFactor);
+        m_CameraPosition.SetY(m_CameraPosition.GetY() + (m_TargetPosition.GetY() - m_CameraPosition.GetY()) * lerpFactor);
     }
     else {
 		// Currently fixed camera position
@@ -117,7 +122,7 @@ myMath::Matrix3x3 CameraSystem2D::getProjectionMatrix() const
 // SetCameraPosition function implementation
 void CameraSystem2D::setCameraPosition(const myMath::Vector2D& position)
 {
-    m_CameraPosition = position;
+    m_TargetPosition = position;
 }
 // GetCameraPosition function implementation
 myMath::Vector2D CameraSystem2D::getCameraPosition() const

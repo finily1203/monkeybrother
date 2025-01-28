@@ -63,6 +63,7 @@ bool GLFWFunctions::firstCollision = false;
 bool GLFWFunctions::gameOver = false;
 bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
+double GLFWFunctions::mouseXDelta = 0.0;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -113,6 +114,7 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     callEvents();
 
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    //glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     return true;
 }
@@ -377,8 +379,12 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
-    //On relase it doesn't use since we use cursorPositionEvent for debugging
-    (void)window; (void)xpos; (void)ypos;
+	(void)window;
+	(void)ypos;
+    static double lastX = xpos;
+    mouseXDelta = xpos - lastX;
+    lastX = xpos;
+
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
 #endif
