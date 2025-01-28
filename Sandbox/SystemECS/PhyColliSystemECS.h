@@ -48,6 +48,8 @@ public:
 
     // Collision response for OBB
     void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
+
+    void MultiPlatformCollisionResponse(Entity player, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations);
 };
 
 class PhysicsSystemECS : public System
@@ -84,9 +86,11 @@ public:
 	// Load and save physics config from JSON
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
-
-
-
+    void ApplyNormalPhysics(Entity player);
+    std::vector<Entity> CollidingPlatforms(Entity player);
+    void HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms);
+    //void HandleCollisionResponse(Entity player, const myMath::Vector2D& normal, float penetration);
+    //void HandleCircleOBBCollision(Entity player, const std::vector<Entity>& platforms);
 
 private:
     static float friction;

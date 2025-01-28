@@ -18,75 +18,62 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 
 void PlatformBehaviour::update(Entity entity) {
-    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
-    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
-    bool isColliding = false;
+    //auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    //auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+    //bool isColliding = false;
 
-	//for collision response
-	static float timeLastCollision = 0.0f;
-
-    for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
-        if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
-            myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
+    //for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
+    //    if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+    //        myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
  
-            float radius = ecsCoordinator.getComponent<TransformComponent>(playerEntity).scale.GetX() * 0.5f;
-            float rotation = ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation.GetX();
-            myMath::Vector2D direction = PhysicsSystemRef->directionalVector(rotation);
-            myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
-            float mass = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
-            float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).maxAccumulatedForce;
-            float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).targetForce;
-            float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).prevForce;
-            Force force = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
-            ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
-            CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
-            CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
+    //        float radius = ecsCoordinator.getComponent<TransformComponent>(playerEntity).scale.GetX() * 0.5f;
+    //        float rotation = ecsCoordinator.getComponent<TransformComponent>(playerEntity).orientation.GetX();
+    //        myMath::Vector2D direction = PhysicsSystemRef->directionalVector(rotation);
+    //        myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).gravityScale;
+    //        float mass = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).mass;
+    //        float maxAccForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).maxAccumulatedForce;
+    //        float& targetForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).targetForce;
+    //        float& prevForce = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).prevForce;
+    //        Force force = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+    //        ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
+    //        CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
+    //        CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
 
-            myMath::Vector2D normal{};
-            float penetration{};
+    //        myMath::Vector2D normal{};
+    //        float penetration{};
 
-            force.SetDirection(direction);
+    //        force.SetDirection(direction);
 
-            isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
-            forceManager.AddForce(playerEntity, force.GetMagnitude()*gravity * mass * GLFWFunctions::delta_time);
+    //        isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration);
+    //        forceManager.AddForce(playerEntity, force.GetMagnitude()*gravity * mass * GLFWFunctions::delta_time);
 
-            if (isColliding)
-            {
-				timeLastCollision = 0.0f;
-                if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
-                {
-                    forceManager.ClearForce(playerEntity);
-                }
-                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
-            }
-            else
-            {
-                targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
-            }
+    //        if (isColliding)
+    //        {
+    //            if (-normal.GetX() == force.GetDirection().GetX() && -normal.GetY() == force.GetDirection().GetY())
+    //            {
+    //                forceManager.ClearForce(playerEntity);
+    //            }
 
-            forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
+    //            targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
+    //        }
+    //        else
+    //        {
+    //            targetForce = forceManager.ResultantForce(force.GetDirection(), normal, maxAccForce) * GLFWFunctions::delta_time;
+    //        }
 
-            prevForce = targetForce;
+    //        forceManager.ApplyForce(playerEntity, force.GetDirection(), targetForce);
 
-            if (isColliding)
-            {
-                if (GLFWFunctions::firstCollision == false)
-                {
-                    GLFWFunctions::bumpAudio = true;
-                    GLFWFunctions::firstCollision = true;
-                    std::cout << "First time collide with platform" << std::endl;
-                }
-                collisionSystem.CollisionResponse(playerEntity, normal, penetration);
-            }
-            else
-            {
-				timeLastCollision += GLFWFunctions::delta_time;
-				if (timeLastCollision > 2.0f)
-				{
-					GLFWFunctions::firstCollision = false;
-				}
-            }
-        }
-    }
+    //        prevForce = targetForce;
+
+    //        if (isColliding)
+    //        {
+    //            collisionSystem.CollisionResponse(playerEntity, normal, penetration);
+    //        }
+    //        else
+    //        {
+    //            GLFWFunctions::firstCollision = false;
+    //        }
+    //    }
+    //}
     
 }
