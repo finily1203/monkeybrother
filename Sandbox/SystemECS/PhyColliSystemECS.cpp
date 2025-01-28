@@ -318,6 +318,8 @@ void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std
         maxPenetration = std::max(maxPenetration, penetrations[i]);
     }
 
+    //maxPenetration = std::sqrtf(penetrations[0] * penetrations[0] + penetrations[1] * penetrations[1]);
+
     // Normalize the combined normal
     float length = std::sqrt(combinedNormal.GetX() * combinedNormal.GetX() +
         combinedNormal.GetY() * combinedNormal.GetY());
