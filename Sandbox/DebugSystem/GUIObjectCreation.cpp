@@ -351,7 +351,7 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 		BehaviourComponent behaviour{};
 		//behaviour.none = true;
-		behaviour.platform = true;
+		//behaviour.platform = true;
 
 		ecsCoordinator.addComponent(entityObj, aabb);
 		ecsCoordinator.addComponent(entityObj, closestPlatform);
