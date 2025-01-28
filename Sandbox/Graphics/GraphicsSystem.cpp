@@ -150,7 +150,7 @@ void GraphicsSystem::update() {}
 
 void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
     if (isAnimated == GL_TRUE) {
-        if (!GameViewWindow::getPaused()) {
+        if (!GameViewWindow::getPaused() || !GLFWFunctions::gamePaused) {
             m_AnimationData->Update(deltaTime);
         }
         //m_AnimationData->Update(deltaTime);

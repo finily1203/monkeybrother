@@ -125,6 +125,8 @@ void GraphicSystemECS::update(float dt) {
             cameraSystem.update();
         }
 
+        mouseBehaviour.update(entity);
+
         /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
         /*--------------------------------------------------------------------------------
         --------------------------------------------------------------------------------*/
@@ -171,7 +173,12 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton")
+            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || 
+                ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" || 
+                ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
+                ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
+                ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
+                ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
             }
@@ -215,22 +222,85 @@ void GraphicSystemECS::update(float dt) {
 
             else if (ecsCoordinator.getEntityID(entity) == "startButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveStartButton"), transform.mdl_xform);
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveStartButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeStartButton"), transform.mdl_xform);
+                }
             }
 
-            else if (ecsCoordinator.getEntityID(entity) == "optionsButton")
+            else if (ecsCoordinator.getEntityID(entity) == "resumeButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveOptionsButton"), transform.mdl_xform);
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveResumeButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeResumeButton"), transform.mdl_xform);
+                }
             }
 
-            else if (ecsCoordinator.getEntityID(entity) == "tutorialButton")
+            else if (ecsCoordinator.getEntityID(entity) == "optionsButton" || ecsCoordinator.getEntityID(entity) == "pauseOptionsButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveOptionsButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeOptionsButton"), transform.mdl_xform);
+                }
             }
 
-            else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton")
+            else if (ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeTutorialButton"), transform.mdl_xform);
+                }
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "confirmButton")
+            {
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveConfirmButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeConfirmButton"), transform.mdl_xform);
+                }
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton" || ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
+            {
+                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
+                }
+
+                else
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeQuitButton"), transform.mdl_xform);
+                }
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
             }
         }
         else if (isCollectable) {
@@ -253,6 +323,18 @@ void GraphicSystemECS::update(float dt) {
             else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
             {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform);
             }
         }
         else if (isUI) {

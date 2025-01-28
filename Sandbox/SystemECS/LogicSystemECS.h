@@ -33,11 +33,15 @@ public:
 	void update(Entity entity) override;
 	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
 	void onMouseHover(double mouseX, double mouseY);
+	
+	std::string getHoveredButton() const { return currHoveredButton; }
+	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
 
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
 	void handleButtonClick(GLFWwindow* window, Entity entity);
 	GLFWcursor* cursor = nullptr;
+	std::string currHoveredButton;
 };
 
 class LogicSystemECS : public System

@@ -97,7 +97,8 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
-	bool isHovering = false;
+	GLFWFunctions::isHovering = false;
+	setHoveredButton("");
 
 	for (auto& entity : allEntities)
 	{
@@ -109,20 +110,14 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
 				glfwSetCursor(GLFWFunctions::pWindow, cursor);
-				transform.scale.SetX(button.hoveredScale.GetX());
-				transform.scale.SetY(button.hoveredScale.GetY());
-				isHovering = true;
-			}
-
-			else
-			{
-				transform.scale.SetX(button.originalScale.GetX());
-				transform.scale.SetY(button.originalScale.GetY());
+				GLFWFunctions::isHovering = true;
+				setHoveredButton(ecsCoordinator.getEntityID(entity));
+				return;
 			}
 		}
 	}
 
-	if (!isHovering)
+	if (!GLFWFunctions::isHovering)
 	{
 		glfwSetCursor(GLFWFunctions::pWindow, nullptr);
 	}
@@ -160,6 +155,9 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
 		GLFWFunctions::gameOver = false;
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::pauseMenuCount = 0;
+		GLFWFunctions::optionsMenuCount = 0;
 
 		//ecsCoordinator.test5();
 
@@ -177,13 +175,17 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "startButton")
 	{
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::optionsMenuCount = 0;
+		int levelOneScene = 1;
+
 		for (auto currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);
 		}
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		GameViewWindow::setSceneNum(1);
+		GameViewWindow::setSceneNum(levelOneScene);
 		GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 
 		if (GameViewWindow::getSceneNum() != 0)
@@ -196,6 +198,86 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		{
 			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
 		}
+	}
+
+	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")
+	{
+		if (GLFWFunctions::pauseMenuCount == 1)
+		{
+			for (auto currEntity : allEntities)
+			{
+				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+				{
+					ecsCoordinator.destroyEntity(currEntity);
+				}
+			}
+
+			GLFWFunctions::pauseMenuCount--;
+		}
+
+		if (GLFWFunctions::optionsMenuCount < 1)
+		{
+			GLFWFunctions::optionsMenuCount++;
+			ecsCoordinator.LoadOptionsMenuFromJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+		}
+	}
+
+	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" || 
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::pauseMenuCount--;
+	}
+
+	else if (entityId == "closeOptionsMenu")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "optionsMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closeOptionsMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "confirmButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::optionsMenuCount--;
+
+		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+		{
+			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+			GLFWFunctions::pauseMenuCount++;
+		}
+
+		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "pauseQuitButton")
+	{
+		for (auto currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GLFWFunctions::pauseMenuCount--;
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
 }
 

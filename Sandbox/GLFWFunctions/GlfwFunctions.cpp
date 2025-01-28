@@ -55,10 +55,14 @@ int GLFWFunctions::windowHeight = 0;
 int GLFWFunctions::defultWindowWidth = 0;
 int GLFWFunctions::defultWindowHeight = 0;
 int GLFWFunctions::collectableCount = 0;
+int GLFWFunctions::pauseMenuCount = 0;
+int GLFWFunctions::optionsMenuCount = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
 bool GLFWFunctions::gameOver = false;
+bool GLFWFunctions::isHovering = false;
+bool GLFWFunctions::gamePaused = false;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -235,8 +239,16 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         
 
 
-    if ((*keyState)[Key::P])
+    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
         audioPaused = ~audioPaused;
+        GLFWFunctions::gamePaused = true;
+
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
+        {
+            GLFWFunctions::pauseMenuCount++;
+            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+        }
+    }
 
     if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;

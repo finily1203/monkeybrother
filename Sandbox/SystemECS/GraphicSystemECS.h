@@ -17,6 +17,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "EntityManager.h"
 #include "GraphicsSystem.h"
 #include "CameraSystem2D.h"
+#include "LogicSystemECS.h"
 
 class GraphicSystemECS : public System
 {
@@ -36,4 +37,5 @@ public:
 	std::string getSystemECS() override;
 
 private:
+	MouseBehaviour mouseBehaviour;
 };
