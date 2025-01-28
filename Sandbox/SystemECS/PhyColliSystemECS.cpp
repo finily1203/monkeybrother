@@ -590,6 +590,8 @@ void PhysicsSystemECS::update(float dt)
             count++;
         }
     }
+    if (playerEntity == NULL)
+        return;
     std::vector<Entity> collidingPlatforms = CollidingPlatforms(playerEntity);
     if (collidingPlatforms.size() == 0) {
         closestPlatformEntity = FindClosestPlatform(playerEntity);
