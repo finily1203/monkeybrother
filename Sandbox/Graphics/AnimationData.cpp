@@ -144,22 +144,22 @@ void AnimationData::TriggerFrameEvents() {
     }
 }
 
-void AnimationData::SetAnimationTotalFrames(int totalFrames) {
-    this->totalFrames = totalFrames;
+void AnimationData::SetAnimationTotalFrames(int newTotalFrames) {
+    this->totalFrames = newTotalFrames;
 }
 
-void AnimationData::SetAnimationFrameDuration(float frameDuration) {
-    this->frameDuration = frameDuration;
+void AnimationData::SetAnimationFrameDuration(float newFrameDuration) {
+    this->frameDuration = newFrameDuration;
 }
 
-void AnimationData::SetAnimationColumns(int columns) {
-    this->columns = columns;
-    frameWidth = 1.0f / columns; // Recalculate frame width
-    uvDirty = true; // Mark UV as dirty to update later
+void AnimationData::SetAnimationColumns(int newColumns) {
+    this->columns = newColumns;
+    frameWidth = 1.0f / newColumns;
+    uvDirty = true;
 }
 
-void AnimationData::SetAnimationRows(int rows) {
-    this->rows = rows;
-    frameHeight = 1.0f / rows; // Recalculate frame height
-    uvDirty = true; // Mark UV as dirty to update later
+void AnimationData::SetAnimationRows(int newRows) {
+    this->rows = newRows;
+    frameHeight = 1.0f / newRows;
+    uvDirty = true;
 }

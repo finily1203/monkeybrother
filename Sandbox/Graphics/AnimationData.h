@@ -59,10 +59,10 @@ public:
     void AddFrameEvent(int frame, const std::string& eventName);
 	// Set current action
     void TriggerFrameEvents();
-    void SetAnimationTotalFrames(int totalFrames);
-    void SetAnimationFrameDuration(float frameDuration);
-    void SetAnimationColumns(int columns);
-    void SetAnimationRows(int rows);
+    void SetAnimationTotalFrames(int newTotalFrames);
+    void SetAnimationFrameDuration(float newFrameDuration);
+    void SetAnimationColumns(int newColumns);
+    void SetAnimationRows(int newRows);
 private:
 
     int totalFrames;

@@ -192,7 +192,7 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform);
         }
         else if (isPlayer) {
-            // First draw the base mossball sprite
+            
             graphicsSystem.Update(dt, hasMovement, animation.totalFrames, animation.frameTime,
                 animation.columns, animation.rows);
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
@@ -200,11 +200,11 @@ void GraphicSystemECS::update(float dt) {
                 transform.mdl_xform);
 
 
-                // Static eyes for idle state
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
-                    assetsManager.GetTexture("eyes.png"),
-                    transform.mdl_xform);
             
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture("eyes.png"),
+                transform.mdl_xform);
+
         }
 
         else if (isPump && !isAnimate) {
