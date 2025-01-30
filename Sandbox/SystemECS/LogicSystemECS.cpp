@@ -231,7 +231,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	{
 		for (auto currEntity : allEntities)
 		{
-			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" || 
 				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
 				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
 				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||

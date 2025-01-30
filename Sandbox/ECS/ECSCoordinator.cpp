@@ -558,6 +558,86 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
+	int mainMenuScene = -1;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+	}
+	 
+	GameViewWindow::setSceneNum(mainMenuScene);
+	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+}
+
+void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))
 	{
@@ -631,122 +711,79 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	}
 }
 
-// this function will save the entity's data to the JSON file
-void ECSCoordinator::SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename)
+void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
 
-	// checks if JSON file could be opened 
 	if (!serializer.Open(filename))
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
 		return;
 	}
 
-	// returns the JSON object from the file 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
-	// loop through every entities in the array of the JSON object 
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
 	for (const auto& entityData : jsonObj["entities"])
 	{
-		// getting the id of the data in the entities array of 
-		// the JSON object 
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
 
-		// this if statement is to change the particular entity data based on 
-		// the entityId. This will not change all data but just one 
-		if (ecs.entityManager->getEntityById(entityId) == entity)
-		{
-			// ensuring that entity has TransformComponent 
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
-			{
-				TransformComponent transform = getComponent<TransformComponent>(entity);
-
-				// change the data in the JSON object based on the entity's 
-				// data 
-				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
-				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
-				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
-				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
-				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<PhysicsComponent>())) {
-				PhysicsComponent physics = getComponent<PhysicsComponent>(entity);
-
-				myMath::Vector2D direction = physics.force.GetDirection();
-				float magnitude = physics.force.GetMagnitude();
-
-				serializer.WriteObject(physics.mass, entityId, "entities.forces.mass");
-				serializer.WriteObject(physics.gravityScale, entityId, "entities.forces.gravityScale");
-				serializer.WriteObject(physics.jump, entityId, "entities.forces.jump");
-				serializer.WriteObject(physics.dampening, entityId, "entities.forces.dampening");
-				serializer.WriteObject(physics.velocity, entityId, "entities.forces.velocity");
-				serializer.WriteObject(physics.maxVelocity, entityId, "entities.forces.maxVelocity");
-				serializer.WriteObject(physics.acceleration, entityId, "entities.forces.acceleration");
-				serializer.WriteObject(direction, entityId, "entities.forces.force.direction");
-				serializer.WriteObject(magnitude, entityId, "entities.forces.force.magnitude");
-				serializer.WriteObject(physics.accumulatedForce, entityId, "entities.forces.accumulatedForce");
-				serializer.WriteObject(physics.maxAccumulatedForce, entityId, "entities.forces.maxAccumulatedForce");
-				serializer.WriteObject(physics.prevForce, entityId, "entities.forces.prevForce");
-				serializer.WriteObject(physics.targetForce, entityId, "entities.forces.targetForce");
-
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<ClosestPlatform>()))
-			{
-				ClosestPlatform closestPlatform = getComponent<ClosestPlatform>(entity);
-
-				serializer.WriteObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<MovementComponent>()))
-			{
-				MovementComponent movement = getComponent<MovementComponent>(entity);
-
-				serializer.WriteObject(movement.speed, entityId, "entities.movement.speed");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<AnimationComponent>()))
-			{
-				AnimationComponent animation = getComponent<AnimationComponent>(entity);
-
-				serializer.WriteObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<EnemyComponent>()))
-			{
-				EnemyComponent enemy = getComponent<EnemyComponent>(entity);
-
-				serializer.WriteObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
-			{
-				FontComponent fontComp = getComponent<FontComponent>(entity);
-
-				serializer.WriteObject(fontComp.text, entityId, "entities.font.text.string");
-				serializer.WriteObject(fontComp.textBoxWidth, entityId, "entities.font.text.BoxWidth");
-				serializer.WriteObject(fontComp.textScale, entityId, "entities.font.textScale.scale");
-				serializer.WriteObject(fontComp.color, entityId, "entities.font.color");
-				serializer.WriteObject(fontComp.fontId, entityId, "entities.font.fontId.fontName");
-			}
-
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<ButtonComponent>()))
-			{
-				ButtonComponent button = getComponent<ButtonComponent>(entity);
-
-				serializer.WriteObject(button.originalScale, entityId, "entities.transform.scale");
-				serializer.WriteObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
-				serializer.WriteObject(button.isButton, entityId, "entities.button.isButton");
-			}
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 		}
-	}
 
-	// checks if the JSON object is able to be saved to the JSON file 
-	if (!serializer.Save(filename))
-	{
-		std::cout << "Error: could not save to file " << filename << std::endl;
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
 	}
 }
 

@@ -203,18 +203,21 @@ std::string FilePathManager::GetMainMenuJSONPath()
 // this function retrieves the pause menu JSON file
 std::string FilePathManager::GetPauseMenuJSONPath()
 {
-	std::filesystem::path execPath = GetExecutablePath();
-	std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "pauseMenu.json";
-	std::string jsonPathString = jsonPath.string();
-	return jsonPathString;
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "pauseMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
 }
 
-// this function retrieves the options menu JSON file
+// this function retrieves the optionsmenu JSON file
 std::string FilePathManager::GetOptionsMenuJSONPath()
 {
-	std::filesystem::path execPath = GetExecutablePath();
-	std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "optionsMenu.json";
-	std::string jsonPathString = jsonPath.string();
-	return jsonPathString;
-}
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "optionsMenu.json";
 
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

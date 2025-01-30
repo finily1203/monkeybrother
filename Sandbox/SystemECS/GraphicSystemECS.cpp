@@ -126,6 +126,8 @@ void GraphicSystemECS::update(float dt) {
             cameraSystem.update();
         }
 
+        mouseBehaviour.update(entity);
+
         /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
         /*--------------------------------------------------------------------------------
         --------------------------------------------------------------------------------*/
@@ -172,9 +174,12 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
         if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || ecsCoordinator.getEntityID(entity) == "collectableUI" ||
-                ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" || ecsCoordinator.getEntityID(entity) == "tutorialButton" ||
-                ecsCoordinator.getEntityID(entity) == "quitWindowButton1")
+            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || 
+                ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" || 
+                ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
+                ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
+                ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
+                ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
             }
@@ -228,19 +233,37 @@ void GraphicSystemECS::update(float dt) {
         /*if (isUI) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            if (GLFWFunctions::collectableCount == 0) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-3"), transform.mdl_xform);
+            else if (ecsCoordinator.getEntityID(entity) == "startButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveStartButton"), transform.mdl_xform);
             }
-            else if (GLFWFunctions::collectableCount == 1) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-2"), transform.mdl_xform);
+
+            else if (ecsCoordinator.getEntityID(entity) == "optionsButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveOptionsButton"), transform.mdl_xform);
             }
-            else if (GLFWFunctions::collectableCount == 2) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-1"), transform.mdl_xform);
+
+            else if (ecsCoordinator.getEntityID(entity) == "tutorialButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
             }
-            else if (GLFWFunctions::collectableCount >= 3) {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-0"), transform.mdl_xform);
+
+            else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
             }
-        }*/
+        }
+        else if (isCollectable) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+        }
+        else if (isExit) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
+        }
+        else if (isBackground) {
+            if (ecsCoordinator.getEntityID(entity) == "background")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            }
 
         /* if (ecsCoordinator.hasComponent<TransformComponent>(entity) &&
                   ecsCoordinator.hasComponent<BehaviourComponent>(entity) &&
@@ -248,7 +271,24 @@ void GraphicSystemECS::update(float dt) {
                   graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)), transform.mdl_xform);
          }*/
 
-        if (isUI) {
+            else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform);
+            }
+        }
+        else if (isUI) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (GLFWFunctions::collectableCount == 0) {
