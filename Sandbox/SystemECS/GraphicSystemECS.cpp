@@ -190,14 +190,14 @@ void GraphicSystemECS::update(float dt) {
         }
         if (isAnimate && GLFWFunctions::isPumpOn) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("bubbles 3.png"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         // Drawing based on entity components
         if (isEnemy) {
 
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("goldfish"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         else if (isPlayer) {
@@ -206,7 +206,7 @@ void GraphicSystemECS::update(float dt) {
                 GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture("mossball"),
                 transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
 
 
@@ -214,20 +214,20 @@ void GraphicSystemECS::update(float dt) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture("eyes.png"),
                 transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
 
         }
 
         else if (isPump && !isAnimate) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("airVent"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
 
         }
         else if (isPlatform) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("woodtile"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         else if (isButton) {
@@ -235,30 +235,30 @@ void GraphicSystemECS::update(float dt) {
 
             if (ecsCoordinator.getEntityID(entity) == "quitButton") {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs 
                 );
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "retryButton")
             {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs  
                 );
             }
         }
         else if (isCollectable) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         else if (isExit) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         else if (isBackground) {
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform,
-                animation.currentUVs  // Pass entity-specific UV coordinates
+                animation.currentUVs  
             );
         }
         else if (isUI) {
@@ -266,22 +266,22 @@ void GraphicSystemECS::update(float dt) {
 
             if (GLFWFunctions::collectableCount == 0) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-3"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs  
                 );
             }
             else if (GLFWFunctions::collectableCount == 1) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-2"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs  
                 );
             }
             else if (GLFWFunctions::collectableCount == 2) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-1"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs  
                 );
             }
             else if (GLFWFunctions::collectableCount >= 3) {
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-0"), transform.mdl_xform,
-                    animation.currentUVs  // Pass entity-specific UV coordinates
+                    animation.currentUVs  
                 );
             }
         }
@@ -302,7 +302,7 @@ void GraphicSystemECS::update(float dt) {
                 GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(ecsCoordinator.getEntityID(entity)),
                 transform.mdl_xform,
-                staticUVs  // Use static UVs instead of animation.currentUVs
+                staticUVs  
             );
         }
     }

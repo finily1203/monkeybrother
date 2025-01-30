@@ -1,5 +1,5 @@
 /*! All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
- * @author: Joel Chu (c.weiyuan)
+ * @author: Joel Chu (c.weiyuan), Javier Chua (javierjunliang.chua)
  * @team: MonkeHood
  * @course: CSD2401
  * @file: AnimationComponent.h
@@ -34,7 +34,7 @@ struct AnimationComponent {
         , creationTime(glfwGetTime())
     {
         currentUVs.resize(4);
-        UpdateUVCoordinates(); // Initialize with proper UV coordinates
+        UpdateUVCoordinates();
     }
 
     AnimationComponent(float frames, float time, float cols, float rws)
@@ -47,17 +47,17 @@ struct AnimationComponent {
         , rows(std::max(1.0f, rws))
     {
         currentUVs.resize(4);
-        UpdateUVCoordinates(); // Initialize with proper UV coordinates
+        UpdateUVCoordinates(); 
     }
 
     void Update() {
         if (!isAnimated || totalFrames <= 1.0f) return;
 
-        // Use absolute time since creation for animation
+        
         double currentAbsoluteTime = glfwGetTime();
         double timeSinceCreation = currentAbsoluteTime - creationTime;
 
-        // Calculate current frame based on absolute time
+        
         currentFrame = static_cast<int>((timeSinceCreation / frameTime)) % static_cast<int>(totalFrames);
 
         UpdateUVCoordinates();
@@ -65,11 +65,11 @@ struct AnimationComponent {
 
     void UpdateUVCoordinates() {
         if (!isAnimated) {
-            // For non-animated sprites, use the entire texture
-            currentUVs[0] = glm::vec2(1.0f, 1.0f);  // Top right
-            currentUVs[1] = glm::vec2(1.0f, 0.0f);  // Bottom right
-            currentUVs[2] = glm::vec2(0.0f, 0.0f);  // Bottom left
-            currentUVs[3] = glm::vec2(0.0f, 1.0f);  // Top left
+            
+            currentUVs[0] = glm::vec2(1.0f, 1.0f);  
+            currentUVs[1] = glm::vec2(1.0f, 0.0f); 
+            currentUVs[2] = glm::vec2(0.0f, 0.0f);  
+            currentUVs[3] = glm::vec2(0.0f, 1.0f);  
             return;
         }
 
@@ -87,7 +87,7 @@ struct AnimationComponent {
         float vMax = 1.0f - (frameHeight * currentRow);
         float vMin = vMax - frameHeight;
 
-        // Assign UV coordinates for the quad
+       
         currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
         currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right
         currentUVs[2] = glm::vec2(uMin, vMin);  // Bottom left

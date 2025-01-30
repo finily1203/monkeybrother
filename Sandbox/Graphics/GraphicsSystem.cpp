@@ -149,6 +149,7 @@ void GraphicsSystem::initialise() {
 void GraphicsSystem::update() {}
 
 void GraphicsSystem::Update(float deltaTime, const AnimationComponent& animation) {
+    (void)deltaTime;
     if (animation.isAnimated) {
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, animation.currentUVs.data());
