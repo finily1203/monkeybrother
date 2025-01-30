@@ -37,9 +37,6 @@ public:
 	std::string getHoveredButton() const { return currHoveredButton; }
 	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
 
-	std::string getHoveredButton() const { return currHoveredButton; }
-	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
-
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
 	void handleButtonClick(GLFWwindow* window, Entity entity);

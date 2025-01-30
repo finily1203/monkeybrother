@@ -287,32 +287,32 @@ void GraphicSystemECS::update(float dt) {
                 transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform);
             }
-        }
-        else if (isUI) {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            if (GLFWFunctions::collectableCount == 0) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-3");
-            }
-            else if (GLFWFunctions::collectableCount == 1) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-2");
-            }
-            else if (GLFWFunctions::collectableCount == 2) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-1");
-            }
-            else if (GLFWFunctions::collectableCount >= 3) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-0");
-            }
-        }
+            if (isUI) {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-        if (isButton) {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-        }
+                if (GLFWFunctions::collectableCount == 0) {
+                    ecsCoordinator.setTextureID(entity, "UI Counter-3");
+                }
+                else if (GLFWFunctions::collectableCount == 1) {
+                    ecsCoordinator.setTextureID(entity, "UI Counter-2");
+                }
+                else if (GLFWFunctions::collectableCount == 2) {
+                    ecsCoordinator.setTextureID(entity, "UI Counter-1");
+                }
+                else if (GLFWFunctions::collectableCount >= 3) {
+                    ecsCoordinator.setTextureID(entity, "UI Counter-0");
+                }
+            }
 
-        if (ecsCoordinator.getTextureID(entity) != "")
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
+            if (isButton) {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+            }
+
+            if (ecsCoordinator.getTextureID(entity) != "")
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
+        }
     }
-}
 
 
 void GraphicSystemECS::cleanup() {}
