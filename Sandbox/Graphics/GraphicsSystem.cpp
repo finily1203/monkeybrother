@@ -148,24 +148,13 @@ void GraphicsSystem::initialise() {
 
 void GraphicsSystem::update() {}
 
-void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated, float totalFrames, float frameTime, float columns, float rows) {
-    if (isAnimated == GL_TRUE) {
-        if (!GameViewWindow::getPaused()) {
-            m_AnimationData->SetAnimationTotalFrames(static_cast<int>(totalFrames));
-            m_AnimationData->SetAnimationFrameDuration(frameTime);
-            m_AnimationData->SetAnimationColumns(static_cast<int>(columns));
-            m_AnimationData->SetAnimationRows(static_cast<int>(rows));
-            // Remove the speed multiplier calculation or set it to 1.0
-            m_AnimationData->SetSpeedMultiplier(1.0f);
-            m_AnimationData->Update(deltaTime);
-        }
-        const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-
+void GraphicsSystem::Update(float deltaTime, const AnimationComponent& animation) {
+    if (animation.isAnimated) {
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, animation.currentUVs.data());
     }
     else {
-        // Update the UV coordinates for the current frame
+        // Default UV coordinates for non-animated sprites
         float uvCoord[] = {
             1.0f, 1.0f,  // top right
             1.0f, 0.0f,  // bottom right
@@ -173,7 +162,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated, float totalFr
             0.0f, 1.0f   // top left
         };
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8, uvCoord);
     }
 
     GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
@@ -376,17 +365,20 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 }
 
 
-void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
-    // load shader program in use by this object
+void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, const myMath::Matrix3x3& xform, const std::vector<glm::vec2>& uvCoords) {
     if (mode == DrawMode::TEXTURE)
         assetsManager.GetShader("shader1")->Bind();
     else
         assetsManager.GetShader("shader2")->Bind();
+
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glm::mat3 mdl_xform(1.0f);
-    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
+    // Update UV coordinates for this specific draw call
+    glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+
+    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
         glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
@@ -394,7 +386,6 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
-    // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     assetsManager.GetShader("shader2")->Unbind();

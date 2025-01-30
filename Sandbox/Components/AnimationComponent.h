@@ -13,13 +13,15 @@
 #include "AnimationData.h"
 
 struct AnimationComponent {
-    bool isAnimated;           
-    int currentFrame;          
-    float totalFrames;         
-    float frameTime;           
-    float currentTime;         
-    float columns;            
-    float rows;               
+    double creationTime;
+    bool isAnimated;
+    int currentFrame;
+    float totalFrames;
+    float frameTime;
+    float currentTime;
+    float columns;
+    float rows;
+    std::vector<glm::vec2> currentUVs;
 
     AnimationComponent()
         : isAnimated(false)
@@ -27,40 +29,68 @@ struct AnimationComponent {
         , totalFrames(1.0f)
         , frameTime(0.0f)
         , currentTime(0.0f)
-        , columns(0.0f)       
-        , rows(0.0f)         
-    {}
+        , columns(1.0f)
+        , rows(1.0f)
+        , creationTime(glfwGetTime())
+    {
+        currentUVs.resize(4);
+        UpdateUVCoordinates(); // Initialize with proper UV coordinates
+    }
 
-    // Constructor with animation parameters
     AnimationComponent(float frames, float time, float cols, float rws)
         : isAnimated(true)
         , currentFrame(0)
-        , totalFrames(frames)
-        , frameTime(time)
+        , totalFrames(std::max(1.0f, frames))
+        , frameTime(std::max(0.001f, time))
         , currentTime(0.0f)
-        , columns(cols)
-        , rows(rws)
-    {}
-
-
-    void Update(float deltaTime) {
-        if (!isAnimated || totalFrames <= 1.0f) return;
-
-        currentTime += deltaTime;
-        if (currentTime >= frameTime) {
-            currentTime -= frameTime;
-       
-            currentFrame = static_cast<int>((currentFrame + 1) % static_cast<int>(totalFrames));
-        }
+        , columns(std::max(1.0f, cols))
+        , rows(std::max(1.0f, rws))
+    {
+        currentUVs.resize(4);
+        UpdateUVCoordinates(); // Initialize with proper UV coordinates
     }
 
-    
-    int GetColumns() const { return static_cast<int>(columns); }
-    int GetRows() const { return static_cast<int>(rows); }
+    void Update() {
+        if (!isAnimated || totalFrames <= 1.0f) return;
 
-    ~AnimationComponent() {
-        
-        currentFrame = 0;
-        currentTime = 0.0f;
+        // Use absolute time since creation for animation
+        double currentAbsoluteTime = glfwGetTime();
+        double timeSinceCreation = currentAbsoluteTime - creationTime;
+
+        // Calculate current frame based on absolute time
+        currentFrame = static_cast<int>((timeSinceCreation / frameTime)) % static_cast<int>(totalFrames);
+
+        UpdateUVCoordinates();
+    }
+
+    void UpdateUVCoordinates() {
+        if (!isAnimated) {
+            // For non-animated sprites, use the entire texture
+            currentUVs[0] = glm::vec2(1.0f, 1.0f);  // Top right
+            currentUVs[1] = glm::vec2(1.0f, 0.0f);  // Bottom right
+            currentUVs[2] = glm::vec2(0.0f, 0.0f);  // Bottom left
+            currentUVs[3] = glm::vec2(0.0f, 1.0f);  // Top left
+            return;
+        }
+
+        // Calculate frame size in UV coordinates
+        float frameWidth = 1.0f / columns;
+        float frameHeight = 1.0f / rows;
+
+        // Calculate current frame position
+        int currentRow = currentFrame / static_cast<int>(columns);
+        int currentCol = currentFrame % static_cast<int>(columns);
+
+        // Calculate UV coordinates for current frame
+        float uMin = frameWidth * currentCol;
+        float uMax = uMin + frameWidth;
+        float vMax = 1.0f - (frameHeight * currentRow);
+        float vMin = vMax - frameHeight;
+
+        // Assign UV coordinates for the quad
+        currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
+        currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right
+        currentUVs[2] = glm::vec2(uMin, vMin);  // Bottom left
+        currentUVs[3] = glm::vec2(uMin, vMax);  // Top left
     }
 };

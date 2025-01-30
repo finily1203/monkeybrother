@@ -38,7 +38,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector3D.h"
 #include "matrix3x3.h"
 #include "TransformComponent.h"
-
+#include "AnimationComponent.h"
 
 class GraphicsSystem : public GameSystems
 {
@@ -53,13 +53,13 @@ public:
 
     void initialise() override;
     void update() override;
-    void Update(float deltaTime, GLboolean isAnimated, float totalFrames, float frameTime, float columns, float rows);
+    void Update(float deltaTime, const AnimationComponent& animation);
     void Render(float deltaTime);
     void cleanup() override;
     SystemType getSystem() override; //For perfomance viewer
 
     myMath::Matrix3x3 UpdateObject(myMath::Vector2D objPos, myMath::Vector2D objScale, myMath::Vector2D objOri, myMath::Matrix3x3 viewMat);
-    void DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform);
+    void DrawObject(DrawMode mode, const GLuint texture, const myMath::Matrix3x3& xform, const std::vector<glm::vec2>& uvCoords);
 
     GLuint GetVAO() const { return m_VAO; }
 
