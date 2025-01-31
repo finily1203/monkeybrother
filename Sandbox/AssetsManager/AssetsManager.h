@@ -71,6 +71,13 @@ public:
 	std::map<std::string, std::string>* m_FontPaths;
 	std::map<std::string, std::map<char, Character>>* m_Fonts;
 
+	//For loading Prefabs
+	void LoadPrefabAssets();
+	void LoadPrefab(const std::string& prefabName, const std::string& prefabPath);
+	std::string GetPrefabPath(const std::string& prefabName) const;
+	void UnloadPrefab(const std::string& prefabName);
+	void ClearPrefabs();
+
 	//For Drag and Drop files from file explorer
 	void handleDropFile(std::string filePath);
 	void loadAsset(std::string filePath);
@@ -97,6 +104,7 @@ public:
 	const std::map<std::string, std::unique_ptr<Shader>>& getShaderList() const;
 	const std::map<std::string, FMOD::Sound*>& getAudioList() const;
 	const std::map<std::string, std::map<char, Character>>& getFontList() const;
+	const std::map<std::string, std::string>& getPrefabList() const;
 
 
 
@@ -106,6 +114,7 @@ private:
 	std::map<std::string, GLuint>* m_Textures;
 	std::map<std::string, std::unique_ptr<Shader>>* m_Shaders;
 	std::map<std::string, FMOD::Sound*>* m_Audio;
+	std::map<std::string, std::string>* m_Prefabs;
 
 	std::vector<std::string> *m_AssetList;
 

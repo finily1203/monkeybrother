@@ -38,6 +38,7 @@ File Contributions: Lew Zong Han Owen (60%)
 enum Specifier {
 	TEXTURE,
 	FONT,
+	PREFAB
 };
 
 //Class for ImGui game viewport window in debugging mode
@@ -77,7 +78,8 @@ public:
 	static void LoadSceneFromJSON(std::string const& filename);
 	static void SaveSceneToJSON(std::string const& filename);
 
-	static void LoadPrefabFromJSON(std::string const& filename);
+	static void LoadPrefabFromJSON(std::string const& filename, std::string const& filepath);
+	static std::string GetPrefabJSONPath(std::string const& filename);
 
 	static void createDropEntity(const char* assetName, Specifier specifier);
 

@@ -25,6 +25,7 @@ bool AssetBrowser::showTextures = false;
 bool AssetBrowser::showShaders = false;
 bool AssetBrowser::showAudio = false;
 bool AssetBrowser::showFonts = false;
+bool AssetBrowser::showPrefab = false;
 
 //Initialise the asset browser
 void AssetBrowser::Initialise()
@@ -234,6 +235,51 @@ void AssetBrowser::Update()
 					ImGui::EndDragDropSource();
 				}
 				/*ImGui::Text(asset.c_str());*/
+				std::string trunStr = cutString(asset, thumbnailSize);
+				ImGui::Text(trunStr.c_str());
+
+				ImGui::EndGroup();
+
+				currItemIndex++;
+				if (currItemIndex % columns != 0)
+				{
+					ImGui::SameLine(); // Place the next item in the same row
+				}
+			}
+		}
+	}
+
+	ImGui::NewLine();
+
+	if (ImGui::Button("Prefabs"))
+	{
+		if (showPrefab == false)
+		{
+			showPrefab = true;
+		}
+		else
+		{
+			showPrefab = false;
+		}
+	}
+	if (showPrefab)
+	{
+		if (columns < 1)
+		{
+			columns = 1;
+		}
+		for (auto& asset : *assetNames)
+		{
+			if (assetsManager.getPrefabList().find(asset) != assetsManager.getPrefabList().end())
+			{
+				ImGui::BeginGroup();
+				ImGui::Image((void*)(intptr_t)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+				{
+					ImGui::SetDragDropPayload("PREFAB_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
+					ImGui::Text("Dragging: %s", asset.c_str());
+					ImGui::EndDragDropSource();
+				}
 				std::string trunStr = cutString(asset, thumbnailSize);
 				ImGui::Text(trunStr.c_str());
 
