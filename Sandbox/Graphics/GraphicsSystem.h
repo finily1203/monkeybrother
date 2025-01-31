@@ -80,8 +80,7 @@ private:
     GLuint m_Texture, m_Texture2, m_Texture3;
     GLboolean is_animated;
     std::unique_ptr<Shader> m_Shader, m_Shader2;
-    std::unique_ptr<AnimationData> m_AnimationData;  // Pointer to the AnimationData instance
-    std::unique_ptr<AnimationData> idleAnimation;  // Pointer to the AnimationData instance
+
 
     void ReleaseResources();
 };
