@@ -1185,3 +1185,14 @@ void GameViewWindow::SaveSceneToJSON(std::string const& filename)
 
 	serializer.WriteInt(scene, "scene", filename);
 }
+
+void GameViewWindow::LoadPrefabFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+	nlohmann::json currentObj = serializer.GetJSONObject();
+}

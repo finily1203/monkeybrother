@@ -63,6 +63,9 @@ public:
 
 private:
 	//FMOD::System* audioSystem;
+	/*std::unordered_map<std::string, FMOD::Channel*> channelList;*/
+	/*std::vector<std::pair<std::string, FMOD::Channel*>> channelList;*/
+
 	FMOD::Channel* bgmChannel;
 	FMOD::Channel* soundEffectChannel;
 	FMOD::Channel* assetBrowserChannel;

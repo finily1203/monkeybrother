@@ -18,13 +18,31 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include "GUIGameViewport.h"
 
+//BGM VOLUME MAX -> 0.5f, INC / DEC BY 0.05f, LOWEST 0f
+//SFX VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
+//GEN VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
+
+//BGM AFFECTS: bgmChannel
+//SFX AFFECTS: soundEffectChannel, assetBrowserChannel, pumpChannel, rotationChannel
+//GEN AFFECTS: ambienceChannel
+
+//PUMP CHANNEL MAKE SURE TO MULTIPLY BY 0.1f FOR VOLUME
+
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f) {}
-AudioSystem::~AudioSystem() {
-    cleanup();
+                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f)
+{
+    //channelList["BGM"] = bgmChannel;
+    //channelList["Sound Effect"] = soundEffectChannel;
+    //channelList["Asset Browser"] = assetBrowserChannel;
+    //channelList["Ambience"] = ambienceChannel;
+    //channelList["Pump"] = pumpChannel;
+    //channelList["Rotation"] = rotationChannel;
+
+	//std::cout << "Channel List size: " << channelList.size() << std::endl;
 }
+AudioSystem::~AudioSystem() {}
 
 SystemType AudioSystem::getSystem() {
     return SystemType::AudioSystemType;
@@ -217,7 +235,9 @@ void AudioSystem::update() {
 }
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
-void AudioSystem::cleanup() {}
+void AudioSystem::cleanup() {
+
+}
 
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);

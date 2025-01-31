@@ -77,6 +77,8 @@ public:
 	static void LoadSceneFromJSON(std::string const& filename);
 	static void SaveSceneToJSON(std::string const& filename);
 
+	static void LoadPrefabFromJSON(std::string const& filename);
+
 	static void createDropEntity(const char* assetName, Specifier specifier);
 
 	static void setAccumulatedDragDistance(float valueX, float valueY) {

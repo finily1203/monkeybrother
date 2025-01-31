@@ -50,6 +50,7 @@
     <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
     <ClCompile Include="SystemECS\FilterBehaviour.cpp" />
     <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
+    <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -122,6 +123,7 @@
     <ClInclude Include="Components\FilterComponent.h" />
     <ClInclude Include="Components\MovPlatformComponent.h" />
     <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
+    <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

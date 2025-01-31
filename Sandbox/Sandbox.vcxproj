@@ -124,6 +124,7 @@
     </ClCompile>
     <ClCompile Include="DebugSystem\Debug.cpp" />
     <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
+    <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
     <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
+    <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
     <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
