@@ -58,6 +58,9 @@ public:
 	FMOD::Channel* getPumpChannel() const { return pumpChannel; }	
 	void setPumpChannelToNull() { pumpChannel = nullptr; }
 
+	void decAllVol();
+	void incAllVol();
+
 private:
 	//FMOD::System* audioSystem;
 	FMOD::Channel* bgmChannel;
