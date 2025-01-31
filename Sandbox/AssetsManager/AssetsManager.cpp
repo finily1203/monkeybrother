@@ -23,11 +23,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-std::string* AssetsManager::overwritePath = nullptr;
-
 
 AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0),
-                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false)
+                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false),
+	                             m_Textures(nullptr), m_Shaders(nullptr), m_Audio(nullptr), m_Fonts(nullptr), 
+                                 m_FontPaths(nullptr), overwritePath(new std::string())
 {
     m_AssetList = new std::vector<std::string>();
 }
@@ -78,6 +78,8 @@ void AssetsManager::cleanup()
     audSystem = nullptr;
     delete m_AssetList;
     m_AssetList = nullptr;
+    delete overwritePath;
+	overwritePath = nullptr;
 }
 
 SystemType AssetsManager::getSystem()
@@ -162,6 +164,7 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
     if (iterator != m_Textures->end()) {
 		glDeleteTextures(1, &iterator->second);
 		m_Textures->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), texName), m_AssetList->end());
         std::cout << "Texture unloaded successfully!" << std::endl;
 	}
     else {
@@ -246,6 +249,7 @@ void AssetsManager::UnloadShader(const std::string& name) {
     auto iterator = m_Shaders->find(name);
     if (iterator != m_Shaders->end()) {
 		m_Shaders->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), name), m_AssetList->end());
 		std::cout << "Shader unloaded successfully!" << std::endl;
 	}
     else {
@@ -338,6 +342,8 @@ void AssetsManager::UnloadAudio(const std::string& name) {
     auto iterator = m_Audio->find(name);
     if (iterator != m_Audio->end()) {
         iterator->second->release();
+		m_Audio->erase(iterator);
+		m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), name), m_AssetList->end());
         std::cout << "Audio unloaded successfully!" << std::endl;
     }
     else {
@@ -473,6 +479,7 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
 		m_Fonts->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), fontPath), m_AssetList->end());
 		std::cout << "Font unloaded successfully!" << std::endl;
 	}
     else {
@@ -502,6 +509,7 @@ void AssetsManager::handleDropFile(std::string filePath) {
     if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
 		delExistingAsset(filePath);
 		overwritePopUp = true;
+        std::cout << filePath << std::endl;
 		*overwritePath = filePath;
         std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
     }
@@ -512,6 +520,11 @@ void AssetsManager::handleDropFile(std::string filePath) {
 }
 
 void AssetsManager::loadAsset(std::string filePath) {
+    if (filePath.empty()) {
+        std::cout << "file path was empty and asset was not loaded" << std::endl;
+        return;
+    }
+
 	std::filesystem::path path(filePath);
 	if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
 		LoadTexture(path.filename().string().c_str(), path.string());
@@ -564,6 +577,10 @@ void AssetsManager::delExistingAsset(std::string filePath) {
 
 bool AssetsManager::checkIfAssetListChanged() const {
 	return hasAssetsListChanged;
+}
+
+void AssetsManager::setAssetListChanged(bool value) {
+	hasAssetsListChanged = value;
 }
 
 bool AssetsManager::checkOverwritePopUp() const {

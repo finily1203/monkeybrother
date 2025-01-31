@@ -94,7 +94,7 @@ void GraphicSystemECS::update(float dt) {
         // Check if the entity has an animation component
         auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
         //Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
-        std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
+        //std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 

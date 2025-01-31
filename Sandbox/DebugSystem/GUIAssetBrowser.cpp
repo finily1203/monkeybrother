@@ -54,6 +54,7 @@ void AssetBrowser::Update()
 		{
 			assetNames->push_back(asset);
 		}
+		assetsManager.setAssetListChanged(false);
 	}
 
 	float availWidth = ImGui::GetContentRegionAvail().x - 200.f;
@@ -272,6 +273,8 @@ void AssetBrowser::Update()
 			if (assetName)
 			{
 				std::cout << "Deleted shader asset: " << assetName << std::endl;
+				assetsManager.UnloadShader(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "shaderAssets");
 			}
 		}
 		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("AUDIO_PAYLOAD"))
@@ -279,7 +282,9 @@ void AssetBrowser::Update()
 			const char* assetName = (const char*)payloadAud->Data;
 			if (assetName)
 			{
-				std::cout << "Deleted shader asset: " << assetName << std::endl;
+				std::cout << "Deleted audio asset: " << assetName << std::endl;
+				assetsManager.UnloadAudio(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "audioAssets");
 			}
 		}
 		else if (const ImGuiPayload* payloadFont = ImGui::AcceptDragDropPayload("FONT_PAYLOAD"))
@@ -288,6 +293,8 @@ void AssetBrowser::Update()
 			if (assetName)
 			{
 				std::cout << "Deleted font asset: " << assetName << std::endl;
+				assetsManager.UnloadFont(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "fontAssets");
 			}
 		}
 		ImGui::EndDragDropTarget();

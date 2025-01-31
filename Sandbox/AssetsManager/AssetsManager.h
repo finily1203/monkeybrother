@@ -76,6 +76,7 @@ public:
 	void loadAsset(std::string filePath);
 	void delExistingAsset(std::string filePath);
 	bool checkIfAssetListChanged() const;
+	void setAssetListChanged(bool value);
 	bool checkOverwritePopUp() const;
 	void setOverwritePopUp(bool value);
 	bool checkOverwriteFile() const;
@@ -114,5 +115,5 @@ private:
 	bool overwritePopUp;
 	bool overwriteFile;
 
-	static std::string* overwritePath;
+	std::string* overwritePath;
 };
