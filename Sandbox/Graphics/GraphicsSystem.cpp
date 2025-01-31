@@ -22,7 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
         - Implemented function to change sprite animation according to the action.
         - Implemented drawDebugLines function to draw the bounding box of the sprite,
           and the update function to update the model transformation matrix.
-        
+
  File Contributions: Liu YaoTing (50%), Javier Chua (50%)
 
 /*_______________________________________________________________________________________________________________*/
@@ -57,7 +57,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 GraphicsSystem::GraphicsSystem()
     : m_VAO(0), m_VBO(0), m_UVBO(0), m_EBO(0), m_Texture(0), is_animated(0), m_Texture2(0), m_Texture3(0) {
     // Initialize AnimationData with total frames, frame duration, columns, rows of the spritesheet
-    m_AnimationData = std::make_unique<AnimationData>(48, 0.03f, 4, 6);
+
     vps = new std::vector<GLViewport>();
     vps->push_back({ 0, 0, GLFWFunctions::windowWidth, GLFWFunctions::windowHeight });
     glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
@@ -148,19 +148,14 @@ void GraphicsSystem::initialise() {
 
 void GraphicsSystem::update() {}
 
-void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
-    if (isAnimated == GL_TRUE) {
-        if (!GameViewWindow::getPaused() || !GLFWFunctions::gamePaused) {
-            m_AnimationData->Update(deltaTime);
-        }
-        //m_AnimationData->Update(deltaTime);
-        const auto& uvCoords = m_AnimationData->GetCurrentUVs();
-
+void GraphicsSystem::Update(float deltaTime, const AnimationComponent& animation) {
+    (void)deltaTime;
+    if (animation.isAnimated) {
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, animation.currentUVs.data());
     }
     else {
-        // Update the UV coordinates for the current frame
+        // Default UV coordinates for non-animated sprites
         float uvCoord[] = {
             1.0f, 1.0f,  // top right
             1.0f, 0.0f,  // bottom right
@@ -168,7 +163,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
             0.0f, 1.0f   // top left
         };
         glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoord);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8, uvCoord);
     }
 
     GLint w{ GLFWFunctions::windowWidth }, h{ GLFWFunctions::windowHeight };
@@ -180,7 +175,7 @@ void GraphicsSystem::Update(float deltaTime, GLboolean isAnimated) {
         old_w = w;
         old_h = h;
     }
-	glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
+    glViewport((*vps)[0].x, (*vps)[0].y, (*vps)[0].width, (*vps)[0].height);
 }
 
 void GraphicsSystem::Render(float deltaTime) {
@@ -190,7 +185,6 @@ void GraphicsSystem::Render(float deltaTime) {
 
 void GraphicsSystem::cleanup() {
     ReleaseResources();
-    delete m_AnimationData.release();
     delete vps;
     vps = nullptr;
 }
@@ -371,17 +365,20 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 }
 
 
-void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Matrix3x3 xform) {
-    // load shader program in use by this object
+void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, const myMath::Matrix3x3& xform, const std::vector<glm::vec2>& uvCoords) {
     if (mode == DrawMode::TEXTURE)
         assetsManager.GetShader("shader1")->Bind();
     else
         assetsManager.GetShader("shader2")->Bind();
+
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glm::mat3 mdl_xform(1.0f);
-    mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
 
+    // Update UV coordinates for this specific draw call
+    glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 4, uvCoords.data());
+
+    glm::mat3 mdl_xform = myMath::Matrix3x3::ConvertToGLMMat3(xform);
     GLint uniformLoc = assetsManager.GetShader("shader2")->GetUniformLocation("uModel_to_NDC");
     if (uniformLoc != -1) {
         glUniformMatrix3fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(mdl_xform));
@@ -389,7 +386,6 @@ void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, myMath::Mat
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
-    // unbind VAO
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     assetsManager.GetShader("shader2")->Unbind();

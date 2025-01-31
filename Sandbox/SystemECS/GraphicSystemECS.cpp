@@ -88,9 +88,13 @@ void GraphicSystemECS::update(float dt) {
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
         Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
+		bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
+
+
         // Check if the entity has an animation component
         auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-        Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
+        //Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
+        std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -104,15 +108,14 @@ void GraphicSystemECS::update(float dt) {
         bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
         bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
         bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
-        bool isAnimate = false;
-
-        if (ecsCoordinator.hasComponent<PumpComponent>(entity)) {
-            const auto& pumpComponent = ecsCoordinator.getComponent<PumpComponent>(entity);
-            isAnimate = pumpComponent.isAnimate;
-        }
 
         // Use hasMovement for the update parameter
-        graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
+        //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
+        
+        if (animation.isAnimated) {
+            animation.Update();
+        }
+
         //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
         transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
@@ -195,19 +198,19 @@ void GraphicSystemECS::update(float dt) {
 
         else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
         {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform, animation.currentUVs);
         }
 
         else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
         {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform, animation.currentUVs);
         }
 
         else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
         {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform);
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform, animation.currentUVs);
         }
 
         if (isUI) {
@@ -231,12 +234,12 @@ void GraphicSystemECS::update(float dt) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (ecsCoordinator.getEntityID(entity) == "quitButton") {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform, animation.currentUVs);
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "retryButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform, animation.currentUVs);
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "startButton")
@@ -292,12 +295,24 @@ void GraphicSystemECS::update(float dt) {
 
             else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform, animation.currentUVs);
             }
         }
 
-        if (ecsCoordinator.getTextureID(entity) != "")
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform);
+            if (ecsCoordinator.getTextureID(entity) != "") {
+                //if (entityAnimate) {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
+				//}
+                //else {
+                //    std::vector<glm::vec2> UVs{
+                //        glm::vec2(1.0f, 1.0f),
+                //        glm::vec2(1.0f, 0.0f),
+                //        glm::vec2(0.0f, 0.0f),
+                //        glm::vec2(0.0f, 1.0f)
+                //    };
+                //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, UVs);
+                //}
+            }
         }
     }
 
