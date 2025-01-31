@@ -19,12 +19,15 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "Debug.h"
 #include "FontSystemECS.h"
 #include "LogicSystemECS.h"
+#include "BehaviourComponent.h"
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
 #include "CollectableBehaviour.h"
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
 #include "PlatformBehaviour.h"
+#include "FilterBehaviour.h"
+#include "MovPlatformBehaviour.h"
 #include "GUIAssetBrowser.h"
 #include <memory>
 
@@ -39,6 +42,7 @@ int Inspector::selectedEntityID = -1;
 int Inspector::draggedEntityID = -1;
 bool Inspector::isSelectingEntity = false;
 bool moveable = false;
+bool checked = false;
 
 
 
@@ -611,8 +615,12 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 
+	if (!logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID) 
+		&& ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+		ecsCoordinator.removeComponent<ClosestPlatform>(selectedEntityID);
+	}
 
-	const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform" };
+	const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform", "Button", "Filter", "MovPlatform"};
 
 
 	if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
@@ -632,6 +640,15 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	}
 	else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
 		currentItem = 6;
+	}
+	else if (logicSystemRef->hasBehaviour<MouseBehaviour>(selectedEntityID)) {
+		currentItem = 7;
+	}
+	else if (logicSystemRef->hasBehaviour<FilterBehaviour>(selectedEntityID)) {
+		currentItem = 8;
+	}
+	else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(selectedEntityID)) {
+		currentItem = 9;
 	}
 	else {
 		currentItem = 0;
@@ -683,8 +700,16 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
 					break;
 				case 6:
-
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
+					break;
+				case 7:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
+					break;
+				case 8:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
+					break;
+				case 9:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MovPlatformBehaviour>());
 					break;
 				}
 
@@ -734,6 +759,35 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	}
 	ImGui::SameLine();
 	ImGui::Text("Texture");
+
+	if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+		checked = true;
+	}
+	else {
+		checked = false;
+	}
+
+	 // State variable
+	if (ImGui::Checkbox("Label", &checked)) {
+		if (checked) {
+			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+				AnimationComponent animation{};
+
+				animation.isAnimated = true;
+				animation.totalFrames = 24.0;
+				animation.frameTime = 0.05,
+				animation.columns = 8.0,
+				animation.rows = 3.0,
+
+				ecsCoordinator.addComponent(selectedEntityID, animation);
+			}
+		}
+		else {
+			if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+				ecsCoordinator.removeComponent<AnimationComponent>(selectedEntityID);
+			}
+		}
+	}
 
 
 	ImGui::End();

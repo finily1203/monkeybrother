@@ -842,9 +842,16 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
 	}
 
-	/*if (ecs.hasComponent<AnimationComponent>(entity)) {
-		entityJSON["animation"] = { {"isAnimated", true} };
-	}*/
+	if (ecs.hasComponent<AnimationComponent>(entity)) {
+		auto& animation = ecs.getComponent<AnimationComponent>(entity);
+		entityJSON["animation"] = {
+			{"isAnimated", animation.isAnimated},
+			{"totalFrames", animation.totalFrames},
+			{"frameTime", animation.frameTime},
+			{"columns", animation.columns},
+			{"rows", animation.rows}
+		};
+	}
 
 	if (ecs.hasComponent<FontComponent>(entity)) {
 		auto& fontComp = ecs.getComponent<FontComponent>(entity);

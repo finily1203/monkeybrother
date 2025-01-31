@@ -379,7 +379,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			else
 			if (entityData["behaviour"].contains("platform")) {
 				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.platform");
-				//logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
 			}
 			else
 			if (entityData["behaviour"].contains("filter")) {

@@ -88,13 +88,17 @@ void GraphicSystemECS::update(float dt) {
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
         Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
-		bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
+        bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
+        AnimationComponent animation{};
 
 
         // Check if the entity has an animation component
-        auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-        //Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
-        //std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
+        if (hasAnimation) {
+            animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+            if (animation.isAnimated) {
+                animation.Update();
+            }
+        }
 
         auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -111,10 +115,7 @@ void GraphicSystemECS::update(float dt) {
 
         // Use hasMovement for the update parameter
         //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
-        
-        if (animation.isAnimated) {
-            animation.Update();
-        }
+       
 
         //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
         myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
