@@ -701,6 +701,52 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	}
 }
 
+void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	// checks if JSON file could be opened 
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	// returns the JSON object from the file 
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+	auto allEntities = ecs.getAllLiveEntities();
+
+	for (auto& entity : allEntities)
+	{
+		// getting the id of the data in the entities array of 
+		// the JSON object 
+		std::string entityId = ecs.getEntityID(entity);
+
+		if (entityId == "sfxSoundbarArrow" || entityId == "musicSoundbarArrow")
+		{
+			// ensuring that entity has TransformComponent
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				// change the data in the JSON object based on the entity's 
+				// data 
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+	}
+
+	// checks if the JSON object is able to be saved to the JSON file 
+	if (!serializer.Save(filename))
+	{
+		std::cout << "Error: could not save to file " << filename << std::endl;
+	}
+}
+
 //clones the entity
 Entity ECSCoordinator::cloneEntity(Entity entity)
 {
