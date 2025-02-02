@@ -28,6 +28,7 @@ File Contributions: Lew Zong Han Owen (80%)
 #include "GUIGameViewport.h"
 #include "GUIConsole.h"
 #include "GUIAssetBrowser.h"
+#include "GUIAudioPanel.h"
 #include "GlfwFunctions.h"
 #include "Crashlog.h"
 #include "GlobalCoordinator.h"
@@ -128,6 +129,8 @@ void DebugSystem::initialise() {
 	HierarchyList::Initialise();
 	Inspector::Initialise();
 	AssetBrowser::Initialise();
+	AudioPanel::Initialise();
+
 
 	lastUpdateTime = glfwGetTime();
 }
@@ -285,6 +288,10 @@ void DebugSystem::update() {
 		AssetBrowser::Update();
 		ImGui::End();
 
+		ImGui::Begin("Audio Panel"); //Asset Browser system
+		AudioPanel::Update();
+		ImGui::End();
+
 		ImGui::End();//dockspace
 
 		//Rendering of UI
@@ -307,6 +314,7 @@ void DebugSystem::cleanup() {
 	HierarchyList::Cleanup();
 	Inspector::Cleanup();
 	AssetBrowser::Cleanup();
+	AudioPanel::Cleanup();
 	Console::Cleanup();
 
 	// Clear containers
