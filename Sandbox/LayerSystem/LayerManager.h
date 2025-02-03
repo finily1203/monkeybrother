@@ -43,6 +43,9 @@ public:
 	void removeEntityFromAllLayer(Entity entity);
 	void shiftEntityToLayer(int oriLayer, int newLayer, Entity entity);
 	const std::vector<Entity>& getEntitiesFromLayer(int layer);
+
+	//Entity's position
+	int getEntityLayer(Entity entity);
 	
 private:
 	std::unordered_map<int, Layer>* m_Layers;

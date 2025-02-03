@@ -599,7 +599,7 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
-	int mainMenuScene = -1;
+	//int mainMenuScene = -1;
 
 	if (!serializer.Open(filename))
 	{
@@ -683,7 +683,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 	 
-	GameViewWindow::setSceneNum(mainMenuScene);
+	//GameViewWindow::setSceneNum(mainMenuScene);
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
 

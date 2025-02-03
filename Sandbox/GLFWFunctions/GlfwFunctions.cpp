@@ -240,8 +240,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = false;
     }
 
-
-
     if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
         audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;

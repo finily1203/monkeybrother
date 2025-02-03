@@ -176,3 +176,13 @@ bool LayerManager::getGuiVisibility(int layer) {
 		return false;
 	}
 }
+
+int LayerManager::getEntityLayer(Entity entity) {
+	for (auto& layer : *m_Layers) {
+		auto& entities = layer.second.entities;
+		if (std::find(entities.begin(), entities.end(), entity) != entities.end()) {
+			return layer.first; // Returns layer number
+		}
+	}
+	return -1; // Entity not found
+}

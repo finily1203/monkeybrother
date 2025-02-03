@@ -95,19 +95,20 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
 			//check if entity is visible
-			if(layerManager.getEntityVisibility(entity))
-			{ 
+			if (layerManager.getEntityVisibility(entity))
+			{
 				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-			if (mouseIsOverButton(mouseX, mouseY, transform))
-			{
-				handleButtonClick(window, entity);
-
-				std::string entityId = ecsCoordinator.getEntityID(entity);
-				
-				if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+				if (mouseIsOverButton(mouseX, mouseY, transform))
 				{
-					isDragging = true;
+					handleButtonClick(window, entity);
+
+					std::string entityId = ecsCoordinator.getEntityID(entity);
+
+					if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+					{
+						isDragging = true;
+					}
 				}
 			}
 		}

@@ -20,6 +20,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "FontSystemECS.h"
 #include "LogicSystemECS.h"
 #include "BehaviourComponent.h"
+#include "UIComponent.h"
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
 #include "CollectableBehaviour.h"
@@ -43,6 +44,9 @@ int Inspector::draggedEntityID = -1;
 bool Inspector::isSelectingEntity = false;
 bool moveable = false;
 bool checked = false;
+bool isOver = false;
+bool checks[4] = { false };
+static int selected = 0;
 
 
 
@@ -83,26 +87,38 @@ void Inspector::Update() {
 	ImVec2 centeredMouse = GameViewWindow::GetCenteredMousePosition();
 	Console::GetLog() << "Mouse Relative: X: " << centeredMouse.x << " Y: " << centeredMouse.y << std::endl;
 	auto isMouseOverEntity = [&](int entity, float& distanceSquared, bool useCircular = false) -> bool {
-		if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton") {
+		if (ecsCoordinator.hasComponent<ButtonComponent>(entity) || ecsCoordinator.hasComponent<UIComponent>(entity)) {
 			const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			float x = transform.position.GetX();
-			float y = transform.position.GetY();
-			float width = transform.scale.GetX();
-			float height = transform.scale.GetY();
 
-			// Increase collision area by scaling the width and height
-			float collisionScale = 1.8f;  // Adjust this value to make area bigger/smaller
-			width *= collisionScale;
-			height *= collisionScale;
+			float left = -transform.scale.GetX() / 2.0f;
+			float right = transform.scale.GetX() / 2.0f;
+			float top = transform.scale.GetY() / 2.0f;
+			float bottom = -transform.scale.GetY() / 2.0f;
 
-			// Calculate bounds with scaled dimensions
-			double leftBound = x - width * 0.8f;
-			double rightBound = x + width * 0.2f;
-			double topBound = y + height * 0.2;
-			double bottomBound = y - height * 0.5; /*+ height * 0.1*/;
+			// Transform mouse position to local space
+			myMath::Vector2D localMouse(
+				centeredMouse.x - transform.position.GetX(),
+				centeredMouse.y - transform.position.GetY()
+			);
 
-			return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
-				centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
+			// Rotate mouse position back
+			float angle = -transform.orientation.GetX() * (3.14159f / 180.0f); // Convert to radians
+			float cosAngle = cos(angle);
+			float sinAngle = sin(angle);
+			myMath::Vector2D rotatedMouse(
+				localMouse.GetX() * cosAngle - localMouse.GetY() * sinAngle,
+				localMouse.GetX() * sinAngle + localMouse.GetY() * cosAngle
+			);
+
+			// Apply collision scale
+			float collisionScale = 1.8f;
+			float scaledLeft = left * collisionScale;
+			float scaledRight = right * collisionScale;
+			float scaledTop = top * collisionScale;
+			float scaledBottom = bottom * collisionScale;
+
+			return (rotatedMouse.GetX() >= scaledLeft && rotatedMouse.GetX() <= scaledRight &&
+				rotatedMouse.GetY() >= scaledBottom && rotatedMouse.GetY() <= scaledTop);
 		}
 		else
 			if (ecsCoordinator.hasComponent<FontComponent>(entity) &&
@@ -232,30 +248,57 @@ void Inspector::Update() {
 	// Handle dragging
 	if (draggedEntityID != -1 && !isSelectingEntity) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
-		float dx = mouseWorldPos.x - transform.position.GetX();
-		float dy = mouseWorldPos.y - transform.position.GetY();
-		float halfWidth = std::abs(transform.scale.GetX() / 2.0f);
-		float halfHeight = std::abs(transform.scale.GetY() / 2.0f);
+		if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) || ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID)
+			|| ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
+			float left = -transform.scale.GetX() / 2.0f;
+			float right = transform.scale.GetX() / 2.0f;
+			float top = transform.scale.GetY() / 2.0f;
+			float bottom = -transform.scale.GetY() / 2.0f;
 
+			myMath::Vector2D localMouse(
+				centeredMouse.x - transform.position.GetX(),
+				centeredMouse.y - transform.position.GetY()
+			);
 
-		bool withinX = std::abs(dx) <= halfWidth;
-		bool withinY = std::abs(dy) <= halfHeight;
-		if (isInitialClickAfterSelection /*|| !initiatedByDoubleClick*/) {
-			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-				isInitialClickAfterSelection = false;
-				//initiatedByDoubleClick = true;
-			}
+			float angle = -transform.orientation.GetX() * (3.14159f / 180.0f);
+			float cosAngle = cos(angle);
+			float sinAngle = sin(angle);
+			myMath::Vector2D rotatedMouse(
+				localMouse.GetX()* cosAngle - localMouse.GetY() * sinAngle,
+				localMouse.GetX()* sinAngle + localMouse.GetY() * cosAngle
+			);
+
+			float collisionScale = 1.8f;
+			float scaledLeft = left * collisionScale;
+			float scaledRight = right * collisionScale;
+			float scaledTop = top * collisionScale;
+			float scaledBottom = bottom * collisionScale;
+
+			isOver = (rotatedMouse.GetX() >= scaledLeft && rotatedMouse.GetX() <= scaledRight &&
+				rotatedMouse.GetY() >= scaledBottom && rotatedMouse.GetY() <= scaledTop);
 		}
-		else if (/*initiatedByDoubleClick && */ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+		else {
+			float dx = mouseWorldPos.x - transform.position.GetX();
+			float dy = mouseWorldPos.y - transform.position.GetY();
+			float halfWidth = std::abs(transform.scale.GetX() / 2.0f);
+			float halfHeight = std::abs(transform.scale.GetY() / 2.0f);
+			bool withinX = std::abs(dx) <= halfWidth;
+			bool withinY = std::abs(dy) <= halfHeight;
+			if (withinX && withinY)
+				isOver = true;
+			else
+				isOver = false;
+		}
+
+
+		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
-
-			if (withinX && withinY) {
+			if (isOver) {
 				moveable = true;
-
 			}
-
-			if (moveable == true) {
-				if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID)) {
+			if (moveable) {
+				if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) || ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID)
+					|| ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
 					transform.position.SetX(centeredMouse.x);
 					transform.position.SetY(centeredMouse.y);
 				}
@@ -611,6 +654,19 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			ImGui::PopID();
 			ImGui::Separator();
 
+		}
+		int originalLayer = layerManager.getEntityLayer(selectedEntityID);
+		selected = originalLayer;
+		
+		ImGui::RadioButton("0", &selected, 0); ImGui::SameLine();
+		ImGui::RadioButton("1", &selected, 1); ImGui::SameLine();
+		ImGui::RadioButton("2", &selected, 2); ImGui::SameLine();
+		ImGui::RadioButton("3", &selected, 3);
+		ImGui::SameLine();
+		ImGui::Text("Layer");
+
+		if (selected != originalLayer) {
+			layerManager.shiftEntityToLayer(originalLayer, selected, selectedEntityID);
 		}
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
