@@ -583,6 +583,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -635,6 +636,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 		}
 
 		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 	 
 	GameViewWindow::setSceneNum(mainMenuScene);
@@ -661,6 +663,7 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 		// getting the id of the data in the entities array of 
 		// the JSON object 
 		std::string entityId = ecs.getEntityID(entity);
+		//std::string textureId = ecs.getTextureID(entity);
 
 		if (entityId == "sfxSoundbarArrow" || entityId == "musicSoundbarArrow")
 		{

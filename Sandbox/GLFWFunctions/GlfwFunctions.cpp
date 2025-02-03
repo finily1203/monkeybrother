@@ -64,6 +64,7 @@ bool GLFWFunctions::gameOver = false;
 bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
 MouseBehaviour mouseBehaviour;
+double GLFWFunctions::mouseXDelta = 0.0;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -383,13 +384,16 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
+    (void)window;
+    (void)ypos;
+    static double lastX = xpos;
+    mouseXDelta = xpos - lastX;
+    lastX = xpos;
     //On relase it doesn't use since we use cursorPositionEvent for debugging
     if (mouseBehaviour.getIsDragging())
     {
         mouseBehaviour.onMouseDrag(window, xpos, ypos);
     }
-
-    (void)window; (void)xpos; (void)ypos;
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
     if (mouseBehaviour.getIsDragging())
