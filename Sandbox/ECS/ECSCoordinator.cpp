@@ -104,6 +104,8 @@ void ECSCoordinator::destroyEntity(Entity entity)
 	componentManager->entityRemoved(entity);
 	systemManager->entityRemoved(entity);
 
+	//remove entity from layer manager
+	layerManager.removeEntityFromAllLayer(entity);
 }
 
 // this is the definition of the function that loads the data from JSON file to the entity
@@ -141,6 +143,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			textureId = entityData["textureId"].get<std::string>();
 		}*/
 		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			layerManager.addEntityToLayer(0, entityObj);
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -494,8 +505,6 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 		ecs.entityManager->setEntityId(entityObj, entityId);
 		ecs.setTextureID(entityObj, textureId);
 
-		////auto add entity to layer 0
-		//layerManager.addEntityToLayer(0, entityObj);
 	}
 
 	GameViewWindow::setSceneNum(mainMenuScene);
@@ -523,6 +532,15 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			layerManager.addEntityToLayer(0, entityObj);
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -600,6 +618,15 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			layerManager.addEntityToLayer(0, entityObj);
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity

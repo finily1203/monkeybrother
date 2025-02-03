@@ -82,238 +82,247 @@ void GraphicSystemECS::initialise() {
 //and render objects.
 void GraphicSystemECS::update(float dt) {
 
-    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-        // Check if the entity has a transform component
-        auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-        Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
+    //find out how many layers there are
+    //for each layer draw entities in that layer
+	//start from 0 to highest layer (so 0 is drawn first)
 
-		bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
+    for (int i = 0; i < layerManager.getLayerCount(); i++) {
+        //check if layer is visible
+		bool isLayerVisible = layerManager.getLayerVisibility(i);
+        if (isLayerVisible) {
+            for (auto entity : layerManager.getEntitiesFromLayer(i)) {
+                auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+                Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
+
+                bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
 
 
-        // Check if the entity has an animation component
-        auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-        //Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
-        //std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
+                // Check if the entity has an animation component
+                auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                //Console::GetLog() << "Entity: " << entity << " Animation: " << (animation.isAnimated ? "True" : "False") << std::endl;
+                //std::cout << "Entity: " << entity << " Animation: " << (hasAnimation ? "True" : "False") << " isAnimated: " << (animation.isAnimated ? "True" : "False") << std::endl;
 
-        auto entitySig = ecsCoordinator.getEntitySignature(entity);
+                auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
-        bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
-        bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
-        bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-        bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
-        bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
-        bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
-        bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
-        bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
-        bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
-        bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
+                bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
+                bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+                bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
+                bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
+                bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
+                bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
+                bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
+                bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
+                bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+                bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
 
-        // Use hasMovement for the update parameter
-        //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
-        
-        if (animation.isAnimated) {
-            animation.Update();
-        }
+                // Use hasMovement for the update parameter
+                //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
 
-        //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
-        myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
-        transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
+                if (animation.isAnimated) {
+                    animation.Update();
+                }
 
-        // Compute view matrix
-        if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
-            cameraSystem.update();
-        }
-        else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            cameraSystem.lockToComponent(transform);
-            cameraSystem.update();
-        }
+                //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
+                myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
-        mouseBehaviour.update(entity);
+                // Compute view matrix
+                if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
+                    cameraSystem.update();
+                }
+                else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                    cameraSystem.lockToComponent(transform);
+                    cameraSystem.update();
+                }
 
-        /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
-        /*--------------------------------------------------------------------------------
-        --------------------------------------------------------------------------------*/
+                mouseBehaviour.update(entity);
 
-        // check if the player has collected all the collectables
-        // Created a win text entity
-        if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::gameOver == false && GameViewWindow::getSceneNum() > -1) {
-            createTextEntity(
-                ecsCoordinator,
-                "You Win!",
-                "Antonio",
-                myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
-                myMath::Vector2D(-30, 40),         // Position
-                "winTextBox"                       // Unique ID
-            );
-            GLFWFunctions::gameOver = true;
-        }
-        // lose text entity
-        if (GLFWFunctions::instantLose && GLFWFunctions::gameOver == false) {
-            createTextEntity(
-                ecsCoordinator,
-                "You Lose!",
-                "Antonio",
-                myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
-                myMath::Vector2D(-30, 40),          // Position
-                "loseTextBox"                       // Unique ID
-            );
-            GLFWFunctions::gameOver = true;
-        }
-        // 
-        if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
-            if (ecsCoordinator.getEntityID(entity) == "winTextBox")
-            {
-                auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
-                font.text = "Exit!";
-            }
-        }
-        // cheat code 
-        if (GLFWFunctions::instantWin)
-        {
-            GLFWFunctions::collectableCount = 0;
-        }
+                /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
+                /*--------------------------------------------------------------------------------
+                --------------------------------------------------------------------------------*/
 
-        // TODO:: Update AABB component inside game loop
-        // Press F1 to draw out debug AABB
-        if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" || 
-                ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" || 
-                ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
-                ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
-                ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
-                ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
-            {
-                graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
-            }
+                // check if the player has collected all the collectables
+                // Created a win text entity
+                if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::gameOver == false && GameViewWindow::getSceneNum() > -1) {
+                    createTextEntity(
+                        ecsCoordinator,
+                        "You Win!",
+                        "Antonio",
+                        myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
+                        myMath::Vector2D(-30, 40),         // Position
+                        "winTextBox"                       // Unique ID
+                    );
+                    GLFWFunctions::gameOver = true;
+                }
+                // lose text entity
+                if (GLFWFunctions::instantLose && GLFWFunctions::gameOver == false) {
+                    createTextEntity(
+                        ecsCoordinator,
+                        "You Lose!",
+                        "Antonio",
+                        myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
+                        myMath::Vector2D(-30, 40),          // Position
+                        "loseTextBox"                       // Unique ID
+                    );
+                    GLFWFunctions::gameOver = true;
+                }
+                // 
+                if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
+                    if (ecsCoordinator.getEntityID(entity) == "winTextBox")
+                    {
+                        auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
+                        font.text = "Exit!";
+                    }
+                }
+                // cheat code 
+                if (GLFWFunctions::instantWin)
+                {
+                    GLFWFunctions::collectableCount = 0;
+                }
 
-            else
-            {
-                graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
-            }
-        }
-        else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-            graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
-        }
+                // TODO:: Update AABB component inside game loop
+                // Press F1 to draw out debug AABB
+                if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                    if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" ||
+                        ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" ||
+                        ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
+                        ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
+                        ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
+                        ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
+                    {
+                        graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
+                    }
 
-        else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
-        {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform, animation.currentUVs);
-        }
+                    else
+                    {
+                        graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
+                    }
+                }
+                else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                    graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
+                }
 
-        else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
-        {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform, animation.currentUVs);
-        }
+                else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+                {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform, animation.currentUVs);
+                }
 
-        else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
-        {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform, animation.currentUVs);
-        }
+                else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform, animation.currentUVs);
+                }
 
-        if (isUI) {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform, animation.currentUVs);
+                }
 
-            if (GLFWFunctions::collectableCount == 0) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-3");
-            }
-            else if (GLFWFunctions::collectableCount == 1) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-2");
-            }
-            else if (GLFWFunctions::collectableCount == 2) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-1");
-            }
-            else if (GLFWFunctions::collectableCount >= 3) {
-                ecsCoordinator.setTextureID(entity, "UI Counter-0");
-            }
-        }
+                if (isUI) {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-        else if (isButton) {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    if (GLFWFunctions::collectableCount == 0) {
+                        ecsCoordinator.setTextureID(entity, "UI Counter-3");
+                    }
+                    else if (GLFWFunctions::collectableCount == 1) {
+                        ecsCoordinator.setTextureID(entity, "UI Counter-2");
+                    }
+                    else if (GLFWFunctions::collectableCount == 2) {
+                        ecsCoordinator.setTextureID(entity, "UI Counter-1");
+                    }
+                    else if (GLFWFunctions::collectableCount >= 3) {
+                        ecsCoordinator.setTextureID(entity, "UI Counter-0");
+                    }
+                }
 
-            if (ecsCoordinator.getEntityID(entity) == "quitButton") {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform, animation.currentUVs);
-            }
+                else if (isButton) {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-            else if (ecsCoordinator.getEntityID(entity) == "retryButton")
-            {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform, animation.currentUVs);
-            }
+                    if (ecsCoordinator.getEntityID(entity) == "quitButton") {
+                        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform, animation.currentUVs);
+                    }
 
-            else if (ecsCoordinator.getEntityID(entity) == "startButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveStartButton");
-                else
-					ecsCoordinator.setTextureID(entity, "activeStartButton");
-            }
+                    else if (ecsCoordinator.getEntityID(entity) == "retryButton")
+                    {
+                        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform, animation.currentUVs);
+                    }
 
-            else if (ecsCoordinator.getEntityID(entity) == "resumeButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveResumeButton");
+                    else if (ecsCoordinator.getEntityID(entity) == "startButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveStartButton");
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeStartButton");
+                    }
 
-                else
-					ecsCoordinator.setTextureID(entity, "activeResumeButton");
-            }
+                    else if (ecsCoordinator.getEntityID(entity) == "resumeButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveResumeButton");
 
-            else if (ecsCoordinator.getEntityID(entity) == "optionsButton" || ecsCoordinator.getEntityID(entity) == "pauseOptionsButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveOptionsButton");
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeResumeButton");
+                    }
 
-                else
-					ecsCoordinator.setTextureID(entity, "activeOptionsButton");
-            }
+                    else if (ecsCoordinator.getEntityID(entity) == "optionsButton" || ecsCoordinator.getEntityID(entity) == "pauseOptionsButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveOptionsButton");
 
-            else if (ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveTutorialButton");
-                else
-					ecsCoordinator.setTextureID(entity, "activeTutorialButton");
-            }
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeOptionsButton");
+                    }
 
-            else if (ecsCoordinator.getEntityID(entity) == "confirmButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveConfirmButton");
+                    else if (ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveTutorialButton");
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeTutorialButton");
+                    }
 
-                else
-					ecsCoordinator.setTextureID(entity, "activeConfirmButton");
-            }
+                    else if (ecsCoordinator.getEntityID(entity) == "confirmButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveConfirmButton");
 
-            else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton" || ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
-            {
-                if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
-					ecsCoordinator.setTextureID(entity, "unactiveQuitButton");
-                else
-					ecsCoordinator.setTextureID(entity, "activeQuitButton");
-            }
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeConfirmButton");
+                    }
 
-            else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
-            {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform, animation.currentUVs);
-            }
-        }
+                    else if (ecsCoordinator.getEntityID(entity) == "quitWindowButton" || ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                            ecsCoordinator.setTextureID(entity, "unactiveQuitButton");
+                        else
+                            ecsCoordinator.setTextureID(entity, "activeQuitButton");
+                    }
 
-            if (ecsCoordinator.getTextureID(entity) != "") {
-                //if (entityAnimate) {
+                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+                    {
+                        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform, animation.currentUVs);
+                    }
+                }
+
+                if (ecsCoordinator.getTextureID(entity) != "") {
+                    //if (entityAnimate) {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
-				//}
-                //else {
-                //    std::vector<glm::vec2> UVs{
-                //        glm::vec2(1.0f, 1.0f),
-                //        glm::vec2(1.0f, 0.0f),
-                //        glm::vec2(0.0f, 0.0f),
-                //        glm::vec2(0.0f, 1.0f)
-                //    };
-                //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, UVs);
-                //}
+                    //}
+                    //else {
+                    //    std::vector<glm::vec2> UVs{
+                    //        glm::vec2(1.0f, 1.0f),
+                    //        glm::vec2(1.0f, 0.0f),
+                    //        glm::vec2(0.0f, 0.0f),
+                    //        glm::vec2(0.0f, 1.0f)
+                    //    };
+                    //    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, UVs);
+                    //}
+                }
             }
         }
     }
+}
 
 
 void GraphicSystemECS::cleanup() {}
