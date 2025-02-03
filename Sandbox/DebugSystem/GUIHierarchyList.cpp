@@ -24,16 +24,16 @@ void HierarchyList::Initialise() {
 }
 
 void HierarchyList::Update() {
-	ImGui::Begin("Hierarchy List");
+    ImGui::Begin("Hierarchy List");
 
-    static int layerToClear = -1; //can't set to 0 cause layer 0 exists
+    static int layerToClear = -1; // -1 because layer 0 is a layer
     static bool showPopup = false;
+    static int entityDraggedFrom = -1; // -1 because layer 0 is a layer
 
     for (int i = 0; i < layerManager.getLayerCount(); i++) {
         char label[64];
         snprintf(label, sizeof(label), "Layer %d", i);
 
-        //Using treenode for each layer
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
         bool guiVisible = layerManager.getGuiVisibility(i);
 
@@ -43,18 +43,29 @@ void HierarchyList::Update() {
 
         bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)i, nodeFlags, "%s", label);
 
-        //Handle click to toggle visibility
+        // Toggle layer visibility on click
         if (ImGui::IsItemClicked()) {
             layerManager.setGuiVisibility(i, !guiVisible);
-
             if (!GameViewWindow::getPaused()) {
                 GameViewWindow::TogglePause();
             }
         }
 
-        //If node open, display entities inside layer
+		//Drop entity to layer
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
+                IM_ASSERT(payload->DataSize == sizeof(int));
+                int draggedEntity = *(const int*)payload->Data;
+
+                // Move entity to the current layer
+                layerManager.shiftEntityToLayer(entityDraggedFrom, i, draggedEntity);
+                Console::GetLog() << "Entity moved to Layer " << i << std::endl;
+            }
+            ImGui::EndDragDropTarget();
+        }
+
         if (nodeOpen) {
-            if (layerManager.getGuiVisibility(i)) {
+            if (guiVisible) {
                 for (auto entity : layerManager.getEntitiesFromLayer(i)) {
                     char buttonLabel[64];
                     auto signature = ecsCoordinator.getEntityID(entity);
@@ -63,43 +74,49 @@ void HierarchyList::Update() {
                     ImGui::PushID(entity);
                     ImGui::PushItemWidth(-1);
 
+                    // Entity button
                     if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
                         Inspector::selectedEntityID = entity;
                         Inspector::draggedEntityID = entity;
+                    }
+
+                    //Drag entity
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                        ImGui::SetDragDropPayload("ENTITY_DRAG", &entity, sizeof(int)); // Send entity ID
+                        ImGui::Text("Moving %s", buttonLabel); // Drag label
+                        ImGui::EndDragDropSource();
+						entityDraggedFrom = i;
                     }
 
                     ImGui::PopItemWidth();
                     ImGui::PopID();
                 }
             }
+
+            // Clear Layer Button
             char clearButton[32];
             snprintf(clearButton, sizeof(clearButton), "Clear Layer %d", i);
             if (ImGui::Button(clearButton)) {
-                //pop up appear
                 layerToClear = i;
-				showPopup = true;
+                showPopup = true;
             }
 
             ImGui::SameLine();
-			char visibilityButton[32];
-			//check visibility of layer
-			bool isVisible = layerManager.getLayerVisibility(i);
-            if(isVisible)
-			    snprintf(visibilityButton, sizeof(visibilityButton), "Disable Layer %d", i);
-            else
-				snprintf(visibilityButton, sizeof(visibilityButton), "Enable Layer %d", i);
+            char visibilityButton[32];
+            bool isVisible = layerManager.getLayerVisibility(i);
+            snprintf(visibilityButton, sizeof(visibilityButton), isVisible ? "Disable Layer %d" : "Enable Layer %d", i);
 
-			if (ImGui::Button(visibilityButton)) {
-				layerManager.setLayerVisibility(i, !isVisible);
-			}
+            if (ImGui::Button(visibilityButton)) {
+                layerManager.setLayerVisibility(i, !isVisible);
+            }
 
-            ImGui::TreePop();  // Always call TreePop when nodeOpen is true
+            ImGui::TreePop();
         }
     }
 
-	if (showPopup) {
-		ImGui::OpenPopup("Clear Layer?");
-	}
+    if (showPopup) {
+        ImGui::OpenPopup("Clear Layer?");
+    }
 
     if (ImGui::BeginPopupModal("Clear Layer?", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Are you sure you want to clear Layer %d?", layerToClear);
@@ -108,8 +125,7 @@ void HierarchyList::Update() {
                 Console::GetLog() << "Layer " << layerToClear << " cleared" << std::endl;
             }
             else {
-                Console::GetLog() << "You can't clear layer 0! || Layer trying to clear does not exist!" << std::endl;
-                Console::GetLog() << "Refer to console to see exact reason" << std::endl;
+                Console::GetLog() << "Cannot clear layer 0 or invalid layer!" << std::endl;
             }
             layerToClear = -1;
             showPopup = false;
@@ -117,14 +133,14 @@ void HierarchyList::Update() {
         }
         ImGui::SameLine();
         if (ImGui::Button("No")) {
-			layerToClear = -1;
+            layerToClear = -1;
             showPopup = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
     }
 
-	ImGui::End();
+    ImGui::End();
 }
 
 void HierarchyList::LoadHierarchyListFromJSON(std::string const& filename)
