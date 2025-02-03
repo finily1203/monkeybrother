@@ -199,19 +199,19 @@ void GraphicSystemECS::update(float dt) {
 
         else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
         {
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform, animation.currentUVs);
+            ecsCoordinator.setTextureID(entity, "gameLogo");
         }
 
         else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
         {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform, animation.currentUVs);
+            ecsCoordinator.setTextureID(entity, "pauseMenu");
         }
 
         else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
         {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform, animation.currentUVs);
+            ecsCoordinator.setTextureID(entity, "optionsMenu");
         }
 
         if (isUI) {
@@ -235,12 +235,12 @@ void GraphicSystemECS::update(float dt) {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
             if (ecsCoordinator.getEntityID(entity) == "quitButton") {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonQuit"), transform.mdl_xform, animation.currentUVs);
+                ecsCoordinator.setTextureID(entity, "buttonQuit");
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "retryButton")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform, animation.currentUVs);
+                ecsCoordinator.setTextureID(entity, "buttonRetry");
             }
 
             else if (ecsCoordinator.getEntityID(entity) == "startButton")

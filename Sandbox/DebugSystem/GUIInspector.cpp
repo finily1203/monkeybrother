@@ -768,7 +768,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	}
 
 	 // State variable
-	if (ImGui::Checkbox("Label", &checked)) {
+	if (ImGui::Checkbox("Animation", &checked)) {
 		if (checked) {
 			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
 				AnimationComponent animation{};
