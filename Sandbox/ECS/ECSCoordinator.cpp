@@ -399,6 +399,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 		ecs.entityManager->setTextureId(entityObj, textureId);
+
+
+		//auto add entity to layer 0
+		/*layerManager.addEntityToLayer(0, entityObj);*/
 	}
 }
 
@@ -425,6 +429,15 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
 		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			layerManager.addEntityToLayer(0, entityObj);
+		}
 
 		// read all of the data from the JSON object and assign the data
 		// to the current entity
@@ -476,9 +489,13 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 
 			ecs.addComponent(entityObj, behaviour);
 		}
+		
 
 		ecs.entityManager->setEntityId(entityObj, entityId);
 		ecs.setTextureID(entityObj, textureId);
+
+		////auto add entity to layer 0
+		//layerManager.addEntityToLayer(0, entityObj);
 	}
 
 	GameViewWindow::setSceneNum(mainMenuScene);

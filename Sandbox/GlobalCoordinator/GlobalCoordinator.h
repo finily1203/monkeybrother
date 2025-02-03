@@ -19,6 +19,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AudioSystem.h"
 #include "CameraSystem2D.h"
 #include "FontSystem.h"
+#include "LayerManager.h"
 
 enum SystemType { //For perfomance viewer
 	AudioSystemType,
@@ -28,7 +29,8 @@ enum SystemType { //For perfomance viewer
 	CameraType,
 	ECSType,
 	AssetsManagerType,
-	FontType
+	FontType,
+	LayerManagerType
 };
 
 extern AudioSystem audioSystem;
@@ -38,3 +40,4 @@ extern GraphicsSystem graphicsSystem;
 extern CameraSystem2D cameraSystem;
 extern DebugSystem debugSystem;
 extern FontSystem fontSystem;
+extern LayerManager layerManager;

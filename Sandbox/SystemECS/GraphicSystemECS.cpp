@@ -82,7 +82,6 @@ void GraphicSystemECS::initialise() {
 //and render objects.
 void GraphicSystemECS::update(float dt) {
 
-
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         // Check if the entity has a transform component
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);

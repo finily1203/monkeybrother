@@ -19,3 +19,4 @@ AssetsManager assetsManager;
 CameraSystem2D cameraSystem;
 FontSystem fontSystem;
 AudioSystem audioSystem;
+LayerManager layerManager;

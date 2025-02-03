@@ -64,6 +64,9 @@ void Engine::updateSystem() {
 		case SystemType::FontType:
 			debugSystem.StartSystemTiming("FontSystem");
 			break;
+		case SystemType::LayerManagerType:
+			debugSystem.EndSystemTiming("LayerManager");
+			break;
 		default:
 			break;
 		}
@@ -96,6 +99,9 @@ void Engine::updateSystem() {
 		case SystemType::FontType:
 			debugSystem.EndSystemTiming("FontSystem");
 			break;
+		case SystemType::LayerManagerType:
+			debugSystem.EndSystemTiming("LayerManager");
+			break;
 		default:
 			break;
 		}
@@ -113,7 +119,7 @@ void Engine::cleanupSystem() {
 			
 			if (system != &ecsCoordinator && system != &debugSystem && system != &fontSystem 
 				&& system != &assetsManager && system != &graphicsSystem && system != &cameraSystem
-				&& system != &audioSystem) {
+				&& system != &audioSystem && system != &layerManager ) {
 				delete system;
 			}
 		}
