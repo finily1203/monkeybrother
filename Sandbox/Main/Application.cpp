@@ -65,6 +65,8 @@ int main() {
 
 		engine->addSystem(&cameraSystem);
 
+		engine->addSystem(&layerManager);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 

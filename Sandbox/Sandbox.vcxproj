@@ -60,7 +60,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;$(SolutionDir)Sandbox\SystemECS\Scripts;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;$(SolutionDir)Sandbox\LayerSystem</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -89,7 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLFW\include;$(SolutionDir)lib\GLEW\include;$(SolutionDir)lib\FMOD\core\inc;$(SolutionDir)lib\FMOD\studio\inc;$(SolutionDir)lib\freetype\include;$(SolutionDir)Sandbox\include;$(SolutionDir)Sandbox\WindowSystem;$(SolutionDir)Sandbox\Engine;$(SolutionDir)Sandbox\GLFWFunctions;$(SolutionDir)Sandbox\AllTests;$(SolutionDir)Sandbox\Graphics;$(SolutionDir)Sandbox\ImGui;$(SolutionDir)Sandbox\DebugSystem;$(SolutionDir)Sandbox\ECS;$(SolutionDir)Sandbox\MathLibrary;$(SolutionDir)Sandbox\AudioSystem;$(SolutionDir)Sandbox\Components;$(SolutionDir)Sandbox\TransformSystem;$(SolutionDir)Sandbox\SystemECS;$(SolutionDir)Sandbox\GlobalCoordinator;$(SolutionDir)Sandbox\AssetsManager;$(SolutionDir)Sandbox\LayerSystem</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -147,6 +147,7 @@
     <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="LayerSystem\LayerManager.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="GLFWFunctions\GlfwFunctions.cpp" />
     <ClCompile Include="ECS\EntityManager.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="Graphics\GraphicsSystem.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="LayerSystem\LayerManager.h" />
     <ClInclude Include="MathLibrary\matrix3x3.h" />
     <ClInclude Include="MathLibrary\vector2D.h" />
     <ClInclude Include="MathLibrary\vector3D.h" />

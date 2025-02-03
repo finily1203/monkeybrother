@@ -36,15 +36,25 @@ void LogicSystemECS::cleanup() {
 
 
 void LogicSystemECS::update(float dt) {
-	//for each entity, update the behaviour
-	for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-		if (behaviours.find(entity) != behaviours.end()) {
-			behaviours[entity]->update(entity);
+	//check each layer if they visible, if layer not visible, do not update
+	for (int i = 0; i < layerManager.getLayerCount(); i++) {
+		bool isLayerVisible = layerManager.getLayerVisibility(i);
+		if (isLayerVisible) {
+			for (auto entity : layerManager.getEntitiesFromLayer(i)) {
+				if (behaviours.find(entity) != behaviours.end()) {
+					behaviours[entity]->update(entity);
+				}
+			}
 		}
 	}
+	//for each entity, update the behaviour
+	//for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+	//	if (behaviours.find(entity) != behaviours.end()) {
+	//		behaviours[entity]->update(entity);
+	//	}
+	//}
 
 	(void)dt;
-
 }
 
 void LogicSystemECS::assignBehaviour(Entity entity, std::shared_ptr<BehaviourECS> behaviour) {
@@ -84,7 +94,10 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 	{
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
-			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			//check if entity is visible
+			if(layerManager.getEntityVisibility(entity))
+			{ 
+				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
@@ -164,14 +177,19 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 	{
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
-			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-
-			if (mouseIsOverButton(mouseX, mouseY, transform))
+			//check if entity is visible
+			if (layerManager.getEntityVisibility(entity))
 			{
-				glfwSetCursor(GLFWFunctions::pWindow, cursor);
-				GLFWFunctions::isHovering = true;
-				setHoveredButton(ecsCoordinator.getEntityID(entity));
-				return;
+				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
+
+				if (mouseIsOverButton(mouseX, mouseY, transform))
+				{
+					glfwSetCursor(GLFWFunctions::pWindow, cursor);
+					GLFWFunctions::isHovering = true;
+					setHoveredButton(ecsCoordinator.getEntityID(entity));
+					return;
+				}
 			}
 		}
 	}

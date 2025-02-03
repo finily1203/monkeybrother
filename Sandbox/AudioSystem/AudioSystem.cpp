@@ -30,17 +30,20 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
-                           , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
+, ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
                            , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f)
 {
-    //channelList["BGM"] = bgmChannel;
-    //channelList["Sound Effect"] = soundEffectChannel;
-    //channelList["Asset Browser"] = assetBrowserChannel;
-    //channelList["Ambience"] = ambienceChannel;
-    //channelList["Pump"] = pumpChannel;
-    //channelList["Rotation"] = rotationChannel;
 
-	//std::cout << "Channel List size: " << channelList.size() << std::endl;
+	channelList = new std::vector<std::pair<std::string,FMOD::Channel*>>();
+
+    channelList->push_back(std::make_pair("BGM", bgmChannel));
+	channelList->push_back(std::make_pair("SFX", soundEffectChannel));
+	channelList->push_back(std::make_pair("AssetBrowser", assetBrowserChannel));
+	channelList->push_back(std::make_pair("Ambience", ambienceChannel));
+	channelList->push_back(std::make_pair("Pump", pumpChannel));
+	channelList->push_back(std::make_pair("Rotation", rotationChannel));
+
+	//std::cout << "Channel List size: " << channelList->size() << std::endl;
 }
 AudioSystem::~AudioSystem() {}
 
@@ -229,6 +232,7 @@ void AudioSystem::update() {
 			incAllVol();
             (*GLFWFunctions::keyState)[Key::PERIOD] = false;
         }
+
     }
 
     assetsManager.GetAudioSystem()->update();
@@ -236,6 +240,8 @@ void AudioSystem::update() {
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
 void AudioSystem::cleanup() {
+    delete channelList;
+    channelList = nullptr;
 
 }
 
@@ -262,8 +268,6 @@ void AudioSystem::playSong(const std::string& songName) {
 
 void AudioSystem::playBgm(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
-
-
     if (bgmChannel) {
         FMOD_RESULT result = bgmChannel->stop();
         if (result != FMOD_OK) {
@@ -392,4 +396,31 @@ void AudioSystem::incAllVol()
     assetBrowserChannel->setVolume(sfxVol);
     pumpChannel->setVolume(sfxVol * 0.1f);
     rotationChannel->setVolume(sfxVol);
+}
+
+std::vector<std::pair<std::string, FMOD::Channel*>> AudioSystem::getChannelList() const
+{
+    return *channelList;
+}
+
+float AudioSystem::getGenVol() const {
+	return genVol;
+}
+float AudioSystem::getBgmVol() const {
+	return bgmVol;
+}
+float AudioSystem::getSfxVol() const {
+	return sfxVol;
+}
+
+void AudioSystem::setGenVol(float volPerc) {
+    float genVol = volPerc / 100.0f;
+}
+
+void AudioSystem::setBgmVol(float volPerc) {
+	float bgmVol = volPerc / 200.0f;
+
+}
+void AudioSystem::setSfxVol(float volPerc) {
+	float sfxVol = volPerc / 100.0f;
 }

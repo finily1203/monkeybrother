@@ -35,6 +35,8 @@ public:
 	void cleanup() override;
 	SystemType getSystem() override; //For perfomance viewer
 
+	std::vector<std::pair<std::string, FMOD::Channel*>> getChannelList() const;
+
 	//Function to add song into the songlist 
 	//void addSong(const std::string& songPath);
 
@@ -61,10 +63,20 @@ public:
 	void decAllVol();
 	void incAllVol();
 
+	float getGenVol() const;
+	float getBgmVol() const;
+	float getSfxVol() const;
+
+	void setGenVol(float volPerc);
+	void setBgmVol(float volPerc);
+	void setSfxVol(float volPerc);
+
 private:
 	//FMOD::System* audioSystem;
 	/*std::unordered_map<std::string, FMOD::Channel*> channelList;*/
 	/*std::vector<std::pair<std::string, FMOD::Channel*>> channelList;*/
+
+	std::vector<std::pair<std::string,FMOD::Channel*>>* channelList;
 
 	FMOD::Channel* bgmChannel;
 	FMOD::Channel* soundEffectChannel;

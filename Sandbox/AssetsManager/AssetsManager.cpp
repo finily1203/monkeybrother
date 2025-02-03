@@ -334,7 +334,7 @@ FMOD::Sound* AssetsManager::GetAudio(const std::string& name) const {
 		return iterator->second;
 	}
     else {
-		std::cerr << "Audio not found!" << std::endl;
+		std::cerr << "Audio " << name << " not found!" << std::endl;
 		return 0;
 	}
 }

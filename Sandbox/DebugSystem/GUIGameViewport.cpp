@@ -714,6 +714,9 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 
+	//default add to layer 0
+	layerManager.addEntityToLayer(0, dropEntity);
+
 	TransformComponent transform;
 	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
@@ -768,6 +771,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 
 	ecsCoordinator.setTextureID(dropEntity, assetName);
 	ecsCoordinator.setEntityID(dropEntity, entityId);
+
 }
 
 std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
@@ -1297,6 +1301,9 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 
 	ecsCoordinator.setEntityID(prefabEntity, entityId);
 	ecsCoordinator.setTextureID(prefabEntity, textureId);
+
+	//default add to layer 0
+	layerManager.addEntityToLayer(0, prefabEntity);
 
 	TransformComponent transform;
 	serializer.ReadObject(transform.mdl_xform, filepath, "transform.localTransform");

@@ -185,6 +185,9 @@ void ObjectCreation::Update() {
 				ecsCoordinator.setEntityID(entityObj, entityId);
 				ObjectCreationCondition(items, currentItem, entityObj, entityId);
 				DebugSystem::newEntities->push_back(entityObj);
+
+				//default add to layer 0
+				layerManager.addEntityToLayer(0, entityObj);
 			}
 		}
 	}
@@ -223,7 +226,8 @@ void ObjectCreation::Update() {
 			ObjectCreationCondition(items, currentItem, entityObj, entityId);
 			DebugSystem::newEntities->push_back(entityObj);
 
-
+			//default add to layer 0
+			layerManager.addEntityToLayer(0, entityObj);
 		}
 	}
 
