@@ -38,6 +38,7 @@ File Contributions: Lew Zong Han Owen (60%)
 enum Specifier {
 	TEXTURE,
 	FONT,
+	PREFAB
 };
 
 //Class for ImGui game viewport window in debugging mode
@@ -45,7 +46,7 @@ class GameViewWindow {
 public:
 	static ImVec2 GetCenteredMousePosition();
 
-	static void TogglePause() { isPaused = !isPaused;}
+	static void TogglePause() { isPaused = !isPaused; }
 	static bool IsPaused() { return isPaused; }
 
 	static ImVec2 NormalizeViewportCoordinates(float screenX, float screenY);
@@ -76,6 +77,9 @@ public:
 
 	static void LoadSceneFromJSON(std::string const& filename);
 	static void SaveSceneToJSON(std::string const& filename);
+
+	static void LoadPrefabFromJSON(std::string const& filename, std::string const& filepath);
+	static std::string GetPrefabJSONPath(std::string const& filename);
 
 	static void createDropEntity(const char* assetName, Specifier specifier);
 

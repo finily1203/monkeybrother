@@ -39,4 +39,5 @@ private:
 	static bool showShaders;
 	static bool showAudio;
 	static bool showFonts;
+	static bool showPrefab;
 };

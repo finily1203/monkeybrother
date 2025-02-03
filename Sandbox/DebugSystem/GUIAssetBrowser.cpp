@@ -25,6 +25,7 @@ bool AssetBrowser::showTextures = false;
 bool AssetBrowser::showShaders = false;
 bool AssetBrowser::showAudio = false;
 bool AssetBrowser::showFonts = false;
+bool AssetBrowser::showPrefab = false;
 
 //Initialise the asset browser
 void AssetBrowser::Initialise()
@@ -54,6 +55,7 @@ void AssetBrowser::Update()
 		{
 			assetNames->push_back(asset);
 		}
+		assetsManager.setAssetListChanged(false);
 	}
 
 	float availWidth = ImGui::GetContentRegionAvail().x - 200.f;
@@ -248,6 +250,51 @@ void AssetBrowser::Update()
 	}
 
 	ImGui::NewLine();
+
+	if (ImGui::Button("Prefabs"))
+	{
+		if (showPrefab == false)
+		{
+			showPrefab = true;
+		}
+		else
+		{
+			showPrefab = false;
+		}
+	}
+	if (showPrefab)
+	{
+		if (columns < 1)
+		{
+			columns = 1;
+		}
+		for (auto& asset : *assetNames)
+		{
+			if (assetsManager.getPrefabList().find(asset) != assetsManager.getPrefabList().end())
+			{
+				ImGui::BeginGroup();
+				ImGui::Image((void*)(intptr_t)assetsManager.GetTexture("fileIcon"), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+				{
+					ImGui::SetDragDropPayload("PREFAB_PAYLOAD", asset.c_str(), asset.size() + 1, ImGuiCond_Once);
+					ImGui::Text("Dragging: %s", asset.c_str());
+					ImGui::EndDragDropSource();
+				}
+				std::string trunStr = cutString(asset, thumbnailSize);
+				ImGui::Text(trunStr.c_str());
+
+				ImGui::EndGroup();
+
+				currItemIndex++;
+				if (currItemIndex % columns != 0)
+				{
+					ImGui::SameLine(); // Place the next item in the same row
+				}
+			}
+		}
+	}
+
+	ImGui::NewLine();
 	ImGui::Separator();
 
 	ImGui::Text("Drag and drop an asset here to delete it:");
@@ -272,6 +319,8 @@ void AssetBrowser::Update()
 			if (assetName)
 			{
 				std::cout << "Deleted shader asset: " << assetName << std::endl;
+				assetsManager.UnloadShader(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "shaderAssets");
 			}
 		}
 		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("AUDIO_PAYLOAD"))
@@ -279,7 +328,9 @@ void AssetBrowser::Update()
 			const char* assetName = (const char*)payloadAud->Data;
 			if (assetName)
 			{
-				std::cout << "Deleted shader asset: " << assetName << std::endl;
+				std::cout << "Deleted audio asset: " << assetName << std::endl;
+				assetsManager.UnloadAudio(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "audioAssets");
 			}
 		}
 		else if (const ImGuiPayload* payloadFont = ImGui::AcceptDragDropPayload("FONT_PAYLOAD"))
@@ -288,6 +339,8 @@ void AssetBrowser::Update()
 			if (assetName)
 			{
 				std::cout << "Deleted font asset: " << assetName << std::endl;
+				assetsManager.UnloadFont(assetName);
+				assetsManager.DeleteAssetFromJSON(assetName, "fontAssets");
 			}
 		}
 		ImGui::EndDragDropTarget();

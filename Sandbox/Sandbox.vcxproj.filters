@@ -48,6 +48,9 @@
     <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
     <ClCompile Include="SystemECS\PlayerBehaviour.cpp" />
     <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
+    <ClCompile Include="SystemECS\FilterBehaviour.cpp" />
+    <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
+    <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -116,6 +119,11 @@
     <ClInclude Include="Components\BackgroundComponent.h" />
     <ClInclude Include="Components\UIComponent.h" />
     <ClInclude Include="SystemECS\PlatformBehaviour.h" />
+    <ClInclude Include="SystemECS\FilterBehaviour.h" />
+    <ClInclude Include="Components\FilterComponent.h" />
+    <ClInclude Include="Components\MovPlatformComponent.h" />
+    <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
+    <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

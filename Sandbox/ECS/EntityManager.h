@@ -39,10 +39,11 @@ public:
 
 	Entity getEntityById(std::string const& id);
 	void setEntityId(Entity entity, std::string const& id);
-	void setTextureId(Entity entity, std::string const& id);
 	std::string getEntityId(Entity entity);
-	std::string getTextureId(Entity entity);
 	Entity getEntityFromId(std::string const& id);
+
+	void setTextureId(Entity entity, std::string const& id);
+	std::string getTextureId(Entity entity);
 
 	std::unordered_map<Entity, std::string> getEntityMap() const;
 

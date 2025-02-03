@@ -23,6 +23,8 @@ struct BehaviourComponent
 	bool collectable;
 	bool button;
 	bool platform;
+	bool filter;
+	bool movPlatform;
 
-	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false), platform(false) {}
+	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false), platform(false), filter(false), movPlatform(false) {}
 };

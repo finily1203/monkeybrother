@@ -40,6 +40,8 @@ File Contributions: Lew Zong Han Owen (60%)
 #include "ExitBehaviour.h"
 #include "BackgroundComponent.h"
 #include "PlatformBehaviour.h"
+#include "MovPlatformBehaviour.h"
+#include "FilterBehaviour.h"
 #include "UIComponent.h"
 
 //Variables for GameViewWindow
@@ -451,7 +453,7 @@ void GameViewWindow::Update() {
 
 		// Clamp the new zoom value between min and max
 		currentZoom = std::clamp(currentZoom, MIN_ZOOM, MAX_ZOOM);
-		
+
 		cameraSystem.setCameraZoom(currentZoom);
 	}
 
@@ -467,7 +469,7 @@ void GameViewWindow::Update() {
 			const char* assetName = (const char*)payloadTex->Data;
 			createDropEntity(assetName, TEXTURE);
 			std::cout << "Dropped Texture: " << assetName << std::endl;
-			
+
 		}
 		else if (const ImGuiPayload* payloadShdr = ImGui::AcceptDragDropPayload("SHADER_PAYLOAD")) {
 			const char* assetName = (const char*)payloadShdr->Data;
@@ -479,6 +481,11 @@ void GameViewWindow::Update() {
 			createDropEntity(assetName, FONT);
 			std::cout << "Dropped Font: " << assetName << std::endl;
 
+		}
+		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("PREFAB_PAYLOAD")) {
+			const char* assetName = (const char*)payloadAud->Data;
+			createDropEntity(assetName, PREFAB);
+			std::cout << "Dropped prefab: " << assetName << std::endl;
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -497,7 +504,7 @@ void GameViewWindow::Cleanup() {
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
-		if (viewportTexture != 0) {
+	if (viewportTexture != 0) {
 		glDeleteTextures(1, &viewportTexture);
 	}
 
@@ -592,7 +599,7 @@ ImVec2 GameViewWindow::GetCenteredPosForViewport(ImVec2 size)
 
 		// Move camera position
 		myMath::Vector2D camPos = cameraSystem.getCameraPosition();
-		
+
 		float zoomAdjustedSpeed = mouseDragSpeed * (2.0f / currentZoom);
 		camPos.SetX(camPos.GetX() + (currentMouseDragDist.x - mouseDragDist.x) * zoomAdjustedSpeed);
 		camPos.SetY(camPos.GetY() - (currentMouseDragDist.y - mouseDragDist.y) * zoomAdjustedSpeed);
@@ -642,16 +649,23 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 
 //Create entity from drag and drop
 void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
+	if (specifier == PREFAB)
+	{
+		std::string assetPath = assetsManager.GetPrefabPath(assetName);
+		LoadPrefabFromJSON(assetName, assetPath);
+		return;
+	}
+
+
 	Entity dropEntity = ecsCoordinator.createEntity();
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-
 
 	TransformComponent transform;
 	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
 	transform.scale = { 100.0f, 100.0f };
 	transform.orientation = { 0.0f, 0.0f };
-	
+
 	ecsCoordinator.addComponent(dropEntity, transform);
 
 	BehaviourComponent behaviour;
@@ -663,6 +677,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 	// Add the appropriate components based on the specifier
 	switch (specifier) {
 	case TEXTURE:
+		{
 			if (strcmp(assetName, "goldfish") == 0) {
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
@@ -681,21 +696,23 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 				ecsCoordinator.addComponent(dropEntity, physics);
 			}
 
-		break;
+			break;
+		}
 	case FONT:
-		FontComponent font;
-		font.fontId = assetName;
-		font.text = "Temporary";
-		font.textScale = 1.0f;
-		font.textBoxWidth = 300.0f;
-		font.color = { 1.0f, 1.0f, 1.0f };
-		ecsCoordinator.addComponent(dropEntity, font);
-		break;
+		{
+			FontComponent font;
+			font.fontId = assetName;
+			font.text = "Temporary";
+			font.textScale = 1.0f;
+			font.textBoxWidth = 300.0f;
+			font.color = { 1.0f, 1.0f, 1.0f };
+			ecsCoordinator.addComponent(dropEntity, font);
+			break;
+		}
 	}
-
 	std::string entityId = "Object" + std::to_string(objectCounter);
 	objectCounter++;
-	
+
 	ecsCoordinator.setTextureID(dropEntity, assetName);
 	ecsCoordinator.setEntityID(dropEntity, entityId);
 }
@@ -825,9 +842,16 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		entityJSON["closestPlatform"] = { {"isClosest", platform.isClosest} };
 	}
 
-	/*if (ecs.hasComponent<AnimationComponent>(entity)) {
-		entityJSON["animation"] = { {"isAnimated", true} };
-	}*/
+	if (ecs.hasComponent<AnimationComponent>(entity)) {
+		auto& animation = ecs.getComponent<AnimationComponent>(entity);
+		entityJSON["animation"] = {
+			{"isAnimated", animation.isAnimated},
+			{"totalFrames", animation.totalFrames},
+			{"frameTime", animation.frameTime},
+			{"columns", animation.columns},
+			{"rows", animation.rows}
+		};
+	}
 
 	if (ecs.hasComponent<FontComponent>(entity)) {
 		auto& fontComp = ecs.getComponent<FontComponent>(entity);
@@ -849,7 +873,7 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			}}
 		};
 	}
-	
+
 	if (ecs.hasComponent<PlayerComponent>(entity)) {
 		auto& player = ecs.getComponent<PlayerComponent>(entity);
 		player.isPlayer = true;
@@ -954,7 +978,7 @@ ImVec2 GameViewWindow::GetCenteredMousePosition() {
 		return ImVec2(0, 0);
 	}
 
-	// Map the coordinates to ±800 x ±450 range
+	// Map the coordinates to ?800 x ?450 range
 	float normalizedX = (sceneX / aspectSize.x) * 800.0f * 2.0f;
 	float normalizedY = (sceneY / aspectSize.y) * 450.0f * 2.0f;
 
@@ -1005,11 +1029,11 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 
 	// Apply pan offset
 	//if (clickedScreenPan) {
-		double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
-		double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
+	double panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+	double panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
-		worldX += panX * cosAngle - panY * sinAngle;
-		worldY += panX * sinAngle + panY * cosAngle;
+	worldX += panX * cosAngle - panY * sinAngle;
+	worldY += panX * sinAngle + panY * cosAngle;
 	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
@@ -1075,11 +1099,11 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 
 	// Apply pan offset
 	//if (clickedScreenPan) {
-		float panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
-		float panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
+	float panX = accumulatedMouseDragDist.x / (currentZoom * GLFWFunctions::windowWidth);
+	float panY = accumulatedMouseDragDist.y / (currentZoom * GLFWFunctions::windowHeight);
 
-		worldX += panX * cosAngle - panY * sinAngle;
-		worldY += panX * sinAngle + panY * cosAngle;
+	worldX += panX * cosAngle - panY * sinAngle;
+	worldY += panX * sinAngle + panY * cosAngle;
 	//}
 
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
@@ -1094,6 +1118,8 @@ ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {
 void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
+
+	std::cout << filename << std::endl;
 
 	// checks if JSON file can be opened
 	if (!serializer.Open(filename))
@@ -1184,4 +1210,175 @@ void GameViewWindow::SaveSceneToJSON(std::string const& filename)
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
 	serializer.WriteInt(scene, "scene", filename);
+}
+
+std::string GameViewWindow::GetPrefabJSONPath(std::string const& filename)
+{
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\prefabs\\" + filename;
+	return jsonPath;
+}
+
+void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string const& filepath)
+{
+	JSONSerializer serializer;
+
+	//extract out last part of the file path
+	std::string assetPathName = filepath.substr(filepath.find_last_of("\\/") + 1);
+    assetPathName = GetPrefabJSONPath(assetPathName);
+
+	if (!serializer.Open(assetPathName))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
+	Entity prefabEntity = ecsCoordinator.createEntity();
+	//get entity ID and texture ID
+	std::string entityId = currentObj["id"];
+	entityId += std::to_string(objectCounter); 
+	std::string textureId = currentObj["textureId"];
+
+	ecsCoordinator.setEntityID(prefabEntity, entityId);
+	ecsCoordinator.setTextureID(prefabEntity, textureId);
+
+	TransformComponent transform;
+	serializer.ReadObject(transform.mdl_xform, filepath, "transform.localTransform");
+	serializer.ReadObject(transform.orientation, filepath, "transform.orientation");
+	serializer.ReadObject(transform.position, filepath, "transform.position");
+	serializer.ReadObject(transform.mdl_to_ndc_xform, filepath, "transform.projectionMatrix");
+	serializer.ReadObject(transform.scale, filepath, "transform.scale");
+
+	ecsCoordinator.addComponent(prefabEntity, transform);
+
+	// Add the appropriate components based on the specifier
+	if (currentObj.contains("aabb")) {
+		AABBComponent aabb;
+		serializer.ReadObject(aabb.bottom, filepath, "aabb.bottom");
+		serializer.ReadObject(aabb.left, filepath, "aabb.left");
+		serializer.ReadObject(aabb.right, filepath, "aabb.right");
+		serializer.ReadObject(aabb.top, filepath, "aabb.top");
+
+		ecsCoordinator.addComponent(prefabEntity, aabb);
+	}
+
+	if (currentObj.contains("forces")) {
+		PhysicsComponent forces{};
+
+		myMath::Vector2D direction = forces.force.GetDirection();
+		float magnitude = forces.force.GetMagnitude();
+
+		serializer.ReadObject(forces.mass, entityId, "forces.mass");
+		serializer.ReadObject(forces.gravityScale, entityId, "forces.gravityScale");
+		serializer.ReadObject(forces.jump, entityId, "forces.jump");
+		serializer.ReadObject(forces.dampening, entityId, "forces.dampening");
+		serializer.ReadObject(forces.velocity, entityId, "forces.velocity");
+		serializer.ReadObject(forces.maxVelocity, entityId, "forces.maxVelocity");
+		serializer.ReadObject(forces.acceleration, entityId, "forces.acceleration");
+		serializer.ReadObject(direction, entityId, "forces.force.direction");
+		serializer.ReadObject(magnitude, entityId, "forces.force.magnitude");
+		serializer.ReadObject(forces.accumulatedForce, entityId, "forces.accumulatedForce");
+		serializer.ReadObject(forces.maxAccumulatedForce, entityId, "forces.maxAccumulatedForce");
+		serializer.ReadObject(forces.prevForce, entityId, "forces.prevForce");
+		serializer.ReadObject(forces.targetForce, entityId, "forces.targetForce");
+
+		forces.force.SetDirection(direction);
+		forces.force.SetMagnitude(magnitude);
+
+		ecsCoordinator.addComponent(prefabEntity, forces);
+	}
+
+	if (currentObj.contains("player")) {
+		PlayerComponent player;
+		serializer.ReadObject(player.isPlayer, entityId, " player.isPlayer");
+
+		ecsCoordinator.addComponent(prefabEntity, player);
+	}
+
+	if (currentObj.contains("behaviour")) {
+		BehaviourComponent behaviour{};
+		if (currentObj["behaviour"].contains("none")) {
+			serializer.ReadObject(behaviour.none, entityId, "behaviour.none");
+			logicSystemRef->unassignBehaviour(prefabEntity);
+		}
+		else if (currentObj["behaviour"].contains("player")) {
+			serializer.ReadObject(behaviour.player, entityId, "behaviour.player");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<PlayerBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("enemy")) {
+			serializer.ReadObject(behaviour.enemy, entityId, "behaviour.enemy");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<EnemyBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("pump")) {
+			serializer.ReadObject(behaviour.pump, entityId, "behaviour.pump");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<EffectPumpBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("exit")) {
+			serializer.ReadObject(behaviour.exit, entityId, "behaviour.exit");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<ExitBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("collectable")) {
+			serializer.ReadObject(behaviour.collectable, entityId, "behaviour.collectable");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<CollectableBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("button")) {
+			serializer.ReadObject(behaviour.button, entityId, "behaviour.button");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<MouseBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("platform")) {
+			serializer.ReadObject(behaviour.platform, entityId, "behaviour.platform");
+			//logicSystemRef->assignBehaviour(entityObj, std::make_shared<PlatformBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("filter")) {
+			serializer.ReadObject(behaviour.platform, entityId, "behaviour.filter");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<FilterBehaviour>());
+		}
+		else if (currentObj["behaviour"].contains("movPlatform")) {
+			serializer.ReadObject(behaviour.platform, entityId, "behaviour.movPlatform");
+			logicSystemRef->assignBehaviour(prefabEntity, std::make_shared<MovPlatformBehaviour>());
+		}
+
+		ecsCoordinator.addComponent(prefabEntity, behaviour);
+	}
+
+	if (currentObj.contains("animation")) {
+		AnimationComponent animation;
+		serializer.ReadObject(animation.isAnimated, entityId, "animation.isAnimated");
+		serializer.ReadObject(animation.totalFrames, entityId, "animation.totalFrames");
+		serializer.ReadObject(animation.frameTime, entityId, "animation.frameTime");
+		serializer.ReadObject(animation.columns, entityId, "animation.columns");
+		serializer.ReadObject(animation.rows, entityId, "animation.rows");
+
+		ecsCoordinator.addComponent(prefabEntity, animation);
+	}
+
+	if (currentObj.contains("collectable")) {
+		CollectableComponent collectable;
+		serializer.ReadObject(collectable.isCollectable, entityId, "collectable.isCollectable");
+		ecsCoordinator.addComponent(prefabEntity, collectable);
+	}
+
+	if (currentObj.contains("pump")) {
+		PumpComponent pump;
+		serializer.ReadObject(pump.isPump, entityId, "pump.isPump");
+		serializer.ReadObject(pump.pumpForce, entityId, "pump.pumpForce");
+		serializer.ReadObject(pump.isAnimate, entityId, "pump.isAnimate");
+
+		ecsCoordinator.addComponent(prefabEntity, pump);
+	}
+
+	if (currentObj.contains("filter")) {
+		FilterComponent filter;
+		serializer.ReadObject(filter.isFilter, entityId, "filter.isFilter");
+		ecsCoordinator.addComponent(prefabEntity, filter);
+	}
+
+	if (currentObj.contains("enemy")) {
+		EnemyComponent enemy;
+		serializer.ReadObject(enemy.isEnemy, entityId, "enemy.isEnemy");
+		ecsCoordinator.addComponent(prefabEntity, enemy);
+	}
 }

@@ -96,6 +96,8 @@ struct GLFWFunctions {
 	static int windowWidth;
 	static int windowHeight;
 	static int collectableCount;
+	static int pauseMenuCount;
+	static int optionsMenuCount;
 
 	static int defultWindowWidth;
 	static int defultWindowHeight;
@@ -103,7 +105,10 @@ struct GLFWFunctions {
 	static bool collectAudio;
 	static bool firstCollision;
 	static bool gameOver;
+	static bool isHovering;
+	static bool gamePaused;
 
+	static double mouseXDelta; // Add this to track mouse movement
 
 	static std::unordered_map<Key, bool>* keyState;
 	static std::unordered_map<MouseButton, bool>* mouseButtonState;

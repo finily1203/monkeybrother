@@ -101,6 +101,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)lib\GLFW\lib-vc2022;$(SolutionDir)lib\imGui;$(SolutionDir)lib\GLEW\lib;$(SolutionDir)bin\Debug-x64\monkeybrother;$(SolutionDir)lib\FMOD\studio\lib\x64;$(SolutionDir)lib\FMOD\core\lib\x64;$(SolutionDir)lib\freetype\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>freetype.lib;glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;fmodstudioL_vc.lib;fmod_vc.lib;fmodstudio_vc.lib;fmodstudioL_vc.lib</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -123,6 +124,7 @@
     </ClCompile>
     <ClCompile Include="DebugSystem\Debug.cpp" />
     <ClCompile Include="DebugSystem\GUIAssetBrowser.cpp" />
+    <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
     <ClCompile Include="DebugSystem\GUIConsole.cpp" />
     <ClCompile Include="DebugSystem\GUIGameViewport.cpp" />
     <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
@@ -158,8 +160,10 @@
     <ClCompile Include="SystemECS\EffectPumpBehaviour.cpp" />
     <ClCompile Include="SystemECS\EnemyBehaviour.cpp" />
     <ClCompile Include="SystemECS\ExitBehaviour.cpp" />
+    <ClCompile Include="SystemECS\FilterBehaviour.cpp" />
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
+    <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
@@ -178,8 +182,10 @@
     <ClInclude Include="Components\CollectableComponent.h" />
     <ClInclude Include="Components\EnemyComponent.h" />
     <ClInclude Include="Components\ExitComponent.h" />
+    <ClInclude Include="Components\FilterComponent.h" />
     <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\MovementComponent.h" />
+    <ClInclude Include="Components\MovPlatformComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="Components\PlayerComponent.h" />
@@ -188,6 +194,7 @@
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />
+    <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
     <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
@@ -224,9 +231,11 @@
     <ClInclude Include="SystemECS\EffectPumpBehaviour.h" />
     <ClInclude Include="SystemECS\EnemyBehaviour.h" />
     <ClInclude Include="SystemECS\ExitBehaviour.h" />
+    <ClInclude Include="SystemECS\FilterBehaviour.h" />
     <ClInclude Include="SystemECS\Force.h" />
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
+    <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="SystemECS\PlatformBehaviour.h" />

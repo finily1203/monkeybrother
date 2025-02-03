@@ -49,67 +49,67 @@ void HierarchyList::Update() {
 
 			ImGui::PopID();
 		}
-			//if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
-			//	auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
-			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			//	auto signature = ecsCoordinator.getEntityID(entity);
+		//if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
+		//	auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
+		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		//	auto signature = ecsCoordinator.getEntityID(entity);
 
-			//	size_t maxSize = 1000;
-			//	std::string tempStr = fontComp.text;
-			//	memset(textBuffer, 0, MAXTEXTSIZE);
-			//	size_t length = std::min(tempStr.length(), maxSize);
-			//	for (size_t i = 0; i < length; i++)
-			//	{
-			//		textBuffer[i] = tempStr[i];
-			//	}
-			//	ImGui::PushID(entity);
+		//	size_t maxSize = 1000;
+		//	std::string tempStr = fontComp.text;
+		//	memset(textBuffer, 0, MAXTEXTSIZE);
+		//	size_t length = std::min(tempStr.length(), maxSize);
+		//	for (size_t i = 0; i < length; i++)
+		//	{
+		//		textBuffer[i] = tempStr[i];
+		//	}
+		//	ImGui::PushID(entity);
 
-			//	char buttonLabel[64];
-			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-			//	ImGui::PushItemWidth(-1);
-			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-			//		Inspector::selectedEntityID = entity;
-			//	}
-			//	ImGui::PopItemWidth();
+		//	char buttonLabel[64];
+		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+		//	ImGui::PushItemWidth(-1);
+		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+		//		Inspector::selectedEntityID = entity;
+		//	}
+		//	ImGui::PopItemWidth();
 
-			//	ImGui::PopID();
+		//	ImGui::PopID();
 
-			//}
-			//else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
-			//	&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
-			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			//	auto signature = ecsCoordinator.getEntityID(entity);
-			//	
-			//	ImGui::PushID(entity);
+		//}
+		//else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
+		//	&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
+		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		//	auto signature = ecsCoordinator.getEntityID(entity);
+		//	
+		//	ImGui::PushID(entity);
 
-			//	char buttonLabel[64];
-			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-			//	ImGui::PushItemWidth(-1);
-			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-			//		Inspector::selectedEntityID = entity;
-			//	}
-			//	ImGui::PopItemWidth();
+		//	char buttonLabel[64];
+		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+		//	ImGui::PushItemWidth(-1);
+		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+		//		Inspector::selectedEntityID = entity;
+		//	}
+		//	ImGui::PopItemWidth();
 
-			//	ImGui::PopID();
-			//}
-			//else
-			//{ //Remaining object's data modification features
-			//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			//	auto signature = ecsCoordinator.getEntityID(entity);
+		//	ImGui::PopID();
+		//}
+		//else
+		//{ //Remaining object's data modification features
+		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		//	auto signature = ecsCoordinator.getEntityID(entity);
 
-			//	ImGui::PushID(entity);
+		//	ImGui::PushID(entity);
 
-			//	char buttonLabel[64];
-			//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-			//	ImGui::PushItemWidth(-1); 
-			//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {  
-			//		Inspector::selectedEntityID = entity;
-			//	}
-			//	ImGui::PopItemWidth();
+		//	char buttonLabel[64];
+		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+		//	ImGui::PushItemWidth(-1); 
+		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {  
+		//		Inspector::selectedEntityID = entity;
+		//	}
+		//	ImGui::PopItemWidth();
 
-			//	ImGui::PopID();
+		//	ImGui::PopID();
 
-			//}
+		//}
 	}
 
 

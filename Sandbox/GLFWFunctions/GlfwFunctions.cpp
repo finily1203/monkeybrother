@@ -55,10 +55,15 @@ int GLFWFunctions::windowHeight = 0;
 int GLFWFunctions::defultWindowWidth = 0;
 int GLFWFunctions::defultWindowHeight = 0;
 int GLFWFunctions::collectableCount = 0;
+int GLFWFunctions::pauseMenuCount = 0;
+int GLFWFunctions::optionsMenuCount = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
 bool GLFWFunctions::gameOver = false;
+bool GLFWFunctions::isHovering = false;
+bool GLFWFunctions::gamePaused = false;
+double GLFWFunctions::mouseXDelta = 0.0;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -71,8 +76,8 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     if (!glfwInit())
         return false;
 
-    if(!keyState)
-		keyState = new std::unordered_map<Key, bool>();
+    if (!keyState)
+        keyState = new std::unordered_map<Key, bool>();
 
     fullscreen = isfullscreen;
 
@@ -109,6 +114,7 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     callEvents();
 
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    //glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     return true;
 }
@@ -230,13 +236,21 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = true;
     }
     else {
-		isRotating = false;
+        isRotating = false;
     }
-        
 
 
-    if ((*keyState)[Key::P])
+
+    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
         audioPaused = ~audioPaused;
+        GLFWFunctions::gamePaused = true;
+
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
+        {
+            GLFWFunctions::pauseMenuCount++;
+            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+        }
+    }
 
     if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;
@@ -276,47 +290,46 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
         }
-        if (!GameViewWindow::getPaused())
-        {
-            if ((*keyState)[Key::F] && action == GLFW_PRESS) {
-                fullscreen = !fullscreen;
-                GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
-                if (fullscreen) {
-                    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-                    glfwSetWindowMonitor(
-                        pWindow,
-                        monitor,
-                        0, 0,
-                        mode->width,
-                        mode->height,
-                        mode->refreshRate
-                    );
-                }
-                else {
-                    // Switch to windowed mode
-                    int windowedWidth = defultWindowWidth;  // Desired windowed mode width
-                    int windowedHeight = defultWindowHeight; // Desired windowed mode height
-                    int x = 150;             // Desired X position for the window
-                    int y = 150;             // Desired Y position for the window
+        if ((*keyState)[Key::F] && action == GLFW_PRESS) {
+            fullscreen = !fullscreen;
+            GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
-                    glfwSetWindowMonitor(
-                        pWindow,
-                        nullptr,
-                        x, y,
-                        windowedWidth,
-                        windowedHeight,
-                        0
-                    );
-
-                    // Restore window decorations
-                    glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
-                    glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
-                }
-
-                std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
+            if (fullscreen) {
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(
+                    pWindow,
+                    monitor,
+                    0, 0,
+                    mode->width,
+                    mode->height,
+                    mode->refreshRate
+                );
             }
+            else {
+                // Switch to windowed mode
+                int windowedWidth = defultWindowWidth;  // Desired windowed mode width
+                int windowedHeight = defultWindowHeight; // Desired windowed mode height
+                int x = 150;             // Desired X position for the window
+                int y = 150;             // Desired Y position for the window
+
+                glfwSetWindowMonitor(
+                    pWindow,
+                    nullptr,
+                    x, y,
+                    windowedWidth,
+                    windowedHeight,
+                    0
+                );
+
+                // Restore window decorations
+                glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
+                glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
+            }
+
+            std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
         }
+
     }
     else if (action == GLFW_RELEASE) {
         (*keyState)[static_cast<Key>(key)] = false;
@@ -366,8 +379,12 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
-    //On relase it doesn't use since we use cursorPositionEvent for debugging
-    (void)window; (void)xpos; (void)ypos;
+	(void)window;
+	(void)ypos;
+    static double lastX = xpos;
+    mouseXDelta = xpos - lastX;
+    lastX = xpos;
+
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
 #endif
@@ -417,32 +434,30 @@ void GLFWFunctions::getFps() {
 
 void GLFWFunctions::dropEvent(GLFWwindow* window, int count, const char** paths) {
     (void)window;
-    if (debug_flag) {
-        for (int i = 0; i < count; i++) {
-            std::string filePath = paths[i];
-            std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-            if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
-                //seperate window to inform not allowed to drop type of file
-                MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
-            }
-            else {
-                assetsManager.handleDropFile(filePath);
-            }
+    for (int i = 0; i < count; i++) {
+        std::string filePath = paths[i];
+        std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+        if (fileExtension == ".ogg" || fileExtension == ".txt") { //might need to add more file types
+            //seperate window to inform not allowed to drop type of file
+            MessageBoxA(nullptr, ("Type of file \"" + fileExtension + "\" is not allowed to be used.").c_str(), "Incorrect File Type", MB_OK | MB_ICONERROR);
+        }
+        else {
+            assetsManager.handleDropFile(filePath);
         }
     }
 }
 
 //terminates the window
 void GLFWFunctions::glfwCleanup() {
-    
+
     if (keyState) {
         delete keyState;
         keyState = nullptr;
     }
-	if (mouseButtonState) {
-		delete mouseButtonState;
-		mouseButtonState = nullptr;
-	}
+    if (mouseButtonState) {
+        delete mouseButtonState;
+        mouseButtonState = nullptr;
+    }
 
     glfwTerminate();
 }

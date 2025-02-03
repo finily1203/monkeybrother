@@ -33,11 +33,15 @@ public:
 	void update(Entity entity) override;
 	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
 	void onMouseHover(double mouseX, double mouseY);
+	
+	std::string getHoveredButton() const { return currHoveredButton; }
+	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
 
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
 	void handleButtonClick(GLFWwindow* window, Entity entity);
 	GLFWcursor* cursor = nullptr;
+	std::string currHoveredButton;
 };
 
 class LogicSystemECS : public System
@@ -53,7 +57,7 @@ public:
 	//Update function to update the graphics system
 	//uses functions from GraphicsSystem class to update, draw
 	//and render objects.
-	void update(float ) override;
+	void update(float) override;
 
 	//For now we don't use a behaviour manager since we have little behaviours
 	//But need to expand this in the future
@@ -62,7 +66,7 @@ public:
 	void ApplyForce(Entity entity, const myMath::Vector2D& appliedForce);
 
 	void unassignBehaviour(Entity entity);
-	
+
 	bool hasBehaviour(Entity entity) { return behaviours.find(entity) != behaviours.end(); }
 
 	template<typename T = BehaviourECS>

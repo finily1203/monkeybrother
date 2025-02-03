@@ -18,13 +18,31 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include "GUIGameViewport.h"
 
+//BGM VOLUME MAX -> 0.5f, INC / DEC BY 0.05f, LOWEST 0f
+//SFX VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
+//GEN VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
+
+//BGM AFFECTS: bgmChannel
+//SFX AFFECTS: soundEffectChannel, assetBrowserChannel, pumpChannel, rotationChannel
+//GEN AFFECTS: ambienceChannel
+
+//PUMP CHANNEL MAKE SURE TO MULTIPLY BY 0.1f FOR VOLUME
+
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f) {}
-AudioSystem::~AudioSystem() {
-    cleanup();
+                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f)
+{
+    //channelList["BGM"] = bgmChannel;
+    //channelList["Sound Effect"] = soundEffectChannel;
+    //channelList["Asset Browser"] = assetBrowserChannel;
+    //channelList["Ambience"] = ambienceChannel;
+    //channelList["Pump"] = pumpChannel;
+    //channelList["Rotation"] = rotationChannel;
+
+	//std::cout << "Channel List size: " << channelList.size() << std::endl;
 }
+AudioSystem::~AudioSystem() {}
 
 SystemType AudioSystem::getSystem() {
     return SystemType::AudioSystemType;
@@ -32,9 +50,8 @@ SystemType AudioSystem::getSystem() {
 
 //Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
-
-    playSong("Ambience.wav");
-    playBgm("Iris_L2_BGM_Loop.wav");
+    //playSong("Ambience.wav");
+    //playBgm("Iris_L2_BGM_Loop.wav");
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -42,190 +59,185 @@ void AudioSystem::initialise() {
 void AudioSystem::update() {
     bool bIsPlaying = false;
 
-    // Check the state of the pump and play/stop the pump sound
-    if (GLFWFunctions::isPumpOn) {
-        if (!pumpChannel) {
-            playPumpSound("pumpSound.wav");
-        }
-        else {
-            // Ensure the pump sound is playing
-            FMOD_RESULT result = pumpChannel->isPlaying(&bIsPlaying);
-            if (result != FMOD_OK) {
-                std::cout << "FMOD isPlaying error for pump sound! (" << result << ")" << std::endl;
-            }
+    //only play if scene is 1
+    if(GameViewWindow::getSceneNum() == 1)
+    {
 
-            if (!bIsPlaying) {
-                pumpChannel->setPaused(false); // Resume if paused
-            }
-        }
-    }
-    else {
-        // Stop the pump sound if it's no longer needed
-        if (pumpChannel) {
-            FMOD_RESULT result = pumpChannel->stop();
-            if (result != FMOD_OK) {
-                std::cout << "FMOD stop error for pump sound! (" << result << ")" << std::endl;
-            }
-            pumpChannel = nullptr;
-        }
-    }
+        // Ensure BGM and ambience play only if they are not already playing
+        bool isBgmPlaying = false;
+        bool isAmbiencePlaying = false;
 
-
-    if (bgmChannel) {
-        FMOD_RESULT result = bgmChannel->isPlaying(&bIsPlaying);
-        if (result != FMOD_OK) {
-            std::cout << "FMOD isPlaying error! (" << result << ") " << std::endl;
+        if (bgmChannel) {
+            bgmChannel->isPlaying(&isBgmPlaying);
+        }
+        if (ambienceChannel) {
+            ambienceChannel->isPlaying(&isAmbiencePlaying);
         }
 
-        // If not playing, replay the sound unless stopAudio is true
-        if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
+        if (!isBgmPlaying) {
+            playBgm("Iris_L2_BGM_Loop.wav");
+        }
+
+        if (!isAmbiencePlaying) {
             playSong("Ambience.wav");
         }
 
-        if (GLFWFunctions::audioPaused || GameViewWindow::getPaused()) {
-            // Check if the channel is already paused
-            bool isPaused = false;
-            bgmChannel->getPaused(&isPaused);
-
-            if (!isPaused) {
-                // If the sound is not paused, pause it
-                result = bgmChannel->setPaused(true);
-                result = soundEffectChannel->setPaused(true);
-                result = assetBrowserChannel->setPaused(true);
-                result = ambienceChannel->setPaused(true);
-                result = pumpChannel->setPaused(true);
-                result = rotationChannel->setPaused(true);
+        //std::cout << GameViewWindow::getSceneNum() << std::endl;
+        // Check the state of the pump and play/stop the pump sound
+        if (GLFWFunctions::isPumpOn) {
+            if (!pumpChannel) {
+                playPumpSound("pumpSound.wav");
+            }
+            else {
+                // Ensure the pump sound is playing
+                FMOD_RESULT result = pumpChannel->isPlaying(&bIsPlaying);
                 if (result != FMOD_OK) {
-                    std::cout << "FMOD pause error! (" << result << ")" << std::endl;
+                    std::cout << "FMOD isPlaying error for pump sound! (" << result << ")" << std::endl;
                 }
-                else {
-                    std::cout << "Audio paused." << std::endl;
+
+                if (!bIsPlaying) {
+                    pumpChannel->setPaused(false); // Resume if paused
                 }
             }
         }
         else {
-            // Check if the channel is already playing (not paused)
-            bool isPaused = false;
-            bgmChannel->getPaused(&isPaused);
-
-            if (isPaused) {
-                // If the sound is paused, unpause it
-                result = bgmChannel->setPaused(false);
-                result = soundEffectChannel->setPaused(false);
-                result = assetBrowserChannel->setPaused(false);
-                result = ambienceChannel->setPaused(false);
-                result = pumpChannel->setPaused(false);
-                result = rotationChannel->setPaused(false);
+            // Stop the pump sound if it's no longer needed
+            if (pumpChannel) {
+                FMOD_RESULT result = pumpChannel->stop();
                 if (result != FMOD_OK) {
-                    std::cout << "FMOD resume error! (" << result << ")" << std::endl;
+                    std::cout << "FMOD stop error for pump sound! (" << result << ")" << std::endl;
                 }
-                else {
-                    std::cout << "Audio resumed." << std::endl;
-                }
+                pumpChannel = nullptr;
             }
         }
 
-        if (GLFWFunctions::audioNext) {
-            switch (GLFWFunctions::audioNum) {
-            case 0:
+
+        if (bgmChannel) {
+            FMOD_RESULT result = bgmChannel->isPlaying(&bIsPlaying);
+            if (result != FMOD_OK) {
+                std::cout << "FMOD isPlaying error! (" << result << ") " << std::endl;
+            }
+
+            // If not playing, replay the sound unless stopAudio is true
+            if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
                 playSong("Ambience.wav");
-                break;
-            case 1:
-                playSong("bubbles");
-                break;
             }
-            GLFWFunctions::audioNext = false;
-        }
-    }
 
-    if (GLFWFunctions::isRotating) {
-        if (!rotationChannel) {
-            playRotationEffect("Rotation.wav");
+            if (GLFWFunctions::audioPaused || GameViewWindow::getPaused()) {
+                // Check if the channel is already paused
+                bool isPaused = false;
+                bgmChannel->getPaused(&isPaused);
+
+                if (!isPaused) {
+                    // If the sound is not paused, pause it
+                    result = bgmChannel->setPaused(true);
+                    result = soundEffectChannel->setPaused(true);
+                    result = assetBrowserChannel->setPaused(true);
+                    result = ambienceChannel->setPaused(true);
+                    result = pumpChannel->setPaused(true);
+                    result = rotationChannel->setPaused(true);
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD pause error! (" << result << ")" << std::endl;
+                    }
+                    else {
+                        std::cout << "Audio paused." << std::endl;
+                    }
+                }
+            }
+            else {
+                // Check if the channel is already playing (not paused)
+                bool isPaused = false;
+                bgmChannel->getPaused(&isPaused);
+
+                if (isPaused) {
+                    // If the sound is paused, unpause it
+                    result = bgmChannel->setPaused(false);
+                    result = soundEffectChannel->setPaused(false);
+                    result = assetBrowserChannel->setPaused(false);
+                    result = ambienceChannel->setPaused(false);
+                    result = pumpChannel->setPaused(false);
+                    result = rotationChannel->setPaused(false);
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD resume error! (" << result << ")" << std::endl;
+                    }
+                    else {
+                        std::cout << "Audio resumed." << std::endl;
+                    }
+                }
+            }
+
+            if (GLFWFunctions::audioNext) {
+                switch (GLFWFunctions::audioNum) {
+                case 0:
+                    playSong("Ambience.wav");
+                    break;
+                case 1:
+                    playSong("bubbles");
+                    break;
+                }
+                GLFWFunctions::audioNext = false;
+            }
+        }
+
+        if (GLFWFunctions::isRotating) {
+            if (!rotationChannel) {
+                playRotationEffect("Rotation.wav");
+            }
+            else {
+                bIsPlaying = false;
+                rotationChannel->isPlaying(&bIsPlaying);
+                if (!bIsPlaying) {
+                    rotationChannel->setPaused(false);
+                }
+            }
         }
         else {
-            bIsPlaying = false;
-            rotationChannel->isPlaying(&bIsPlaying);
-            if (!bIsPlaying) {
-                rotationChannel->setPaused(false);
+            if (rotationChannel) {
+                rotationChannel->setPaused(true);
             }
+            rotationChannel = nullptr;
         }
-    }
-    else {
-        if (rotationChannel) {
-            rotationChannel->setPaused(true);
+
+        if (GLFWFunctions::bumpAudio) {
+            playSoundEffect("Mossball_Bounce.wav");
+            GLFWFunctions::bumpAudio = false;
+
+            std::cout << "Bump audio played." << std::endl;
         }
-        rotationChannel = nullptr;
-    }
 
-    if (GLFWFunctions::bumpAudio) {
-        playSoundEffect("Mossball_Bounce.wav");
-        GLFWFunctions::bumpAudio = false;
-    }
+        if (GLFWFunctions::collectAudio) {
+            playSoundEffect("Collection.wav");
+            GLFWFunctions::collectAudio = false;
+        }
 
-    if (GLFWFunctions::collectAudio) {
-        playSoundEffect("Collection.wav");
-        GLFWFunctions::collectAudio = false;
-    }
+        if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
+            playSoundEffect("bubbleButton");
+            (*GLFWFunctions::keyState)[Key::NUM_9] = false;
+        }
 
-    if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
-        playSoundEffect("bubbleButton");
-        (*GLFWFunctions::keyState)[Key::NUM_9] = false;
-    }
-
-     else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
+        else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
             playSoundEffect("bubbleSingle");
             (*GLFWFunctions::keyState)[Key::NUM_8] = false;
-    }
+        }
 
-    if ((*GLFWFunctions::keyState)[Key::COMMA]) {
-        genVol -= 0.1f;
-        bgmVol -= 0.005f;
-		sfxVol -= 0.1f;
+        if ((*GLFWFunctions::keyState)[Key::COMMA]) {
+			decAllVol();
+            (*GLFWFunctions::keyState)[Key::COMMA] = false;
 
-        if (genVol < 0.0f) 
-            genVol = 0.0f;
-        if (bgmVol < 0.0f) 
-            bgmVol = 0.0f;
-		if (sfxVol < 0.0f)
-			sfxVol = 0.0f;
-
-        ambienceChannel->setVolume(genVol);
-        bgmChannel->setVolume(bgmVol);
-		soundEffectChannel->setVolume(sfxVol);
-		assetBrowserChannel->setVolume(sfxVol);
-        pumpChannel->setVolume(sfxVol);
-        rotationChannel->setVolume(sfxVol);
-        
-        (*GLFWFunctions::keyState)[Key::COMMA] = false;
-
-    }
-    else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
-        genVol += 0.1f;
-        bgmVol += 0.005f;
-        sfxVol += 0.1f;
-
-        if (genVol > 1.0f) 
-            genVol = 1.0f;
-        if (bgmVol > 0.1f) 
-            bgmVol = 0.1f;
-        if (sfxVol < 0.0f)
-            sfxVol = 0.0f;
-
-        ambienceChannel->setVolume(genVol);
-        bgmChannel->setVolume(bgmVol);
-        soundEffectChannel->setVolume(sfxVol);
-        assetBrowserChannel->setVolume(sfxVol);
-        pumpChannel->setVolume(sfxVol);
-        rotationChannel->setVolume(sfxVol);
- 
-        (*GLFWFunctions::keyState)[Key::PERIOD] = false;
+        }
+        else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
+			incAllVol();
+            (*GLFWFunctions::keyState)[Key::PERIOD] = false;
+        }
     }
 
     assetsManager.GetAudioSystem()->update();
 }
 
 //Clears all the songs from the audioSystem and terminates the audioSystem
-void AudioSystem::cleanup() {}
+void AudioSystem::cleanup() {
+
+}
 
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
@@ -242,7 +254,7 @@ void AudioSystem::playSong(const std::string& songName) {
     }
 
     if (ambienceChannel) {
-        ambienceChannel->setVolume(genVol);
+        ambienceChannel->setVolume(genVol * 5.0f);
         ambienceChannel->setPaused(false);
     }
 
@@ -290,7 +302,7 @@ void AudioSystem::playPumpSound(const std::string& soundName)
     }
 
     if (pumpChannel) {
-        pumpChannel->setVolume(genVol);
+        pumpChannel->setVolume(sfxVol * 0.1f );
         pumpChannel->setPaused(false);
     }
 }
@@ -340,3 +352,44 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
     }
 }
 
+void AudioSystem::decAllVol()
+{
+    genVol -= 0.1f;
+    bgmVol -= 0.05f;
+    sfxVol -= 0.1f;
+
+    if (genVol < 0.0f)
+        genVol = 0.0f;
+    if (bgmVol < 0.0f)
+        bgmVol = 0.0f;
+    if (sfxVol < 0.0f)
+        sfxVol = 0.0f;
+
+    ambienceChannel->setVolume(genVol);
+    bgmChannel->setVolume(bgmVol);
+    soundEffectChannel->setVolume(sfxVol);
+    assetBrowserChannel->setVolume(sfxVol);
+    pumpChannel->setVolume(sfxVol * 0.1f);
+    rotationChannel->setVolume(sfxVol);
+}
+
+void AudioSystem::incAllVol()
+{
+    genVol += 0.1f;
+    bgmVol += 0.05f;
+    sfxVol += 0.1f;
+
+    if (genVol > 1.0f)
+        genVol = 1.0f;
+    if (bgmVol > 0.5f)
+        bgmVol = 0.5f;
+    if (sfxVol > 0.0f)
+        sfxVol = 1.0f;
+
+    ambienceChannel->setVolume(genVol);
+    bgmChannel->setVolume(bgmVol);
+    soundEffectChannel->setVolume(sfxVol);
+    assetBrowserChannel->setVolume(sfxVol);
+    pumpChannel->setVolume(sfxVol * 0.1f);
+    rotationChannel->setVolume(sfxVol);
+}

@@ -44,7 +44,7 @@ public:
 	static int selectedEntityID;
 	static int draggedEntityID;
 	static bool isSelectingEntity;
-	
+
 	static std::vector<std::string>* assetNames;
 	static float objAttributeSliderMaxLength;
 	static char textBuffer[MAXTEXTSIZE];

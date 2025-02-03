@@ -23,11 +23,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-std::string* AssetsManager::overwritePath = nullptr;
-
 
 AssetsManager::AssetsManager() : audSystem(nullptr), m_textureWidth(0), m_textureHeight(0), nrChannels(0),
-                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false)
+                                 hasAssetsListChanged(false), overwritePopUp(false), overwriteFile(false),
+	                             m_Textures(nullptr), m_Shaders(nullptr), m_Audio(nullptr), m_Fonts(nullptr), 
+                                 m_FontPaths(nullptr), m_Prefabs(nullptr), overwritePath(new std::string())
 {
     m_AssetList = new std::vector<std::string>();
 }
@@ -52,10 +52,14 @@ void AssetsManager::initialise()
     if(!m_FontPaths)
 		m_FontPaths = new std::map<std::string, std::string>();
 
+	if (!m_Prefabs)
+		m_Prefabs = new std::map<std::string, std::string>();
+
     LoadShaderAssets();
     LoadTextureAssets();
     LoadFontAssets();
     LoadAudioAssets();
+	LoadPrefabAssets();
 }
 
 void AssetsManager::update(){
@@ -73,11 +77,14 @@ void AssetsManager::cleanup()
     ClearShaders();
     ClearFonts();
     ClearAudio();
+	ClearPrefabs();
 
     delete audSystem;
     audSystem = nullptr;
     delete m_AssetList;
     m_AssetList = nullptr;
+    delete overwritePath;
+	overwritePath = nullptr;
 }
 
 SystemType AssetsManager::getSystem()
@@ -162,6 +169,7 @@ void AssetsManager::UnloadTexture(const std::string& texName) {
     if (iterator != m_Textures->end()) {
 		glDeleteTextures(1, &iterator->second);
 		m_Textures->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), texName), m_AssetList->end());
         std::cout << "Texture unloaded successfully!" << std::endl;
 	}
     else {
@@ -246,6 +254,7 @@ void AssetsManager::UnloadShader(const std::string& name) {
     auto iterator = m_Shaders->find(name);
     if (iterator != m_Shaders->end()) {
 		m_Shaders->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), name), m_AssetList->end());
 		std::cout << "Shader unloaded successfully!" << std::endl;
 	}
     else {
@@ -338,6 +347,8 @@ void AssetsManager::UnloadAudio(const std::string& name) {
     auto iterator = m_Audio->find(name);
     if (iterator != m_Audio->end()) {
         iterator->second->release();
+		m_Audio->erase(iterator);
+		m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), name), m_AssetList->end());
         std::cout << "Audio unloaded successfully!" << std::endl;
     }
     else {
@@ -473,6 +484,7 @@ void AssetsManager::UnloadFont(const std::string& fontPath) {
 			glDeleteTextures(1, &character.second.TextureID);
 		}
 		m_Fonts->erase(iterator);
+        m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), fontPath), m_AssetList->end());
 		std::cout << "Font unloaded successfully!" << std::endl;
 	}
     else {
@@ -493,6 +505,63 @@ void AssetsManager::ClearFonts() {
 	std::cout << "All fonts cleared!" << std::endl;
 }
 
+//-----------------------------PREFAB ASSETS----------------------------------//
+void AssetsManager::LoadPrefabAssets() {
+	std::string jsonFilePath = FilePathManager::GetAssetsJSONPath();
+	std::ifstream file(jsonFilePath);
+	nlohmann::json jsonObj;
+	if (file.is_open())
+	{
+		file >> jsonObj;
+		file.close();
+	}
+	for (const auto& prefabAsset : jsonObj["prefabAssets"])
+	{
+		std::string prefabName = prefabAsset["id"].get<std::string>();
+		std::string relativePath = prefabAsset["filePath"].get<std::string>();
+		std::string prefabFilePath = FilePathManager::GetExecutablePath() + "\\" + relativePath;
+		assetsManager.LoadPrefab(prefabName, prefabFilePath);
+	}
+}
+
+void AssetsManager::LoadPrefab(const std::string& prefabName, const std::string& prefabPath) {
+	if (m_Prefabs->find(prefabName) != m_Prefabs->end()) {
+		std::cerr << "Prefab already loaded!" << std::endl;
+		return;
+	}
+	(*m_Prefabs)[prefabName] = prefabPath;
+	m_AssetList->push_back(prefabName);
+	std::cout << "Prefab " << prefabName << " loaded successfully!" << std::endl;
+}
+
+std::string AssetsManager::GetPrefabPath(const std::string& name) const {
+	auto iterator = m_Prefabs->find(name);
+	if (iterator != m_Prefabs->end()) {
+		return iterator->second;
+	}
+	else {
+		std::cerr << "Prefab not found!" << std::endl;
+		return "";
+	}
+}
+
+void AssetsManager::UnloadPrefab(const std::string& name) {
+	auto iterator = m_Prefabs->find(name);
+	if (iterator != m_Prefabs->end()) {
+		m_Prefabs->erase(iterator);
+		m_AssetList->erase(std::remove(m_AssetList->begin(), m_AssetList->end(), name), m_AssetList->end());
+		std::cout << "Prefab unloaded successfully!" << std::endl;
+	}
+	else {
+		std::cerr << "Prefab not found!" << std::endl;
+	}
+}
+
+void AssetsManager::ClearPrefabs() {
+	delete m_Prefabs;
+	m_Prefabs = nullptr;
+	std::cout << "All prefabs cleared!" << std::endl;
+}
 
 //-----------------------------ASSET MANAGEMENT----------------------------------//
 void AssetsManager::handleDropFile(std::string filePath) {
@@ -502,6 +571,7 @@ void AssetsManager::handleDropFile(std::string filePath) {
     if (std::find(m_AssetList->begin(), m_AssetList->end(), path.filename().string()) != m_AssetList->end()) {
 		delExistingAsset(filePath);
 		overwritePopUp = true;
+        std::cout << filePath << std::endl;
 		*overwritePath = filePath;
         std::cout << "Current asset was deleted for new one to be updated!" << std::endl;
     }
@@ -512,6 +582,11 @@ void AssetsManager::handleDropFile(std::string filePath) {
 }
 
 void AssetsManager::loadAsset(std::string filePath) {
+    if (filePath.empty()) {
+        std::cout << "file path was empty and asset was not loaded" << std::endl;
+        return;
+    }
+
 	std::filesystem::path path(filePath);
 	if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
 		LoadTexture(path.filename().string().c_str(), path.string());
@@ -533,6 +608,11 @@ void AssetsManager::loadAsset(std::string filePath) {
 		AddNewAssetToJSON(path.filename().string(), "audioAssets", path.string());
 		std::cout << "Audio loaded from file explorer!" << std::endl;
 	}
+    else if (path.extension() == ".json") {
+		LoadPrefab(path.filename().string(), path.string());
+		AddNewAssetToJSON(path.filename().string(), "prefabAssets", path.string());
+		std::cout << "Prefab loaded from file explorer!" << std::endl;
+    }
 	else {
 		std::cerr << "File type not supported!" << std::endl;
 	}
@@ -556,7 +636,11 @@ void AssetsManager::delExistingAsset(std::string filePath) {
     else if (path.extension() == ".wav" || path.extension() == ".mp3") {
         UnloadAudio(path.filename().string());
         DeleteAssetFromJSON(path.filename().string(), "audioAssets");
-    }
+	}
+	else if (path.extension() == ".json") {
+		UnloadPrefab(path.filename().string());
+		DeleteAssetFromJSON(path.filename().string(), "prefabAssets");
+	}
     else {
         std::cerr << "File type not supported!" << std::endl;
     }
@@ -564,6 +648,10 @@ void AssetsManager::delExistingAsset(std::string filePath) {
 
 bool AssetsManager::checkIfAssetListChanged() const {
 	return hasAssetsListChanged;
+}
+
+void AssetsManager::setAssetListChanged(bool value) {
+	hasAssetsListChanged = value;
 }
 
 bool AssetsManager::checkOverwritePopUp() const {
@@ -603,6 +691,10 @@ const std::map<std::string, std::map<char, Character>>& AssetsManager::getFontLi
 	return *m_Fonts;
 }
 
+const std::map<std::string, std::string>& AssetsManager::getPrefabList() const {
+	return *m_Prefabs;
+}
+
 void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string assetType, std::string sourcePath) {
     nlohmann::ordered_json assetObj = {};
 
@@ -625,7 +717,10 @@ void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string 
 		identifier = "audio/";
         finalFilePath += identifier + assetName;
 	}
-
+	else if (assetType == "prefabAssets") {
+		identifier = "prefabs/";
+		finalFilePath += identifier + assetName;
+	}
 
     //Add in asset into assets folder
     std::string destintationPath = FilePathManager::GetExecutablePath() + "\\" + finalFilePath;
@@ -678,7 +773,6 @@ void AssetsManager::AddNewAssetToJSON(std::string const& assetName, std::string 
 
 
 void AssetsManager::DeleteAssetFromJSON(std::string const& assetName, std::string assetType) {
-
     //read assets.json file
     nlohmann::json jsonData;
     std::ifstream inputFile(FilePathManager::GetAssetsJSONPath());
@@ -722,6 +816,7 @@ void AssetsManager::DeleteAssetFromJSON(std::string const& assetName, std::strin
     else if (assetType == "shaderAssets") identifier = "shaders/";
     else if (assetType == "fontAssets") identifier = "fonts/";
     else if (assetType == "audioAssets") identifier = "audio/";
+	else if (assetType == "prefabAssets") identifier = "prefabs/";
 
     std::string filePath = FilePathManager::GetExecutablePath() + "\\assets\\" + identifier + assetName;
 

@@ -46,6 +46,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "CollectableComponent.h"
 #include "PumpComponent.h"
 #include "ExitComponent.h"
+#include "FilterComponent.h"
+#include "MovPlatformComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -110,20 +112,23 @@ public:
 
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
-	std::string getTextureID(Entity entity);
 	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
-	void setTextureID(Entity entity, std::string ID);
 
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the entity's data to JSON file
 	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 
 	void LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	void LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	void LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
 
+	void setTextureID(Entity entity, std::string ID);
+
+	std::string getTextureID(Entity entity);
 
 	//System Manager Functions
 	//Register the system

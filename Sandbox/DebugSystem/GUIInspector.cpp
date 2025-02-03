@@ -19,12 +19,15 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "Debug.h"
 #include "FontSystemECS.h"
 #include "LogicSystemECS.h"
+#include "BehaviourComponent.h"
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
 #include "CollectableBehaviour.h"
 #include "EffectPumpBehaviour.h"
 #include "ExitBehaviour.h"
 #include "PlatformBehaviour.h"
+#include "FilterBehaviour.h"
+#include "MovPlatformBehaviour.h"
 #include "GUIAssetBrowser.h"
 #include <memory>
 
@@ -39,6 +42,7 @@ int Inspector::selectedEntityID = -1;
 int Inspector::draggedEntityID = -1;
 bool Inspector::isSelectingEntity = false;
 bool moveable = false;
+bool checked = false;
 
 
 
@@ -92,64 +96,65 @@ void Inspector::Update() {
 			height *= collisionScale;
 
 			// Calculate bounds with scaled dimensions
-			double leftBound = x - width*0.8f;
-			double rightBound = x + width*0.2f;
-			double topBound = y + height*0.2;
+			double leftBound = x - width * 0.8f;
+			double rightBound = x + width * 0.2f;
+			double topBound = y + height * 0.2;
 			double bottomBound = y - height * 0.5; /*+ height * 0.1*/;
 
 			return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
 				centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
-		}else
-		if (ecsCoordinator.hasComponent<FontComponent>(entity) &&
-			ecsCoordinator.hasComponent<TransformComponent>(entity)) {
-			const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-
-			float x = transform.position.GetX();
-			float y = transform.position.GetY();
-			float width = 400.0f;  
-			float height = 100.0f;  // Increased from 50 to 100
-
-			// Center the collision box horizontally relative to the position
-			float leftBound = x;
-			float rightBound = x + (width * 0.4f);
-			float topBound = y + height * 0.8f;    // Increased upper bound
-			float bottomBound = y - height * 0.2f;  // Lowered bottom bound
-
-			// Calculate distance for circular collision from centered position
-			float centerX = x;  // Use position directly since bounds are centered
-			float centerY = bottomBound + height * 0.1f;
-			float dx = centeredMouse.x - centerX;
-			float dy = centeredMouse.y - centerY;
-			distanceSquared = dx * dx + dy * dy;
-
-			if (useCircular) {
-				float normalizedX = dx / (width * 0.5f);
-				float normalizedY = dy / (height * 0.5f);
-				return (normalizedX * normalizedX + normalizedY * normalizedY) <= 1.0f;
-			}
-			else {
-				return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
-					centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
-			}
 		}
-		else if (ecsCoordinator.hasComponent<TransformComponent>(entity)) {
-			// Keep your existing non-text entity collision code
-			const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			float halfWidth = std::abs(transform.scale.GetX() * 0.5f);
-			float halfHeight = std::abs(transform.scale.GetY() * 0.5f);
-			float dx = mouseWorldPos.x - transform.position.GetX();
-			float dy = mouseWorldPos.y - transform.position.GetY();
-			distanceSquared = dx * dx + dy * dy;
+		else
+			if (ecsCoordinator.hasComponent<FontComponent>(entity) &&
+				ecsCoordinator.hasComponent<TransformComponent>(entity)) {
+				const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
-			if (useCircular) {
-				float normalizedX = dx / halfWidth;
-				float normalizedY = dy / halfHeight;
-				return (normalizedX * normalizedX + normalizedY * normalizedY) <= 1.0f;
+				float x = transform.position.GetX();
+				float y = transform.position.GetY();
+				float width = 400.0f;
+				float height = 100.0f;  // Increased from 50 to 100
+
+				// Center the collision box horizontally relative to the position
+				float leftBound = x;
+				float rightBound = x + (width * 0.4f);
+				float topBound = y + height * 0.8f;    // Increased upper bound
+				float bottomBound = y - height * 0.2f;  // Lowered bottom bound
+
+				// Calculate distance for circular collision from centered position
+				float centerX = x;  // Use position directly since bounds are centered
+				float centerY = bottomBound + height * 0.1f;
+				float dx = centeredMouse.x - centerX;
+				float dy = centeredMouse.y - centerY;
+				distanceSquared = dx * dx + dy * dy;
+
+				if (useCircular) {
+					float normalizedX = dx / (width * 0.5f);
+					float normalizedY = dy / (height * 0.5f);
+					return (normalizedX * normalizedX + normalizedY * normalizedY) <= 1.0f;
+				}
+				else {
+					return (centeredMouse.x >= leftBound && centeredMouse.x <= rightBound &&
+						centeredMouse.y <= topBound && centeredMouse.y >= bottomBound);
+				}
 			}
-			else {
-				return (std::abs(dx) <= halfWidth && std::abs(dy) <= halfHeight);
+			else if (ecsCoordinator.hasComponent<TransformComponent>(entity)) {
+				// Keep your existing non-text entity collision code
+				const auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				float halfWidth = std::abs(transform.scale.GetX() * 0.5f);
+				float halfHeight = std::abs(transform.scale.GetY() * 0.5f);
+				float dx = mouseWorldPos.x - transform.position.GetX();
+				float dy = mouseWorldPos.y - transform.position.GetY();
+				distanceSquared = dx * dx + dy * dy;
+
+				if (useCircular) {
+					float normalizedX = dx / halfWidth;
+					float normalizedY = dy / halfHeight;
+					return (normalizedX * normalizedX + normalizedY * normalizedY) <= 1.0f;
+				}
+				else {
+					return (std::abs(dx) <= halfWidth && std::abs(dy) <= halfHeight);
+				}
 			}
-		}
 		return false;
 		};
 
@@ -157,7 +162,7 @@ void Inspector::Update() {
 
 	//std::string selEntityID; // Store selected entity ID instead of Entity handle
 
-	
+
 	static bool isInitialClickAfterSelection = true;
 
 	static ImVec2 mousePos;
@@ -246,7 +251,7 @@ void Inspector::Update() {
 
 			if (withinX && withinY) {
 				moveable = true;
-				
+
 			}
 
 			if (moveable == true) {
@@ -314,7 +319,7 @@ void Inspector::Update() {
 					transform.scale.SetY(newScaleY);
 				}
 			}
-			
+
 		}
 	}
 
@@ -359,7 +364,7 @@ void Inspector::Update() {
 	}
 
 	RenderInspectorWindow(ecsCoordinator, selectedEntityID);
-	
+
 }
 
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
@@ -608,131 +613,181 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 
 		}
 
-		auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
+	if (!logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID) 
+		&& ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+		ecsCoordinator.removeComponent<ClosestPlatform>(selectedEntityID);
+	}
+
+	const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform", "Button", "Filter", "MovPlatform"};
 
 
-		const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform"};
+	if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
+		currentItem = 1;
+	}
+	else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(selectedEntityID)) {
+		currentItem = 2;
+	}
+	else if (logicSystemRef->hasBehaviour<ExitBehaviour>(selectedEntityID)) {
+		currentItem = 3;
+	}
+	else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(selectedEntityID)) {
+		currentItem = 4;
+	}
+	else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
+		currentItem = 5;
+	}
+	else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
+		currentItem = 6;
+	}
+	else if (logicSystemRef->hasBehaviour<MouseBehaviour>(selectedEntityID)) {
+		currentItem = 7;
+	}
+	else if (logicSystemRef->hasBehaviour<FilterBehaviour>(selectedEntityID)) {
+		currentItem = 8;
+	}
+	else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(selectedEntityID)) {
+		currentItem = 9;
+	}
+	else {
+		currentItem = 0;
+	}
 
+	// Create the combo box
+	ImGui::SetNextItemWidth(200);
+	if (ImGui::BeginCombo("##dropdown", items[currentItem])) {
+		for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+			const bool typeSelected = (currentItem == i);
+			if (ImGui::Selectable(items[i], typeSelected)) {
 
-		if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
-			currentItem = 1;
+				if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
+					ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
+
+				PhysicsComponent physics;
+				// Add new component
+				switch (i) {
+				case 0:
+					if (logicSystemRef->hasBehaviour(selectedEntityID))
+						logicSystemRef->unassignBehaviour(selectedEntityID);
+					break;
+				case 1:
+					//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
+					physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
+					if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
+					break;
+				case 2:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>());
+					break;
+				case 3:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>());
+					break;
+				case 4:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
+					GLFWFunctions::collectableCount++;
+					break;
+				case 5:
+					physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+					physics.mass = 1.0f;
+					physics.dampening = 0.9f;
+					physics.maxVelocity = 200.0f;
+					physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
+					physics.maxAccumulatedForce = 40.0f;
+					if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+					break;
+				case 6:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
+					break;
+				case 7:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
+					break;
+				case 8:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
+					break;
+				case 9:
+					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MovPlatformBehaviour>());
+					break;
+				}
+
+				currentItem = i;
+			}
 		}
-		else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(selectedEntityID)) {
-			currentItem = 2;
+		ImGui::EndCombo();
+	}
+	ImGui::SameLine();
+	ImGui::Text("Behaviour");
+
+	if (assetsManager.checkIfAssetListChanged())
+	{
+		assetNames->clear();
+		for (auto& asset : assetsManager.getAssetList())
+		{
+			assetNames->push_back(asset);
 		}
-		else if (logicSystemRef->hasBehaviour<ExitBehaviour>(selectedEntityID)) {
-			currentItem = 3;
+	}
+	// Add a static string to store the current selected item
+	static char selectedTexture[256] = "Select a texture...";
+	strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
+
+	// Create the dropdown
+	ImGui::SetNextItemWidth(200);
+	if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
+	{
+		for (auto& asset : *assetNames)
+		{
+			if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end())
+			{
+				bool is_selected = (strcmp(selectedTexture, asset.c_str()) == 0);
+				if (ImGui::Selectable(asset.c_str(), is_selected))
+				{
+					strcpy_s(selectedTexture, asset.c_str());
+
+					ecsCoordinator.setTextureID(selectedEntityID, selectedTexture);
+				}
+
+				if (is_selected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
 		}
-		else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(selectedEntityID)) {
-			currentItem = 4;
-		}
-		else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
-			currentItem = 5;
-		}
-		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
-			currentItem = 6;
+		ImGui::EndCombo();
+	}
+	ImGui::SameLine();
+	ImGui::Text("Texture");
+
+	if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+		checked = true;
+	}
+	else {
+		checked = false;
+	}
+
+	 // State variable
+	if (ImGui::Checkbox("Label", &checked)) {
+		if (checked) {
+			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+				AnimationComponent animation{};
+
+				animation.isAnimated = true;
+				animation.totalFrames = 24.0;
+				animation.frameTime = 0.05,
+				animation.columns = 8.0,
+				animation.rows = 3.0,
+
+				ecsCoordinator.addComponent(selectedEntityID, animation);
+			}
 		}
 		else {
-			currentItem = 0;
-		}
-
-		// Create the combo box
-		ImGui::SetNextItemWidth(200);
-		if (ImGui::BeginCombo("##dropdown", items[currentItem])) {
-			for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
-				const bool typeSelected = (currentItem == i);
-				if (ImGui::Selectable(items[i], typeSelected)) {
-
-					if(ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
-						ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
-
-					PhysicsComponent physics;
-					// Add new component
-					switch (i) {
-					case 0:
-						if (logicSystemRef->hasBehaviour(selectedEntityID))
-							logicSystemRef->unassignBehaviour(selectedEntityID);
-						break;
-					case 1:
-						//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
-						physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
-						if(!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
-						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
-						break;
-					case 2:
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>());
-						break;
-					case 3:
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>());
-						break;
-					case 4:
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
-						GLFWFunctions::collectableCount++;
-						break;
-					case 5:
-						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
-						physics.mass = 1.0f;
-						physics.dampening = 0.9f;
-						physics.maxVelocity = 200.0f;
-						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
-						physics.maxAccumulatedForce = 40.0f;
-						if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
-						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
-						break;
-					case 6:
-						
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
-						break;
-					}
-
-					currentItem = i;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		ImGui::SameLine();
-		ImGui::Text("Behaviour");
-
-		if (assetsManager.checkIfAssetListChanged())
-		{
-			assetNames->clear();
-			for (auto& asset : assetsManager.getAssetList())
-			{
-				assetNames->push_back(asset);
+			if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+				ecsCoordinator.removeComponent<AnimationComponent>(selectedEntityID);
 			}
 		}
-		// Add a static string to store the current selected item
-		static char selectedTexture[256] = "Select a texture..."; 
-		strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
-
-		// Create the dropdown
-		ImGui::SetNextItemWidth(200);
-		if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
-		{
-			for (auto& asset : *assetNames)
-			{
-				if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end())
-				{
-					bool is_selected = (strcmp(selectedTexture, asset.c_str()) == 0);
-					if (ImGui::Selectable(asset.c_str(), is_selected))
-					{
-						strcpy_s(selectedTexture, asset.c_str());
-
-						ecsCoordinator.setTextureID(selectedEntityID, selectedTexture);
-					}
-
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-			}
-			ImGui::EndCombo();
-		}
-		ImGui::SameLine();
-		ImGui::Text("Texture");
+	}
 
 
 	ImGui::End();
