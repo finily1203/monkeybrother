@@ -144,6 +144,9 @@ void GameViewWindow::Update() {
 			saveNum = 1;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine(0, optionsButtonPadding);
@@ -160,12 +163,19 @@ void GameViewWindow::Update() {
 				outputFile << jsonData.dump(2);
 				outputFile.close();
 			}
+
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 		}
 
 		if (ImGui::Button("Slot 2", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine(0, optionsButtonPadding);
@@ -182,12 +192,19 @@ void GameViewWindow::Update() {
 				outputFile << jsonData.dump(2);
 				outputFile.close();
 			}
+
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 		}
 
 		if (ImGui::Button("Slot 3", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine(0, optionsButtonPadding);
@@ -204,12 +221,19 @@ void GameViewWindow::Update() {
 				outputFile << jsonData.dump(2);
 				outputFile.close();
 			}
+
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 		}
 
 		if (ImGui::Button("Slot 4", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine(0, optionsButtonPadding);
@@ -226,12 +250,19 @@ void GameViewWindow::Update() {
 				outputFile << jsonData.dump(2);
 				outputFile.close();
 			}
+
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 		}
 
 		if (ImGui::Button("Slot 5", ImVec2(slotWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine(0, optionsButtonPadding);
@@ -248,6 +279,10 @@ void GameViewWindow::Update() {
 				outputFile << jsonData.dump(2);
 				outputFile.close();
 			}
+
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 		}
 
 
@@ -315,6 +350,9 @@ void GameViewWindow::Update() {
 
 		if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			scene = 0;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 				ecsCoordinator.destroyEntity(entity);
@@ -327,6 +365,9 @@ void GameViewWindow::Update() {
 		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 1;
 			scene = saveNum;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
@@ -336,6 +377,9 @@ void GameViewWindow::Update() {
 		if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 2;
 			scene = saveNum;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
@@ -345,6 +389,9 @@ void GameViewWindow::Update() {
 		if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 3;
 			scene = saveNum;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
@@ -354,6 +401,9 @@ void GameViewWindow::Update() {
 		if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 4;
 			scene = saveNum;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;
@@ -363,6 +413,9 @@ void GameViewWindow::Update() {
 		if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
 			saveNum = 5;
 			scene = saveNum;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
 			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 			loadFileChosen = true;
 			isSelectingFile = false;

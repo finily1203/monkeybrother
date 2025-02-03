@@ -183,7 +183,9 @@ void GraphicSystemECS::update(float dt) {
                 ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
                 ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
                 ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
-                ecsCoordinator.getEntityID(entity) == "pauseQuitButton")
+                ecsCoordinator.getEntityID(entity) == "pauseQuitButton" || ecsCoordinator.getEntityID(entity) == "sfxSoundbar" ||
+                ecsCoordinator.getEntityID(entity) == "musicSoundbar" || ecsCoordinator.getEntityID(entity) == "confirmButton" ||
+                ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
             {
                 graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
             }
@@ -296,7 +298,138 @@ void GraphicSystemECS::update(float dt) {
 
             else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
             {
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform, animation.currentUVs);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "sfxSoundbar" || ecsCoordinator.getEntityID(entity) == "musicSoundbar")
+            {
+                std::string soundbarType = ecsCoordinator.getEntityID(entity);
+                TransformComponent soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+                TransformComponent arrowTransform{};
+
+                std::string audioArrowId = (soundbarType == "sfxSoundbar") ? "sfxSoundbarArrow" :
+                                           (soundbarType == "musicSoundbar") ? "musicSoundbarArrow" : "";
+
+                if (!audioArrowId.empty())
+                {
+                    for (auto& soundbarArrowEntity : ecsCoordinator.getAllLiveEntities())
+                    {
+                        if (ecsCoordinator.getEntityID(soundbarArrowEntity) == audioArrowId)
+                        {
+                            arrowTransform = ecsCoordinator.getComponent<TransformComponent>(soundbarArrowEntity);
+                            break;
+                        }
+                    }
+
+                    float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.2f);
+
+                    std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "activeSoundbar" : "unactiveSoundbar";
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(textureName), transform.mdl_xform);
+                }
+
+
+                //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveSoundbar"), transform.mdl_xform);
+            }
+        }
+        else if (isCollectable) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("collectMoss"), transform.mdl_xform);
+        }
+        else if (isExit) {
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("exitFilter"), transform.mdl_xform);
+        }
+        else if (isBackground) {
+            if (ecsCoordinator.getEntityID(entity) == "background")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("background"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "mainMenuBg")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("mainScreenBg"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+            {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("gameLogo"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("pauseMenu"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("optionsMenu"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
+            {
+                std::string audioType = ecsCoordinator.getEntityID(entity);
+                TransformComponent arrowTransform{}, soundbarTransform{};
+
+                std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
+                                           (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
+
+                std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbar" :
+                                         (audioType == "musicAudio") ? "musicSoundbar" : "";
+
+                if (!audioArrowId.empty() && !soundbarId.empty())
+                {
+                    for (auto& soundbarEntity : ecsCoordinator.getAllLiveEntities())
+                    {
+                        if (ecsCoordinator.getEntityID(soundbarEntity) == soundbarId)
+                        {
+                            soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(soundbarEntity);
+                            break;
+                        }
+                    }
+
+                    for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
+                    {
+                        if (ecsCoordinator.getEntityID(arrowEntity) == audioArrowId)
+                        {
+                            arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                            break;
+                        }
+                    }
+                    
+                    float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.22f);
+
+                    std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(textureName), transform.mdl_xform);
+                }
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarBase" || ecsCoordinator.getEntityID(entity) == "musicSoundbarBase")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("soundbarBase"), transform.mdl_xform);
+            }
+
+            else if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarArrow" || ecsCoordinator.getEntityID(entity) == "musicSoundbarArrow")
+            {
+                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("soundbarArrow"), transform.mdl_xform);
+            }
+        }
+        else if (isUI) {
+            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+            if (GLFWFunctions::collectableCount == 0) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-3"), transform.mdl_xform);
+            }
+            else if (GLFWFunctions::collectableCount == 1) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-2"), transform.mdl_xform);
+            }
+            else if (GLFWFunctions::collectableCount == 2) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-1"), transform.mdl_xform);
+            }
+            else if (GLFWFunctions::collectableCount >= 3) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("UI Counter-0"), transform.mdl_xform);
             }
         }
 

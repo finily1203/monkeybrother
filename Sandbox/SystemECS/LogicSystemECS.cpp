@@ -89,9 +89,69 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
 				handleButtonClick(window, entity);
+
+				std::string entityId = ecsCoordinator.getEntityID(entity);
+				
+				if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+				{
+					isDragging = true;
+				}
 			}
 		}
 	}
+}
+
+void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouseY)
+{
+	if (!isDragging)
+	{
+		return;
+	}
+
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+
+	int windowWidth{}, windowHeight{};
+	glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+	float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+
+	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbar") ? "sfxSoundbarArrow" :
+								(getSoundbarId() == "musicSoundbar") ? "musicSoundbarArrow" : "";
+
+	if (!soundbarArrow.empty())
+	{
+		TransformComponent soundbarTransform{};
+
+		for (auto& entity : allEntities)
+		{
+			std::string entityId = ecsCoordinator.getEntityID(entity);
+			if (entityId == getSoundbarId())
+			{
+				soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				break;
+			}
+		}
+
+		float soundbarLeft = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.1f);
+		float soundbarRight = soundbarTransform.position.GetX() + (soundbarTransform.scale.GetX() / 2.1f);
+
+		if (cursorXCentered >= soundbarLeft && cursorXCentered <= soundbarRight)
+		{
+			for (auto& entity : allEntities)
+			{
+				std::string entityId = ecsCoordinator.getEntityID(entity);
+
+				if (entityId == soundbarArrow)
+				{
+					TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					transform.position.SetX(cursorXCentered);
+					break;
+				}
+			}
+		}
+	}
+
+	(void)window;
+	(void)mouseY;
 }
 
 void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
@@ -105,7 +165,6 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
 			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-			ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
 
 			if (mouseIsOverButton(mouseX, mouseY, transform))
 			{
@@ -125,11 +184,11 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 
 bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
 {
-	float const scalar = 0.7f;
-	float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 2.f;
-	float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 2.f;
-	float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
-	float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
+	float const scalar = 0.85f;
+    float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 1.8f;
+    float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 1.85f;
+    float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
+    float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
 
 	return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
 }
@@ -138,6 +197,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 {
 	std::string entityId = ecsCoordinator.getEntityID(entity);
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	setSoundbarId("");
 
 	if (entityId == "quitButton" || entityId == "quitWindowButton")
 	{
@@ -252,7 +312,15 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		{
 			if (ecsCoordinator.getEntityID(currEntity) == "optionsMenuBg" ||
 				ecsCoordinator.getEntityID(currEntity) == "closeOptionsMenu" ||
-				ecsCoordinator.getEntityID(currEntity) == "confirmButton")
+				ecsCoordinator.getEntityID(currEntity) == "confirmButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "sfxAudio" ||
+				ecsCoordinator.getEntityID(currEntity) == "musicAudio" ||
+				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbarBase" ||
+				ecsCoordinator.getEntityID(currEntity) == "musicSoundbarBase" ||
+				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbar" ||
+				ecsCoordinator.getEntityID(currEntity) == "musicSoundbar" ||
+				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbarArrow" ||
+				ecsCoordinator.getEntityID(currEntity) == "musicSoundbarArrow")
 			{
 				ecsCoordinator.destroyEntity(currEntity);
 			}
@@ -279,6 +347,33 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		GLFWFunctions::pauseMenuCount--;
 		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
+
+	else if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+	{
+		double mouseX{}, mouseY{};
+		int windowWidth{}, windowHeight{};
+		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+		setSoundbarId(entityId);
+
+		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+		std::string audioArrowId = (entityId == "sfxSoundbar") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
+
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == audioArrowId)
+			{
+				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				transform.position.SetX(cursorXCentered);
+				break;
+			}
+		}
+	}
+
+	else if (entityId == "confirmButton")
+	{
+		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+	}
 }
 
 MouseBehaviour::~MouseBehaviour()
@@ -286,6 +381,7 @@ MouseBehaviour::~MouseBehaviour()
 	if (cursor)
 	{
 		glfwDestroyCursor(cursor);
+		cursor = nullptr;
 	}
 }
 

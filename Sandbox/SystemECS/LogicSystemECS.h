@@ -27,21 +27,30 @@ public:
 
 class MouseBehaviour : public BehaviourECS {
 public:
-	MouseBehaviour() : cursor(glfwCreateStandardCursor(GLFW_HAND_CURSOR)) {}
+	MouseBehaviour() : cursor(glfwCreateStandardCursor(GLFW_HAND_CURSOR)), isDragging(false) {}
 	~MouseBehaviour();
 
 	void update(Entity entity) override;
 	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
 	void onMouseHover(double mouseX, double mouseY);
+	void onMouseDrag(GLFWwindow* window, double mouseX, double mouseY);
 	
 	std::string getHoveredButton() const { return currHoveredButton; }
 	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
+
+	std::string getSoundbarId() const { return draggingSoundbarId; }
+	void setSoundbarId(std::string const& soundbarId) { draggingSoundbarId = soundbarId; }
+
+	bool getIsDragging() const { return isDragging; }
+	void setIsDragging(bool dragging) { isDragging = dragging; }
 
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
 	void handleButtonClick(GLFWwindow* window, Entity entity);
 	GLFWcursor* cursor = nullptr;
 	std::string currHoveredButton;
+	std::string draggingSoundbarId;
+	bool isDragging;
 };
 
 class LogicSystemECS : public System

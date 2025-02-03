@@ -63,7 +63,7 @@ bool GLFWFunctions::firstCollision = false;
 bool GLFWFunctions::gameOver = false;
 bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
-double GLFWFunctions::mouseXDelta = 0.0;
+MouseBehaviour mouseBehaviour;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
 std::unordered_map<MouseButton, bool>* GLFWFunctions::mouseButtonState;
@@ -355,7 +355,6 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
         if (mappedButton == MouseButton::left)
         {
-            MouseBehaviour click;
             double mouseX{}, mouseY{};
             int currWindowWidth{}, currWindowHeight{};
             glfwGetCursorPos(pWindow, &mouseX, &mouseY);
@@ -366,12 +365,17 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
             if (!debug_flag)
             {
-                click.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+                mouseBehaviour.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
             }
         }
     }
     else if (action == GLFW_RELEASE) {
         mouseButtonState->operator[](mappedButton) = false;
+
+        if (mappedButton == MouseButton::left)
+        {
+            mouseBehaviour.setIsDragging(false);
+        }
     }
 
     (void)window;
@@ -379,14 +383,19 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
 //Handle cursor position events
 void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double ypos) {
-	(void)window;
-	(void)ypos;
-    static double lastX = xpos;
-    mouseXDelta = xpos - lastX;
-    lastX = xpos;
+    //On relase it doesn't use since we use cursorPositionEvent for debugging
+    if (mouseBehaviour.getIsDragging())
+    {
+        mouseBehaviour.onMouseDrag(window, xpos, ypos);
+    }
 
+    (void)window; (void)xpos; (void)ypos;
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
+    if (mouseBehaviour.getIsDragging())
+    {
+        mouseBehaviour.onMouseDrag(window, xpos, ypos);
+    }
 #endif
 }
 
@@ -458,6 +467,8 @@ void GLFWFunctions::glfwCleanup() {
         delete mouseButtonState;
         mouseButtonState = nullptr;
     }
+
+    mouseBehaviour.~MouseBehaviour();
 
     glfwTerminate();
 }
