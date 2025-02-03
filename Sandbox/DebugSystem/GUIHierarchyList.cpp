@@ -26,92 +26,103 @@ void HierarchyList::Initialise() {
 void HierarchyList::Update() {
 	ImGui::Begin("Hierarchy List");
 
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.getEntityID(entity) == "placeholderentity") {
-		}
-		else
-		{
-			auto signature = ecsCoordinator.getEntityID(entity);
+    static int layerToClear = -1; //can't set to 0 cause layer 0 exists
+    static bool showPopup = false;
 
-			ImGui::PushID(entity);
+    for (int i = 0; i < layerManager.getLayerCount(); i++) {
+        char label[64];
+        snprintf(label, sizeof(label), "Layer %d", i);
 
-			char buttonLabel[64];
-			snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-			ImGui::PushItemWidth(-1);
-			if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-				if (!GameViewWindow::getPaused()) {
-					GameViewWindow::TogglePause();
-				}
-				Inspector::selectedEntityID = entity;
-				Inspector::draggedEntityID = entity;
+        //Using treenode for each layer
+        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+        bool guiVisible = layerManager.getGuiVisibility(i);
+
+        if (guiVisible) {
+            nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
+        }
+
+        bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)i, nodeFlags, "%s", label);
+
+        //Handle click to toggle visibility
+        if (ImGui::IsItemClicked()) {
+            layerManager.setGuiVisibility(i, !guiVisible);
+
+            if (!GameViewWindow::getPaused()) {
+                GameViewWindow::TogglePause();
+            }
+        }
+
+        //If node open, display entities inside layer
+        if (nodeOpen) {
+            if (layerManager.getGuiVisibility(i)) {
+                for (auto entity : layerManager.getEntitiesFromLayer(i)) {
+                    char buttonLabel[64];
+                    auto signature = ecsCoordinator.getEntityID(entity);
+                    snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
+
+                    ImGui::PushID(entity);
+                    ImGui::PushItemWidth(-1);
+
+                    if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
+                        Inspector::selectedEntityID = entity;
+                        Inspector::draggedEntityID = entity;
+                    }
+
+                    ImGui::PopItemWidth();
+                    ImGui::PopID();
+                }
+            }
+            char clearButton[32];
+            snprintf(clearButton, sizeof(clearButton), "Clear Layer %d", i);
+            if (ImGui::Button(clearButton)) {
+                //pop up appear
+                layerToClear = i;
+				showPopup = true;
+            }
+
+            ImGui::SameLine();
+			char visibilityButton[32];
+			//check visibility of layer
+			bool isVisible = layerManager.getLayerVisibility(i);
+            if(isVisible)
+			    snprintf(visibilityButton, sizeof(visibilityButton), "Disable Layer %d", i);
+            else
+				snprintf(visibilityButton, sizeof(visibilityButton), "Enable Layer %d", i);
+
+			if (ImGui::Button(visibilityButton)) {
+				layerManager.setLayerVisibility(i, !isVisible);
 			}
-			ImGui::PopItemWidth();
 
-			ImGui::PopID();
-		}
-		//if (ecsCoordinator.hasComponent<FontComponent>(entity)) { //TextBox specific data modification feature
-		//	auto& fontComp = ecsCoordinator.getComponent<FontComponent>(entity);
-		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		//	auto signature = ecsCoordinator.getEntityID(entity);
+            ImGui::TreePop();  // Always call TreePop when nodeOpen is true
+        }
+    }
 
-		//	size_t maxSize = 1000;
-		//	std::string tempStr = fontComp.text;
-		//	memset(textBuffer, 0, MAXTEXTSIZE);
-		//	size_t length = std::min(tempStr.length(), maxSize);
-		//	for (size_t i = 0; i < length; i++)
-		//	{
-		//		textBuffer[i] = tempStr[i];
-		//	}
-		//	ImGui::PushID(entity);
-
-		//	char buttonLabel[64];
-		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-		//	ImGui::PushItemWidth(-1);
-		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-		//		Inspector::selectedEntityID = entity;
-		//	}
-		//	ImGui::PopItemWidth();
-
-		//	ImGui::PopID();
-
-		//}
-		//else if (ecsCoordinator.hasComponent<PhysicsComponent>(entity) //Player specific data modification features
-		//	&& !ecsCoordinator.hasComponent<EnemyComponent>(entity)) {
-		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		//	auto signature = ecsCoordinator.getEntityID(entity);
-		//	
-		//	ImGui::PushID(entity);
-
-		//	char buttonLabel[64];
-		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-		//	ImGui::PushItemWidth(-1);
-		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-		//		Inspector::selectedEntityID = entity;
-		//	}
-		//	ImGui::PopItemWidth();
-
-		//	ImGui::PopID();
-		//}
-		//else
-		//{ //Remaining object's data modification features
-		//	auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		//	auto signature = ecsCoordinator.getEntityID(entity);
-
-		//	ImGui::PushID(entity);
-
-		//	char buttonLabel[64];
-		//	snprintf(buttonLabel, sizeof(buttonLabel), "%s", signature.c_str());
-		//	ImGui::PushItemWidth(-1); 
-		//	if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {  
-		//		Inspector::selectedEntityID = entity;
-		//	}
-		//	ImGui::PopItemWidth();
-
-		//	ImGui::PopID();
-
-		//}
+	if (showPopup) {
+		ImGui::OpenPopup("Clear Layer?");
 	}
 
+    if (ImGui::BeginPopupModal("Clear Layer?", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Are you sure you want to clear Layer %d?", layerToClear);
+        if (ImGui::Button("Yes")) {
+            if (layerManager.clearLayer(layerToClear)) {
+                Console::GetLog() << "Layer " << layerToClear << " cleared" << std::endl;
+            }
+            else {
+                Console::GetLog() << "You can't clear layer 0! || Layer trying to clear does not exist!" << std::endl;
+                Console::GetLog() << "Refer to console to see exact reason" << std::endl;
+            }
+            layerToClear = -1;
+            showPopup = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("No")) {
+			layerToClear = -1;
+            showPopup = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 
 	ImGui::End();
 }

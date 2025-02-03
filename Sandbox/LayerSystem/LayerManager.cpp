@@ -93,14 +93,21 @@ const std::vector<Entity>& LayerManager::getEntitiesFromLayer(int layer) {
 	}
 }
 
-void LayerManager::clearLayer(int layer) {
+bool LayerManager::clearLayer(int layer) {
+	//if they ask to clear layer 0, deny request
+	if (layer == 0) {
+		std::cout << "Cannot clear layer 0" << std::endl;
+		return false;
+	}
 	if (m_Layers->find(layer) != m_Layers->end()) {
 		//add entities from that layer to layer 0 then remove the layer
 		m_Layers->at(0).entities.insert(m_Layers->at(0).entities.end(), m_Layers->at(layer).entities.begin(), m_Layers->at(layer).entities.end());
 		m_Layers->at(layer).entities.clear();
+		return true;
 	}
 	else {
 		std::cout << "Layer " << layer << " does not exist" << std::endl;
+		return false;
 	}
 }
 
@@ -151,3 +158,21 @@ bool LayerManager::getEntityVisibility(Entity entity) {
 	return false;
 }
 
+void LayerManager::setGuiVisibility(int layer, bool isVisible) {
+	if (m_Layers->find(layer) != m_Layers->end()) {
+		m_Layers->at(layer).isGuiVisible = isVisible;
+	}
+	else {
+		std::cout << "Layer " << layer << " does not exist" << std::endl;
+	}
+}
+
+bool LayerManager::getGuiVisibility(int layer) {
+	if (m_Layers->find(layer) != m_Layers->end()) {
+		return m_Layers->at(layer).isGuiVisible;
+	}
+	else {
+		std::cout << "Layer " << layer << " does not exist" << std::endl;
+		return false;
+	}
+}

@@ -7,8 +7,9 @@ struct Layer
 {
 	std::vector<Entity> entities;
 	bool isVisible; //default visibility is true
+	bool isGuiVisible; //default visibility is false
 
-	Layer() : isVisible(true) {};
+	Layer() : isVisible(true), isGuiVisible(false) {};
 };
 
 class LayerManager : public GameSystems
@@ -25,12 +26,16 @@ public:
 	void addNewLayer();
 	void addNumLayers(int num);
 	int getLayerCount();
-	void clearLayer(int layer);
+	bool clearLayer(int layer);
 
 	//Layer visibility
 	void setLayerVisibility(int layer, bool isVisible);
 	bool getLayerVisibility(int layer);
 	bool getEntityVisibility(Entity entity);
+
+	//Gui visibility
+	void setGuiVisibility(int layer, bool isVisible);
+	bool getGuiVisibility(int layer);
 
 	//Movement of entity between layers
 	void addEntityToLayer(int layer, Entity entity);
