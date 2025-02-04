@@ -387,9 +387,9 @@ void GraphicSystemECS::update(float dt) {
                    
                 }
 
-                if (isPlayer) {
+                /*if (isPlayer) {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("eyes.png"), transform.mdl_xform, animation.currentUVs);
-                }
+                }*/
             }
         }
     }
