@@ -221,3 +221,14 @@ std::string FilePathManager::GetOptionsMenuJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the layer JSON file
+std::string FilePathManager::GetLayerJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "layer.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

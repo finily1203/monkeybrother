@@ -43,8 +43,15 @@ public:
 	void removeEntityFromAllLayer(Entity entity);
 	void shiftEntityToLayer(int oriLayer, int newLayer, Entity entity);
 	const std::vector<Entity>& getEntitiesFromLayer(int layer);
+
+	int getLayerFromEntity(Entity entity);
+
+	//save and load number of layers from JSON
+	void loadLayerFromJSON(std::string const& filename);
+	void saveLayerToJSON(std::string const& filename);
 	
 private:
 	std::unordered_map<int, Layer>* m_Layers;
 	int m_LayerCount;
+
 };

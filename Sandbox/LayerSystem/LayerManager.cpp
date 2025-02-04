@@ -2,6 +2,8 @@
 #include "LayerManager.h"
 #include <iostream>
 
+
+
 LayerManager::LayerManager() {
 	m_Layers = new std::unordered_map<int, Layer>();
 	m_LayerCount = 0;
@@ -10,8 +12,11 @@ LayerManager::LayerManager() {
 LayerManager::~LayerManager() {}
 
 void LayerManager::initialise() {
+	//read from json amount of layers
+	loadLayerFromJSON(FilePathManager::GetLayerJSONPath());
+
 	//for now only have four layer
-	addNumLayers(4);
+	addNumLayers(m_LayerCount);
 
 	//for testing purpose set layer 1 to invisible
 	//if layer 1 is invible, entities in layer 1 will not be updated (for both graphics and logic)
@@ -24,6 +29,8 @@ void LayerManager::update() {
 }
 
 void LayerManager::cleanup() {
+	saveLayerToJSON(FilePathManager::GetLayerJSONPath());
+
 	delete m_Layers;
 	m_Layers = nullptr;
 }
@@ -112,8 +119,9 @@ bool LayerManager::clearLayer(int layer) {
 }
 
 void LayerManager::addNewLayer() {
-	m_Layers->insert(std::make_pair(m_LayerCount, Layer()));
-	m_LayerCount++;
+	for (int i = 0; i < m_LayerCount; i++) {
+		m_Layers->insert(std::make_pair(i, Layer()));
+	}
 }
 
 void LayerManager::addNumLayers(int num) {
@@ -175,4 +183,45 @@ bool LayerManager::getGuiVisibility(int layer) {
 		std::cout << "Layer " << layer << " does not exist" << std::endl;
 		return false;
 	}
+}
+
+
+//if entity is in any layer, return the layer number, if not in any layer it will be in layer 0
+int LayerManager::getLayerFromEntity(Entity entity) {
+	for (auto& layer : *m_Layers) {
+		auto& entities = layer.second.entities;
+		if (std::find(entities.begin(), entities.end(), entity) != entities.end()) {
+			return layer.first;
+		}
+	}
+	return 0;
+}
+
+void LayerManager::loadLayerFromJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json currentObj = serializer.GetJSONObject();
+
+	serializer.ReadInt(m_LayerCount, "layers");
+}
+
+void LayerManager::saveLayerToJSON(std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		Console::GetLog() << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+	serializer.WriteInt(m_LayerCount, "layers", filename);
 }
