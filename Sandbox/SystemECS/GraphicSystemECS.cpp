@@ -123,9 +123,7 @@ void GraphicSystemECS::update(float dt) {
         //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
        
 
-                if (animation.isAnimated) {
-                    animation.Update();
-                }
+
 
                 //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
                 myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
@@ -188,17 +186,17 @@ void GraphicSystemECS::update(float dt) {
         // TODO:: Update AABB component inside game loop
         // Press F1 to draw out debug AABB
                 if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-                    if (ecsCoordinator.getEntityID(entity) == "quitButton" || ecsCoordinator.getEntityID(entity) == "retryButton" ||
-                        ecsCoordinator.getEntityID(entity) == "startButton" || ecsCoordinator.getEntityID(entity) == "optionsButton" ||
-                        ecsCoordinator.getEntityID(entity) == "tutorialButton" || ecsCoordinator.getEntityID(entity) == "quitWindowButton" ||
-                        ecsCoordinator.getEntityID(entity) == "resumeButton" || ecsCoordinator.getEntityID(entity) == "closePauseMenu" ||
-                        ecsCoordinator.getEntityID(entity) == "pauseOptionsButton" || ecsCoordinator.getEntityID(entity) == "pauseTutorialButton" ||
-                        ecsCoordinator.getEntityID(entity) == "pauseQuitButton" || ecsCoordinator.getEntityID(entity) == "sfxSoundbar" ||
-                        ecsCoordinator.getEntityID(entity) == "musicSoundbar" || ecsCoordinator.getEntityID(entity) == "confirmButton" ||
-                        ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+                    if (isButton || isUI)
                     {
                         graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), identityMatrix);
                     }
+                    else
+                    {
+                        graphicsSystem.drawDebugOBB(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
+                    }
+                }
+                else if (GLFWFunctions::debug_flag && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                    graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
                 }
 
         if (ecsCoordinator.getEntityID(entity) == "gameLogo")
@@ -387,6 +385,10 @@ void GraphicSystemECS::update(float dt) {
                 if (ecsCoordinator.getTextureID(entity) != "") {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
                    
+                }
+
+                if (isPlayer) {
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("eyes.png"), transform.mdl_xform, animation.currentUVs);
                 }
             }
         }

@@ -41,6 +41,7 @@ public:
 	static void RenderInspectorWindow(ECSCoordinator& ecsCoordinator, int selectedEntityID);
 
 	static void LoadInspectorFromJSON(std::string const& filename);
+
 	static int selectedEntityID;
 	static int draggedEntityID;
 	static bool isSelectingEntity;
@@ -51,3 +52,4 @@ public:
 	static ImVec2 mouseWorldPos;
 	static std::vector<std::pair<int, std::string>>* overlappingEntities;
 };
+

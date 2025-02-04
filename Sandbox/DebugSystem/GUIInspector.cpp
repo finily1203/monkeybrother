@@ -46,7 +46,14 @@ bool moveable = false;
 bool checked = false;
 bool isOver = false;
 bool checks[4] = { false };
-static int selected = 0;
+static int selectedLayer = 0;
+
+static float thumbnailSize = 128.0f;
+static float paddingSize = 16.0f;
+
+float value = 0.01f;  // Starting at 0.01
+int rows = 1;
+int columns = 1;
 
 
 
@@ -656,17 +663,17 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 
 		}
 		int originalLayer = layerManager.getEntityLayer(selectedEntityID);
-		selected = originalLayer;
+		selectedLayer = originalLayer;
 		
-		ImGui::RadioButton("0", &selected, 0); ImGui::SameLine();
-		ImGui::RadioButton("1", &selected, 1); ImGui::SameLine();
-		ImGui::RadioButton("2", &selected, 2); ImGui::SameLine();
-		ImGui::RadioButton("3", &selected, 3);
+		ImGui::RadioButton("0", &selectedLayer, 0); ImGui::SameLine();
+		ImGui::RadioButton("1", &selectedLayer, 1); ImGui::SameLine();
+		ImGui::RadioButton("2", &selectedLayer, 2); ImGui::SameLine();
+		ImGui::RadioButton("3", &selectedLayer, 3);
 		ImGui::SameLine();
 		ImGui::Text("Layer");
 
-		if (selected != originalLayer) {
-			layerManager.shiftEntityToLayer(originalLayer, selected, selectedEntityID);
+		if (selectedLayer != originalLayer) {
+			layerManager.shiftEntityToLayer(originalLayer, selectedLayer, selectedEntityID);
 		}
 
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
@@ -816,8 +823,13 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	ImGui::SameLine();
 	ImGui::Text("Texture");
 
+
 	if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
 		checked = true;
+		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
+		value = animation.frameTime;
+		rows = animation.rows;
+		columns = animation.columns;
 	}
 	else {
 		checked = false;
@@ -827,14 +839,14 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	if (ImGui::Checkbox("Animation", &checked)) {
 		if (checked) {
 			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+				// Get sprite sheet info
+				
 				AnimationComponent animation{};
-
 				animation.isAnimated = true;
-				animation.totalFrames = 24.0;
-				animation.frameTime = 0.05,
-				animation.columns = 8.0,
-				animation.rows = 3.0,
-
+				animation.totalFrames = 24.0f;
+				animation.frameTime = 0.05f;
+				animation.columns = 8.0f;
+				animation.rows = 3.0f;
 				ecsCoordinator.addComponent(selectedEntityID, animation);
 			}
 		}
@@ -845,6 +857,32 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		}
 	}
 
+	if (checked) {
+		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
+
+		ImGui::PushItemWidth(100.0f);
+		ImGui::InputInt("Rows", &rows, 1, 100);
+
+		ImGui::InputInt("Columns", &columns, 1, 100);
+
+		//ImGui::PushItemWidth(100.0f);  // Width in pixels
+		if (ImGui::SliderFloat("##slider", &value, 0.01f, 0.10f, "%.2f sec", ImGuiSliderFlags_NoInput))
+		{
+			animation.frameTime = value;
+		}
+		ImGui::PopItemWidth();
+		Console().GetLog() << "rows: " << animation.rows << " columns: " << animation.columns << std::endl;
+		ImGui::SameLine();
+		ImGui::Text("Frame Time");
+
+		GLuint textureID = assetsManager.GetTexture(ecsCoordinator.getTextureID(selectedEntityID));
+		
+		ImGui::Image((void*)(intptr_t)textureID, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+
+		animation.rows = rows;
+		animation.columns = columns;
+		
+	}
 
 	ImGui::End();
 }
