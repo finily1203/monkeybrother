@@ -806,9 +806,13 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 {
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 	// Initialize ordered components that should always be present first
+
+	int entityLayer = layerManager.getLayerFromEntity(entity);
+
 	nlohmann::ordered_json entityJSON = {
 		{"id", entityId},
 		{"textureId", textureId},
+		{"layer", entityLayer},
 		{"transform", {
 			{"localTransform", {
 				{transform.mdl_xform.GetMatrixValue(0, 0), transform.mdl_xform.GetMatrixValue(0, 1), transform.mdl_xform.GetMatrixValue(0, 2)},

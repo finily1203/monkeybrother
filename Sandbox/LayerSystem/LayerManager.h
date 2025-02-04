@@ -46,8 +46,14 @@ public:
 
 	//Entity's position
 	int getEntityLayer(Entity entity);
+	int getLayerFromEntity(Entity entity);
+
+	//save and load number of layers from JSON
+	void loadLayerFromJSON(std::string const& filename);
+	void saveLayerToJSON(std::string const& filename);
 	
 private:
 	std::unordered_map<int, Layer>* m_Layers;
 	int m_LayerCount;
+
 };
