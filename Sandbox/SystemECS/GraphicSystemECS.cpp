@@ -94,17 +94,17 @@ void GraphicSystemECS::update(float dt) {
                 auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
                 Console::GetLog() << "Entity: " << entity << " Position: " << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
 
-        bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
-        AnimationComponent animation{};
+                bool hasAnimation = ecsCoordinator.hasComponent<AnimationComponent>(entity);
+                AnimationComponent animation{};
 
 
-        // Check if the entity has an animation component
-        if (hasAnimation) {
-            animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-            if (animation.isAnimated) {
-                animation.Update();
-            }
-        }
+                // Check if the entity has an animation component
+                if (hasAnimation) {
+                    animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                    if (animation.isAnimated) {
+                        animation.Update();
+                    }
+                }
 
                 auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -118,11 +118,10 @@ void GraphicSystemECS::update(float dt) {
                 bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
                 bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
+				bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
 
-        // Use hasMovement for the update parameter
-        //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
-       
-
+                // Use hasMovement for the update parameter
+                //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
 
 
                 //graphicsSystem.Update(dt / 10.0f, (isAnimate&& isPump) || (isPlayer && hasMovement) || (isEnemy && hasMovement)); // Use hasMovement instead of true
@@ -378,10 +377,26 @@ void GraphicSystemECS::update(float dt) {
                             ecsCoordinator.setTextureID(entity, textureName);
                         }
                     }
-            
+                }
 
-           
-        }
+                //if is player, check visibility of player, if not visible do not render
+                if (isPlayer) {
+                    auto& player = ecsCoordinator.getComponent<PlayerComponent>(entity);
+                    if (!player.isVisible) {
+                        continue;
+                    }
+                }
+
+                if (isFilter) {
+					auto& filter = ecsCoordinator.getComponent<FilterComponent>(entity);
+					if (filter.isFilterClogged) {
+						ecsCoordinator.setTextureID(entity, "filter_mossed");
+					}
+                    else {
+                        ecsCoordinator.setTextureID(entity, "exitFilter");
+                    }
+                }
+
                 if (ecsCoordinator.getTextureID(entity) != "") {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
                    

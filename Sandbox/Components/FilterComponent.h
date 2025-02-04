@@ -2,6 +2,6 @@
 struct FilterComponent
 {
 	bool isFilter;
-
-	FilterComponent() : isFilter(false) {}
+	bool isFilterClogged;
+	FilterComponent() : isFilter(false), isFilterClogged(false) {}
 };
