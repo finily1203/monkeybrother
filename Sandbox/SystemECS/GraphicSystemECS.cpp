@@ -258,6 +258,7 @@ void GraphicSystemECS::update(float dt) {
         if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos || ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
         {
             int activeNotches{};
+            float startPos{}, endPos{};
             std::string audioType = ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ? "sfxNotch" : "musicNotch";
             std::string arrowId = (audioType == "sfxNotch") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
 
@@ -271,7 +272,9 @@ void GraphicSystemECS::update(float dt) {
                     break;
                 }
             }
+
             std::vector<std::pair<Entity, TransformComponent>> notches;
+
 
             for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
             {
@@ -283,11 +286,22 @@ void GraphicSystemECS::update(float dt) {
                 }
             }
 
+            if (notches.size() == 10)
+            {
+                startPos = notches[0].second.position.GetX() - (notches[0].second.scale.GetX() / 2.0f);
+                endPos = notches[9].second.position.GetX() + (notches[9].second.scale.GetX() / 2.0f);
+
+                float arrowPos = arrowTransform.position.GetX();
+                float progress = std::abs((arrowPos - startPos) / (endPos - startPos));
+                float percentage = std::round(progress * 10.f) * 10.f;
+                percentage = std::clamp(percentage, 0.f, 100.f);
+            }
+
             for (size_t i{}; i < notches.size(); ++i)
             {
                 if (arrowTransform.position.GetX() + arrowTransform.scale.GetX() / 2.35f >= notches[i].second.position.GetX())
                 {
-                    activeNotches = i + 1;
+                    activeNotches = static_cast<int>(i) + 1;
                 }
             }
 

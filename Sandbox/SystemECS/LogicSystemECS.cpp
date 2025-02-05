@@ -145,7 +145,7 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 			}
 		}
 
-		float soundbarLeft = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.1f);
+		float soundbarLeft = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.12f);
 		float soundbarRight = soundbarTransform.position.GetX() + (soundbarTransform.scale.GetX() / 2.1f);
 
 		if (cursorXCentered >= soundbarLeft && cursorXCentered <= soundbarRight)
