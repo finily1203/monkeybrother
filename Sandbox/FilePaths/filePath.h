@@ -43,4 +43,5 @@ public:
 	static std::string GetMainMenuJSONPath();
 	static std::string GetPauseMenuJSONPath();
 	static std::string GetOptionsMenuJSONPath();
+	static std::string GetIntroCutsceneJSONPath();	
 };

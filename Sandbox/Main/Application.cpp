@@ -67,6 +67,8 @@ int main() {
 
 		engine->addSystem(&layerManager);
 
+		engine->addSystem(&cutsceneSystem);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 

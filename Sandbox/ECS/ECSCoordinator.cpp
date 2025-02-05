@@ -54,8 +54,23 @@ void ECSCoordinator::initialise() {
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
-	systemManager->update();
+	static bool cutsceneComplete = false;
 
+	if (cutsceneSystem.isPlaying()) {
+		systemManager->update();
+	}
+	else if (!cutsceneComplete && cutsceneSystem.isFinished()) {
+		// Clean up cutscene entities
+		for (auto entity : getAllLiveEntities()) {
+			destroyEntity(entity);
+		}
+		// Load main menu
+		LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+		cutsceneComplete = true;
+	}
+	else {
+		systemManager->update();
+	}
 }
 
 //Cleans up the ECS system by calling the cleanup function
@@ -507,8 +522,8 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 
 	}
 
-	GameViewWindow::setSceneNum(mainMenuScene);
-	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+	/*GameViewWindow::setSceneNum(mainMenuScene);
+	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());*/
 }
 
 void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
@@ -687,6 +702,82 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
 
+void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename) {
+	JSONSerializer serializer;
+	int cutsceneScene = -2;
+	if (!serializer.Open(filename)) {
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// Initialize cutscene system and clear any existing frames
+	cutsceneSystem.initialise();
+
+	// Load cutscene frames first
+	if (jsonObj.contains("cutsceneFrames")) {
+		for (const auto& frameData : jsonObj["cutsceneFrames"]) {
+			myMath::Vector2D position;
+			position.SetX(frameData["position"]["x"].get<float>());
+			position.SetY(frameData["position"]["y"].get<float>());
+			float duration = frameData["duration"].get<float>();
+
+			cutsceneSystem.addFrame(position, duration);
+		}
+	}
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	// Load entities
+	for (const auto& entityData : jsonObj["entities"]) {
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		// Add entity to default layer
+		layerManager.addEntityToLayer(0, entityObj);
+
+		// Parse transform data
+		if (entityData.contains("transform")) {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+		}
+
+		// Add components
+		ecs.addComponent(entityObj, transform);
+
+		// Add background component if specified
+		if (entityData.contains("background")) {
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+			ecs.addComponent(entityObj, background);
+		}
+
+		// Add behaviour component
+		if (entityData.contains("behaviour")) {
+			BehaviourComponent behaviour{};
+			if (entityData["behaviour"].contains("none")) {
+				behaviour.none = true;
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		// Set entity identifiers
+		ecs.setEntityID(entityObj, entityId);
+		ecs.setTextureID(entityObj, textureId);
+	}
+
+	// Start the cutscene immediately
+	cutsceneSystem.start();
+
+	GameViewWindow::setSceneNum(cutsceneScene);
+	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+}
 void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -763,11 +854,14 @@ void ECSCoordinator::test5() {
 	//  LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	//}
 
-	LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
-
-
+	if (GameViewWindow::getSceneNum() == -2)
+	{
+		LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
+	}
+	else {
+		LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+	}
 }
-
 
 //Initialises all required components and systems for the ECS system
 void ECSCoordinator::initialiseSystemsAndComponents() {
