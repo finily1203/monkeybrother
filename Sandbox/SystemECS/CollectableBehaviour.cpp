@@ -18,45 +18,101 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "PhyColliSystemECS.h"
 
 void CollectableBehaviour::update(Entity entity) {
-	//get player entity based on ifPlayer component
-	
-	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
-	auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+
+    // Handle active animation destruction
+    if (collectAnimationEntity != nullptr && ecsCoordinator.hasComponent<AnimationComponent>(*collectAnimationEntity)) {
+  //      auto& animation = ecsCoordinator.getComponent<AnimationComponent>(*collectAnimationEntity);
+
+  //      double currentTime = glfwGetTime();
+  //      double elapsedTime = currentTime - animationStartTime;
+
+		//std::cout << elapsedTime << std::endl;
+
+  //      if (elapsedTime >= (animation.totalFrames * animation.frameTime)) {
+  //          ecsCoordinator.destroyEntity(*collectAnimationEntity);
+  //          collectAnimationEntity = nullptr;  // Reset pointer after destruction
+  //      }
+    }
 
 
-	for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
-
-			//get the position of the player and the collectable
-			auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
-			myMath::Vector2D& playerPos = playerTransform.position;
-			float radius = playerTransform.scale.GetX() * 0.5f;
-
-			CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
-			CollisionSystemECS::OBB collectOBB = collisionSystem.createOBBFromEntity(entity);
-
-			myMath::Vector2D normal{};
-			float penetration{};
-
-			bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
-
-			if (isColliding) {
-				std::cout << "COLLIDED" << std::endl;
-				//player grow in size and mass
-				playerTransform.scale.SetX(playerTransform.scale.GetX() + 50.0f);
-				playerTransform.scale.SetY(playerTransform.scale.GetY() + 50.0f);
-				auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
-				playerPhysics.mass += 0.5f;
-
-				GLFWFunctions::collectAudio = true;
-			
-
-				ecsCoordinator.destroyEntity(entity);
-				GLFWFunctions::collectableCount--;
-			}
-		}
+	if (collectAnimationEntity != nullptr) {
+		std::cout << "Collectable animation entity exists" << std::endl;
 	}
 
+    if (collectAnimationEntity == nullptr) {
+		std::cout << "Collectable animation entity does not exist" << std::endl;
+    }
 
+    // Check for collision with player
+    for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+            auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+            myMath::Vector2D& playerPos = playerTransform.position;
+            float radius = playerTransform.scale.GetX() * 0.5f;
 
+            CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
+            CollisionSystemECS::OBB collectOBB = collisionSystem.createOBBFromEntity(entity);
+
+            myMath::Vector2D normal{};
+            float penetration{};
+
+            bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
+
+            if (isColliding) {
+                playerTransform.scale.SetX(playerTransform.scale.GetX() + 50.0f);
+                playerTransform.scale.SetY(playerTransform.scale.GetY() + 50.0f);
+                auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
+                playerPhysics.mass += 0.5f;
+
+                GLFWFunctions::collectAudio = true;
+
+                // Only create animation if none exists
+                if (collectAnimationEntity == nullptr) {
+                    createCollectAnimation(entity);
+                }
+
+                ecsCoordinator.destroyEntity(entity);  // Destroy the collectable
+                GLFWFunctions::collectableCount--;
+            }
+        }
+    }
+}
+
+void CollectableBehaviour::createCollectAnimation(Entity entity) {
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
+    animationStartTime = glfwGetTime();             // Record start time
+
+    //get entity texture ID
+	std::string textureId = ecsCoordinator.getTextureID(entity);
+	std::string animationId = textureId + "collectAnimation";
+
+    ecsCoordinator.setEntityID(newAnimationEntity, animationId);
+    ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_CollectedMoss.png");
+
+    // Transform setup
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    transform.position = entityTransform.position;
+    transform.scale.SetX(entityTransform.scale.GetX());
+    transform.scale.SetY(entityTransform.scale.GetY());
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 13.0f;
+    animation.frameTime = 0.1f;
+    animation.columns = 4.0f;
+    animation.rows = 4.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // Add to default layer 0
+    layerManager.addEntityToLayer(0, newAnimationEntity);
+
+    collectAnimationEntity = &newAnimationEntity;
 }
