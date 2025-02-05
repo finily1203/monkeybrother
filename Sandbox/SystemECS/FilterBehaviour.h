@@ -4,6 +4,7 @@
 class FilterBehaviour : public BehaviourECS {
 public:
 	void update(Entity entity) override;
+	void createCloggedAnimation(Entity entity);
 
 private:
 	bool isFilterUsed = false;

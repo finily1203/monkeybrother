@@ -57,7 +57,6 @@ struct AnimationComponent {
         double currentAbsoluteTime = glfwGetTime();
         double timeSinceCreation = currentAbsoluteTime - creationTime;
 
-
         currentFrame = static_cast<int>((timeSinceCreation / frameTime)) % static_cast<int>(totalFrames);
 
         UpdateUVCoordinates();

@@ -17,8 +17,4 @@ class CollectableBehaviour : public BehaviourECS {
 public:
     void update(Entity entity);
     void createCollectAnimation(Entity entity);
-
-private:
-    Entity* collectAnimationEntity;  
-    double animationStartTime = 0.0;
 };

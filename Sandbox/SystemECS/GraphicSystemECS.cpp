@@ -517,6 +517,22 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
+                    auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                    double currentAbsoluteTime = glfwGetTime();
+                    double timeSinceCreation = currentAbsoluteTime - animation.creationTime;
+
+                    animation.currentFrame = static_cast<int>((timeSinceCreation / animation.frameTime)) % static_cast<int>(animation.totalFrames);
+
+                    // Check if one loop is completed
+                    if (animation.currentFrame == static_cast<int>(animation.totalFrames) - 1) {
+
+                        // Optional: Trigger actions after one loop
+                        ecsCoordinator.destroyEntity(entity);  // Example: Destroy after one loop
+                    }
+                }
+
                 if (ecsCoordinator.getTextureID(entity) != "") {
                     //should not render the animation for filter in and filter out if filter is clogged
                     if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter_out.png") {

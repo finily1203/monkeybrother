@@ -30,7 +30,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
-, ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
+                           , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
                            , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f)
 {
 

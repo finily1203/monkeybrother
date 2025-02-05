@@ -56,6 +56,15 @@ void ECSCoordinator::initialise() {
 void ECSCoordinator::update() {
 	systemManager->update();
 
+	if (GLFWFunctions::changeLevel) {
+		//delete all live entities
+		for (auto& entity : getAllLiveEntities()) {
+			destroyEntity(entity);
+		}
+		int sceneNum = GameViewWindow::getSceneNum();
+		LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
+		GLFWFunctions::changeLevel = false;
+	}
 }
 
 //Cleans up the ECS system by calling the cleanup function

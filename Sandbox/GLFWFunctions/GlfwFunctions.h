@@ -108,6 +108,7 @@ struct GLFWFunctions {
 	static bool isHovering;
 	static bool gamePaused;
 	static bool filterClogged; // rmb to remove this
+	static bool changeLevel;
 
 	static double mouseXDelta; // Add this to track mouse movement
 

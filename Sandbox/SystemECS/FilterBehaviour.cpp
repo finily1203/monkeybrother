@@ -82,6 +82,7 @@ void FilterBehaviour::update(Entity entity) {
                     playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));  // Increased distance
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
+					createCloggedAnimation(entity);
                 }
                 else {
                     // Keep player hidden near the filter during the 2-second delay
@@ -94,4 +95,34 @@ void FilterBehaviour::update(Entity entity) {
             }
         }
     }
+}
+
+void FilterBehaviour::createCloggedAnimation(Entity entity) {
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
+
+    ecsCoordinator.setEntityID(newAnimationEntity, "cloggedAnimation");
+    ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_DefunctFilter.png");
+
+    // Transform setup
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    transform.position = entityTransform.position;
+    transform.scale.SetX(entityTransform.scale.GetX());
+    transform.scale.SetY(entityTransform.scale.GetY());
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 8.0f;
+    animation.frameTime = 0.05f;
+    animation.columns = 3.0f;
+    animation.rows = 3.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // Add to default layer 0
+    layerManager.addEntityToLayer(0, newAnimationEntity);
 }

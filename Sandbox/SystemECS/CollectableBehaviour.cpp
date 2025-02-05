@@ -21,30 +21,6 @@ void CollectableBehaviour::update(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
 
-    // Handle active animation destruction
-    if (collectAnimationEntity != nullptr && ecsCoordinator.hasComponent<AnimationComponent>(*collectAnimationEntity)) {
-  //      auto& animation = ecsCoordinator.getComponent<AnimationComponent>(*collectAnimationEntity);
-
-  //      double currentTime = glfwGetTime();
-  //      double elapsedTime = currentTime - animationStartTime;
-
-		//std::cout << elapsedTime << std::endl;
-
-  //      if (elapsedTime >= (animation.totalFrames * animation.frameTime)) {
-  //          ecsCoordinator.destroyEntity(*collectAnimationEntity);
-  //          collectAnimationEntity = nullptr;  // Reset pointer after destruction
-  //      }
-    }
-
-
-	if (collectAnimationEntity != nullptr) {
-		std::cout << "Collectable animation entity exists" << std::endl;
-	}
-
-    if (collectAnimationEntity == nullptr) {
-		std::cout << "Collectable animation entity does not exist" << std::endl;
-    }
-
     // Check for collision with player
     for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
@@ -68,10 +44,7 @@ void CollectableBehaviour::update(Entity entity) {
 
                 GLFWFunctions::collectAudio = true;
 
-                // Only create animation if none exists
-                if (collectAnimationEntity == nullptr) {
-                    createCollectAnimation(entity);
-                }
+                createCollectAnimation(entity);
 
                 ecsCoordinator.destroyEntity(entity);  // Destroy the collectable
                 GLFWFunctions::collectableCount--;
@@ -82,13 +55,8 @@ void CollectableBehaviour::update(Entity entity) {
 
 void CollectableBehaviour::createCollectAnimation(Entity entity) {
     Entity newAnimationEntity = ecsCoordinator.createEntity();
-    animationStartTime = glfwGetTime();             // Record start time
 
-    //get entity texture ID
-	std::string textureId = ecsCoordinator.getTextureID(entity);
-	std::string animationId = textureId + "collectAnimation";
-
-    ecsCoordinator.setEntityID(newAnimationEntity, animationId);
+    ecsCoordinator.setEntityID(newAnimationEntity, "collectAnimation");
     ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_CollectedMoss.png");
 
     // Transform setup
@@ -113,6 +81,4 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     // Add to default layer 0
     layerManager.addEntityToLayer(0, newAnimationEntity);
-
-    collectAnimationEntity = &newAnimationEntity;
 }

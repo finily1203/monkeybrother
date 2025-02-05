@@ -64,6 +64,8 @@ bool GLFWFunctions::gameOver = false;
 bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
+bool GLFWFunctions::changeLevel = false;
+
 MouseBehaviour mouseBehaviour;
 double GLFWFunctions::mouseXDelta = 0.0;
 
