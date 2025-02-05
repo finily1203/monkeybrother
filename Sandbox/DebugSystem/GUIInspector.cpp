@@ -54,6 +54,7 @@ static float paddingSize = 16.0f;
 float value = 0.01f;  // Starting at 0.01
 int rows = 1;
 int columns = 1;
+int frames = 1;
 
 
 
@@ -727,7 +728,12 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 				if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
 					ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
 
+				if (ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID)) {
+					ecsCoordinator.removeComponent<FilterComponent>(selectedEntityID);
+				}
+
 				PhysicsComponent physics;
+				FilterComponent filter;
 				// Add new component
 				switch (i) {
 				case 0:
@@ -769,6 +775,10 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
 					break;
 				case 8:
+					filter.isFilter = true;
+					filter.isFilterClogged = false;
+					if (!ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID))
+						ecsCoordinator.addComponent<FilterComponent>(selectedEntityID, filter);
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
 					break;
 				case 9:
@@ -830,6 +840,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		value = animation.frameTime;
 		rows = animation.rows;
 		columns = animation.columns;
+		frames = animation.totalFrames;
 	}
 	else {
 		checked = false;
@@ -861,6 +872,8 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
 
 		ImGui::PushItemWidth(100.0f);
+		ImGui::InputInt("TotalFrames", &frames, 1, 100);
+
 		ImGui::InputInt("Rows", &rows, 1, 100);
 
 		ImGui::InputInt("Columns", &columns, 1, 100);
@@ -881,6 +894,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 
 		animation.rows = rows;
 		animation.columns = columns;
+		animation.totalFrames = frames;
 		
 	}
 

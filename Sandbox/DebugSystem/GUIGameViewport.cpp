@@ -32,6 +32,8 @@ File Contributions: Lew Zong Han Owen (60%)
 #include "GlobalCoordinator.h"
 #include "GUIInspector.h"
 #include "BehaviourComponent.h"
+#include "FilterComponent.h"
+#include "MovPlatformComponent.h"
 #include "LogicSystemECS.h"
 #include "PlayerBehaviour.h"
 #include "EnemyBehaviour.h"
@@ -982,6 +984,16 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		entityJSON["UI"] = { {"isUI", UI.isUI} };
 	}
 
+	if (ecs.hasComponent<FilterComponent>(entity)) {
+		auto& filter = ecs.getComponent<FilterComponent>(entity);
+		filter.isFilter = true;
+		filter.isFilterClogged = false;
+		entityJSON["filter"] = {
+			{"isFilter", filter.isFilter},
+			{"isFilterClogged", filter.isFilterClogged}
+		};
+	}
+
 	//std::cout << "Has Behaviour:" << ecs.hasComponent<BehaviourComponent>(entity) << std::endl;
 	if (ecs.hasComponent<BehaviourComponent>(entity)) {
 		auto& behaviour = ecs.getComponent<BehaviourComponent>(entity);
@@ -1017,6 +1029,14 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 		else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(entity)) {
 			behaviour.platform = true;
 			entityJSON["behaviour"] = { {"platform", behaviour.platform} };
+		}
+		else if (logicSystemRef->hasBehaviour<FilterBehaviour>(entity)) {
+			behaviour.filter = true;
+			entityJSON["behaviour"] = { {"filter", behaviour.filter} };
+		}
+		else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(entity)) {
+			behaviour.movPlatform = true;
+			entityJSON["behaviour"] = { {"movPlatform", behaviour.movPlatform} };
 		}
 	}
 
