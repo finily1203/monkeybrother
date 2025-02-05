@@ -17,6 +17,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #pragma once
 #include "ECSCoordinator.h"
 #include "GraphicsSystem.h"
+#include <unordered_set>
 
 
 class BehaviourECS {

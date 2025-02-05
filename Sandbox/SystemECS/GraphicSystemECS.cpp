@@ -246,20 +246,67 @@ void GraphicSystemECS::update(float dt) {
                         break;
                     }
                 }
-
-                float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.22f);
+            }
+                    
+                float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
 
                 std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
                 transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                 ecsCoordinator.setTextureID(entity, textureName);
-            }
         }
 
-        if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarBase" || ecsCoordinator.getEntityID(entity) == "musicSoundbarBase")
+        if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos || ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
+            {
+                int activeNotches{};
+                std::string audioType = ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ? "sfxNotch" : "musicNotch";
+                std::string arrowId = (audioType == "sfxNotch") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
+
+                TransformComponent arrowTransform{};
+
+                for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
+                {
+                    if (ecsCoordinator.getEntityID(arrowEntity) == arrowId)
+                    {
+                        arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                        break;
+                    }
+                }
+                std::vector<std::pair<Entity, TransformComponent>> notches;
+
+                for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
+                {
+                    std::string notchId = ecsCoordinator.getEntityID(notchEntity);
+                    if (notchId.find(audioType) != std::string::npos)
+                    {
+                        TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
+                        notches.emplace_back(notchEntity, notchTransform);
+                    }
+                }
+
+                for (size_t i{}; i < notches.size(); ++i)
+                {
+                    if (arrowTransform.position.GetX() + arrowTransform.scale.GetX() / 2.35f >= notches[i].second.position.GetX())
+                    {
+                        activeNotches = i + 1;
+                    }
+                }
+
+                for (size_t i{}; i < notches.size(); ++i)
+                {
+                    std::string notchTexture = (i < activeNotches) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                    TransformComponent& notchTransform = notches[i].second;
+
+                    notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform);
+                }
+            }
+        
+
+        /*if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarBase" || ecsCoordinator.getEntityID(entity) == "musicSoundbarBase")
         {
             transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
             ecsCoordinator.setTextureID(entity, "soundbarBase");
-        }
+        }*/
 
         if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarArrow" || ecsCoordinator.getEntityID(entity) == "musicSoundbarArrow")
         {
@@ -372,10 +419,10 @@ void GraphicSystemECS::update(float dt) {
                                 }
                             }
 
-                            float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.2f);
+                            //float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.2f);
 
-                            std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "activeSoundbar" : "unactiveSoundbar";
-                            ecsCoordinator.setTextureID(entity, textureName);
+                            //std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "activeSoundbar" : "unactiveSoundbar";
+                            ecsCoordinator.setTextureID(entity, "soundbarBase");
                         }
                     }
             
@@ -394,6 +441,7 @@ void GraphicSystemECS::update(float dt) {
         }
     }
 }
+
 
 
 void GraphicSystemECS::cleanup() {}
