@@ -58,7 +58,7 @@ void AudioPanel::Update()
 			channel->getCurrentSound(&sound);
 			if (sound) {
 				sound->getName(musicName, sizeof(musicName));
-				std::cout << "Current music playing: " << musicName << std::endl;
+				//std::cout << "Current music playing: " << musicName << std::endl;
 			}
 		}
 	}

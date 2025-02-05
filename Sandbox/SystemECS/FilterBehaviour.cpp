@@ -80,6 +80,7 @@ void FilterBehaviour::update(Entity entity) {
                     // Move player further to avoid immediate re-collision
                     playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));  // Increased distance
                     isFilterUsed = true;
+                    GLFWFunctions::filterClogged = true;
                 }
                 else {
                     // Keep player hidden near the filter during the 2-second delay
