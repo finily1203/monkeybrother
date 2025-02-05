@@ -727,7 +727,12 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 				if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
 					ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
 
+				if (ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID)) {
+					ecsCoordinator.removeComponent<FilterComponent>(selectedEntityID);
+				}
+
 				PhysicsComponent physics;
+				FilterComponent filter;
 				// Add new component
 				switch (i) {
 				case 0:
@@ -769,6 +774,10 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
 					break;
 				case 8:
+					filter.isFilter = true;
+					filter.isFilterClogged = false;
+					if (!ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID))
+						ecsCoordinator.addComponent<FilterComponent>(selectedEntityID, filter);
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
 					break;
 				case 9:

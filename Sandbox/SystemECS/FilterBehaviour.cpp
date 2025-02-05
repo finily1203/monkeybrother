@@ -15,6 +15,7 @@
 //set isClogged to true
 
 void FilterBehaviour::update(Entity entity) {
+    
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
