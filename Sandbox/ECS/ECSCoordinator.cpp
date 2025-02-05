@@ -295,6 +295,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		if (entityData.contains("filter")) {
 			FilterComponent filter{};
 			serializer.ReadObject(filter.isFilter, entityId, "entities.filter.isFilter");
+			serializer.ReadObject(filter.isFilterClogged, entityId, "entities.filter.isFilterClogged");
 			ecs.addComponent(entityObj, filter);
 		}
 

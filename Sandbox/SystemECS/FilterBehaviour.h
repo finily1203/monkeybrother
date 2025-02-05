@@ -6,6 +6,6 @@ public:
 	void update(Entity entity) override;
 
 private:
-	bool isClogged = false;
+	bool isFilterUsed = false;
 	std::chrono::time_point<std::chrono::steady_clock> collisionTime;
 };

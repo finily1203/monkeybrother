@@ -1437,6 +1437,7 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 	if (currentObj.contains("filter")) {
 		FilterComponent filter;
 		serializer.ReadObject(filter.isFilter, entityId, "filter.isFilter");
+		serializer.ReadObject(filter.isFilterClogged, entityId, "filter.isFilterClogged");
 		ecsCoordinator.addComponent(prefabEntity, filter);
 	}
 
