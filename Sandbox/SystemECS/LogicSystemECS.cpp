@@ -92,7 +92,7 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 
 				std::string entityId = ecsCoordinator.getEntityID(entity);
 				
-				if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+				if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase")
 				{
 					isDragging = true;
 				}
@@ -114,8 +114,8 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 	glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
 	float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
 
-	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbar") ? "sfxSoundbarArrow" :
-								(getSoundbarId() == "musicSoundbar") ? "musicSoundbarArrow" : "";
+	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
+								(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
 	if (!soundbarArrow.empty())
 	{
@@ -308,19 +308,21 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "closeOptionsMenu")
 	{
+		std::unordered_set<std::string> optionsMenuEntityNames = {
+			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
+			"sfxAudio", "musicAudio", "sfxSoundbarBase",
+			"musicSoundbarBase", "sfxSoundbarArrow", "musicSoundbarArrow", 
+			"sfxNotch0", "sfxNotch1", "sfxNotch2", "sfxNotch3",
+			"sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
+			"musicNotch2", "musicNotch3", "musicNotch4",
+			"musicNotch5", "musicNotch6", "musicNotch7",
+			"musicNotch8", "musicNotch9"
+		};
+
 		for (auto currEntity : allEntities)
 		{
-			if (ecsCoordinator.getEntityID(currEntity) == "optionsMenuBg" ||
-				ecsCoordinator.getEntityID(currEntity) == "closeOptionsMenu" ||
-				ecsCoordinator.getEntityID(currEntity) == "confirmButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "sfxAudio" ||
-				ecsCoordinator.getEntityID(currEntity) == "musicAudio" ||
-				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbarBase" ||
-				ecsCoordinator.getEntityID(currEntity) == "musicSoundbarBase" ||
-				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbar" ||
-				ecsCoordinator.getEntityID(currEntity) == "musicSoundbar" ||
-				ecsCoordinator.getEntityID(currEntity) == "sfxSoundbarArrow" ||
-				ecsCoordinator.getEntityID(currEntity) == "musicSoundbarArrow")
+			if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
 			{
 				ecsCoordinator.destroyEntity(currEntity);
 			}
@@ -348,7 +350,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
 
-	else if (entityId == "sfxSoundbar" || entityId == "musicSoundbar")
+	else if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase")
 	{
 		double mouseX{}, mouseY{};
 		int windowWidth{}, windowHeight{};
@@ -357,7 +359,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		setSoundbarId(entityId);
 
 		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-		std::string audioArrowId = (entityId == "sfxSoundbar") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
+		std::string audioArrowId = (entityId == "sfxSoundbarBase") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
 
 		for (auto& currEntity : allEntities)
 		{
@@ -372,7 +374,37 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "confirmButton")
 	{
+		std::unordered_set<std::string> optionsMenuEntityNames = {
+			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
+			"sfxAudio", "musicAudio", "sfxSoundbarBase",
+			"musicSoundbarBase", "sfxSoundbarArrow", "musicSoundbarArrow",
+			"sfxNotch0", "sfxNotch1", "sfxNotch2", "sfxNotch3",
+			"sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
+			"musicNotch2", "musicNotch3", "musicNotch4",
+			"musicNotch5", "musicNotch6", "musicNotch7",
+			"musicNotch8", "musicNotch9"
+		};
+
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+
+		for (auto currEntity : allEntities)
+		{
+			if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::optionsMenuCount--;
+
+		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+		{
+			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+			GLFWFunctions::pauseMenuCount++;
+		}
+
+		GLFWFunctions::gamePaused = true;
 	}
 }
 
