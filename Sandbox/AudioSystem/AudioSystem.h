@@ -72,6 +72,8 @@ public:
 	void setSfxVol(float volPerc);
 
 	void saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage);
+	static float sfxPercentage;
+	static float musicPercentage;
 
 private:
 	//FMOD::System* audioSystem;

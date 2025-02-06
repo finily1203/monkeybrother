@@ -252,6 +252,25 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             GLFWFunctions::pauseMenuCount++;
             ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
         }
+
+        else if (GLFWFunctions::optionsMenuCount != 1)
+        {
+            for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+            {
+                if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+                    ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+                    ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+                {
+                    ecsCoordinator.destroyEntity(currEntity);
+                }
+            }
+
+            GLFWFunctions::gamePaused = false;
+            GLFWFunctions::pauseMenuCount--;
+        }
     }
 
     if ((*keyState)[Key::S])
