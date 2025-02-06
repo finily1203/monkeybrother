@@ -84,11 +84,32 @@ void GraphicSystemECS::update(float dt) {
     (void)dt;
     //find out how many layers there are
     //for each layer draw entities in that layer
-	//start from 0 to highest layer (so 0 is drawn first)
+    //start from 0 to highest layer (so 0 is drawn first)
+    // Compute view matrix
+    // Get player entity and transform once at start of frame
+    Entity playerEntity = Entity{};
+    TransformComponent* playerTransform = nullptr;
+
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+            playerEntity = entity;
+            playerTransform = &ecsCoordinator.getComponent<TransformComponent>(entity);
+            break;
+        }
+    }
+
+    // Update camera once per frame
+    if (GLFWFunctions::allow_camera_movement) {
+        cameraSystem.update();
+    }
+    else if (playerTransform != nullptr) {
+        cameraSystem.lockToComponent(*playerTransform);
+        cameraSystem.update();
+    }
 
     for (int i = 0; i < layerManager.getLayerCount(); i++) {
         //check if layer is visible
-		bool isLayerVisible = layerManager.getLayerVisibility(i);
+        bool isLayerVisible = layerManager.getLayerVisibility(i);
         if (isLayerVisible) {
             for (auto entity : layerManager.getEntitiesFromLayer(i)) {
                 auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
@@ -126,8 +147,8 @@ void GraphicSystemECS::update(float dt) {
                 bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
                 bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
+                //bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
-                //check behaviour instead
 				auto& behaviour = ecsCoordinator.getComponent<BehaviourComponent>(entity);
 
                 // Use hasMovement for the update parameter
@@ -138,14 +159,6 @@ void GraphicSystemECS::update(float dt) {
                 myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
                 transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
-                // Compute view matrix
-                if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
-                    cameraSystem.update();
-                }
-                else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-                    cameraSystem.lockToComponent(transform);
-                    cameraSystem.update();
-                }
 
                 mouseBehaviour.update(entity);
 
@@ -208,10 +221,10 @@ void GraphicSystemECS::update(float dt) {
                     graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
                 }
 
-		        if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
-		        {
-			        ecsCoordinator.setTextureID(entity, "cutsceneBackground");
-		        }
+                if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
+                {
+                    ecsCoordinator.setTextureID(entity, "cutsceneBackground");
+                }
                 if (ecsCoordinator.getEntityID(entity) == "gameLogo")
                 {
                     ecsCoordinator.setTextureID(entity, "gameLogo");
@@ -237,8 +250,8 @@ void GraphicSystemECS::update(float dt) {
                     std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
                         (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
 
-            std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbarBase" :
-                (audioType == "musicAudio") ? "musicSoundbarBase" : "";
+                    std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbarBase" :
+                        (audioType == "musicAudio") ? "musicSoundbarBase" : "";
 
                     if (!audioArrowId.empty() && !soundbarId.empty())
                     {
@@ -260,136 +273,136 @@ void GraphicSystemECS::update(float dt) {
                             }
                         }
 
-                float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
+                        float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
 
-                std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
-                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-                ecsCoordinator.setTextureID(entity, textureName);
-                //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(textureName), transform.mdl_xform);
-            }
-        }
+                        std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
+                        transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                        ecsCoordinator.setTextureID(entity, textureName);
+                        //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(textureName), transform.mdl_xform);
+                    }
+                }
 
-        if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ||
-            ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
-        {
-            int activeNotchesSFX{}, activeNotchesMusic{};
-            float startPosSFX{}, endPosSFX{};
-            float startPosMusic{}, endPosMusic{};
-
-            TransformComponent sfxArrowTransform{}, musicArrowTransform{};
-
-            // Identify arrow positions for SFX and Music
-            for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
-            {
-                std::string arrowId = ecsCoordinator.getEntityID(arrowEntity);
-                if (arrowId == "sfxSoundbarArrow")
+                if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ||
+                    ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
                 {
-                    sfxArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                    int activeNotchesSFX{}, activeNotchesMusic{};
+                    float startPosSFX{}, endPosSFX{};
+                    float startPosMusic{}, endPosMusic{};
+
+                    TransformComponent sfxArrowTransform{}, musicArrowTransform{};
+
+                    // Identify arrow positions for SFX and Music
+                    for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
+                    {
+                        std::string arrowId = ecsCoordinator.getEntityID(arrowEntity);
+                        if (arrowId == "sfxSoundbarArrow")
+                        {
+                            sfxArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                        }
+
+                        else if (arrowId == "musicSoundbarArrow")
+                        {
+                            musicArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                        }
+                    }
+
+                    std::vector<std::pair<Entity, TransformComponent>> sfxNotches, musicNotches;
+
+                    // Separate SFX and Music Notches
+                    for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
+                    {
+                        std::string notchId = ecsCoordinator.getEntityID(notchEntity);
+                        TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
+
+                        if (notchId.find("sfxNotch") != std::string::npos)
+                        {
+                            sfxNotches.emplace_back(notchEntity, notchTransform);
+                        }
+
+                        else if (notchId.find("musicNotch") != std::string::npos)
+                        {
+                            musicNotches.emplace_back(notchEntity, notchTransform);
+                        }
+                    }
+
+                    float sfxPercentage{}, musicPercentage{};
+
+                    if (sfxNotches.size() == 10)
+                    {
+                        startPosSFX = sfxNotches[0].second.position.GetX() - (sfxNotches[0].second.scale.GetX() / 2.0f);
+                        endPosSFX = sfxNotches[9].second.position.GetX() + (sfxNotches[9].second.scale.GetX() / 2.0f);
+
+                        float arrowPosSFX = sfxArrowTransform.position.GetX();
+                        float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
+                        if (progressSFX >= 0.01f && progressSFX <= 0.09f) {
+                            sfxPercentage = 10.0f;
+                        }
+                        else {
+                            sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                        }
+                        sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
+                        AudioSystem::sfxPercentage = sfxPercentage;
+                    }
+
+                    if (musicNotches.size() == 10)
+                    {
+                        startPosMusic = musicNotches[0].second.position.GetX() - (musicNotches[0].second.scale.GetX() / 2.0f);
+                        endPosMusic = musicNotches[9].second.position.GetX() + (musicNotches[9].second.scale.GetX() / 2.0f);
+
+                        float arrowPosMusic = musicArrowTransform.position.GetX();
+                        float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
+                        if (progressMusic >= 0.01f && progressMusic <= 0.09f) {
+                            musicPercentage = 10.0f;
+                        }
+                        else {
+                            musicPercentage = std::round(progressMusic * 10.f) * 10.f;
+                        }
+                        musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
+                        AudioSystem::musicPercentage = musicPercentage;
+                    }
+
+                    // Update active notches separately for SFX and Music
+                    for (size_t j = 0; j < sfxNotches.size(); ++j)
+                    {
+                        if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[j].second.position.GetX())
+                        {
+                            activeNotchesSFX = static_cast<int>(j) + 1;
+                        }
+                    }
+
+                    for (size_t j = 0; j < musicNotches.size(); ++j)
+                    {
+                        if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[j].second.position.GetX())
+                        {
+                            activeNotchesMusic = static_cast<int>(j) + 1;
+                        }
+                    }
+
+                    // Draw SFX Notches
+                    for (size_t j = 0; j < sfxNotches.size(); ++j)
+                    {
+                        std::string notchTexture = (j < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                        TransformComponent& notchTransform = sfxNotches[j].second;
+                        notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
+                        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
+                    }
+
+                    // Draw Music Notches
+                    for (size_t j = 0; j < musicNotches.size(); ++j)
+                    {
+                        std::string notchTexture = (j < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                        TransformComponent& notchTransform = musicNotches[j].second;
+                        notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
+                        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
+                    }
                 }
-                
-                else if (arrowId == "musicSoundbarArrow")
+
+                if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarArrow" || ecsCoordinator.getEntityID(entity) == "musicSoundbarArrow")
                 {
-                    musicArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    ecsCoordinator.setTextureID(entity, "soundbarArrow");
+                    //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("soundbarArrow"), transform.mdl_xform);
                 }
-            }
-
-            std::vector<std::pair<Entity, TransformComponent>> sfxNotches, musicNotches;
-
-            // Separate SFX and Music Notches
-            for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
-            {
-                std::string notchId = ecsCoordinator.getEntityID(notchEntity);
-                TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
-
-                if (notchId.find("sfxNotch") != std::string::npos)
-                {
-                    sfxNotches.emplace_back(notchEntity, notchTransform);
-                }
-
-                else if (notchId.find("musicNotch") != std::string::npos)
-                {
-                    musicNotches.emplace_back(notchEntity, notchTransform);
-                }
-            }
-
-            float sfxPercentage{}, musicPercentage{};
-
-            if (sfxNotches.size() == 10)
-            {
-                startPosSFX = sfxNotches[0].second.position.GetX() - (sfxNotches[0].second.scale.GetX() / 2.0f);
-                endPosSFX = sfxNotches[9].second.position.GetX() + (sfxNotches[9].second.scale.GetX() / 2.0f);
-
-                float arrowPosSFX = sfxArrowTransform.position.GetX();
-                float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
-                if (progressSFX >= 0.01f && progressSFX <= 0.09f) {
-                    sfxPercentage = 10.0f;
-                }
-				else {
-					sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
-                }
-                sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
-                AudioSystem::sfxPercentage = sfxPercentage;
-            }
-
-            if (musicNotches.size() == 10)
-            {
-                startPosMusic = musicNotches[0].second.position.GetX() - (musicNotches[0].second.scale.GetX() / 2.0f);
-                endPosMusic = musicNotches[9].second.position.GetX() + (musicNotches[9].second.scale.GetX() / 2.0f);
-
-                float arrowPosMusic = musicArrowTransform.position.GetX();
-                float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
-				if (progressMusic >= 0.01f && progressMusic <= 0.09f) {
-					musicPercentage = 10.0f;
-				}
-                else {
-                    musicPercentage = std::round(progressMusic * 10.f) * 10.f; 
-                }
-                musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
-                AudioSystem::musicPercentage = musicPercentage;
-            }
-
-           // Update active notches separately for SFX and Music
-            for (size_t j = 0; j < sfxNotches.size(); ++j)
-            {
-                if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[j].second.position.GetX())
-                {
-                    activeNotchesSFX = static_cast<int>(j) + 1;
-                }
-            }
-
-            for (size_t j = 0; j < musicNotches.size(); ++j)
-            {
-                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[j].second.position.GetX())
-                {
-                    activeNotchesMusic = static_cast<int>(j) + 1;
-                }
-            }
-
-            // Draw SFX Notches
-            for (size_t j = 0; j < sfxNotches.size(); ++j)
-            {
-                std::string notchTexture = (j < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = sfxNotches[j].second;
-                notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
-            }
-
-            // Draw Music Notches
-            for (size_t j = 0; j < musicNotches.size(); ++j)
-            {
-                std::string notchTexture = (j < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = musicNotches[j].second;
-                notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
-                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
-            }
-        }
-
-        if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarArrow" || ecsCoordinator.getEntityID(entity) == "musicSoundbarArrow")
-        {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            ecsCoordinator.setTextureID(entity, "soundbarArrow");
-            //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("soundbarArrow"), transform.mdl_xform);
-        }
 
                 if (isUI) {
                     transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
@@ -409,7 +422,7 @@ void GraphicSystemECS::update(float dt) {
                 }
 
                 if (behaviour.exit) {
-					//transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    //transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                     if (GLFWFunctions::collectableCount == 0) {
                         ecsCoordinator.setTextureID(entity, "cloggedVent3");
                     }
@@ -458,13 +471,13 @@ void GraphicSystemECS::update(float dt) {
                         if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
                         {
                             ecsCoordinator.setTextureID(entity, "unactiveResumeButton");
-                           // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveResumeButton"), transform.mdl_xform);
+                            // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveResumeButton"), transform.mdl_xform);
                         }
 
                         else
                         {
                             ecsCoordinator.setTextureID(entity, "activeResumeButton");
-                           // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeResumeButton"), transform.mdl_xform);
+                            // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeResumeButton"), transform.mdl_xform);
                         }
                     }
 
@@ -488,13 +501,13 @@ void GraphicSystemECS::update(float dt) {
                         if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
                         {
                             ecsCoordinator.setTextureID(entity, "unactiveTutorialButton");
-                           // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
+                            // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveTutorialButton"), transform.mdl_xform);
                         }
 
                         else
                         {
                             ecsCoordinator.setTextureID(entity, "activeTutorialButton");
-                           // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeTutorialButton"), transform.mdl_xform);
+                            // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("activeTutorialButton"), transform.mdl_xform);
                         }
                     }
 
@@ -518,7 +531,7 @@ void GraphicSystemECS::update(float dt) {
                         if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
                         {
                             ecsCoordinator.setTextureID(entity, "unactiveQuitButton");
-                           // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
+                            // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveQuitButton"), transform.mdl_xform);
                         }
 
                         else
@@ -531,7 +544,7 @@ void GraphicSystemECS::update(float dt) {
                     else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
                     {
                         ecsCoordinator.setTextureID(entity, "closePopupButton");
-                       // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
+                        // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
                     }
 
                     else if (ecsCoordinator.getEntityID(entity) == "sfxSoundbarBase" || ecsCoordinator.getEntityID(entity) == "musicSoundbarBase")
@@ -576,10 +589,10 @@ void GraphicSystemECS::update(float dt) {
                 }
 
                 if (isFilter) {
-					auto& filter = ecsCoordinator.getComponent<FilterComponent>(entity);
-					if (filter.isFilterClogged) {
-						ecsCoordinator.setTextureID(entity, "filter_mossed");
-					}
+                    auto& filter = ecsCoordinator.getComponent<FilterComponent>(entity);
+                    if (filter.isFilterClogged) {
+                        ecsCoordinator.setTextureID(entity, "filter_mossed");
+                    }
                     else {
                         ecsCoordinator.setTextureID(entity, "exitFilter");
                     }
@@ -617,7 +630,7 @@ void GraphicSystemECS::update(float dt) {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
                 }
 
-				//std::cout << "isPump on? " << (GLFWFunctions::isPumpOn ? "true" : "false") << std::endl;
+                //std::cout << "isPump on? " << (GLFWFunctions::isPumpOn ? "true" : "false") << std::endl;
 
                 /*if (isPlayer) {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("eyes.png"), transform.mdl_xform, animation.currentUVs);
