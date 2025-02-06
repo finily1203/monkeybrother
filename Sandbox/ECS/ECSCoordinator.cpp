@@ -136,6 +136,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 
 // this is the definition of the function that loads the data from JSON file to the entity
 // open the JSON file and initialize the entity data based on the values read
+
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	GLFWFunctions::collectableCount = 0;
@@ -474,6 +475,12 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		//auto add entity to layer 0
 		/*layerManager.addEntityToLayer(0, entityObj);*/
 	}
+	/*for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+		Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
+		ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
+		float mag = playerForce.GetMagnitude();
+		forceManager.AddForce(entity, myMath::Vector2D(-.3, -.3));
+	}*/
 }
 
 // function that loads the main menu entities from the manu menu JSON file
