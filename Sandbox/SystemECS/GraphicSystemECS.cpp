@@ -85,6 +85,27 @@ void GraphicSystemECS::update(float dt) {
     //find out how many layers there are
     //for each layer draw entities in that layer
 	//start from 0 to highest layer (so 0 is drawn first)
+    // Compute view matrix
+    // Get player entity and transform once at start of frame
+    Entity playerEntity = Entity{};
+    TransformComponent* playerTransform = nullptr;
+
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+            playerEntity = entity;
+            playerTransform = &ecsCoordinator.getComponent<TransformComponent>(entity);
+            break;
+        }
+    }
+
+    // Update camera once per frame
+    if (GLFWFunctions::allow_camera_movement) {
+        cameraSystem.update();
+    }
+    else if (playerTransform != nullptr) {
+        cameraSystem.lockToComponent(*playerTransform);
+        cameraSystem.update();
+    }
 
     for (int i = 0; i < layerManager.getLayerCount(); i++) {
         //check if layer is visible
@@ -136,14 +157,6 @@ void GraphicSystemECS::update(float dt) {
                 myMath::Matrix3x3 identityMatrix = { 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f };
                 transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, cameraSystem.getViewMatrix());
 
-                // Compute view matrix
-                if (GLFWFunctions::allow_camera_movement) { // Press F2 to allow camera movement
-                    cameraSystem.update();
-                }
-                else if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-                    cameraSystem.lockToComponent(transform);
-                    cameraSystem.update();
-                }
 
                 mouseBehaviour.update(entity);
 
