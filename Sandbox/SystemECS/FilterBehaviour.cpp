@@ -1,3 +1,19 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   FilterBehaviour.cpp
+@brief:  This source file includes the implementation of the FilterBehaviour
+         that logicSystemECS uses to handle the behaviour of the filter entity.
+         For our game implementation, the filter is meant to be a one-time use
+         only object and will have visual indicators informing players that the filter
+         can or cannot be used. Filter will reduce of the size of the mossball
+
+         Joel Chu (c.weiyuan): defined the functions of FilterBehaviour class
+                               100%
+*//*___________________________________________________________________________-*/
+
 #include "FilterBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
