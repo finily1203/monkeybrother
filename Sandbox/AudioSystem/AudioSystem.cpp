@@ -27,6 +27,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //GEN AFFECTS: ambienceChannel
 
 //PUMP CHANNEL MAKE SURE TO MULTIPLY BY 0.1f FOR VOLUME
+float AudioSystem::sfxPercentage = 0.f;
+float AudioSystem::musicPercentage = 0.f;
 
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
@@ -423,4 +425,29 @@ void AudioSystem::setBgmVol(float volPerc) {
 }
 void AudioSystem::setSfxVol(float volPerc) {
 	float sfxVol = volPerc / 100.0f;
+}
+
+// saving audio settings for sfx and music audio to JSON file
+void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage)
+{
+    nlohmann::json audioSettings;
+
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        inputFile >> audioSettings;
+        inputFile.close();
+    }
+
+    audioSettings["sfxAudioPercentage"] = sfxPercentage;
+    audioSettings["musicAudioPercentage"] = musicPercentage;
+
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open())
+    {
+        return;
+    }
+
+    outputFile << audioSettings.dump(2);
+    outputFile.close();
 }
