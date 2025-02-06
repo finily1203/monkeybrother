@@ -82,7 +82,12 @@ void ECSCoordinator::update() {
 				destroyEntity(entity);
 			}
 			int sceneNum = GameViewWindow::getSceneNum();
-			LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
+			if (sceneNum == 1 || sceneNum == 2) {
+				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
+			}
+			else if (sceneNum == -1) {
+				LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+			}
 			GLFWFunctions::changeLevel = false;
 			GLFWFunctions::newSceneLoaded = true;
 		}
