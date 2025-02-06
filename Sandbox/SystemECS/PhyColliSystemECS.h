@@ -89,8 +89,6 @@ public:
     void ApplyNormalPhysics(Entity player);
     std::vector<Entity> CollidingPlatforms(Entity player);
     void HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms);
-    //void HandleCollisionResponse(Entity player, const myMath::Vector2D& normal, float penetration);
-    //void HandleCircleOBBCollision(Entity player, const std::vector<Entity>& platforms);
 
 private:
     static float friction;

@@ -311,12 +311,14 @@ void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
 
     float dotProd = myMath::DotProductVector2D(normals[0], normals[1]);
-     if (dotProd != 0.f) {
+     if (dotProd != 0.f) 
+     {
          // Calculate the combined normal
          myMath::Vector2D combinedNormal(0.0f, 0.0f);
          float maxPenetration = 0.0f;
 
-         for (size_t i = 0; i < normals.size(); ++i) {
+         for (size_t i = 0; i < normals.size(); ++i) 
+         {
              combinedNormal = combinedNormal + normals[i];
              maxPenetration = std::max(maxPenetration, penetrations[i]);
          }
@@ -326,7 +328,8 @@ void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std
          // Normalize the combined normal
          float length = std::sqrt(combinedNormal.GetX() * combinedNormal.GetX() +
              combinedNormal.GetY() * combinedNormal.GetY());
-         if (length > 0.0f) {
+         if (length > 0.0f) 
+         {
              combinedNormal = combinedNormal * (1.0f / length);
          }
 
@@ -368,7 +371,8 @@ void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std
      }
 }
 
-void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms) {
+void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms) 
+{
     // Get player components
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
@@ -394,12 +398,14 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
     int collisionCount = 0;
 
     // Check collision with each platform
-    for (const auto& platform : platforms) {
+    for (const auto& platform : platforms) 
+    {
         CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(platform);
         myMath::Vector2D normal{};
         float penetration{};
 
-        if (collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration)) {
+        if (collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration)) 
+        {
             avgNormal = avgNormal + normal;
             totalPenetration += penetration;
             normals.push_back(normal);
@@ -410,7 +416,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
     }
 
     // If no collisions, return early
-    if (!isAnyColliding) {
+    if (!isAnyColliding) 
+    {
         GLFWFunctions::firstCollision = false;
         return;
     }
@@ -421,7 +428,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
 
     // Normalize the average normal
     float normalLength = std::sqrt(avgNormal.GetX() * avgNormal.GetX() + avgNormal.GetY() * avgNormal.GetY());
-    if (normalLength > 0.0f) {
+    if (normalLength > 0.0f) 
+    {
         avgNormal = avgNormal * (1.0f / normalLength);
     }
 
@@ -431,7 +439,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
 
     // Handle collision response
     alrJumped = true;
-    if (-avgNormal.GetX() == force.GetDirection().GetX() && -avgNormal.GetY() == force.GetDirection().GetY()) {
+    if (-avgNormal.GetX() == force.GetDirection().GetX() && -avgNormal.GetY() == force.GetDirection().GetY()) 
+    {
         forceManager.ClearForce(player);
     }
 
@@ -441,7 +450,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
     prevForce = targetForce;
 
     // Handle audio and collision response
-    if (!GLFWFunctions::firstCollision) {
+    if (!GLFWFunctions::firstCollision) 
+    {
         GLFWFunctions::bumpAudio = true;
         GLFWFunctions::firstCollision = true;
         std::cout << "First time collide with multiple platforms" << std::endl;
@@ -452,7 +462,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
 }
 
 
-void PhysicsSystemECS::ApplyNormalPhysics(Entity player) {
+void PhysicsSystemECS::ApplyNormalPhysics(Entity player) 
+{
     auto& physicsComp = ecsCoordinator.getComponent<PhysicsComponent>(player);
 
     // Apply gravity
@@ -610,9 +621,11 @@ void PhysicsSystemECS::update(float dt)
     (void)dt;
     count = 0;
     playerCount = 0;
+
     for (auto& entity : ecsCoordinator.getAllLiveEntities())
     {
-        if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) 
+        {
             playerEntity = entity;
             //count++;
             playerCount++;
@@ -624,85 +637,29 @@ void PhysicsSystemECS::update(float dt)
         }
     }
     if (playerEntity == NULL)
+    {
         return;
+    }
+
     std::vector<Entity> collidingPlatforms = CollidingPlatforms(playerEntity);
-    if (collidingPlatforms.size() == 0) {
+
+    if (collidingPlatforms.size() == 0) 
+    {
         closestPlatformEntity = FindClosestPlatform(playerEntity);
         HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
     }
 
-    if (collidingPlatforms.size() == 1) {
+    if (collidingPlatforms.size() == 1) 
+    {
 		HandleCircleOBBCollision(playerEntity, collidingPlatforms[0]);
-
     }
 
-    if (collidingPlatforms.size() > 1) {
-  //      for (auto& platformEntity : collidingPlatforms)
-  //      {
-		//	HandleCircleOBBCollision(playerEntity, platformEntity);
-		//}
-
+    if (collidingPlatforms.size() > 1) 
+    {
         HandleCircleMultiPlatformCollision(playerEntity, collidingPlatforms);
-
 	}
 
-    //Console::GetLog() << "Colliding platforms: " << collidingPlatforms[0] << std::endl;
-
-
-    //if (playerCount > 0)
-    //{
-    //    //closestPlatformEntity = FindClosestPlatform(playerEntity);
-    //    HandleCircleOBBCollision(playerEntity, closestPlatformEntity);
-    //}
-
-    //std::vector<Entity> collidingPlatforms;
-    //// Count entities and find the player entity
-    //Entity playEntity = NULL;
-    //for (auto& entity : entities)
-    //{
-    //    if (ecsCoordinator.hasComponent<PlayerComponent>(entity))
-    //    {
-    //        playEntity = entity;
-    //    }
-    //}
-
-    //// Early exit if no player is found
-    //if (playEntity == NULL) return;
-
-    //// Get the player position and radius
-    //auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playEntity);
-    //myMath::Vector2D playerPos = playerTransform.position;
-    //float playerRadius = playerTransform.scale.GetX() * 0.5f;
-
-    //// Detect all colliding platforms
-    //for (auto& entity : entities)
-    //{
-    //    if (ecsCoordinator.hasComponent<ClosestPlatform>(entity))
-    //    {
-
-    //        // Check for collision between player and platform
-    //        CollisionSystemECS::OBB platformOBB = collisionSystem.createOBBFromEntity(entity);
-    //        myMath::Vector2D normal{};
-    //        float penetration{};
-    //        bool isCollide = collisionSystem.checkCircleOBBCollision(playerPos, playerRadius, platformOBB, normal, penetration);
-
-    //        if (isCollide)
-    //        {
-    //            collidingPlatforms.push_back(entity);
-    //        }
-    //    }
-    //}
-    //Console::GetLog() << "Colliding platforms: " << collidingPlatforms.size() << std::endl;
-    // Resolve collisions
-    //if (playerCount > 0 || collidingPlatforms.size() > 0)
-    //{
-    //    for (auto& platformEntity : collidingPlatforms)
-    //    {
-    //        HandleCircleOBBCollision(playerEntity, platformEntity);
-    //    }
-    //}
-
-
+    Console::GetLog() << "Colliding platforms: " << collidingPlatforms[0] << std::endl;
 
 }
 
