@@ -26,13 +26,13 @@ class CutsceneSystem : public GameSystems {
 private:
     struct CutsceneFrame {
         myMath::Vector2D cameraPosition;
+        float zoom;
         float duration;
         bool hasCompleted;
 
-        CutsceneFrame(const myMath::Vector2D& pos, float dur)
-            : cameraPosition(pos)
-            , duration(dur)
-            , hasCompleted(false) {}
+        CutsceneFrame(const myMath::Vector2D& pos, float z, float dur)
+            : cameraPosition(pos), zoom(z), duration(dur), hasCompleted(false) {
+        }
     };
 
 public:
@@ -46,10 +46,10 @@ public:
     SystemType getSystem() override;
 
     // Cutscene-specific methods
-    void addFrame(const myMath::Vector2D& position, float duration);
+    void addFrame(const myMath::Vector2D& position, float zoom, float duration);
     void start();
     void stop();
-    bool isPlaying() const { return m_isPlaying; }
+    bool isPlaying() const;
     bool isFinished() const;
     void skipToEnd();
 

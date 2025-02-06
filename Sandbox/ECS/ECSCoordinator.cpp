@@ -744,6 +744,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename) {
 	JSONSerializer serializer;
 	int cutsceneScene = -2;
+
 	if (!serializer.Open(filename)) {
 		std::cout << "Error: could not open file " << filename << std::endl;
 		return;
@@ -760,9 +761,15 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 			myMath::Vector2D position;
 			position.SetX(frameData["position"]["x"].get<float>());
 			position.SetY(frameData["position"]["y"].get<float>());
+
+			// Get zoom value (with default if not specified)
+			float zoom = frameData.contains("zoom") ?
+				frameData["zoom"].get<float>() : 1.0f;
+
 			float duration = frameData["duration"].get<float>();
 
-			cutsceneSystem.addFrame(position, duration);
+			// Add frame with zoom parameter
+			cutsceneSystem.addFrame(position, zoom, duration);
 		}
 	}
 
@@ -813,7 +820,6 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 
 	// Start the cutscene immediately
 	cutsceneSystem.start();
-
 	GameViewWindow::setSceneNum(cutsceneScene);
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
