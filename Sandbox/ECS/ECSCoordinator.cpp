@@ -619,6 +619,12 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
+	//float bgmVolPrc = 0.0f;
+	//float sfxVolPrc = 0.0f;
+
+	//serializer.ReadFloat(bgmVolPrc, "bgmVol");
+	//serializer.ReadFloat(sfxVolPrc, "sfxVol");
+
 	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
 
 	for (const auto& entityData : jsonObj["entities"])

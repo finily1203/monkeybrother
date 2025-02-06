@@ -129,7 +129,7 @@ void DebugSystem::initialise() {
 	HierarchyList::Initialise();
 	Inspector::Initialise();
 	AssetBrowser::Initialise();
-	AudioPanel::Initialise();
+	//AudioPanel::Initialise();
 
 
 	lastUpdateTime = glfwGetTime();
@@ -288,9 +288,9 @@ void DebugSystem::update() {
 		AssetBrowser::Update();
 		ImGui::End();
 
-		ImGui::Begin("Audio Panel"); //Asset Browser system
-		AudioPanel::Update();
-		ImGui::End();
+		//ImGui::Begin("Audio Panel"); //Asset Browser system
+		//AudioPanel::Update();
+		//ImGui::End();
 
 		ImGui::End();//dockspace
 
@@ -314,7 +314,7 @@ void DebugSystem::cleanup() {
 	HierarchyList::Cleanup();
 	Inspector::Cleanup();
 	AssetBrowser::Cleanup();
-	AudioPanel::Cleanup();
+	//AudioPanel::Cleanup();
 	Console::Cleanup();
 
 	// Clear containers

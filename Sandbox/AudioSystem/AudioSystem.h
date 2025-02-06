@@ -85,6 +85,21 @@ private:
 	FMOD::Channel* pumpChannel;
 	FMOD::Channel* rotationChannel;
 
+	/*
+	* IntroCutscene_Ambience_1: Play at Start Loop
+	* IntroCutscene_Panel_2: Play at start of panel
+	* IntroCutscene_Human_2: ^ , slowly fade out
+	* IntroCutscene_Ambience_2: Play at end of IntroCutscene_Panel_2 audio, loop
+	* 3 no audio, just rely on ambience
+	* 4 - 8 play at start of panel
+	*/
+
+	FMOD::ChannelGroup* cutsceneGroup;
+
+	FMOD::Channel* cutsceneAmbienceChannel; // loops, switch when panel 2 starts
+	FMOD::Channel* cutscenePanelChannel; //play one time audio per panel
+	FMOD::Channel* cutsceneHumanChannel; //play once at panel 2, but should fade out (can try)
+
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
 	float genVol; // general volume
