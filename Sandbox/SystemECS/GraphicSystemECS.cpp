@@ -112,6 +112,7 @@ void GraphicSystemECS::update(float dt) {
                 bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
                 bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
+				bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
                 // Use hasMovement for the update parameter
                 //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
