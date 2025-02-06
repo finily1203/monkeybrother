@@ -19,6 +19,7 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GUIGameViewport.h"
 
 std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
+bool hasZoomBeenSet = false;
 
 CutsceneSystem::CutsceneSystem()
     : m_currentFrameIndex(0), m_currentFrameTime(0.0f), m_isPlaying(false), m_originalZoom(1.0f) {
@@ -46,7 +47,10 @@ void CutsceneSystem::update() {
     }
 
     if (!m_isPlaying || m_currentFrameIndex >= m_frames->size()) {
-        cameraSystem.setCameraZoom(0.2f);
+        if (!hasZoomBeenSet) {
+            cameraSystem.setCameraZoom(0.2f);
+            hasZoomBeenSet = true;
+        }
         return;
     }
 
@@ -200,7 +204,7 @@ void CutsceneSystem::skipToEnd() {
     m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
-    cameraSystem.setCameraZoom(0.2f);
+    cameraSystem.setCameraZoom(0.8f);
 }
 
 size_t CutsceneSystem::getCurrentFrameIndex() const {

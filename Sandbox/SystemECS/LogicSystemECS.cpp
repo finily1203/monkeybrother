@@ -332,7 +332,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// resetting the values back to the original values and setting the scene variable to 1
 		GLFWFunctions::gamePaused = false;
 		GLFWFunctions::optionsMenuCount = 0;
-		int levelOneScene = 1;
+		//int levelOneScene = 1;
 
 		cameraSystem.setCameraZoom(0.8f);
 		for (auto currEntity : allEntities)

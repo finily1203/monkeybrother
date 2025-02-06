@@ -84,7 +84,7 @@ void GraphicSystemECS::update(float dt) {
     (void)dt;
     //find out how many layers there are
     //for each layer draw entities in that layer
-    //start from 0 to highest layer (so 0 is drawn first)
+	//start from 0 to highest layer (so 0 is drawn first)
     // Compute view matrix
     // Get player entity and transform once at start of frame
     Entity playerEntity = Entity{};

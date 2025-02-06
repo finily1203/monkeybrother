@@ -147,7 +147,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 {
 	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
-
+	cameraSystem.setCameraZoom(0.8f);
 	// checks if JSON file could be opened
 	if (!serializer.Open(filename))
 	{
