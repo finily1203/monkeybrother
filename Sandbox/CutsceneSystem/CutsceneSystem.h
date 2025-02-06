@@ -54,7 +54,7 @@ public:
     void skipToEnd();
 
 private:
-    std::vector<CutsceneFrame> m_frames;
+    static std::vector<CutsceneFrame>* m_frames;
     size_t m_currentFrameIndex;
     float m_currentFrameTime;
     bool m_isPlaying;

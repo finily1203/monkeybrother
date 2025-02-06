@@ -64,6 +64,7 @@ struct GLFWFunctions {
 	static bool isKeyHeld(Key key);
 
 	static bool isMouseButtonPressed(MouseButton button);
+	static void updateCursorState();
 
 	static bool isAKeyPressed;
 	static GLFWwindow* pWindow;
@@ -107,6 +108,7 @@ struct GLFWFunctions {
 	static bool gameOver;
 	static bool isHovering;
 	static bool gamePaused;
+	static bool useMouseRotation; // Add this with the other static booleans
 
 	static double mouseXDelta; // Add this to track mouse movement
 

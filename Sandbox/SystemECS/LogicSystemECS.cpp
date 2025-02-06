@@ -53,6 +53,12 @@ void LogicSystemECS::update(float dt) {
 	//		behaviours[entity]->update(entity);
 	//	}
 	//}
+	if (GLFWFunctions::useMouseRotation) {
+		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	else {
+		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
 
 	(void)dt;
 }

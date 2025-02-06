@@ -46,7 +46,7 @@ GLboolean GLFWFunctions::isPumpOn = true;
 GLboolean GLFWFunctions::playPumpSong = true;
 GLboolean GLFWFunctions::isRotating = false;
 GLboolean GLFWFunctions::exitCollision = false;
-
+bool GLFWFunctions::useMouseRotation = false; // Default to mouse rotation
 
 
 int GLFWFunctions::audioNum = 0;
@@ -246,6 +246,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
 
     if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
+        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;
 
@@ -495,4 +496,15 @@ bool GLFWFunctions::isKeyHeld(Key key) {
 
 bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
     return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
+}
+
+void GLFWFunctions::updateCursorState() {
+    if (useMouseRotation) {
+        // Hide cursor and capture it for mouse rotation
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else {
+        // Show cursor and allow normal movement
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }

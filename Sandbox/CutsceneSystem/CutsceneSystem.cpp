@@ -17,11 +17,16 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "GlfwFunctions.h"
 
+ std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
+
 CutsceneSystem::CutsceneSystem() : m_currentFrameIndex(0), m_currentFrameTime(0.0f), m_isPlaying(false), m_originalZoom(1.0f) {}
 
 void CutsceneSystem::initialise() {
     // Reset all cutscene data to initial state
-    m_frames.clear();
+    if (!m_frames) {
+		m_frames = new std::vector<CutsceneFrame>();
+    }
+    m_frames->clear();
     m_currentFrameIndex = 0;
     m_currentFrameTime = 0.0f;
     m_isPlaying = false;
@@ -34,14 +39,14 @@ void CutsceneSystem::update() {
         return;
     }
 
-    if (!m_isPlaying || m_currentFrameIndex >= m_frames.size()) {
+    if (!m_isPlaying || m_currentFrameIndex >= m_frames->size()) {
         if (m_isPlaying) {
             cameraSystem.setCameraZoom(m_originalZoom);
             m_isPlaying = false;
         }
         return;
     }
-    if (m_currentFrameIndex >= m_frames.size()) {
+    if (m_currentFrameIndex >= m_frames->size()) {
         m_isPlaying = false;
         // Reset camera position to origin when cutscene completes
         cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
@@ -56,7 +61,7 @@ void CutsceneSystem::update() {
             m_currentFrameTime = 0.0f;
             spaceWasPressed = true;
 
-            if (m_currentFrameIndex >= m_frames.size()) {
+            if (m_currentFrameIndex >= m_frames->size()) {
                 m_isPlaying = false;
                 return;
             }
@@ -66,7 +71,7 @@ void CutsceneSystem::update() {
         spaceWasPressed = false;
     }
 
-    auto& currentFrame = m_frames[m_currentFrameIndex];
+	auto& currentFrame = m_frames->at(m_currentFrameIndex);
     m_currentFrameTime += GLFWFunctions::delta_time;
 
     // Calculate transition progress (0 to 1)
@@ -75,7 +80,7 @@ void CutsceneSystem::update() {
     // Get start and target positions
     myMath::Vector2D startPos = (m_currentFrameIndex == 0) ?
         currentFrame.cameraPosition :
-        m_frames[m_currentFrameIndex - 1].cameraPosition;
+		m_frames->at(m_currentFrameIndex - 1).cameraPosition;
     myMath::Vector2D targetPos = currentFrame.cameraPosition;
 
     // Interpolate between positions
@@ -87,14 +92,15 @@ void CutsceneSystem::update() {
         m_currentFrameIndex++;
         m_currentFrameTime = 0.0f;
 
-        if (m_currentFrameIndex >= m_frames.size()) {
+        if (m_currentFrameIndex >= m_frames->size()) {
             m_isPlaying = false;
         }
     }
 }
 
 void CutsceneSystem::cleanup() {
-    m_frames.clear();
+    delete m_frames;
+    m_frames = nullptr;
     m_isPlaying = false;
     m_currentFrameIndex = 0;
     m_currentFrameTime = 0.0f;
@@ -105,11 +111,11 @@ SystemType CutsceneSystem::getSystem() {
 }
 
 void CutsceneSystem::addFrame(const myMath::Vector2D& position, float duration) {
-    m_frames.emplace_back(position, duration);
+    m_frames->emplace_back(position, duration);
 }
 
 void CutsceneSystem::start() {
-    if (m_frames.empty()) {
+    if (m_frames->empty()) {
         return;
     }
 
@@ -130,7 +136,7 @@ void CutsceneSystem::start() {
         cameraSystem.setCameraZoom(1.3f);
 
     // Set initial camera position 
-    cameraSystem.setCameraPosition(m_frames[0].cameraPosition);
+	cameraSystem.setCameraPosition(m_frames->at(0).cameraPosition);
 }
 
 void CutsceneSystem::stop() {
@@ -141,17 +147,17 @@ void CutsceneSystem::stop() {
 }
 
 bool CutsceneSystem::isFinished() const {
-    return !m_isPlaying && m_currentFrameIndex >= m_frames.size();
+    return !m_isPlaying && m_currentFrameIndex >= m_frames->size();
 }
 
 void CutsceneSystem::skipToEnd() {
-    if (!m_frames.empty()) {
+    if (!m_frames->empty()) {
         // Move camera to final position
-        cameraSystem.setCameraPosition(m_frames.back().cameraPosition);
+        cameraSystem.setCameraPosition(m_frames->back().cameraPosition);
     }
 
     // Mark cutscene as complete
-    m_currentFrameIndex = m_frames.size();
+    m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
 }
