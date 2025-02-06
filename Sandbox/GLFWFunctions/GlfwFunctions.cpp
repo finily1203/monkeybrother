@@ -67,6 +67,10 @@ bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
 
+float GLFWFunctions::pauseTimer = 0.0f;
+const float GLFWFunctions::pauseDuration = 2.0f;
+bool GLFWFunctions::newSceneLoaded = false;
+
 MouseBehaviour mouseBehaviour;
 double GLFWFunctions::mouseXDelta = 0.0;
 

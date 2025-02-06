@@ -272,22 +272,24 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
 		//set scene to play cutscene
-		//ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());
+		/*ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());*/
+		GameViewWindow::setSceneNum(-2); // Cutscene scene number
+		ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());
 
-		GameViewWindow::setSceneNum(levelOneScene);
-		audioSystem.setChangeBGM(false);
-		GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+		//GameViewWindow::setSceneNum(levelOneScene);
+		//audioSystem.setChangeBGM(false);
+		//GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 
-		if (GameViewWindow::getSceneNum() != 0)
-		{
-			int scene = GameViewWindow::getSceneNum();
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		}
+		//if (GameViewWindow::getSceneNum() != 0)
+		//{
+		//	int scene = GameViewWindow::getSceneNum();
+		//	ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
+		//}
 
-		else
-		{
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		}
+		//else
+		//{
+		//	ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+		//}
 	}
 
 	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")

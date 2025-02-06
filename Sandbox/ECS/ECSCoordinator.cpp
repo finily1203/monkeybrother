@@ -54,26 +54,25 @@ void ECSCoordinator::initialise() {
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
-	static bool cutsceneComplete = false;
-
-	if (cutsceneSystem.isPlaying()) {
+	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
-	else if (!cutsceneComplete && cutsceneSystem.isFinished()) {
-		// Clean up cutscene entities
-		for (auto entity : getAllLiveEntities()) {
-			destroyEntity(entity);
+	else if (GameViewWindow::getSceneNum() == -2) {  // Cutscene
+		if (cutsceneSystem.isPlaying()) {
+			systemManager->update();
 		}
-		// Load main menu
-		LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
-
-		// Load the first scene
-		//int sceneNum = 1;
-		//GameViewWindow::setSceneNum(sceneNum);
-		//LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
-		cutsceneComplete = true;
+		else if (cutsceneSystem.isFinished()) {
+			// Clean up cutscene entities
+			for (auto entity : getAllLiveEntities()) {
+				destroyEntity(entity);
+			}
+			// Load the first level
+			int sceneNum = 1;
+			GameViewWindow::setSceneNum(sceneNum);
+			LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
+		}
 	}
-	else {
+	else {  // Regular gameplay
 		systemManager->update();
 
 		if (GLFWFunctions::changeLevel) {
@@ -618,7 +617,8 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 			layerManager.addEntityToLayer(layer, entityObj);
 		}
 		else {
-			layerManager.addEntityToLayer(0, entityObj);
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
 		}
 
 		// read all of the data from the JSON object and assign the data
@@ -712,7 +712,9 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 			layerManager.addEntityToLayer(layer, entityObj);
 		}
 		else {
-			layerManager.addEntityToLayer(0, entityObj);
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
 		}
 
 		// read all of the data from the JSON object and assign the data
@@ -931,9 +933,11 @@ void ECSCoordinator::test5() {
 	//  LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	//}
 
-	LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
+	//LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
 
-	//LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+	LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+	GameViewWindow::setSceneNum(-1); // Set to main menu scene
+	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 	
 }
 

@@ -63,7 +63,7 @@ void AudioSystem::initialise() {
 	setBgmVol(musicPercentage);
 	setSfxVol(sfxPercentage);
 
-	std::cout << "Audio System initialised." << std::endl;
+	//std::cout << "Audio System initialised." << std::endl;
     /*genVol(0.35f), bgmVol(0.05f), sfxVol(0.5f)*/
 }
 
@@ -72,11 +72,19 @@ void AudioSystem::initialise() {
 void AudioSystem::update() {
     bool bIsPlaying = false;
 
-	std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
+	//std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
 
     //if scene is -2 which is cutscene
     if (GameViewWindow::getSceneNum() == -2)
     {
+        if (bgmChannel) {
+            FMOD_RESULT result = bgmChannel->stop();
+            if (result != FMOD_OK) {
+                std::cout << "FMOD stop error for main menu BGM! (" << result << ")" << std::endl;
+            }
+            bgmChannel = nullptr;
+        }
+
         /*
         * IntroCutscene_Ambience_1: Play at Start Loop
         * IntroCutscene_Panel_2: Play at start of panel

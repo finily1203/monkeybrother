@@ -16,6 +16,7 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 #include "CutsceneSystem.h"
 #include "GlobalCoordinator.h"
 #include "GlfwFunctions.h"
+#include "GUIGameViewport.h"
 
 std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
 
@@ -34,6 +35,10 @@ void CutsceneSystem::initialise() {
 }
 
 void CutsceneSystem::update() {
+    // Update delay timer
+    if (m_delayTimer < m_initialDelay) {
+        m_delayTimer += GLFWFunctions::delta_time;
+    }
     // Skip to end if ENTER is held
     if ((*GLFWFunctions::keyState)[Key::ENTER]) {
         skipToEnd();
@@ -41,10 +46,7 @@ void CutsceneSystem::update() {
     }
 
     if (!m_isPlaying || m_currentFrameIndex >= m_frames->size()) {
-        if (m_isPlaying) {
-            cameraSystem.setCameraZoom(m_originalZoom);
-            m_isPlaying = false;
-        }
+        cameraSystem.setCameraZoom(0.2f);
         return;
     }
 
@@ -54,14 +56,14 @@ void CutsceneSystem::update() {
         return;
     }
 
-    // Handle space/mouse input to advance frames
+    // Check for space press or left mouse click to advance frame
     static bool spaceWasPressed = false;
     static bool mouseWasClicked = false;
     bool shouldAdvance = false;
 
     // Check space key
     if ((*GLFWFunctions::keyState)[Key::SPACE]) {
-        if (!spaceWasPressed) {
+        if (!spaceWasPressed && canAcceptInput()) {
             shouldAdvance = true;
             spaceWasPressed = true;
         }
@@ -70,16 +72,19 @@ void CutsceneSystem::update() {
         spaceWasPressed = false;
     }
 
-    // Check left mouse button
-    if (GLFWFunctions::mouseButtonState &&
-        (*GLFWFunctions::mouseButtonState)[MouseButton::left]) {
-        if (!mouseWasClicked) {
-            shouldAdvance = true;
-            mouseWasClicked = true;
+    // Only check for mouse clicks if we're in the cutscene scene AND past the initial delay
+    if (GameViewWindow::getSceneNum() == -2 && canAcceptInput()) {
+        // Check left mouse button
+        if (GLFWFunctions::mouseButtonState &&
+            (*GLFWFunctions::mouseButtonState)[MouseButton::left]) {
+            if (!mouseWasClicked) {
+                shouldAdvance = true;
+                mouseWasClicked = true;
+            }
         }
-    }
-    else {
-        mouseWasClicked = false;
+        else {
+            mouseWasClicked = false;
+        }
     }
 
     auto& currentFrame = m_frames->at(m_currentFrameIndex);
@@ -158,6 +163,7 @@ void CutsceneSystem::start() {
     m_isPlaying = true;
     m_currentFrameIndex = 0;
     m_currentFrameTime = 0.0f;
+    m_delayTimer = 0.0f;  // Reset the delay timer
 
     // Unlock camera from any entities
     cameraSystem.unlockFromComponent();
