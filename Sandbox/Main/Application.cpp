@@ -27,7 +27,7 @@ File Contributions: Joel Chu (50%)
 
 struct CrtBreakAllocSetter {
 	CrtBreakAllocSetter() {
-		//_crtBreakAlloc = 174;
+		//_crtBreakAlloc = 209;
 	}
 };
 
@@ -66,6 +66,8 @@ int main() {
 		engine->addSystem(&cameraSystem);
 
 		engine->addSystem(&layerManager);
+
+		engine->addSystem(&cutsceneSystem);
 
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();

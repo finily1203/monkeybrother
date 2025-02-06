@@ -126,6 +126,8 @@ public:
 	void LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// save the options settings to JSON
 	void SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the cutscene data from JSON file
+	void LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();

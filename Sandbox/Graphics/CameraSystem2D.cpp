@@ -159,3 +159,6 @@ bool CameraSystem2D::checkLockedComponent() const
 {
     return (m_LockedComponent ? true : false);
 }
+void CameraSystem2D::unlockFromComponent() {
+    m_LockedComponent = nullptr;
+}

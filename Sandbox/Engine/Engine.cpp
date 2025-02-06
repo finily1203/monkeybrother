@@ -67,6 +67,9 @@ void Engine::updateSystem() {
 		case SystemType::LayerManagerType:
 			debugSystem.EndSystemTiming("LayerManager");
 			break;
+		case SystemType::CutsceneSystemType:
+			debugSystem.StartSystemTiming("CutsceneSystem");
+			break;
 		default:
 			break;
 		}
@@ -102,6 +105,9 @@ void Engine::updateSystem() {
 		case SystemType::LayerManagerType:
 			debugSystem.EndSystemTiming("LayerManager");
 			break;
+		case SystemType::CutsceneSystemType:
+			debugSystem.EndSystemTiming("CutsceneSystem");
+			break;
 		default:
 			break;
 		}
@@ -119,7 +125,7 @@ void Engine::cleanupSystem() {
 			
 			if (system != &ecsCoordinator && system != &debugSystem && system != &fontSystem 
 				&& system != &assetsManager && system != &graphicsSystem && system != &cameraSystem
-				&& system != &audioSystem && system != &layerManager ) {
+				&& system != &audioSystem && system != &layerManager && system != &cutsceneSystem ) {
 				delete system;
 			}
 		}
