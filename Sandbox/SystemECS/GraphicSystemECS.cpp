@@ -305,7 +305,12 @@ void GraphicSystemECS::update(float dt) {
 
                 float arrowPosSFX = sfxArrowTransform.position.GetX();
                 float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
-                sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                if (progressSFX >= 0.01f && progressSFX <= 0.09f) {
+                    sfxPercentage = 10.0f;
+                }
+				else {
+					sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                }
                 sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
                 AudioSystem::sfxPercentage = sfxPercentage;
             }
@@ -317,7 +322,12 @@ void GraphicSystemECS::update(float dt) {
 
                 float arrowPosMusic = musicArrowTransform.position.GetX();
                 float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
-                musicPercentage = std::round(progressMusic * 10.f) * 10.f;
+				if (progressMusic >= 0.01f && progressMusic <= 0.09f) {
+					musicPercentage = 10.0f;
+				}
+                else {
+                    musicPercentage = std::round(progressMusic * 10.f) * 10.f; 
+                }
                 musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
                 AudioSystem::musicPercentage = musicPercentage;
             }
@@ -342,7 +352,7 @@ void GraphicSystemECS::update(float dt) {
             // Draw SFX Notches
             for (size_t l = 0; l < sfxNotches.size(); ++l)
             {
-                std::string notchTexture = (i < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                std::string notchTexture = (l < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
                 TransformComponent& notchTransform = sfxNotches[l].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);

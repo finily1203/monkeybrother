@@ -5,7 +5,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   AssetsManager.h
 @brief:  This header file includes all the declaration of the AssetsManager class.
-		 Currently AssetsManager only handles fonts, shaders, textures and audio assets
+		 Currently AssetsManager only handles fonts, shaders, textures, audio and
+		 prefab assets
 
 		 Joel Chu (c.weiyuan): Declared all the functions in AssetsManager class.
 							   100%
