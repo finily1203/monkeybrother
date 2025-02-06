@@ -482,6 +482,8 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 	JSONSerializer serializer;
 	int mainMenuScene = -1;
 
+	GameViewWindow::setSceneNum(mainMenuScene);
+
 	cameraSystem.setCameraZoom(0.2f);
 	cameraSystem.setCameraPosition({0,0});
 

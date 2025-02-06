@@ -72,8 +72,8 @@ void AudioSystem::initialise() {
 void AudioSystem::update() {
     bool bIsPlaying = false;
 
-    //only play if scene is 1
-    if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2 || GameViewWindow::getSceneNum() == -1 )
+    //only play if scene is 1 or 2
+    if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2)
     {
 
         // Ensure BGM and ambience play only if they are not already playing
@@ -97,30 +97,46 @@ void AudioSystem::update() {
 
         //std::cout << GameViewWindow::getSceneNum() << std::endl;
         // Check the state of the pump and play/stop the pump sound
-        if (GLFWFunctions::isPumpOn) {
-            if (!pumpChannel) {
-                playPumpSound("pumpSound.wav");
+
+        //check if there is a pump entity existing
+		for (auto entity : ecsCoordinator.getAllLiveEntities())
+		{
+			if (ecsCoordinator.hasComponent<PumpComponent>(entity))
+			{
+				GLFWFunctions::isTherePump = true;
+				break;
+			}
+			else
+			{
+				GLFWFunctions::isTherePump = false;
+			}
+		}
+        if (GLFWFunctions::isTherePump) {
+            if (GLFWFunctions::isPumpOn) {
+                if (!pumpChannel) {
+                    playPumpSound("pumpSound.wav");
+                }
+                else {
+                    // Ensure the pump sound is playing
+                    FMOD_RESULT result = pumpChannel->isPlaying(&bIsPlaying);
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD isPlaying error for pump sound! (" << result << ")" << std::endl;
+                    }
+
+                    if (!bIsPlaying) {
+                        pumpChannel->setPaused(false); // Resume if paused
+                    }
+                }
             }
             else {
-                // Ensure the pump sound is playing
-                FMOD_RESULT result = pumpChannel->isPlaying(&bIsPlaying);
-                if (result != FMOD_OK) {
-                    std::cout << "FMOD isPlaying error for pump sound! (" << result << ")" << std::endl;
+                // Stop the pump sound if it's no longer needed
+                if (pumpChannel) {
+                    FMOD_RESULT result = pumpChannel->stop();
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD stop error for pump sound! (" << result << ")" << std::endl;
+                    }
+                    pumpChannel = nullptr;
                 }
-
-                if (!bIsPlaying) {
-                    pumpChannel->setPaused(false); // Resume if paused
-                }
-            }
-        }
-        else {
-            // Stop the pump sound if it's no longer needed
-            if (pumpChannel) {
-                FMOD_RESULT result = pumpChannel->stop();
-                if (result != FMOD_OK) {
-                    std::cout << "FMOD stop error for pump sound! (" << result << ")" << std::endl;
-                }
-                pumpChannel = nullptr;
             }
         }
 
@@ -222,16 +238,6 @@ void AudioSystem::update() {
             playSoundEffect("Collection.wav");
             GLFWFunctions::collectAudio = false;
         }
-
-        //if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
-        //    playSoundEffect("bubbleButton");
-        //    (*GLFWFunctions::keyState)[Key::NUM_9] = false;
-        //}
-
-        //else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
-        //    playSoundEffect("bubbleSingle");
-        //    (*GLFWFunctions::keyState)[Key::NUM_8] = false;
-        //}
 
         if ((*GLFWFunctions::keyState)[Key::COMMA]) {
 			decAllVol();

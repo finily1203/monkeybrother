@@ -80,6 +80,7 @@ struct GLFWFunctions {
 	static GLboolean adjustVol;
 	static GLboolean audioNext;
 	static GLboolean isPumpOn;
+	static GLboolean isTherePump;
 	static GLboolean playPumpSong;
 	static GLboolean isRotating;
 	static GLboolean exitCollision;
