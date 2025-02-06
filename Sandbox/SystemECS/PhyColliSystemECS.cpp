@@ -424,7 +424,7 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
 
     // Average the normal and penetration
     avgNormal = avgNormal * (1.0f / static_cast<float>(collisionCount));
-    float avgPenetration = totalPenetration / static_cast<float>(collisionCount);
+    //float avgPenetration = totalPenetration / static_cast<float>(collisionCount);
 
     // Normalize the average normal
     float normalLength = std::sqrt(avgNormal.GetX() * avgNormal.GetX() + avgNormal.GetY() * avgNormal.GetY());
@@ -659,7 +659,7 @@ void PhysicsSystemECS::update(float dt)
         HandleCircleMultiPlatformCollision(playerEntity, collidingPlatforms);
 	}
 
-    Console::GetLog() << "Colliding platforms: " << collidingPlatforms[0] << std::endl;
+    //Console::GetLog() << "Colliding platforms: " << collidingPlatforms[0] << std::endl;
 
 }
 
