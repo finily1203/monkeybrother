@@ -610,7 +610,8 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 			layerManager.addEntityToLayer(layer, entityObj);
 		}
 		else {
-			layerManager.addEntityToLayer(0, entityObj);
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
 		}
 
 		// read all of the data from the JSON object and assign the data
@@ -704,7 +705,9 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 			layerManager.addEntityToLayer(layer, entityObj);
 		}
 		else {
-			layerManager.addEntityToLayer(0, entityObj);
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
 		}
 
 		// read all of the data from the JSON object and assign the data

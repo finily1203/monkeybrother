@@ -93,6 +93,9 @@ struct GLFWFunctions {
 	static GLboolean instantLose;
 	static bool fullscreen;
 
+	static float pauseTimer;
+	const static float pauseDuration;
+	static bool newSceneLoaded;
 
 	static int audioNum;
 	static int windowWidth;

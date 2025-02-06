@@ -618,6 +618,14 @@ Entity closestPlatformEntity = {};
 void PhysicsSystemECS::update(float dt)
 {
     (void)dt;
+    if (GLFWFunctions::newSceneLoaded)
+    {
+        GLFWFunctions::pauseTimer += dt;
+        if (GLFWFunctions::pauseTimer < GLFWFunctions::pauseDuration) return;
+		GLFWFunctions::newSceneLoaded = false;
+		GLFWFunctions::pauseTimer = 0.0f;
+    }
+
     count = 0;
     playerCount = 0;
 

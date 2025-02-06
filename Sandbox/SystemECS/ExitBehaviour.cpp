@@ -53,6 +53,7 @@ void ExitBehaviour::update(Entity entity) {
 				if (currScn > 2) currScn = -1;
 				GameViewWindow::setSceneNum(currScn);
 				GLFWFunctions::changeLevel = true;
+				GLFWFunctions::newSceneLoaded = true;
 			}
 		}
 	}

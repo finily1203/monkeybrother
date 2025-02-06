@@ -63,7 +63,7 @@ void AudioSystem::initialise() {
 	setBgmVol(musicPercentage);
 	setSfxVol(sfxPercentage);
 
-	std::cout << "Audio System initialised." << std::endl;
+	//std::cout << "Audio System initialised." << std::endl;
     /*genVol(0.35f), bgmVol(0.05f), sfxVol(0.5f)*/
 }
 
@@ -72,7 +72,7 @@ void AudioSystem::initialise() {
 void AudioSystem::update() {
     bool bIsPlaying = false;
 
-	std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
+	//std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
 
     //if scene is -2 which is cutscene
     if (GameViewWindow::getSceneNum() == -2)
