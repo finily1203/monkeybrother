@@ -49,7 +49,7 @@ public:
     // Collision response for OBB
     void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
 
-    void MultiPlatformCollisionResponse(Entity player, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations);
+    void MultiPlatformCollisionResponse(Entity player, const std::vector<Entity>& platforms, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations);
 };
 
 class PhysicsSystemECS : public System

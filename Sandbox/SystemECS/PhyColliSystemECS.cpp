@@ -304,41 +304,68 @@ void PhysicsSystemECS::HandleCircleOBBCollision(Entity player, Entity platform)
 }
 
 // Add this new collision response specifically for multiple platforms
-void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations)
+void CollisionSystemECS::MultiPlatformCollisionResponse(Entity player, const std::vector<Entity>& platforms, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations)
 {
     myMath::Vector2D& playerPos = ecsCoordinator.getComponent<TransformComponent>(player).position;
     myMath::Vector2D& vel = ecsCoordinator.getComponent<PhysicsComponent>(player).velocity;
+    float radius = ecsCoordinator.getComponent<TransformComponent>(player).scale.GetX() * 0.5f;
 
-    // Calculate the combined normal
-    myMath::Vector2D combinedNormal(0.0f, 0.0f);
-    float maxPenetration = 0.0f;
+    float dotProd = myMath::DotProductVector2D(normals[0], normals[1]);
+     if (dotProd != 0.f) {
+         // Calculate the combined normal
+         myMath::Vector2D combinedNormal(0.0f, 0.0f);
+         float maxPenetration = 0.0f;
 
-    for (size_t i = 0; i < normals.size(); ++i) {
-        combinedNormal = combinedNormal + normals[i];
-        maxPenetration = std::max(maxPenetration, penetrations[i]);
-    }
+         for (size_t i = 0; i < normals.size(); ++i) {
+             combinedNormal = combinedNormal + normals[i];
+             maxPenetration = std::max(maxPenetration, penetrations[i]);
+         }
 
-    //maxPenetration = std::sqrtf(penetrations[0] * penetrations[0] + penetrations[1] * penetrations[1]);
+         //maxPenetration = std::sqrtf(penetrations[0] * penetrations[0] + penetrations[1] * penetrations[1]);
 
-    // Normalize the combined normal
-    float length = std::sqrt(combinedNormal.GetX() * combinedNormal.GetX() +
-        combinedNormal.GetY() * combinedNormal.GetY());
-    if (length > 0.0f) {
-        combinedNormal = combinedNormal * (1.0f / length);
-    }
+         // Normalize the combined normal
+         float length = std::sqrt(combinedNormal.GetX() * combinedNormal.GetX() +
+             combinedNormal.GetY() * combinedNormal.GetY());
+         if (length > 0.0f) {
+             combinedNormal = combinedNormal * (1.0f / length);
+         }
 
-    // Calculate tangent from the combined normal
-    myMath::Vector2D tangent(-combinedNormal.GetY(), combinedNormal.GetX());
+         // Calculate tangent from the combined normal
+         myMath::Vector2D tangent(-combinedNormal.GetY(), combinedNormal.GetX());
+         // Project velocity onto tangent
+         float tangentVelocity = myMath::DotProductVector2D(vel, tangent);
+         // Only keep the tangential component of velocity
+         vel = tangent * tangentVelocity;
 
-    // Project velocity onto tangent
-    float tangentVelocity = myMath::DotProductVector2D(vel, tangent);
+         // Resolve penetration using the maximum penetration value
+         playerPos.SetX(playerPos.GetX() + combinedNormal.GetX() * maxPenetration);
+         playerPos.SetY(playerPos.GetY() + combinedNormal.GetY() * maxPenetration);
+     }
+     else
+     {
 
-    // Only keep the tangential component of velocity
-    vel = tangent * tangentVelocity;
+         for (auto platform : platforms)
+         {
+             CollisionSystemECS::OBB platformOBB = createOBBFromEntity(platform);
+             myMath::Vector2D normal{};
+             float penetration{};
 
-    // Resolve penetration using the maximum penetration value
-    playerPos.SetX(playerPos.GetX() + combinedNormal.GetX() * maxPenetration);
-    playerPos.SetY(playerPos.GetY() + combinedNormal.GetY() * maxPenetration);
+             if (checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration))
+             {
+                 // Calculate tangent from the combined normal
+                 myMath::Vector2D tangent(-normal.GetY(), normal.GetX());
+
+                 //Project velocity onto tangent
+                 float tangentVelocity = myMath::DotProductVector2D(vel, tangent);
+
+                 //Only keep the tangential component of velocity
+                 vel = tangent * tangentVelocity;
+
+                 playerPos.SetX(playerPos.GetX() + normal.GetX() * penetration);
+                 playerPos.SetY(playerPos.GetY() + normal.GetY() * penetration);
+             }
+         }
+     }
 }
 
 void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms) {
@@ -360,7 +387,9 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
 
     // Calculate average normal and total penetration
     myMath::Vector2D avgNormal(0.0f, 0.0f);
+    std::vector<myMath::Vector2D> normals;
     float totalPenetration = 0.0f;
+    std::vector<float> penetrations;
     bool isAnyColliding = false;
     int collisionCount = 0;
 
@@ -373,6 +402,8 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
         if (collisionSystem.checkCircleOBBCollision(playerPos, radius, platformOBB, normal, penetration)) {
             avgNormal = avgNormal + normal;
             totalPenetration += penetration;
+            normals.push_back(normal);
+            penetrations.push_back(penetration);
             collisionCount++;
             isAnyColliding = true;
         }
@@ -417,7 +448,7 @@ void PhysicsSystemECS::HandleCircleMultiPlatformCollision(Entity player, const s
     }
 
     // Apply final collision response with averaged values
-    collisionSystem.MultiPlatformCollisionResponse(player, { avgNormal }, { avgPenetration });
+    collisionSystem.MultiPlatformCollisionResponse(player, platforms, normals, penetrations);
 }
 
 
