@@ -204,7 +204,7 @@ void CutsceneSystem::skipToEnd() {
     m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
-    cameraSystem.setCameraZoom(0.2f);
+    cameraSystem.setCameraZoom(0.8f);
 }
 
 size_t CutsceneSystem::getCurrentFrameIndex() const {
