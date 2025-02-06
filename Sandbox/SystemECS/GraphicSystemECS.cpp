@@ -310,6 +310,7 @@ void GraphicSystemECS::update(float dt) {
                 float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
                 sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
                 sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
+                AudioSystem::sfxPercentage = sfxPercentage;
             }
 
             if (musicNotches.size() == 10)
@@ -321,10 +322,8 @@ void GraphicSystemECS::update(float dt) {
                 float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
                 musicPercentage = std::round(progressMusic * 10.f) * 10.f;
                 musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
+                AudioSystem::musicPercentage = musicPercentage;
             }
-
-            // Save both percentages
-            audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
 
             // Update active notches separately for SFX and Music
             for (size_t i = 0; i < sfxNotches.size(); ++i)

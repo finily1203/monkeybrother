@@ -405,7 +405,11 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"musicNotch8", "musicNotch9"
 		};
 
+		float sfxPercentage = AudioSystem::sfxPercentage;
+		float musicPercentage = AudioSystem::musicPercentage;
+
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
 
 		for (auto currEntity : allEntities)
 		{
