@@ -122,7 +122,7 @@ myMath::Matrix3x3 CameraSystem2D::getProjectionMatrix() const
 // SetCameraPosition function implementation
 void CameraSystem2D::setCameraPosition(const myMath::Vector2D& position)
 {
-    m_TargetPosition = position;
+    m_CameraPosition = position;
 }
 // GetCameraPosition function implementation
 myMath::Vector2D CameraSystem2D::getCameraPosition() const
@@ -158,4 +158,7 @@ void CameraSystem2D::lockToComponent(const TransformComponent& component)
 bool CameraSystem2D::checkLockedComponent() const
 {
     return (m_LockedComponent ? true : false);
+}
+void CameraSystem2D::unlockFromComponent() {
+    m_LockedComponent = nullptr;
 }

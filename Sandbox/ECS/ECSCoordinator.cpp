@@ -437,6 +437,9 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 	JSONSerializer serializer;
 	int mainMenuScene = -1;
 
+	cameraSystem.setCameraZoom(0.2f);
+	cameraSystem.setCameraPosition({0,0});
+
 	if (!serializer.Open(filename))
 	{
 		std::cout << "Error: could not open file " << filename << std::endl;
@@ -854,13 +857,8 @@ void ECSCoordinator::test5() {
 	//  LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	//}
 
-	if (GameViewWindow::getSceneNum() == -2)
-	{
-		LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
-	}
-	else {
-		LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
-	}
+	LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
+	
 }
 
 //Initialises all required components and systems for the ECS system

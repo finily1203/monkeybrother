@@ -1,6 +1,19 @@
-/*!
-All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-*/
+/*
+All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  CutsceneSystem.h
+@brief  :  This file contains the declaration of the CutsceneSystem class. It is
+		  responsible for managing the cutscene's camera position,
+		  rotation, and zoom, as well as updating the view matrix based on these values.
+		  The CutsceneSystem class also provides functionality to add frames to the cutscene,
+		  start, stop, and skip to the end of the cutscene.
+		  The CutsceneSystem class also provides functionality to check if the cutscene is playing or finished.
+
+ File Contributions: Liu YaoTing (100%)
+
+/*_______________________________________________________________________________________________________________*/
 
 #pragma once
 #include "Systems.h"
