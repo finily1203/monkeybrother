@@ -84,6 +84,13 @@ void AudioSystem::update() {
             }
             bgmChannel = nullptr;
         }
+		if (pumpChannel) {
+			FMOD_RESULT result = pumpChannel->stop();
+			if (result != FMOD_OK) {
+				std::cout << "FMOD stop error for pump channel! (" << result << ")" << std::endl;
+			}
+			pumpChannel = nullptr;
+		}
 
         /*
         * IntroCutscene_Ambience_1: Play at Start Loop
@@ -99,6 +106,26 @@ void AudioSystem::update() {
             changePanel = false;
         }
         bool isPanelPlaying = false;
+        bool isAmbienceOne = false;
+		bool isAmbienceTwo = false;
+
+		if (cutsceneAmbienceChannel)
+		{
+			cutsceneAmbienceChannel->isPlaying(&isAmbienceOne);
+			if (!isAmbienceOne)
+			{
+				playCutsceneAmbience("IntroAmbience1");
+			}
+		}
+
+		if (cutsceneAmbienceChannel2)
+		{
+			cutsceneAmbienceChannel2->isPlaying(&isAmbienceTwo);
+			if (!isAmbienceTwo)
+			{
+				playCutsceneAmbience2("IntroAmbience2");
+			}
+		}
 
         switch (currentFrame) {
         case 0: //scene 1
@@ -581,7 +608,7 @@ void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
     }
 
     if (cutsceneAmbienceChannel) {
-        cutsceneAmbienceChannel->setVolume(genVol);
+        cutsceneAmbienceChannel->setVolume(genVol * 2.0f);
         cutsceneAmbienceChannel->setPaused(false);
     }
 }

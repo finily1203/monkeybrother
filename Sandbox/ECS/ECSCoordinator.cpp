@@ -83,6 +83,7 @@ void ECSCoordinator::update() {
 			}
 			int sceneNum = GameViewWindow::getSceneNum();
 			if (sceneNum == 1 || sceneNum == 2) {
+				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
 			}
 			else if (sceneNum == -1) {
@@ -152,7 +153,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 {
 	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
-	cameraSystem.setCameraZoom(0.8f);
+	cameraSystem.setCameraZoom(1.0f);
 	// checks if JSON file could be opened
 	if (!serializer.Open(filename))
 	{

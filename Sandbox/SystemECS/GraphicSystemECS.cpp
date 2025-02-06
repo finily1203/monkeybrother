@@ -642,7 +642,7 @@ void GraphicSystemECS::update(float dt) {
 
                 if (ecsCoordinator.getTextureID(entity) != "") {
                     //should not render the animation for filter in and filter out if filter is clogged
-                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter_out.png") {
+                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter-out.png") {
                         if (GLFWFunctions::filterClogged) {
                             continue;
                         }
