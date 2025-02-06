@@ -77,6 +77,14 @@ void AudioSystem::update() {
     //if scene is -2 which is cutscene
     if (GameViewWindow::getSceneNum() == -2)
     {
+        if (bgmChannel) {
+            FMOD_RESULT result = bgmChannel->stop();
+            if (result != FMOD_OK) {
+                std::cout << "FMOD stop error for main menu BGM! (" << result << ")" << std::endl;
+            }
+            bgmChannel = nullptr;
+        }
+
         /*
         * IntroCutscene_Ambience_1: Play at Start Loop
         * IntroCutscene_Panel_2: Play at start of panel

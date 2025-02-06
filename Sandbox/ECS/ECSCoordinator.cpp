@@ -924,9 +924,9 @@ void ECSCoordinator::test5() {
 	//  LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
 	//}
 
-	LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
+	//LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
 
-	//LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+	LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
 	
 }
 

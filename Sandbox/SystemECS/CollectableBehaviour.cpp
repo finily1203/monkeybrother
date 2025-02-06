@@ -79,6 +79,7 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
-    // Add to default layer 0
-    layerManager.addEntityToLayer(0, newAnimationEntity);
+    // take layer of entity and add animation to that layer
+    int newLayer = layerManager.getEntityLayer(entity);
+    layerManager.addEntityToLayer(newLayer, newAnimationEntity);
 }
