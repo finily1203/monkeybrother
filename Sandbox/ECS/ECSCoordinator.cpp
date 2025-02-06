@@ -70,6 +70,7 @@ void ECSCoordinator::update() {
 			int sceneNum = 1;
 			GameViewWindow::setSceneNum(sceneNum);
 			LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
+			GLFWFunctions::newSceneLoaded = true;
 		}
 	}
 	else {  // Regular gameplay
@@ -83,6 +84,7 @@ void ECSCoordinator::update() {
 			int sceneNum = GameViewWindow::getSceneNum();
 			LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
 			GLFWFunctions::changeLevel = false;
+			GLFWFunctions::newSceneLoaded = true;
 		}
 	}
 }

@@ -59,8 +59,8 @@ void FilterBehaviour::update(Entity entity) {
         if (isColliding) {
             if (!filterComponent.isFilterClogged) {
                 // Reduce size of mossball
-                playerTransform.scale.SetX(playerTransform.scale.GetX() - 50.f);
-                playerTransform.scale.SetY(playerTransform.scale.GetY() - 50.f);
+                playerTransform.scale.SetX(playerTransform.scale.GetX() - 25.f);
+                playerTransform.scale.SetY(playerTransform.scale.GetY() - 25.f);
                 filterComponent.isFilterClogged = true;
 
                 // Hide player temporarily
