@@ -307,13 +307,15 @@ void GameViewWindow::Update() {
 				});
 
 			// Save all currently live entities
-			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-				std::string entityId = ecsCoordinator.getEntityID(entity);
-				std::string textureId = ecsCoordinator.getTextureID(entity);
-				if (entityId != "placeholderentity") {
-					TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-					auto entityJson = AddNewEntityToJSON(transform, entityId, textureId, ecsCoordinator, entity);
-					jsonData["entities"].push_back(entityJson);
+			for (int i = 0; i < layerManager.getLayerCount(); i++) {
+				for (auto entity : layerManager.getEntitiesFromLayer(i)) {
+					std::string entityId = ecsCoordinator.getEntityID(entity);
+					std::string textureId = ecsCoordinator.getTextureID(entity);
+					if (entityId != "placeholderentity") {
+						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						auto entityJson = AddNewEntityToJSON(transform, entityId, textureId, ecsCoordinator, entity);
+						jsonData["entities"].push_back(entityJson);
+					}
 				}
 			}
 
