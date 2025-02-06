@@ -126,7 +126,9 @@ void GraphicSystemECS::update(float dt) {
                 bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
                 bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
-				bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
+
+                //check behaviour instead
+				auto& behaviour = ecsCoordinator.getComponent<BehaviourComponent>(entity);
 
                 // Use hasMovement for the update parameter
                 //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
@@ -406,7 +408,7 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
-                if (isExit) {
+                if (behaviour.exit) {
 					//transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                     if (GLFWFunctions::collectableCount == 0) {
                         ecsCoordinator.setTextureID(entity, "cloggedVent3");
@@ -584,15 +586,15 @@ void GraphicSystemECS::update(float dt) {
                 }
 
                 if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
-                    auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                    auto& collectAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
 
                     double currentAbsoluteTime = glfwGetTime();
-                    double timeSinceCreation = currentAbsoluteTime - animation.creationTime;
+                    double timeSinceCreation = currentAbsoluteTime - collectAnimation.creationTime;
 
-                    animation.currentFrame = static_cast<int>((timeSinceCreation / animation.frameTime)) % static_cast<int>(animation.totalFrames);
+                    collectAnimation.currentFrame = static_cast<int>((timeSinceCreation / collectAnimation.frameTime)) % static_cast<int>(collectAnimation.totalFrames);
 
                     // Check if one loop is completed
-                    if (animation.currentFrame == static_cast<int>(animation.totalFrames) - 1) {
+                    if (collectAnimation.currentFrame == static_cast<int>(collectAnimation.totalFrames) - 1) {
 
                         // Optional: Trigger actions after one loop
                         ecsCoordinator.destroyEntity(entity);  // Example: Destroy after one loop
