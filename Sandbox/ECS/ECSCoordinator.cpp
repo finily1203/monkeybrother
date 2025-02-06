@@ -66,6 +66,11 @@ void ECSCoordinator::update() {
 		}
 		// Load main menu
 		LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
+
+		// Load the first scene
+		//int sceneNum = 1;
+		//GameViewWindow::setSceneNum(sceneNum);
+		//LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
 		cutsceneComplete = true;
 	}
 	else {
@@ -920,6 +925,8 @@ void ECSCoordinator::test5() {
 	//}
 
 	LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
+
+	//LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
 	
 }
 
