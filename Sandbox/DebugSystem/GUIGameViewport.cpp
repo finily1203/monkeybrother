@@ -342,6 +342,8 @@ void GameViewWindow::Update() {
 
 	if (ImGui::Button("Load")) {
 		isSelectingFile = true;
+		if(!GameViewWindow::getPaused())
+		TogglePause();
 	}
 
 	if (isSelectingFile) {
