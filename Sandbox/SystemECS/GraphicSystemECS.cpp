@@ -255,63 +255,108 @@ void GraphicSystemECS::update(float dt) {
             }
         }
 
-        if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos || ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
+        if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ||
+            ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
         {
-            int activeNotches{};
-            float startPos{}, endPos{};
-            std::string audioType = ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ? "sfxNotch" : "musicNotch";
-            std::string arrowId = (audioType == "sfxNotch") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
+            int activeNotchesSFX{}, activeNotchesMusic{};
+            float startPosSFX{}, endPosSFX{};
+            float startPosMusic{}, endPosMusic{};
 
-            TransformComponent arrowTransform{};
+            TransformComponent sfxArrowTransform{}, musicArrowTransform{};
 
+            // Identify arrow positions for SFX and Music
             for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
             {
-                if (ecsCoordinator.getEntityID(arrowEntity) == arrowId)
+                std::string arrowId = ecsCoordinator.getEntityID(arrowEntity);
+                if (arrowId == "sfxSoundbarArrow")
                 {
-                    arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
-                    break;
+                    sfxArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                }
+                
+                else if (arrowId == "musicSoundbarArrow")
+                {
+                    musicArrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
                 }
             }
 
-            std::vector<std::pair<Entity, TransformComponent>> notches;
+            std::vector<std::pair<Entity, TransformComponent>> sfxNotches, musicNotches;
 
-
+            // Separate SFX and Music Notches
             for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
             {
                 std::string notchId = ecsCoordinator.getEntityID(notchEntity);
-                if (notchId.find(audioType) != std::string::npos)
+                TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
+
+                if (notchId.find("sfxNotch") != std::string::npos)
                 {
-                    TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
-                    notches.emplace_back(notchEntity, notchTransform);
+                    sfxNotches.emplace_back(notchEntity, notchTransform);
+                }
+
+                else if (notchId.find("musicNotch") != std::string::npos)
+                {
+                    musicNotches.emplace_back(notchEntity, notchTransform);
                 }
             }
 
-            if (notches.size() == 10)
-            {
-                startPos = notches[0].second.position.GetX() - (notches[0].second.scale.GetX() / 2.0f);
-                endPos = notches[9].second.position.GetX() + (notches[9].second.scale.GetX() / 2.0f);
+            float sfxPercentage{}, musicPercentage{};
 
-                float arrowPos = arrowTransform.position.GetX();
-                float progress = std::abs((arrowPos - startPos) / (endPos - startPos));
-                float percentage = std::round(progress * 10.f) * 10.f;
-                percentage = std::clamp(percentage, 0.f, 100.f);
+            if (sfxNotches.size() == 10)
+            {
+                startPosSFX = sfxNotches[0].second.position.GetX() - (sfxNotches[0].second.scale.GetX() / 2.0f);
+                endPosSFX = sfxNotches[9].second.position.GetX() + (sfxNotches[9].second.scale.GetX() / 2.0f);
+
+                float arrowPosSFX = sfxArrowTransform.position.GetX();
+                float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
+                sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
             }
 
-            for (size_t i{}; i < notches.size(); ++i)
+            if (musicNotches.size() == 10)
             {
-                if (arrowTransform.position.GetX() + arrowTransform.scale.GetX() / 2.35f >= notches[i].second.position.GetX())
+                startPosMusic = musicNotches[0].second.position.GetX() - (musicNotches[0].second.scale.GetX() / 2.0f);
+                endPosMusic = musicNotches[9].second.position.GetX() + (musicNotches[9].second.scale.GetX() / 2.0f);
+
+                float arrowPosMusic = musicArrowTransform.position.GetX();
+                float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
+                musicPercentage = std::round(progressMusic * 10.f) * 10.f;
+                musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
+            }
+
+            // Save both percentages
+            audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
+
+            // Update active notches separately for SFX and Music
+            for (size_t i = 0; i < sfxNotches.size(); ++i)
+            {
+                if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[i].second.position.GetX())
                 {
-                    activeNotches = static_cast<int>(i) + 1;
+                    activeNotchesSFX = static_cast<int>(i) + 1;
                 }
             }
 
-            for (size_t i{}; i < notches.size(); ++i)
+            for (size_t i = 0; i < musicNotches.size(); ++i)
             {
-                std::string notchTexture = (i < activeNotches) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = notches[i].second;
+                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[i].second.position.GetX())
+                {
+                    activeNotchesMusic = static_cast<int>(i) + 1;
+                }
+            }
 
+            // Draw SFX Notches
+            for (size_t i = 0; i < sfxNotches.size(); ++i)
+            {
+                std::string notchTexture = (i < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                TransformComponent& notchTransform = sfxNotches[i].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
-                //ecsCoordinator.setTextureID(entity, notchTexture);
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
+            }
+
+            // Draw Music Notches
+            for (size_t i = 0; i < musicNotches.size(); ++i)
+            {
+                std::string notchTexture = (i < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                TransformComponent& notchTransform = musicNotches[i].second;
+                notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
             }
         }

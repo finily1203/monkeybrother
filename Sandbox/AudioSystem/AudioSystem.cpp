@@ -424,3 +424,27 @@ void AudioSystem::setBgmVol(float volPerc) {
 void AudioSystem::setSfxVol(float volPerc) {
 	float sfxVol = volPerc / 100.0f;
 }
+
+void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage)
+{
+    nlohmann::json audioSettings;
+
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        inputFile >> audioSettings;
+        inputFile.close();
+    }
+
+    audioSettings["sfxAudioPercentage"] = sfxPercentage;
+    audioSettings["musicAudioPercentage"] = musicPercentage;
+
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open())
+    {
+        return;
+    }
+
+    outputFile << audioSettings.dump(2);
+    outputFile.close();
+}

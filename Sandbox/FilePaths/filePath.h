@@ -25,23 +25,44 @@ File Contributions: Ian Loi (100%)
 class FilePathManager
 {
 public:
+	// retrieve the executable file path
 	static std::string GetExecutablePath();
+	// retrieve the window config JSON file path
 	static std::string GetWindowConfigJSONPath();
+	// retrieve the entities JSON file path
 	static std::string GetEntitiesJSONPath();
+	// retrieve the IMGUI console JSON file path
 	static std::string GetIMGUIConsoleJSONPath();
+	// retrieve the IMGUI viewport JSON file path
 	static std::string GetIMGUIViewportJSONPath();
+	// retrieve the IMGUI debug JSON file path
 	static std::string GetIMGUIDebugJSONPath();
+	// retrieve the IMGUI layout JSON path
 	static std::string GetIMGUILayoutPath();
+	// retrieve the IMGUI inspector JSON path
 	static std::string GetIMGUIInspectorJSONPath();
+	// retrieve the IMGUI creation JSON path
 	static std::string GetIMGUICreationJSONPath();
+	// retrieve the IMGUI hierarchy JSON path
 	static std::string GetIMGUIHierarchyJSONPath();
+	// retrieve the assets JSON path
 	static std::string GetAssetsJSONPath();
+	// retrieve the IMGUI font path
 	static std::string GetIMGUIFontPath();
+	// retrieve the physics JSON path
 	static std::string GetPhysicsPath();
+	// retrieve the save JSON path
 	static std::string GetSaveJSONPath(int& saveCount);
+	// retrieve the scene JSON path
 	static std::string GetSceneJSONPath();
+	// retrieve the main menu JSON path
 	static std::string GetMainMenuJSONPath();
+	// retrieve the pause menu JSON path
 	static std::string GetPauseMenuJSONPath();
+	// retrieve the options menu JSON path
 	static std::string GetOptionsMenuJSONPath();
+	// retrieve the layer JSON path
 	static std::string GetLayerJSONPath();
+	// retrieve the audio settings JSON path
+	static std::string GetAudioSettingsJSONPath();
 };

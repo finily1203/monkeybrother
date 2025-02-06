@@ -176,24 +176,30 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		// the JSON object
 		ecs.addComponent(entityObj, transform);
 
+		// entity that contains background component
 		if (entityData.contains("background"))
 		{
+			// read isBackground from the JSON file
 			BackgroundComponent background{};
 			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
 
 			ecs.addComponent(entityObj, background);
 		}
 
+		// entity that contains UI component
 		if (entityData.contains("UI"))
 		{
+			// read isUI from the JSON file
 			UIComponent UI{};
 			serializer.ReadObject(UI.isUI, entityId, "entities.UI.isUI");
 
 			ecs.addComponent(entityObj, UI);
 		}
 
+		// entity that contains aabb component
 		if (entityData.contains("aabb"))
 		{
+			// read the aabb data from the JSON file
 			AABBComponent aabb{};
 			serializer.ReadObject(aabb.left, entityId, "entities.aabb.left");
 			serializer.ReadObject(aabb.right, entityId, "entities.aabb.right");
@@ -203,17 +209,20 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, aabb);
 		}
 
+		// entity that contains closestPlatform component
 		if (entityData.contains("closestPlatform"))
 		{
+			// read isClosest from the JSON file
 			ClosestPlatform closestPlatform{};
 			serializer.ReadObject(closestPlatform.isClosest, entityId, "entities.closestPlatform.isClosest");
 
 			ecs.addComponent(entityObj, closestPlatform);
 		}
 
-
+		// entity that contains movPlatform component
 		if (entityData.contains("movPlatform"))
 		{
+			// read the movPlatform data from the JSON file
 			MovPlatformComponent movPlatform{};
 			/*
 			float speed;
@@ -232,15 +241,19 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, movPlatform);
 		}
 
+		// entity that contains movement component
 		if (entityData.contains("movement"))
 		{
+			// read the movement data from the JSON file
 			MovementComponent movement{};
 			serializer.ReadObject(movement.speed, entityId, "entities.movement.speed");
 
 			ecs.addComponent(entityObj, movement);
 		}
 
+		// entity that contains animation component
 		if (entityData.contains("animation")) {
+			// read animation data from the JSON file
 			AnimationComponent animation{};
 
 
@@ -254,7 +267,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		}
 
+		// entity that contains player component
 		if (entityData.contains("player")) {
+			// read the player data from the JSON file
 			PlayerComponent player{};
 			serializer.ReadObject(player.isPlayer, entityId, "entities.player.isPlayer");
 			serializer.ReadObject(player.isVisible, entityId, "entities.player.isVisible");
@@ -263,8 +278,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		}
 
+		// entity that contains enemy component
 		if (entityData.contains("enemy"))
 		{
+			// read the enemy data from the JSON file
 			EnemyComponent enemy{};
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
 
@@ -272,8 +289,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		}
 
+		// entity that contains collectable component
 		if (entityData.contains("collectable")) {
-
+			// read collectable data from the JSON file
 			CollectableComponent collectable{};
 			serializer.ReadObject(collectable.isCollectable, entityId, "entities.collectable.isCollectable");
 
@@ -283,7 +301,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			GLFWFunctions::collectableCount++;
 		}
 
+		// entity that contains pump component
 		if (entityData.contains("pump")) {
+			// read pump data from the JSON file
 			PumpComponent pump{};
 			serializer.ReadObject(pump.isPump, entityId, "entities.pump.isPump");
 			serializer.ReadObject(pump.pumpForce, entityId, "entities.pump.pumpForce");
@@ -293,7 +313,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		}
 
+		// entity that contains exit component
 		if (entityData.contains("exit")) {
+			// read isExit from the JSON file
 			ExitComponent exit{};
 			serializer.ReadObject(exit.isExit, entityId, "entities.exit.isExit");
 
@@ -301,15 +323,19 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		}
 
+		// entity that contains filter component
 		if (entityData.contains("filter")) {
+			// read isFilter from the JSON file
 			FilterComponent filter{};
 			serializer.ReadObject(filter.isFilter, entityId, "entities.filter.isFilter");
 			serializer.ReadObject(filter.isFilterClogged, entityId, "entities.filter.isFilterClogged");
 			ecs.addComponent(entityObj, filter);
 		}
 
+		// entity that contains forces component
 		if (entityData.contains("forces"))
 		{
+			// read the forces data from the JSON file
 			PhysicsComponent forces{};
 
 			myMath::Vector2D direction = forces.force.GetDirection(); 
@@ -335,8 +361,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, forces);
 		}
 
+		// entity that contains font component
 		if (entityData.contains("font"))
 		{
+			// read the font data from the JSON file
 			FontComponent font{};
 			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
 			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
@@ -350,8 +378,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, font);
 		}
 
+		// entity that contains button component
 		if (entityData.contains("button"))
 		{
+			// read the button data from the JSON file
 			ButtonComponent button{};
 			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
 			serializer.ReadObject(button.hoveredScale, entityId, "entities.button.hoveredScale");
@@ -360,8 +390,10 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, button);
 		}
 
+		// entity that contains behaviour component
 		if (entityData.contains("behaviour")) {
-
+			// assigning behaviour based on the behaviour type that is read from
+			// the JSON file
 			BehaviourComponent behaviour{};
 
 			if (entityData["behaviour"].contains("none")) {
@@ -427,6 +459,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 	}
 }
 
+// function that loads the main menu entities from the manu menu JSON file
 void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -521,6 +554,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
 
+// function that loads the pause menu entities from pause menu JSON file
 void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -606,6 +640,7 @@ void ECSCoordinator::LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string cons
 	}
 }
 
+// function that loads options menu entities from options menu JSON file
 void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -703,6 +738,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
 
+// function that saves the options settings to options menu JSON file
 void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;

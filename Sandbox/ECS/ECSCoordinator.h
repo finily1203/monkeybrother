@@ -115,13 +115,16 @@ public:
 	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
 
+	// load all entities for the scene from JSON
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
-	// save the entity's data to JSON file
-	void SaveEntityToJSON(ECSCoordinator& ecs, Entity& entity, std::string const& filename);
 
+	// load main menu entities from JSON
 	void LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load pause menu entities from JSON
 	void LoadPauseMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load options menu entities from JSON
 	void LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// save the options settings to JSON
 	void SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
