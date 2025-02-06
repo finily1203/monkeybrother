@@ -81,7 +81,7 @@ void GraphicSystemECS::initialise() {
 //uses functions from GraphicsSystem class to update, draw
 //and render objects.
 void GraphicSystemECS::update(float dt) {
-
+    (void)dt;
     //find out how many layers there are
     //for each layer draw entities in that layer
 	//start from 0 to highest layer (so 0 is drawn first)
@@ -109,16 +109,9 @@ void GraphicSystemECS::update(float dt) {
                 auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
                 bool isPlayer = ecsCoordinator.hasComponent<PlayerComponent>(entity);
-                bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
-                bool hasMovement = ecsCoordinator.hasComponent<PhysicsComponent>(entity);
-                bool isBackground = ecsCoordinator.hasComponent<BackgroundComponent>(entity);
-                bool isPlatform = ecsCoordinator.hasComponent<ClosestPlatform>(entity);
                 bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
-                bool isCollectable = ecsCoordinator.hasComponent<CollectableComponent>(entity);
-                bool isPump = ecsCoordinator.hasComponent<PumpComponent>(entity);
-                bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
-				bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
+                bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
 
                 // Use hasMovement for the update parameter
                 //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
@@ -325,36 +318,36 @@ void GraphicSystemECS::update(float dt) {
             }
 
             // Update active notches separately for SFX and Music
-            for (size_t i = 0; i < sfxNotches.size(); ++i)
+            for (size_t j = 0; j < sfxNotches.size(); ++j)
             {
-                if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[i].second.position.GetX())
+                if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[j].second.position.GetX())
                 {
-                    activeNotchesSFX = static_cast<int>(i) + 1;
+                    activeNotchesSFX = static_cast<int>(j) + 1;
                 }
             }
 
-            for (size_t i = 0; i < musicNotches.size(); ++i)
+            for (size_t k = 0; k < musicNotches.size(); ++k)
             {
-                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[i].second.position.GetX())
+                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[k].second.position.GetX())
                 {
-                    activeNotchesMusic = static_cast<int>(i) + 1;
+                    activeNotchesMusic = static_cast<int>(k) + 1;
                 }
             }
 
             // Draw SFX Notches
-            for (size_t i = 0; i < sfxNotches.size(); ++i)
+            for (size_t l = 0; l < sfxNotches.size(); ++l)
             {
                 std::string notchTexture = (i < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = sfxNotches[i].second;
+                TransformComponent& notchTransform = sfxNotches[l].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
             }
 
             // Draw Music Notches
-            for (size_t i = 0; i < musicNotches.size(); ++i)
+            for (size_t m = 0; m < musicNotches.size(); ++m)
             {
-                std::string notchTexture = (i < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = musicNotches[i].second;
+                std::string notchTexture = (m < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                TransformComponent& notchTransform = musicNotches[m].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
             }
