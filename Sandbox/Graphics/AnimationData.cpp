@@ -136,4 +136,6 @@ void AnimationData::TriggerFrameEvents() {
     }
 }
 
-
+void AnimationData::SetCurrentFrame(int frame) {
+    currentFrame = frame;
+}

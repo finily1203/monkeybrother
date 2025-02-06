@@ -39,7 +39,7 @@ ImVec2 Inspector::mouseWorldPos;
 glm::mat4 projectionMatrix(1.0f);
 int currentItem = 0;
 std::vector<std::string>* Inspector::assetNames;
-int Inspector::selectedEntityID = -1;
+int Inspector::selectEntityID = -1;
 int Inspector::draggedEntityID = -1;
 bool Inspector::isSelectingEntity = false;
 bool moveable = false;
@@ -51,7 +51,7 @@ static int selectedLayer = 0;
 static float thumbnailSize = 256.0f;
 static float paddingSize = 20.0f;
 
-float value = 0.01f;  // Starting at 0.01
+float frameTime = 0.01f;  // Starting at 0.01
 int rows = 1;
 int columns = 1;
 int frames = 1;
@@ -195,7 +195,7 @@ void Inspector::Update() {
 	static bool initiatedByDoubleClick = false;
 
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
-		selectedEntityID = -1;
+		selectEntityID = -1;
 		isSelectingEntity = true;
 		isInitialClickAfterSelection = true;
 		overlappingEntities->clear();
@@ -222,7 +222,7 @@ void Inspector::Update() {
 			ImGui::OpenPopup("Select Entity");
 		}
 		else {
-			selectedEntityID = -1;
+			selectEntityID = -1;
 			draggedEntityID = -1;
 			isSelectingEntity = false;
 		}
@@ -241,7 +241,7 @@ void Inspector::Update() {
 				if (!GameViewWindow::getPaused()) {
 					GameViewWindow::TogglePause();
 				}
-				selectedEntityID = entity;
+				selectEntityID = entity;
 				draggedEntityID = entity;
 				isSelectingEntity = false;
 				isInitialClickAfterSelection = true;
@@ -322,9 +322,9 @@ void Inspector::Update() {
 	}
 
 	// Handle mouse wheel scaling for selected entity
-	if (selectedEntityID != -1 && ImGui::GetIO().MouseWheel != 0.0f && GameViewWindow::IsPointInViewport(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) {
+	if (selectEntityID != -1 && ImGui::GetIO().MouseWheel != 0.0f && GameViewWindow::IsPointInViewport(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) {
 		float wheel_delta = ImGui::GetIO().MouseWheel;
-		auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectEntityID);
 		float dx = mouseWorldPos.x - transform.position.GetX();
 		float dy = mouseWorldPos.y - transform.position.GetY();
 		float halfWidth = std::abs(transform.scale.GetX() / 2.0f);
@@ -336,7 +336,7 @@ void Inspector::Update() {
 		float scaleFactor = 1.0f + (wheel_delta * 0.1f);
 
 		if (withinX && withinY) {
-			if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+			if (!ecsCoordinator.hasComponent<PlayerComponent>(selectEntityID)) {
 				if (ImGui::GetIO().KeyShift) {
 					float rotationDelta = wheel_delta * 15.0f;
 					transform.orientation.SetX(transform.orientation.GetX() + rotationDelta);
@@ -375,9 +375,9 @@ void Inspector::Update() {
 	}
 
 	// Handle right-click deletion for selected entity
-	if (ImGui::IsKeyPressed(ImGuiKey_Delete) && selectedEntityID != -1) {
+	if (ImGui::IsKeyPressed(ImGuiKey_Delete) && selectEntityID != -1) {
 		float distSq;
-		if (isMouseOverEntity(selectedEntityID, distSq)) {
+		if (isMouseOverEntity(selectEntityID, distSq)) {
 			openDeletePopup = true;
 		}
 	}
@@ -395,15 +395,15 @@ void Inspector::Update() {
 		ImGui::Separator();
 
 		if (ImGui::Button("Delete", ImVec2(120, 0))) {
-			ecsCoordinator.destroyEntity(selectedEntityID);
-			selectedEntityID = -1;
+			ecsCoordinator.destroyEntity(selectEntityID);
+			selectEntityID = -1;
 			draggedEntityID = -1;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
 		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-			selectedEntityID = -1;
+			selectEntityID = -1;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
@@ -414,7 +414,7 @@ void Inspector::Update() {
 		isSelectingEntity = false;
 	}
 
-	RenderInspectorWindow(ecsCoordinator, selectedEntityID);
+	RenderInspectorWindow(ecsCoordinator, selectEntityID);
 
 }
 
@@ -847,10 +847,10 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
 		checked = true;
 		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
-		value = animation.frameTime;
-		rows = animation.rows;
-		columns = animation.columns;
-		frames = animation.totalFrames;
+		frameTime = animation.frameTime;
+		rows = static_cast<int>(animation.rows);
+		columns = static_cast<int>(animation.columns);
+		frames = static_cast<int>(animation.totalFrames);
 	}
 	else {
 		checked = false;
@@ -889,9 +889,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		ImGui::InputInt("Columns", &columns, 1, 100);
 
 		//ImGui::PushItemWidth(100.0f);  // Width in pixels
-		if (ImGui::SliderFloat("##slider", &value, 0.01f, 0.10f, "%.2f sec", ImGuiSliderFlags_NoInput))
+		if (ImGui::SliderFloat("##slider", &frameTime, 0.01f, 0.10f, "%.2f sec", ImGuiSliderFlags_NoInput))
 		{
-			animation.frameTime = value;
+			animation.frameTime = frameTime;
 		}
 		ImGui::PopItemWidth();
 		Console().GetLog() << "rows: " << animation.rows << " columns: " << animation.columns << std::endl;
@@ -902,9 +902,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		
 		ImGui::Image((void*)(intptr_t)textureID, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
-		animation.rows = rows;
-		animation.columns = columns;
-		animation.totalFrames = frames;
+		animation.rows = static_cast<float>(rows);
+		animation.columns = static_cast<float>(columns);
+		animation.totalFrames = static_cast<float>(frames);
 		
 	}
 

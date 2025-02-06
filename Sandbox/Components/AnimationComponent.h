@@ -64,14 +64,13 @@ struct AnimationComponent {
     }
 
     void UpdateUVCoordinates() {
-        if (!isAnimated) {
-
+        /*if (!isAnimated && currentFrame == 0) {
             currentUVs[0] = glm::vec2(1.0f, 1.0f);
             currentUVs[1] = glm::vec2(1.0f, 0.0f);
             currentUVs[2] = glm::vec2(0.0f, 0.0f);
             currentUVs[3] = glm::vec2(0.0f, 1.0f);
             return;
-        }
+        }*/
 
         // Calculate frame size in UV coordinates
         float frameWidth = 1.0f / columns;

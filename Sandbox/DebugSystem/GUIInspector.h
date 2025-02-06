@@ -42,7 +42,7 @@ public:
 
 	static void LoadInspectorFromJSON(std::string const& filename);
 
-	static int selectedEntityID;
+	static int selectEntityID;
 	static int draggedEntityID;
 	static bool isSelectingEntity;
 

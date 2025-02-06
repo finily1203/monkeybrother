@@ -76,7 +76,7 @@ void HierarchyList::Update() {
 
                     // Entity button
                     if (ImGui::Button(buttonLabel, ImVec2(-1.0f, 0.0f))) {
-                        Inspector::selectedEntityID = entity;
+                        Inspector::selectEntityID = entity;
                         Inspector::draggedEntityID = entity;
                     }
 

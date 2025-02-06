@@ -103,6 +103,7 @@ int GameViewWindow::scene;
 float GameViewWindow::initialZoom;
 float GameViewWindow::mouseWheelScaleFactor;
 int GameViewWindow::objectCounter = 1;
+bool playerExist = false;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
@@ -442,7 +443,7 @@ void GameViewWindow::Update() {
 
 	// Add pause button to viewport
 	if (ImGui::Button(isPaused ? "Resume" : "Pause") || ImGui::IsKeyPressed(ImGuiKey_Q)) {
-		Inspector::selectedEntityID = -1;
+		Inspector::selectEntityID = -1;
 		Inspector::draggedEntityID = -1;
 		Inspector::isSelectingEntity = false;
 		TogglePause();
@@ -460,9 +461,6 @@ void GameViewWindow::Update() {
 
 	if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
 		GLFWFunctions::allow_camera_movement = true;
-	}
-	else {
-		GLFWFunctions::allow_camera_movement == false;
 	}
 
 	//if (/*ImGui::Button(clickedScreenPan ? "UnPan" : "Pan") || */ImGui::IsKeyPressed(ImGuiKey_E)) {
@@ -484,11 +482,19 @@ void GameViewWindow::Update() {
 
 
 	if (ImGui::Button("Reset Perspective")) {
-		myMath::Vector2D initialCamPos{};
+		TransformComponent playerTransform;
+		for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+			if (ecsCoordinator.hasComponent<PlayerComponent>(entity))
+			{
+				playerTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				playerExist = true;
+			}
+		}
 
-		initialCamPos = { 0,0 };
-
-		cameraSystem.setCameraPosition(initialCamPos);
+		if(playerExist)
+		cameraSystem.setCameraPosition(playerTransform.position);
+		else
+			cameraSystem.setCameraPosition(myMath::Vector2D(0,0));
 		// Reset camera zoom to default value
 		cameraSystem.setCameraZoom(currentZoom);
 	}

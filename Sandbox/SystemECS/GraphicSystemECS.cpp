@@ -101,10 +101,24 @@ void GraphicSystemECS::update(float dt) {
                 // Check if the entity has an animation component
                 if (hasAnimation) {
                     animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-                    if (animation.isAnimated) {
+
+                    if (GameViewWindow::getPaused() || GLFWFunctions::gamePaused) {
+                        // Only call Update() to calculate UVs without advancing the frame
+                        animation.isAnimated = false;
+                        animation.UpdateUVCoordinates();
+                    }
+                    else {
+                        animation.isAnimated = true;
                         animation.Update();
                     }
                 }
+
+                /*AnimationData animationData(animation.totalFrames, animation.frameTime, animation.columns, animation.rows);
+
+                if (GameViewWindow::getPaused()) {
+                    animationData.SetCurrentFrame(0);
+                    animation.isAnimated = false;
+                }*/
 
                 auto entitySig = ecsCoordinator.getEntitySignature(entity);
 
@@ -321,7 +335,7 @@ void GraphicSystemECS::update(float dt) {
                 AudioSystem::musicPercentage = musicPercentage;
             }
 
-            // Update active notches separately for SFX and Music
+           // Update active notches separately for SFX and Music
             for (size_t j = 0; j < sfxNotches.size(); ++j)
             {
                 if (sfxArrowTransform.position.GetX() + sfxArrowTransform.scale.GetX() / 2.35f >= sfxNotches[j].second.position.GetX())
@@ -330,28 +344,28 @@ void GraphicSystemECS::update(float dt) {
                 }
             }
 
-            for (size_t k = 0; k < musicNotches.size(); ++k)
+            for (size_t j = 0; j < musicNotches.size(); ++j)
             {
-                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[k].second.position.GetX())
+                if (musicArrowTransform.position.GetX() + musicArrowTransform.scale.GetX() / 2.35f >= musicNotches[j].second.position.GetX())
                 {
-                    activeNotchesMusic = static_cast<int>(k) + 1;
+                    activeNotchesMusic = static_cast<int>(j) + 1;
                 }
             }
 
             // Draw SFX Notches
-            for (size_t l = 0; l < sfxNotches.size(); ++l)
+            for (size_t j = 0; j < sfxNotches.size(); ++j)
             {
-                std::string notchTexture = (i < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = sfxNotches[l].second;
+                std::string notchTexture = (j < activeNotchesSFX) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                TransformComponent& notchTransform = sfxNotches[j].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
             }
 
             // Draw Music Notches
-            for (size_t m = 0; m < musicNotches.size(); ++m)
+            for (size_t j = 0; j < musicNotches.size(); ++j)
             {
-                std::string notchTexture = (m < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
-                TransformComponent& notchTransform = musicNotches[m].second;
+                std::string notchTexture = (j < activeNotchesMusic) ? "activeSoundbarNotch" : "unactiveSoundbarNotch";
+                TransformComponent& notchTransform = musicNotches[j].second;
                 notchTransform.mdl_xform = graphicsSystem.UpdateObject(notchTransform.position, notchTransform.scale, notchTransform.orientation, identityMatrix);
                 graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(notchTexture), notchTransform.mdl_xform, animation.currentUVs);
             }

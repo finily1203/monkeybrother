@@ -60,6 +60,8 @@ public:
 	// Set current action
     void TriggerFrameEvents();
 
+    void SetCurrentFrame(int frame);
+
 private:
 
     int totalFrames;

@@ -245,7 +245,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = false;
     }
 
-    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
+    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
         glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;
@@ -315,7 +315,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             std::cout << "Instant Lose" << std::endl;
         }
 
-        if ((*keyState)[Key::F] && action == GLFW_PRESS) {
+        if ((*keyState)[Key::F] && action == GLFW_PRESS && !GameViewWindow::getPaused()) {
             fullscreen = !fullscreen;
             GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
