@@ -273,6 +273,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                     ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
                     ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
                     ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
                     ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
                 {
                     ecsCoordinator.destroyEntity(currEntity);

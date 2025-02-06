@@ -309,6 +309,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		GLFWFunctions::gamePaused = false;
 		GLFWFunctions::pauseMenuCount = 0;
 		GLFWFunctions::optionsMenuCount = 0;
+		GLFWFunctions::newSceneLoaded = true;
 
 		//ecsCoordinator.test5();
 
@@ -375,6 +376,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
 					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
 					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
 					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
 				{
 					ecsCoordinator.destroyEntity(currEntity);
@@ -406,6 +408,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
 				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
 				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
 				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
 			{
 				ecsCoordinator.destroyEntity(currEntity);
