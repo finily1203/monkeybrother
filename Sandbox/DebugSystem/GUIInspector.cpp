@@ -48,8 +48,8 @@ bool isOver = false;
 bool checks[4] = { false };
 static int selectedLayer = 0;
 
-static float thumbnailSize = 128.0f;
-static float paddingSize = 16.0f;
+static float thumbnailSize = 256.0f;
+static float paddingSize = 20.0f;
 
 float value = 0.01f;  // Starting at 0.01
 int rows = 1;
@@ -532,6 +532,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		else if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) //Player specific data modification features
 			&& !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID)) {
 			auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+			auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(selectedEntityID);
 			auto signature = ecsCoordinator.getEntityID(selectedEntityID);
 
 			ImGui::PushID(selectedEntityID);
@@ -552,6 +553,11 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			float rotation[1] = { transform.orientation.GetX() };
 			if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
 				transform.orientation.SetX(rotation[0]);
+			}
+
+			float velocity[1] = { physics.maxVelocity };
+			if (ImGui::DragFloat("Velocity", velocity, 1.f)) {
+				physics.maxVelocity = velocity[0];
 			}
 
 			static bool showIDPopup = false;
@@ -759,13 +765,17 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					break;
 				case 5:
 					physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
-					physics.mass = 1.0f;
+					physics.mass = 1.5f;
 					physics.dampening = 0.9f;
 					physics.maxVelocity = 200.0f;
 					physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
 					physics.maxAccumulatedForce = 40.0f;
 					if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
 						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+					if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+						PlayerComponent player;
+						ecsCoordinator.addComponent(selectedEntityID, player);
+					}
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
 					break;
 				case 6:

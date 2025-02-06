@@ -52,6 +52,7 @@
     <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
     <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
     <ClCompile Include="LayerSystem\LayerManager.cpp" />
+    <ClCompile Include="CutsceneSystem\CutsceneSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
     <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="LayerSystem\LayerManager.h" />
+    <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

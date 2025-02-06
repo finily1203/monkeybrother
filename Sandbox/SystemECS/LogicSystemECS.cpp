@@ -47,6 +47,18 @@ void LogicSystemECS::update(float dt) {
 			}
 		}
 	}
+	//for each entity, update the behaviour
+	//for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+	//	if (behaviours.find(entity) != behaviours.end()) {
+	//		behaviours[entity]->update(entity);
+	//	}
+	//}
+	if (GLFWFunctions::useMouseRotation) {
+		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	else {
+		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
 
 	(void)dt;
 }
@@ -176,7 +188,7 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 			if (layerManager.getEntityVisibility(entity))
 			{
 				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
+				//ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
 
 				if (mouseIsOverButton(mouseX, mouseY, transform))
 				{

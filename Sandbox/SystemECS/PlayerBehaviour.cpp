@@ -32,36 +32,43 @@ void PlayerBehaviour::update(Entity entity) {
 	myMath::Vector2D& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
 	float mag = playerForce.GetMagnitude();
 
-	// Get the raw mouse movement
-	double mouseMovement = GLFWFunctions::mouseXDelta;
+	//auto& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
 
-	//// Constants for rotation control
-	//static const float MOVEMENT_THRESHOLD = 0.1f;
-	//static const float BASE_ROTATION_SPEED = 0.1f;
-	//static const float MAX_ROTATION_PER_FRAME = 3.0f;
-
-	if (std::abs(mouseMovement) > MOVEMENT_THRESHOLD) {
-		// Scale rotation by delta time to make it frame-rate independent
-		float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
-		rotationAmount *= (60.0f * GLFWFunctions::delta_time); // Normalize to 60 FPS
-
-		// Clamp the rotation amount
-		rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
-
-		// Apply the rotation
-		rotation.SetX(rotation.GetX() + rotationAmount);
+	// Toggle between mouse and keyboard control when T is pressed
+	static bool wasPressed = false;
+	if ((*GLFWFunctions::keyState)[Key::T]) {
+		if (!wasPressed) {
+			GLFWFunctions::useMouseRotation = !GLFWFunctions::useMouseRotation;
+			GLFWFunctions::updateCursorState(); // Update cursor state when toggling
+			wasPressed = true;
+		}
+	}
+	else {
+		wasPressed = false;
 	}
 
-	// Reset the delta for next frame
+	if (GLFWFunctions::useMouseRotation) {
+		// Mouse rotation logic
+		double mouseMovement = GLFWFunctions::mouseXDelta;
+		if (std::abs(mouseMovement) > MOVEMENT_THRESHOLD) {
+			float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
+			rotationAmount *= (60.0f * GLFWFunctions::delta_time);
+			rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
+			rotation.SetX(rotation.GetX() + rotationAmount);
+		}
+	}
+	else {
+		// Keyboard rotation logic
+		if ((*GLFWFunctions::keyState)[Key::D]) {
+			rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
+		}
+		else if ((*GLFWFunctions::keyState)[Key::A]) {
+			rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
+		}
+	}
+
+	// Reset mouse delta regardless of control mode
 	GLFWFunctions::mouseXDelta = 0.0;
-
-	if ((*GLFWFunctions::keyState)[Key::D]) {
-		rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
-	}
-	else if ((*GLFWFunctions::keyState)[Key::A]) {
-		rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
-
-	}
 
 	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
 		if ((*GLFWFunctions::keyState)[Key::SPACE]) {

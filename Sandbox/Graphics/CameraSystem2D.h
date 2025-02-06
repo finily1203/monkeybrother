@@ -59,6 +59,7 @@ public:
     GLfloat getCameraZoom() const;
 
     void lockToComponent(const TransformComponent& component); // Lock camera to an entity
+	void unlockFromComponent(); // Unlock camera from entity
     bool checkLockedComponent() const; // Check if camera is locked to an entity
 
 private:

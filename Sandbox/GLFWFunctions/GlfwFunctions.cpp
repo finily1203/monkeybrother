@@ -46,7 +46,7 @@ GLboolean GLFWFunctions::isPumpOn = true;
 GLboolean GLFWFunctions::playPumpSong = true;
 GLboolean GLFWFunctions::isRotating = false;
 GLboolean GLFWFunctions::exitCollision = false;
-
+bool GLFWFunctions::useMouseRotation = false; // Default to mouse rotation
 
 
 int GLFWFunctions::audioNum = 0;
@@ -116,7 +116,11 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
     glfwSwapInterval(0); //vsync
     callEvents();
-
+    /*if (useMouseRotation) {
+		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else
+        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);*/
     glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     //glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -197,6 +201,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     case GLFW_KEY_LEFT_ALT:     mappedKey = Key::LALT; break;
     case GLFW_KEY_COMMA:        mappedKey = Key::COMMA; break;
     case GLFW_KEY_PERIOD:       mappedKey = Key::PERIOD; break;
+	case GLFW_KEY_ENTER:        mappedKey = Key::ENTER; break;
 
         // Number keys
     case GLFW_KEY_0:            mappedKey = Key::NUM_0; break;
@@ -244,6 +249,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     }
 
     if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1) {
+        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;
 
@@ -512,4 +518,15 @@ bool GLFWFunctions::isKeyHeld(Key key) {
 
 bool GLFWFunctions::isMouseButtonPressed(MouseButton button) {
     return glfwGetMouseButton(GLFWFunctions::pWindow, static_cast<int>(button)) == GLFW_PRESS;
+}
+
+void GLFWFunctions::updateCursorState() {
+    if (useMouseRotation) {
+        // Hide cursor and capture it for mouse rotation
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else {
+        // Show cursor and allow normal movement
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }

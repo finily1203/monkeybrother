@@ -43,13 +43,13 @@ public:
     bool checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration);
 
     // OBB vs OBB collision detection using SAT (CAN DETECT OBB COLLISION)
-
     bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, myMath::Vector2D& normal, float& penetration);
 
     // Collision response for OBB
     void CollisionResponse(Entity player, myMath::Vector2D normal, float penetration);
 
-    void MultiPlatformCollisionResponse(Entity player, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations);
+    // Collision response for multiple platforms (corners)
+    void MultiPlatformCollisionResponse(Entity player, const std::vector<Entity>& platforms, const std::vector<myMath::Vector2D>& normals, const std::vector<float>& penetrations);
 };
 
 class PhysicsSystemECS : public System
@@ -86,11 +86,15 @@ public:
 	// Load and save physics config from JSON
     void LoadPhysicsConfigFromJSON(std::string const& filename);
     void SavePhysicsConfigFromJSON(std::string const& filename);
+
+    // Apply normal gravity physics
     void ApplyNormalPhysics(Entity player);
+
+    // Get platforms colliding with player
     std::vector<Entity> CollidingPlatforms(Entity player);
+
+    // Handle collision with multiple platforms
     void HandleCircleMultiPlatformCollision(Entity player, const std::vector<Entity>& platforms);
-    //void HandleCollisionResponse(Entity player, const myMath::Vector2D& normal, float penetration);
-    //void HandleCircleOBBCollision(Entity player, const std::vector<Entity>& platforms);
 
 private:
     static float friction;
