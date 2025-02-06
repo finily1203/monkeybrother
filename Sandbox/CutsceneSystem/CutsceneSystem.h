@@ -56,6 +56,7 @@ public:
 
     size_t getCurrentFrameIndex() const;
 	bool getFrameCompletion(size_t index) const;
+    bool canAcceptInput() const { return m_delayTimer >= m_initialDelay; }
 
 private:
     static std::vector<CutsceneFrame>* m_frames;
@@ -64,4 +65,6 @@ private:
     bool m_isPlaying;
     float m_originalZoom;
     myMath::Vector2D lerp(const myMath::Vector2D& start, const myMath::Vector2D& end, float t);
+    float m_initialDelay = 0.5f;  // Half second delay before accepting input
+    float m_delayTimer = 0.0f;    // Timer to track the delay
 };
