@@ -125,7 +125,7 @@ void CutsceneSystem::update() {
         cameraSystem.setCameraZoom(newZoom);
     }
     else {
-        cameraSystem.setCameraZoom(0.85 * newZoom);
+        cameraSystem.setCameraZoom(static_cast<GLfloat>(0.85 * newZoom));
     }
 
     // Update time and check for frame completion

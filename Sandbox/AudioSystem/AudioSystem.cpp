@@ -681,7 +681,7 @@ float AudioSystem::getSfxVol() const {
 void AudioSystem::setGenVol(float volPerc) {
     genVol = (volPerc / 100.0f) * 0.5f;
     ambienceChannel->setVolume(genVol);
-	cutsceneAmbienceChannel->setVolume(genVol * 0.1);
+	cutsceneAmbienceChannel->setVolume(genVol * 0.1f);
 	cutsceneHumanChannel->setVolume(genVol);
 }
 
@@ -713,7 +713,7 @@ void AudioSystem::readAudioSettingsFromJSON(std::string const& filename)
 }
 
 // saving audio settings for sfx and music audio to JSON file
-void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage)
+void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfxPercent, float musicPercent)
 {
     nlohmann::json audioSettings;
 
@@ -724,8 +724,8 @@ void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfx
         inputFile.close();
     }
 
-    audioSettings["sfxAudioPercentage"] = sfxPercentage;
-    audioSettings["musicAudioPercentage"] = musicPercentage;
+    audioSettings["sfxAudioPercentage"] = sfxPercent;
+    audioSettings["musicAudioPercentage"] = musicPercent;
 
     std::ofstream outputFile(filename);
     if (!outputFile.is_open())
