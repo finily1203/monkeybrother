@@ -43,19 +43,20 @@ public:
 	//Function to play song at the given index
 	//void playSong(int index);
 	void playSong(const std::string& songName);
-
 	void playBgm(const std::string& songName);
-
 	void playPumpSound(const std::string& songName);
-
 	//Function to play sound effect
 	void playSoundEffect(const std::string& soundEffectName);
-
 	//Function to play rotation sound effect
 	void playRotationEffect(const std::string& soundEffectName);
-
 	//Function to play sound from asset browser
 	void playSoundAssetBrowser(const std::string& soundName);
+
+	//FOR CUTSCENE
+	void playCutsceneAmbience(const std::string& soundName);
+	void playCutsceneAmbience2(const std::string& soundName);
+	void playCutscenePanel(const std::string& soundName);
+	void playCutsceneHuman(const std::string& soundName);
 
 	FMOD::Channel* getPumpChannel() const { return pumpChannel; }	
 	void setPumpChannelToNull() { pumpChannel = nullptr; }
@@ -71,6 +72,8 @@ public:
 	void setBgmVol(float volPerc);
 	void setSfxVol(float volPerc);
 
+
+	void readAudioSettingsFromJSON(std::string const& filename);
 	void saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage);
 	static float sfxPercentage;
 	static float musicPercentage;
@@ -89,9 +92,29 @@ private:
 	FMOD::Channel* pumpChannel;
 	FMOD::Channel* rotationChannel;
 
+	/*
+	* IntroCutscene_Ambience_1: Play at Start Loop
+	* IntroCutscene_Panel_2: Play at start of panel
+	* IntroCutscene_Human_2: ^ , slowly fade out
+	* IntroCutscene_Ambience_2: Play at end of IntroCutscene_Panel_2 audio, loop
+	* 3 no audio, just rely on ambience
+	* 4 - 8 play at start of panel
+	*/
+
+	//FMOD::ChannelGroup* cutsceneGroup;
+
+	FMOD::Channel* cutsceneAmbienceChannel; // loops, play from panel 1 to 8
+	FMOD::Channel* cutsceneAmbienceChannel2; // loops, play from end of panel 2 to 8
+	FMOD::Channel* cutscenePanelChannel; //play one time audio per panel
+	FMOD::Channel* cutsceneHumanChannel; //play once at panel 2, but should fade out (can try)
+
 	//std::vector<FMOD::Sound*> audioSongList;
 	int currSongIndex;
 	float genVol; // general volume
 	float bgmVol; // bgm volume
 	float sfxVol; // sound effect volume
+
+	bool changeAmbience;
+	bool changePanel;
+	size_t prevFrame;
 };

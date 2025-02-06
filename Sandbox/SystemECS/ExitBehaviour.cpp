@@ -17,6 +17,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "GUIGameViewport.h"
 
 void ExitBehaviour::update(Entity entity) {
 	if (GLFWFunctions::collectableCount == 0) {
@@ -46,7 +47,13 @@ void ExitBehaviour::update(Entity entity) {
 		bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, exitOBB, normal, penetration);
 		GLFWFunctions::exitCollision = isColliding;
 		if (isColliding) {
-			//std::cout << "Game Won" << std::endl;
+			if(!GLFWFunctions::changeLevel){
+				int currScn = GameViewWindow::getSceneNum();
+				currScn++;
+				if (currScn > 2) currScn = -1;
+				GameViewWindow::setSceneNum(currScn);
+				GLFWFunctions::changeLevel = true;
+			}
 		}
 	}
 }

@@ -15,5 +15,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 class CollectableBehaviour : public BehaviourECS {
 public:
-	void update(Entity entity) override;
+    void update(Entity entity);
+    void createCollectAnimation(Entity entity);
 };

@@ -80,6 +80,7 @@ struct GLFWFunctions {
 	static GLboolean adjustVol;
 	static GLboolean audioNext;
 	static GLboolean isPumpOn;
+	static GLboolean isTherePump;
 	static GLboolean playPumpSong;
 	static GLboolean isRotating;
 	static GLboolean exitCollision;
@@ -109,6 +110,8 @@ struct GLFWFunctions {
 	static bool isHovering;
 	static bool gamePaused;
 	static bool useMouseRotation; // Add this with the other static booleans
+	static bool filterClogged; // rmb to remove this
+	static bool changeLevel;
 
 	static double mouseXDelta; // Add this to track mouse movement
 

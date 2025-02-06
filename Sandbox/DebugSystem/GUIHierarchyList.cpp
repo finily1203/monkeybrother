@@ -1,15 +1,20 @@
 /*
 All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
-@author :  Lew Zong Han Owen (z.lew)
-@team   :  MonkeHood
-@course :  CSD2401
-@file   :  GUIHierarchyList.cpp
-@brief  :  This file contains the function definition of ImGui hierarchy list system
+@author   :  Lew Zong Han Owen (z.lew)
+@coauthor : Chu Wei Yuan Joel (c.weiyuan)
+@team     :  MonkeHood
+@course   :  CSD2401
+@file     :  GUIHierarchyList.cpp
+@brief    :  This file contains the function definition of ImGui hierarchy list system
 
 *Lew Zong Han Owen (z.lew) :
 		- Integrated ImGui hierarchy list to display all existing entities. Allow individual entity editing
 
-File Contributions: Lew Zong Han Owen (100%)
+*Chu Wei Yuan Joel (c.weiyuan):
+		- Integrated layering system and its controls into the hierarchy list panel
+
+File Contributions: Lew Zong Han Owen (70%)
+                    Chu Wei Yuan Joel (30%)
 
 /*_______________________________________________________________________________________________________________*/
 #include "GUIHierarchyList.h"

@@ -417,6 +417,14 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
 		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
 
+		std::cout << "SFX: " << sfxPercentage << std::endl;
+		std::cout << "Music: " << musicPercentage << std::endl;
+
+		//change on audio side as well
+		audioSystem.setGenVol(musicPercentage);
+		audioSystem.setBgmVol(musicPercentage);
+		audioSystem.setSfxVol(sfxPercentage);
+
 		for (auto currEntity : allEntities)
 		{
 			if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))

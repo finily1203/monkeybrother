@@ -126,6 +126,7 @@ void GraphicSystemECS::update(float dt) {
                 bool isButton = ecsCoordinator.hasComponent<ButtonComponent>(entity);
                 bool isUI = ecsCoordinator.hasComponent<UIComponent>(entity);
                 bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
+				bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
                 // Use hasMovement for the update parameter
                 //graphicsSystem.Update(dt / 10.0f, isAnimate || hasMovement || isEnemy);
@@ -189,8 +190,8 @@ void GraphicSystemECS::update(float dt) {
                     GLFWFunctions::collectableCount = 0;
                 }
 
-        // TODO:: Update AABB component inside game loop
-        // Press F1 to draw out debug AABB
+                // TODO:: Update AABB component inside game loop
+                // Press F1 to draw out debug AABB
                 if (GLFWFunctions::debug_flag && !ecsCoordinator.hasComponent<FontComponent>(entity) && !ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
                     if (isButton || isUI)
                     {
@@ -205,57 +206,57 @@ void GraphicSystemECS::update(float dt) {
                     graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
                 }
 
-		if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
-		{
-			ecsCoordinator.setTextureID(entity, "cutsceneBackground");
-		}
-        if (ecsCoordinator.getEntityID(entity) == "gameLogo")
-        {
-            ecsCoordinator.setTextureID(entity, "gameLogo");
-        }
+		        if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
+		        {
+			        ecsCoordinator.setTextureID(entity, "cutsceneBackground");
+		        }
+                if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+                {
+                    ecsCoordinator.setTextureID(entity, "gameLogo");
+                }
 
-        if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
-        {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            ecsCoordinator.setTextureID(entity, "pauseMenu");
-        }
+                if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    ecsCoordinator.setTextureID(entity, "pauseMenu");
+                }
 
-        if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
-        {
-            transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-            ecsCoordinator.setTextureID(entity, "optionsMenu");
-        }
+                if (ecsCoordinator.getEntityID(entity) == "optionsMenuBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    ecsCoordinator.setTextureID(entity, "optionsMenu");
+                }
 
-        if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
-        {
-            std::string audioType = ecsCoordinator.getEntityID(entity);
-            TransformComponent arrowTransform{}, soundbarTransform{};
+                if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
+                {
+                    std::string audioType = ecsCoordinator.getEntityID(entity);
+                    TransformComponent arrowTransform{}, soundbarTransform{};
 
-            std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
-                (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
+                    std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
+                        (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
 
             std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbarBase" :
                 (audioType == "musicAudio") ? "musicSoundbarBase" : "";
 
-            if (!audioArrowId.empty() && !soundbarId.empty())
-            {
-                for (auto& soundbarEntity : ecsCoordinator.getAllLiveEntities())
-                {
-                    if (ecsCoordinator.getEntityID(soundbarEntity) == soundbarId)
+                    if (!audioArrowId.empty() && !soundbarId.empty())
                     {
-                        soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(soundbarEntity);
-                        break;
-                    }
-                }
+                        for (auto& soundbarEntity : ecsCoordinator.getAllLiveEntities())
+                        {
+                            if (ecsCoordinator.getEntityID(soundbarEntity) == soundbarId)
+                            {
+                                soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(soundbarEntity);
+                                break;
+                            }
+                        }
 
-                for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
-                {
-                    if (ecsCoordinator.getEntityID(arrowEntity) == audioArrowId)
-                    {
-                        arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
-                        break;
-                    }
-                }
+                        for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
+                        {
+                            if (ecsCoordinator.getEntityID(arrowEntity) == audioArrowId)
+                            {
+                                arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
+                                break;
+                            }
+                        }
 
                 float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
 
@@ -318,7 +319,12 @@ void GraphicSystemECS::update(float dt) {
 
                 float arrowPosSFX = sfxArrowTransform.position.GetX();
                 float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
-                sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                if (progressSFX >= 0.01f && progressSFX <= 0.09f) {
+                    sfxPercentage = 10.0f;
+                }
+				else {
+					sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
+                }
                 sfxPercentage = std::clamp(sfxPercentage, 0.f, 100.f);
                 AudioSystem::sfxPercentage = sfxPercentage;
             }
@@ -330,7 +336,12 @@ void GraphicSystemECS::update(float dt) {
 
                 float arrowPosMusic = musicArrowTransform.position.GetX();
                 float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
-                musicPercentage = std::round(progressMusic * 10.f) * 10.f;
+				if (progressMusic >= 0.01f && progressMusic <= 0.09f) {
+					musicPercentage = 10.0f;
+				}
+                else {
+                    musicPercentage = std::round(progressMusic * 10.f) * 10.f; 
+                }
                 musicPercentage = std::clamp(musicPercentage, 0.f, 100.f);
                 AudioSystem::musicPercentage = musicPercentage;
             }
@@ -392,6 +403,22 @@ void GraphicSystemECS::update(float dt) {
                     }
                     else if (GLFWFunctions::collectableCount >= 3) {
                         ecsCoordinator.setTextureID(entity, "UI Counter-0");
+                    }
+                }
+
+                if (isExit) {
+					//transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+                    if (GLFWFunctions::collectableCount == 0) {
+                        ecsCoordinator.setTextureID(entity, "cloggedVent3");
+                    }
+                    else if (GLFWFunctions::collectableCount == 1) {
+                        ecsCoordinator.setTextureID(entity, "cloggedVent2");
+                    }
+                    else if (GLFWFunctions::collectableCount == 2) {
+                        ecsCoordinator.setTextureID(entity, "cloggedVent1");
+                    }
+                    else if (GLFWFunctions::collectableCount >= 3) {
+                        ecsCoordinator.setTextureID(entity, "cloggedVent0");
                     }
                 }
 
@@ -556,10 +583,39 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
-                if (ecsCoordinator.getTextureID(entity) != "") {
-                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
-                   
+                if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
+                    auto& animation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                    double currentAbsoluteTime = glfwGetTime();
+                    double timeSinceCreation = currentAbsoluteTime - animation.creationTime;
+
+                    animation.currentFrame = static_cast<int>((timeSinceCreation / animation.frameTime)) % static_cast<int>(animation.totalFrames);
+
+                    // Check if one loop is completed
+                    if (animation.currentFrame == static_cast<int>(animation.totalFrames) - 1) {
+
+                        // Optional: Trigger actions after one loop
+                        ecsCoordinator.destroyEntity(entity);  // Example: Destroy after one loop
+                    }
                 }
+
+                if (ecsCoordinator.getTextureID(entity) != "") {
+                    //should not render the animation for filter in and filter out if filter is clogged
+                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter_out.png") {
+                        if (GLFWFunctions::filterClogged) {
+                            continue;
+                        }
+                    }
+                    //should not render the bubble animation if pump is not on
+                    if (ecsCoordinator.getTextureID(entity) == "bubbles 3.png") {
+                        if (!GLFWFunctions::isPumpOn) {
+                            continue;
+                        }
+                    }
+                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(ecsCoordinator.getTextureID(entity)), transform.mdl_xform, animation.currentUVs);
+                }
+
+				//std::cout << "isPump on? " << (GLFWFunctions::isPumpOn ? "true" : "false") << std::endl;
 
                 /*if (isPlayer) {
                     graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("eyes.png"), transform.mdl_xform, animation.currentUVs);

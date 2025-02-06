@@ -18,45 +18,67 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "PhyColliSystemECS.h"
 
 void CollectableBehaviour::update(Entity entity) {
-	//get player entity based on ifPlayer component
-	
-	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
-	auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
 
+    // Check for collision with player
+    for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+            auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+            myMath::Vector2D& playerPos = playerTransform.position;
+            float radius = playerTransform.scale.GetX() * 0.5f;
 
-	for (auto& playerEntity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+            CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
+            CollisionSystemECS::OBB collectOBB = collisionSystem.createOBBFromEntity(entity);
 
-			//get the position of the player and the collectable
-			auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
-			myMath::Vector2D& playerPos = playerTransform.position;
-			float radius = playerTransform.scale.GetX() * 0.5f;
+            myMath::Vector2D normal{};
+            float penetration{};
 
-			CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
-			CollisionSystemECS::OBB collectOBB = collisionSystem.createOBBFromEntity(entity);
+            bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
 
-			myMath::Vector2D normal{};
-			float penetration{};
+            if (isColliding) {
+                playerTransform.scale.SetX(playerTransform.scale.GetX() + 50.0f);
+                playerTransform.scale.SetY(playerTransform.scale.GetY() + 50.0f);
+                auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
+                playerPhysics.mass += 0.5f;
 
-			bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
+                GLFWFunctions::collectAudio = true;
 
-			if (isColliding) {
-				std::cout << "COLLIDED" << std::endl;
-				//player grow in size and mass
-				playerTransform.scale.SetX(playerTransform.scale.GetX() + 50.0f);
-				playerTransform.scale.SetY(playerTransform.scale.GetY() + 50.0f);
-				auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
-				playerPhysics.mass += 0.5f;
+                createCollectAnimation(entity);
 
-				GLFWFunctions::collectAudio = true;
-			
+                ecsCoordinator.destroyEntity(entity);  // Destroy the collectable
+                GLFWFunctions::collectableCount--;
+            }
+        }
+    }
+}
 
-				ecsCoordinator.destroyEntity(entity);
-				GLFWFunctions::collectableCount--;
-			}
-		}
-	}
+void CollectableBehaviour::createCollectAnimation(Entity entity) {
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
 
+    ecsCoordinator.setEntityID(newAnimationEntity, "collectAnimation");
+    ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_CollectedMoss.png");
 
+    // Transform setup
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
+    transform.position = entityTransform.position;
+    transform.scale.SetX(entityTransform.scale.GetX());
+    transform.scale.SetY(entityTransform.scale.GetY());
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 13.0f;
+    animation.frameTime = 0.1f;
+    animation.columns = 4.0f;
+    animation.rows = 4.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // Add to default layer 0
+    layerManager.addEntityToLayer(0, newAnimationEntity);
 }

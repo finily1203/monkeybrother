@@ -1,7 +1,22 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   LayerManager.cpp
+@brief:  This source file includes a simple implementation of the LayerManager class.
+		 LayerManager class is a child class of GameSystems, which is responsible for
+		 the all the layers of the game. Users are able to create, delete, shift entities
+		 ,clear and handle visibility of layers.
+
+		 Joel Chu (c.weiyuan): Implemented all of the functions that belongs to
+							   the LayerManager class.
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "GlobalCoordinator.h"
 #include "LayerManager.h"
 #include <iostream>
-
 
 
 LayerManager::LayerManager() {

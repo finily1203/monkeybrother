@@ -17,14 +17,15 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "GlfwFunctions.h"
 
- std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
+std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
 
-CutsceneSystem::CutsceneSystem() : m_currentFrameIndex(0), m_currentFrameTime(0.0f), m_isPlaying(false), m_originalZoom(1.0f) {}
+CutsceneSystem::CutsceneSystem()
+    : m_currentFrameIndex(0), m_currentFrameTime(0.0f), m_isPlaying(false), m_originalZoom(1.0f) {
+}
 
 void CutsceneSystem::initialise() {
-    // Reset all cutscene data to initial state
     if (!m_frames) {
-		m_frames = new std::vector<CutsceneFrame>();
+        m_frames = new std::vector<CutsceneFrame>();
     }
     m_frames->clear();
     m_currentFrameIndex = 0;
@@ -33,7 +34,7 @@ void CutsceneSystem::initialise() {
 }
 
 void CutsceneSystem::update() {
-    // Skip to end if ESCAPE is held
+    // Skip to end if ENTER is held
     if ((*GLFWFunctions::keyState)[Key::ENTER]) {
         skipToEnd();
         return;
@@ -46,55 +47,90 @@ void CutsceneSystem::update() {
         }
         return;
     }
+
     if (m_currentFrameIndex >= m_frames->size()) {
         m_isPlaying = false;
-        // Reset camera position to origin when cutscene completes
         cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
         return;
     }
 
-    // Next frame on SPACE press
+    // Handle space/mouse input to advance frames
     static bool spaceWasPressed = false;
+    static bool mouseWasClicked = false;
+    bool shouldAdvance = false;
+
+    // Check space key
     if ((*GLFWFunctions::keyState)[Key::SPACE]) {
         if (!spaceWasPressed) {
-            m_currentFrameIndex++;
-            m_currentFrameTime = 0.0f;
+            shouldAdvance = true;
             spaceWasPressed = true;
-
-            if (m_currentFrameIndex >= m_frames->size()) {
-                m_isPlaying = false;
-                return;
-            }
         }
     }
     else {
         spaceWasPressed = false;
     }
 
-	auto& currentFrame = m_frames->at(m_currentFrameIndex);
-    m_currentFrameTime += GLFWFunctions::delta_time;
+    // Check left mouse button
+    if (GLFWFunctions::mouseButtonState &&
+        (*GLFWFunctions::mouseButtonState)[MouseButton::left]) {
+        if (!mouseWasClicked) {
+            shouldAdvance = true;
+            mouseWasClicked = true;
+        }
+    }
+    else {
+        mouseWasClicked = false;
+    }
 
-    // Calculate transition progress (0 to 1)
-    float t = m_currentFrameTime / currentFrame.duration;
+    auto& currentFrame = m_frames->at(m_currentFrameIndex);
 
-    // Get start and target positions
-    myMath::Vector2D startPos = (m_currentFrameIndex == 0) ?
-        currentFrame.cameraPosition :
-		m_frames->at(m_currentFrameIndex - 1).cameraPosition;
-    myMath::Vector2D targetPos = currentFrame.cameraPosition;
-
-    // Interpolate between positions
-    myMath::Vector2D newPos = lerp(startPos, targetPos, t);
-    cameraSystem.setCameraPosition(newPos);
-
-    if (m_currentFrameTime >= currentFrame.duration) {
-        currentFrame.hasCompleted = true;
+    if (shouldAdvance) {
         m_currentFrameIndex++;
         m_currentFrameTime = 0.0f;
 
         if (m_currentFrameIndex >= m_frames->size()) {
             m_isPlaying = false;
+            return;
         }
+    }
+
+    // Calculate transition progress (0 to 1)
+    float t = m_currentFrameTime / currentFrame.duration;
+    t = std::min(t, 1.0f); // Clamp to prevent overshooting
+
+    // Get start and target positions
+    myMath::Vector2D startPos = (m_currentFrameIndex == 0) ?
+        currentFrame.cameraPosition :
+        m_frames->at(m_currentFrameIndex - 1).cameraPosition;
+    myMath::Vector2D targetPos = currentFrame.cameraPosition;
+
+    // Get start and target zoom levels
+    float startZoom = (m_currentFrameIndex == 0) ?
+        currentFrame.zoom :
+        m_frames->at(m_currentFrameIndex - 1).zoom;
+    float targetZoom = currentFrame.zoom;
+
+    // Interpolate position and zoom
+    myMath::Vector2D newPos = lerp(startPos, targetPos, t);
+
+    if (newPos.GetX() == targetPos.GetX() && newPos.GetY() == targetPos.GetY()) {
+		currentFrame.hasCompleted = true;
+    }
+
+    float newZoom = startZoom + (targetZoom - startZoom) * t;
+
+    // Apply transitions
+    cameraSystem.setCameraPosition(newPos);
+    if (GLFWFunctions::fullscreen) {
+        cameraSystem.setCameraZoom(newZoom);
+    }
+    else {
+        cameraSystem.setCameraZoom(0.85 * newZoom);
+    }
+
+    // Update time and check for frame completion
+    if (t < 1.0f) {
+        m_currentFrameTime += GLFWFunctions::delta_time;
     }
 }
 
@@ -110,8 +146,8 @@ SystemType CutsceneSystem::getSystem() {
     return SystemType::CutsceneSystemType;
 }
 
-void CutsceneSystem::addFrame(const myMath::Vector2D& position, float duration) {
-    m_frames->emplace_back(position, duration);
+void CutsceneSystem::addFrame(const myMath::Vector2D& position, float zoom, float duration) {
+    m_frames->emplace_back(position, zoom, duration);
 }
 
 void CutsceneSystem::start() {
@@ -129,21 +165,18 @@ void CutsceneSystem::start() {
     // Store original zoom
     m_originalZoom = cameraSystem.getCameraZoom();
 
-    // Set appropriate zoom level for cutscene
-	if (GLFWFunctions::fullscreen == true)
-		cameraSystem.setCameraZoom(1.5f);
-	else if (GLFWFunctions::fullscreen == false)
-        cameraSystem.setCameraZoom(1.3f);
-
-    // Set initial camera position 
-	cameraSystem.setCameraPosition(m_frames->at(0).cameraPosition);
+    // Set initial position and zoom
+    cameraSystem.setCameraPosition(m_frames->at(0).cameraPosition);
+    cameraSystem.setCameraZoom(m_frames->at(0).zoom);
 }
 
 void CutsceneSystem::stop() {
     m_isPlaying = false;
-
-    // Restore original zoom
     cameraSystem.setCameraZoom(m_originalZoom);
+}
+
+bool CutsceneSystem::isPlaying() const {
+    return m_isPlaying;
 }
 
 bool CutsceneSystem::isFinished() const {
@@ -152,14 +185,27 @@ bool CutsceneSystem::isFinished() const {
 
 void CutsceneSystem::skipToEnd() {
     if (!m_frames->empty()) {
-        // Move camera to final position
+        // Move camera to final position and zoom
         cameraSystem.setCameraPosition(m_frames->back().cameraPosition);
+        cameraSystem.setCameraZoom(m_frames->back().zoom);
     }
 
     // Mark cutscene as complete
     m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
+    cameraSystem.setCameraZoom(0.2f);
+}
+
+size_t CutsceneSystem::getCurrentFrameIndex() const {
+	return m_currentFrameIndex;
+}
+
+bool CutsceneSystem::getFrameCompletion(size_t index) const {
+    if (index < m_frames->size() && index >= 0) {
+        return m_frames->at(index).hasCompleted;
+    }
+    return false;
 }
 
 myMath::Vector2D CutsceneSystem::lerp(const myMath::Vector2D& start, const myMath::Vector2D& end, float t) {
@@ -171,3 +217,4 @@ myMath::Vector2D CutsceneSystem::lerp(const myMath::Vector2D& start, const myMat
         start.GetY() + (end.GetY() - start.GetY()) * t
     );
 }
+

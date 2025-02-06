@@ -70,8 +70,19 @@ void ECSCoordinator::update() {
 	}
 	else {
 		systemManager->update();
+
+		if (GLFWFunctions::changeLevel) {
+			//delete all live entities
+			for (auto& entity : getAllLiveEntities()) {
+				destroyEntity(entity);
+			}
+			int sceneNum = GameViewWindow::getSceneNum();
+			LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
+			GLFWFunctions::changeLevel = false;
+		}
 	}
 }
+
 
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
@@ -471,6 +482,8 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 	JSONSerializer serializer;
 	//int mainMenuScene = -1;
 
+	GameViewWindow::setSceneNum(mainMenuScene);
+
 	cameraSystem.setCameraZoom(0.2f);
 	cameraSystem.setCameraPosition({0,0});
 
@@ -663,6 +676,12 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
 
+	//float bgmVolPrc = 0.0f;
+	//float sfxVolPrc = 0.0f;
+
+	//serializer.ReadFloat(bgmVolPrc, "bgmVol");
+	//serializer.ReadFloat(sfxVolPrc, "sfxVol");
+
 	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
 
 	for (const auto& entityData : jsonObj["entities"])
@@ -744,6 +763,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename) {
 	JSONSerializer serializer;
 	int cutsceneScene = -2;
+
 	if (!serializer.Open(filename)) {
 		std::cout << "Error: could not open file " << filename << std::endl;
 		return;
@@ -760,9 +780,15 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 			myMath::Vector2D position;
 			position.SetX(frameData["position"]["x"].get<float>());
 			position.SetY(frameData["position"]["y"].get<float>());
+
+			// Get zoom value (with default if not specified)
+			float zoom = frameData.contains("zoom") ?
+				frameData["zoom"].get<float>() : 1.0f;
+
 			float duration = frameData["duration"].get<float>();
 
-			cutsceneSystem.addFrame(position, duration);
+			// Add frame with zoom parameter
+			cutsceneSystem.addFrame(position, zoom, duration);
 		}
 	}
 
@@ -813,7 +839,6 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 
 	// Start the cutscene immediately
 	cutsceneSystem.start();
-
 	GameViewWindow::setSceneNum(cutsceneScene);
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }

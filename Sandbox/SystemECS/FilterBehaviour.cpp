@@ -1,3 +1,19 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   FilterBehaviour.cpp
+@brief:  This source file includes the implementation of the FilterBehaviour
+         that logicSystemECS uses to handle the behaviour of the filter entity.
+         For our game implementation, the filter is meant to be a one-time use
+         only object and will have visual indicators informing players that the filter
+         can or cannot be used. Filter will reduce of the size of the mossball
+
+         Joel Chu (c.weiyuan): defined the functions of FilterBehaviour class
+                               100%
+*//*___________________________________________________________________________-*/
+
 #include "FilterBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
@@ -81,6 +97,8 @@ void FilterBehaviour::update(Entity entity) {
                     // Move player further to avoid immediate re-collision
                     playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));  // Increased distance
                     isFilterUsed = true;
+                    GLFWFunctions::filterClogged = true;
+					createCloggedAnimation(entity);
                 }
                 else {
                     // Keep player hidden near the filter during the 2-second delay
@@ -93,4 +111,34 @@ void FilterBehaviour::update(Entity entity) {
             }
         }
     }
+}
+
+void FilterBehaviour::createCloggedAnimation(Entity entity) {
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
+
+    ecsCoordinator.setEntityID(newAnimationEntity, "cloggedAnimation");
+    ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_DefunctFilter.png");
+
+    // Transform setup
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    transform.position = entityTransform.position;
+    transform.scale.SetX(entityTransform.scale.GetX());
+    transform.scale.SetY(entityTransform.scale.GetY());
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 8.0f;
+    animation.frameTime = 0.05f;
+    animation.columns = 3.0f;
+    animation.rows = 3.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // Add to default layer 0
+    layerManager.addEntityToLayer(0, newAnimationEntity);
 }

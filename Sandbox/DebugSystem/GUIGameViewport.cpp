@@ -18,9 +18,13 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		- Integrated save and load function for multiple files
 		- Updated "Pause", "Zoom", and "Pan" buttons
 
-File Contributions: Lew Zong Han Owen (60%)
-					Ian Loi           (10%)
-					Liu YaoTing       (30%)
+*Chu Wei Yuan (c.weiyuan):
+		- Integrated layering system
+
+File Contributions: Lew Zong Han Owen (58%)
+					Ian Loi           (9%)
+					Liu YaoTing       (28%)
+					Chu Wei Yuan Joel (5%)
 
 /*_______________________________________________________________________________________________________________*/
 #define _USE_MATH_DEFINES

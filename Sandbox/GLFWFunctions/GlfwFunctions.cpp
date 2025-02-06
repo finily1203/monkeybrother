@@ -43,6 +43,7 @@ GLboolean GLFWFunctions::skipToEnd = false;
 GLboolean GLFWFunctions::godMode = false;
 bool GLFWFunctions::fullscreen = false;
 GLboolean GLFWFunctions::isPumpOn = true;
+GLboolean GLFWFunctions::isTherePump = false;
 GLboolean GLFWFunctions::playPumpSong = true;
 GLboolean GLFWFunctions::isRotating = false;
 GLboolean GLFWFunctions::exitCollision = false;
@@ -63,6 +64,9 @@ bool GLFWFunctions::firstCollision = false;
 bool GLFWFunctions::gameOver = false;
 bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
+bool GLFWFunctions::filterClogged = false; // rmb to remove this
+bool GLFWFunctions::changeLevel = false;
+
 MouseBehaviour mouseBehaviour;
 double GLFWFunctions::mouseXDelta = 0.0;
 
