@@ -112,6 +112,11 @@ void CutsceneSystem::update() {
 
     // Interpolate position and zoom
     myMath::Vector2D newPos = lerp(startPos, targetPos, t);
+
+    if (newPos.GetX() == targetPos.GetX() && newPos.GetY() == targetPos.GetY()) {
+		currentFrame.hasCompleted = true;
+    }
+
     float newZoom = startZoom + (targetZoom - startZoom) * t;
 
     // Apply transitions
@@ -189,6 +194,18 @@ void CutsceneSystem::skipToEnd() {
     m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
+    cameraSystem.setCameraZoom(0.2f);
+}
+
+size_t CutsceneSystem::getCurrentFrameIndex() const {
+	return m_currentFrameIndex;
+}
+
+bool CutsceneSystem::getFrameCompletion(size_t index) const {
+    if (index < m_frames->size() && index >= 0) {
+        return m_frames->at(index).hasCompleted;
+    }
+    return false;
 }
 
 myMath::Vector2D CutsceneSystem::lerp(const myMath::Vector2D& start, const myMath::Vector2D& end, float t) {
@@ -200,3 +217,4 @@ myMath::Vector2D CutsceneSystem::lerp(const myMath::Vector2D& start, const myMat
         start.GetY() + (end.GetY() - start.GetY()) * t
     );
 }
+

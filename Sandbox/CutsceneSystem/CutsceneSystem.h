@@ -33,6 +33,7 @@ private:
         CutsceneFrame(const myMath::Vector2D& pos, float z, float dur)
             : cameraPosition(pos), zoom(z), duration(dur), hasCompleted(false) {
         }
+
     };
 
 public:
@@ -52,6 +53,9 @@ public:
     bool isPlaying() const;
     bool isFinished() const;
     void skipToEnd();
+
+    size_t getCurrentFrameIndex() const;
+	bool getFrameCompletion(size_t index) const;
 
 private:
     static std::vector<CutsceneFrame>* m_frames;

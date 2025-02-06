@@ -22,9 +22,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //SFX VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
 //GEN VOLUME MAX -> 0.5f, INC / DEC BY 0.05f, LOWEST 0f
 
-//BGM AFFECTS: bgmChannel
-//SFX AFFECTS: soundEffectChannel, assetBrowserChannel, pumpChannel, rotationChannel
-//GEN AFFECTS: ambienceChannel
+//BGM AFFECTS: bgmChannel, 
+//SFX AFFECTS: soundEffectChannel, assetBrowserChannel, pumpChannel, rotationChannel, cutscenePanelChannel
+//GEN AFFECTS: ambienceChannel, cutsceneAmbienceChannel, cutsceneHumanChannel
 
 //PUMP CHANNEL MAKE SURE TO MULTIPLY BY 0.1f FOR VOLUME
 float AudioSystem::sfxPercentage = 0.f;
@@ -33,8 +33,8 @@ float AudioSystem::musicPercentage = 0.f;
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-	                       , cutsceneAmbienceChannel(nullptr), cutscenePanelChannel(nullptr), cutsceneHumanChannel(nullptr)
-                           , currSongIndex(0), genVol(0.f), bgmVol(0.f), sfxVol(0.f)
+                           , cutsceneAmbienceChannel(nullptr), cutsceneAmbienceChannel2(nullptr), cutscenePanelChannel(nullptr), cutsceneHumanChannel(nullptr)
+                           , currSongIndex(0), genVol(0.f), bgmVol(0.f), sfxVol(0.f), changeAmbience(false), changePanel(false), prevFrame(0)
 {
 
 	channelList = new std::vector<std::pair<std::string,FMOD::Channel*>>();
@@ -59,9 +59,9 @@ void AudioSystem::initialise() {
     //read from audio JSON file
     readAudioSettingsFromJSON(FilePathManager::GetAudioSettingsJSONPath());
 	/*std::cout << sfxPercentage << musicPercentage << std::endl;*/
-    genVol = (musicPercentage / 100.f) * 0.5f;
-	bgmVol = (musicPercentage / 100.f) * 0.1f;
-	sfxVol = (sfxPercentage / 100.f) * 1.0f;
+	setGenVol(musicPercentage);
+	setBgmVol(musicPercentage);
+	setSfxVol(sfxPercentage);
 
 	std::cout << "Audio System initialised." << std::endl;
     /*genVol(0.35f), bgmVol(0.05f), sfxVol(0.5f)*/
@@ -72,8 +72,169 @@ void AudioSystem::initialise() {
 void AudioSystem::update() {
     bool bIsPlaying = false;
 
+	std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
+
+    //if scene is -2 which is cutscene
+    if (GameViewWindow::getSceneNum() == -2)
+    {
+        /*
+        * IntroCutscene_Ambience_1: Play at Start Loop
+        * IntroCutscene_Panel_2: Play at start of panel
+        * IntroCutscene_Human_2: ^ , slowly fade out
+        * IntroCutscene_Ambience_2: Play at end of IntroCutscene_Panel_2 audio, loop
+        * 3 no audio, just rely on ambience
+        * 4 - 8 play at start of panel
+        */
+		size_t currentFrame = cutsceneSystem.getCurrentFrameIndex();
+        if (currentFrame != prevFrame)
+        {
+            changePanel = false;
+        }
+        bool isPanelPlaying = false;
+
+        switch (currentFrame) {
+        case 0: //scene 1
+            if (!cutsceneAmbienceChannel) {
+                playCutsceneAmbience("IntroAmbience1");
+            }
+            break;
+        case 1: //scene 2
+            if (!cutscenePanelChannel) {
+                playCutscenePanel("Panel2");
+            }
+
+            if (cutscenePanelChannel) {
+                cutscenePanelChannel->isPlaying(&isPanelPlaying);
+                if (!isPanelPlaying) {
+                    if (!cutsceneAmbienceChannel2) {
+                        playCutsceneAmbience2("IntroAmbience2");
+                    }
+                }
+            }
+
+            if (!cutsceneHumanChannel) {
+                playCutsceneHuman("HumanAmbience");
+            }
+            break;
+        case 2: //scene 3
+            //stop all cutscene audio
+            if (cutsceneHumanChannel) {
+                FMOD_RESULT result = cutsceneHumanChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for cutscene ambience! (" << result << ")" << std::endl;
+                }
+                cutsceneHumanChannel = nullptr;
+            }
+            if (cutscenePanelChannel) {
+                FMOD_RESULT result = cutscenePanelChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                }
+                cutscenePanelChannel = nullptr;
+            }
+            break;
+        case 3: //scene 4
+            if (cutsceneSystem.getFrameCompletion(currentFrame)) {
+                if (!cutscenePanelChannel) {
+                    playCutscenePanel("Panel4_Squeak");
+                }
+            }
+			break;
+		case 4: //scene 5
+            if (!changePanel) {
+                if (cutscenePanelChannel) {
+                    FMOD_RESULT result = cutscenePanelChannel->stop();
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                    }
+                    cutscenePanelChannel = nullptr;
+                }
+                changePanel = true;
+            }
+            if (!cutscenePanelChannel) {
+                playCutscenePanel("Panel5_Fade");
+            }
+			break;
+		case 5: //scene 6
+            if (!changePanel) {
+                if (cutscenePanelChannel) {
+                    FMOD_RESULT result = cutscenePanelChannel->stop();
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                    }
+                    cutscenePanelChannel = nullptr;
+                }
+                changePanel = true;
+            }
+            if (cutsceneSystem.getFrameCompletion(currentFrame)) {
+                if (!cutscenePanelChannel) {
+                    playCutscenePanel("Panel6");
+                }
+            }
+			break;
+		case 6: //scene 7
+            if (!changePanel) {
+                if (cutscenePanelChannel) {
+                    FMOD_RESULT result = cutscenePanelChannel->stop();
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                    }
+                    cutscenePanelChannel = nullptr;
+                }
+                changePanel = true;
+            }
+            if (cutsceneSystem.getFrameCompletion(currentFrame)) {
+                if (!cutscenePanelChannel) {
+                    playCutscenePanel("Panel7");
+                }
+            }
+			break;
+		case 7: //scene 8
+            if (!changePanel) {
+                if (cutscenePanelChannel) {
+                    FMOD_RESULT result = cutscenePanelChannel->stop();
+                    if (result != FMOD_OK) {
+                        std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                    }
+                    cutscenePanelChannel = nullptr;
+                }
+                changePanel = true;
+            }
+            if (cutsceneSystem.getFrameCompletion(currentFrame)) {
+                if (!cutscenePanelChannel) {
+                    playCutscenePanel("Panel8");
+                }
+            }
+			break;
+        default: // after finishing the cutscene stop all music
+            if (cutsceneHumanChannel) {
+                FMOD_RESULT result = cutsceneHumanChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for cutscene ambience! (" << result << ")" << std::endl;
+                }
+                cutsceneHumanChannel = nullptr;
+            }
+            if (cutscenePanelChannel) {
+                FMOD_RESULT result = cutscenePanelChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for cutscene panel! (" << result << ")" << std::endl;
+                }
+                cutscenePanelChannel = nullptr;
+            }
+            if (cutsceneAmbienceChannel) {
+                FMOD_RESULT result = cutsceneAmbienceChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for cutscene ambience! (" << result << ")" << std::endl;
+                }
+                cutsceneAmbienceChannel = nullptr;
+            }
+            changeAmbience = true;
+        }
+        prevFrame = currentFrame;
+    }
+
     //only play if scene is 1 or 2
-    if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2)
+    else if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2)
     {
 
         // Ensure BGM and ambience play only if they are not already playing
@@ -372,6 +533,62 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
     }
 }
 
+void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
+{
+    FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
+    cutsceneAmbienceChannel = nullptr;
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneAmbienceChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
+
+    if (cutsceneAmbienceChannel) {
+        cutsceneAmbienceChannel->setVolume(genVol);
+        cutsceneAmbienceChannel->setPaused(false);
+    }
+}
+
+void AudioSystem::playCutsceneAmbience2(const std::string& ambienceName)
+{
+	FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
+	cutsceneAmbienceChannel2 = nullptr;
+	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneAmbienceChannel2);
+	if (result != FMOD_OK) {
+		std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+	}
+	if (cutsceneAmbienceChannel2) {
+		cutsceneAmbienceChannel2->setVolume(genVol);
+		cutsceneAmbienceChannel2->setPaused(false);
+	}
+}
+
+void AudioSystem::playCutscenePanel(const std::string& panelName) {
+    FMOD::Sound* audioSound = assetsManager.GetAudio(panelName);
+    cutscenePanelChannel = nullptr;
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutscenePanelChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
+
+    if (cutscenePanelChannel) {
+        cutscenePanelChannel->setVolume(sfxVol);
+        cutscenePanelChannel->setPaused(false);
+    }
+}
+
+void AudioSystem::playCutsceneHuman(const std::string& humanName) {
+    FMOD::Sound* audioSound = assetsManager.GetAudio(humanName);
+    cutsceneHumanChannel = nullptr;
+    FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneHumanChannel);
+    if (result != FMOD_OK) {
+        std::cout << "FMOD playSound error! (" << result << ") " << std::endl;
+    }
+    if (cutsceneHumanChannel) {
+        cutsceneHumanChannel->setVolume(genVol * 0.5f);
+        cutsceneHumanChannel->setPaused(false);
+    }
+}
+
 void AudioSystem::decAllVol()
 {
     genVol -= 0.05f;
@@ -432,21 +649,24 @@ float AudioSystem::getSfxVol() const {
 }
 
 void AudioSystem::setGenVol(float volPerc) {
-    float genVol = (volPerc / 100.0f) * 0.5f;
+    genVol = (volPerc / 100.0f) * 0.5f;
     ambienceChannel->setVolume(genVol);
+	cutsceneAmbienceChannel->setVolume(genVol * 0.1);
+	cutsceneHumanChannel->setVolume(genVol);
 }
 
 void AudioSystem::setBgmVol(float volPerc) {
-    float bgmVol = (volPerc / 100.0f) * 0.1f;
+    bgmVol = (volPerc / 100.0f) * 0.1f;
     bgmChannel->setVolume(bgmVol);
 
 }
 void AudioSystem::setSfxVol(float volPerc) {
-    float sfxVol = (volPerc / 100.0f) * 1.0f;
+    sfxVol = (volPerc / 100.0f) * 1.0f;
     soundEffectChannel->setVolume(sfxVol);
     assetBrowserChannel->setVolume(sfxVol);
     pumpChannel->setVolume(sfxVol * 0.1f);
     rotationChannel->setVolume(sfxVol);
+	cutscenePanelChannel->setVolume(sfxVol);
 }
 
 void AudioSystem::readAudioSettingsFromJSON(std::string const& filename)
