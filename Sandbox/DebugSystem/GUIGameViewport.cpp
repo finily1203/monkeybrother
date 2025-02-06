@@ -67,7 +67,7 @@ int GameViewWindow::saveNum;
 int GameViewWindow::fileNum;
 bool GameViewWindow::clickedZoom = false;
 
-float GameViewWindow::currentZoom = 0.2f;
+float GameViewWindow::currentZoom;
 float GameViewWindow::zoomLevel;
 float GameViewWindow::MIN_ZOOM;
 float GameViewWindow::MAX_ZOOM;
@@ -119,7 +119,7 @@ bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
 void GameViewWindow::Update() {
 	SetupViewportTexture();
-
+	currentZoom = cameraSystem.getCameraZoom();
 	aspectSize = GetLargestSizeForViewport();
 	windowSize = ImGui::GetContentRegionAvail();
 	globalMousePos = ImGui::GetMousePos();
@@ -344,6 +344,8 @@ void GameViewWindow::Update() {
 
 	if (ImGui::Button("Load")) {
 		isSelectingFile = true;
+		if(!GameViewWindow::getPaused())
+		TogglePause();
 	}
 
 	if (isSelectingFile) {

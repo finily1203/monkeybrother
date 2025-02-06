@@ -264,6 +264,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		GLFWFunctions::optionsMenuCount = 0;
 		int levelOneScene = 1;
 
+		cameraSystem.setCameraZoom(0.8f);
 		for (auto currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);

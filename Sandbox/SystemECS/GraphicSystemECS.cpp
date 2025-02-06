@@ -586,15 +586,15 @@ void GraphicSystemECS::update(float dt) {
                 }
 
                 if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
-                    auto& collectAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                    auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
 
                     double currentAbsoluteTime = glfwGetTime();
-                    double timeSinceCreation = currentAbsoluteTime - collectAnimation.creationTime;
+                    double timeSinceCreation = currentAbsoluteTime - anim.creationTime;
 
-                    collectAnimation.currentFrame = static_cast<int>((timeSinceCreation / collectAnimation.frameTime)) % static_cast<int>(collectAnimation.totalFrames);
+                    anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
 
                     // Check if one loop is completed
-                    if (collectAnimation.currentFrame == static_cast<int>(collectAnimation.totalFrames) - 1) {
+                    if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
 
                         // Optional: Trigger actions after one loop
                         ecsCoordinator.destroyEntity(entity);  // Example: Destroy after one loop

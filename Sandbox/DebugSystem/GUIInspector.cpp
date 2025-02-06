@@ -55,6 +55,7 @@ float frameTime = 0.01f;  // Starting at 0.01
 int rows = 1;
 int columns = 1;
 int frames = 1;
+bool playerExists = false;
 
 
 
@@ -764,19 +765,31 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 					GLFWFunctions::collectableCount++;
 					break;
 				case 5:
-					physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
-					physics.mass = 1.5f;
-					physics.dampening = 0.9f;
-					physics.maxVelocity = 200.0f;
-					physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
-					physics.maxAccumulatedForce = 40.0f;
-					if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
-						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
-					if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
-						PlayerComponent player;
-						ecsCoordinator.addComponent(selectedEntityID, player);
+
+					// Check if player already exists
+					for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+						if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+							playerExists = true;
+							break;
+						}
 					}
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+
+					// Open popup if attempting to create duplicate player
+					if (!playerExists) {
+						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+						physics.mass = 1.5f;
+						physics.dampening = 0.9f;
+						physics.maxVelocity = 200.0f;
+						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
+						physics.maxAccumulatedForce = 40.0f;
+						if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
+							ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+						if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+							PlayerComponent player;
+							ecsCoordinator.addComponent(selectedEntityID, player);
+						}
+						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+					}
 					break;
 				case 6:
 					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
