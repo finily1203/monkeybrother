@@ -192,14 +192,14 @@ void GraphicSystemECS::update(float dt) {
                     graphicsSystem.drawDebugCircle(ecsCoordinator.getComponent<TransformComponent>(entity), cameraSystem.getViewMatrix());
                 }
 
-		if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
-		{
-			ecsCoordinator.setTextureID(entity, "cutsceneBackground");
-		}
-        if (ecsCoordinator.getEntityID(entity) == "gameLogo")
-        {
-            ecsCoordinator.setTextureID(entity, "gameLogo");
-        }
+		        if (ecsCoordinator.getEntityID(entity) == "cutsceneBg")
+		        {
+			        ecsCoordinator.setTextureID(entity, "cutsceneBackground");
+		        }
+                if (ecsCoordinator.getEntityID(entity) == "gameLogo")
+                {
+                    ecsCoordinator.setTextureID(entity, "gameLogo");
+                }
 
                 if (ecsCoordinator.getEntityID(entity) == "pauseMenuBg")
                 {

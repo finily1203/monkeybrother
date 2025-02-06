@@ -71,6 +71,8 @@ public:
 	void setBgmVol(float volPerc);
 	void setSfxVol(float volPerc);
 
+
+	void readAudioSettingsFromJSON(std::string const& filename);
 	void saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage);
 	static float sfxPercentage;
 	static float musicPercentage;
@@ -98,7 +100,7 @@ private:
 	* 4 - 8 play at start of panel
 	*/
 
-	FMOD::ChannelGroup* cutsceneGroup;
+	//FMOD::ChannelGroup* cutsceneGroup;
 
 	FMOD::Channel* cutsceneAmbienceChannel; // loops, switch when panel 2 starts
 	FMOD::Channel* cutscenePanelChannel; //play one time audio per panel

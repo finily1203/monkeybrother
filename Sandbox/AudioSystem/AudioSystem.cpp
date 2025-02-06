@@ -18,9 +18,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include <iostream>
 #include "GUIGameViewport.h"
 
-//BGM VOLUME MAX -> 0.5f, INC / DEC BY 0.05f, LOWEST 0f
+//BGM VOLUME MAX -> 0.1f, INC / DEC BY 0.01f, LOWEST 0f
 //SFX VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
-//GEN VOLUME MAX -> 1.0f, INC / DEC BY 0.1f, LOWEST 0f
+//GEN VOLUME MAX -> 0.5f, INC / DEC BY 0.05f, LOWEST 0f
 
 //BGM AFFECTS: bgmChannel
 //SFX AFFECTS: soundEffectChannel, assetBrowserChannel, pumpChannel, rotationChannel
@@ -33,7 +33,8 @@ float AudioSystem::musicPercentage = 0.f;
 //Default constructor and destructor for AudioSystem class
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
-                           , currSongIndex(0), genVol(0.35f), bgmVol(0.05f), sfxVol(1.0f)
+	                       , cutsceneAmbienceChannel(nullptr), cutscenePanelChannel(nullptr), cutsceneHumanChannel(nullptr)
+                           , currSongIndex(0), genVol(0.f), bgmVol(0.f), sfxVol(0.f)
 {
 
 	channelList = new std::vector<std::pair<std::string,FMOD::Channel*>>();
@@ -55,8 +56,15 @@ SystemType AudioSystem::getSystem() {
 
 //Init function for AudioSystem class to add songs and defaultly play the first song
 void AudioSystem::initialise() {
-    //playSong("Ambience.wav");
-    //playBgm("Iris_L2_BGM_Loop.wav");
+    //read from audio JSON file
+    readAudioSettingsFromJSON(FilePathManager::GetAudioSettingsJSONPath());
+	/*std::cout << sfxPercentage << musicPercentage << std::endl;*/
+    genVol = (musicPercentage / 100.f) * 0.5f;
+	bgmVol = (musicPercentage / 100.f) * 0.1f;
+	sfxVol = (sfxPercentage / 100.f) * 1.0f;
+
+	std::cout << "Audio System initialised." << std::endl;
+    /*genVol(0.35f), bgmVol(0.05f), sfxVol(0.5f)*/
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -65,7 +73,7 @@ void AudioSystem::update() {
     bool bIsPlaying = false;
 
     //only play if scene is 1
-    if(GameViewWindow::getSceneNum() == 1)
+    if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2 || GameViewWindow::getSceneNum() == -1 )
     {
 
         // Ensure BGM and ambience play only if they are not already playing
@@ -215,15 +223,15 @@ void AudioSystem::update() {
             GLFWFunctions::collectAudio = false;
         }
 
-        if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
-            playSoundEffect("bubbleButton");
-            (*GLFWFunctions::keyState)[Key::NUM_9] = false;
-        }
+        //if ((*GLFWFunctions::keyState)[Key::NUM_9] && (GLFWFunctions::debug_flag == false)) {
+        //    playSoundEffect("bubbleButton");
+        //    (*GLFWFunctions::keyState)[Key::NUM_9] = false;
+        //}
 
-        else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
-            playSoundEffect("bubbleSingle");
-            (*GLFWFunctions::keyState)[Key::NUM_8] = false;
-        }
+        //else if ((*GLFWFunctions::keyState)[Key::NUM_8] && (GLFWFunctions::debug_flag == false)) {
+        //    playSoundEffect("bubbleSingle");
+        //    (*GLFWFunctions::keyState)[Key::NUM_8] = false;
+        //}
 
         if ((*GLFWFunctions::keyState)[Key::COMMA]) {
 			decAllVol();
@@ -360,8 +368,8 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
 
 void AudioSystem::decAllVol()
 {
-    genVol -= 0.1f;
-    bgmVol -= 0.05f;
+    genVol -= 0.05f;
+    bgmVol -= 0.01f;
     sfxVol -= 0.1f;
 
     if (genVol < 0.0f)
@@ -381,14 +389,14 @@ void AudioSystem::decAllVol()
 
 void AudioSystem::incAllVol()
 {
-    genVol += 0.1f;
-    bgmVol += 0.05f;
+    genVol += 0.05f;
+    bgmVol += 0.01f;
     sfxVol += 0.1f;
 
-    if (genVol > 1.0f)
-        genVol = 1.0f;
-    if (bgmVol > 0.5f)
-        bgmVol = 0.5f;
+    if (genVol > 0.5f)
+        genVol = 0.5f;
+    if (bgmVol > 0.1f)
+        bgmVol = 0.1f;
     if (sfxVol > 0.0f)
         sfxVol = 1.0f;
 
@@ -399,6 +407,8 @@ void AudioSystem::incAllVol()
     pumpChannel->setVolume(sfxVol * 0.1f);
     rotationChannel->setVolume(sfxVol);
 }
+
+
 
 std::vector<std::pair<std::string, FMOD::Channel*>> AudioSystem::getChannelList() const
 {
@@ -416,15 +426,34 @@ float AudioSystem::getSfxVol() const {
 }
 
 void AudioSystem::setGenVol(float volPerc) {
-    float genVol = volPerc / 100.0f;
+    float genVol = (volPerc / 100.0f) * 0.5f;
+    ambienceChannel->setVolume(genVol);
 }
 
 void AudioSystem::setBgmVol(float volPerc) {
-	float bgmVol = volPerc / 200.0f;
+    float bgmVol = (volPerc / 100.0f) * 0.1f;
+    bgmChannel->setVolume(bgmVol);
 
 }
 void AudioSystem::setSfxVol(float volPerc) {
-	float sfxVol = volPerc / 100.0f;
+    float sfxVol = (volPerc / 100.0f) * 1.0f;
+    soundEffectChannel->setVolume(sfxVol);
+    assetBrowserChannel->setVolume(sfxVol);
+    pumpChannel->setVolume(sfxVol * 0.1f);
+    rotationChannel->setVolume(sfxVol);
+}
+
+void AudioSystem::readAudioSettingsFromJSON(std::string const& filename)
+{
+    nlohmann::json audioSettings;
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        inputFile >> audioSettings;
+        inputFile.close();
+    }
+    sfxPercentage = audioSettings["sfxAudioPercentage"];
+    musicPercentage = audioSettings["musicAudioPercentage"];
 }
 
 // saving audio settings for sfx and music audio to JSON file
