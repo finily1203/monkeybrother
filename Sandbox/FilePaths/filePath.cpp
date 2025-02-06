@@ -232,3 +232,14 @@ std::string FilePathManager::GetLayerJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the audio settings JSON file
+std::string FilePathManager::GetAudioSettingsJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "audioSettings.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

@@ -1243,6 +1243,7 @@ void GameViewWindow::LoadViewportConfigFromJSON(std::string const& filename)
 
 }
 
+// load the scene number from the scene JSON file
 void GameViewWindow::LoadSceneFromJSON(std::string const& filename)
 {
 	JSONSerializer serializer;
@@ -1258,6 +1259,7 @@ void GameViewWindow::LoadSceneFromJSON(std::string const& filename)
 	serializer.ReadInt(scene, "scene");
 }
 
+// save the updated scene number to the scene JSON file
 void GameViewWindow::SaveSceneToJSON(std::string const& filename)
 {
 	JSONSerializer serializer;

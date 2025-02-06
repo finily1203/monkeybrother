@@ -71,6 +71,8 @@ public:
 	void setBgmVol(float volPerc);
 	void setSfxVol(float volPerc);
 
+	void saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage);
+
 private:
 	//FMOD::System* audioSystem;
 	/*std::unordered_map<std::string, FMOD::Channel*> channelList;*/
