@@ -271,6 +271,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		audioSystem.playSoundEffect("UI_ButtonClick.wav");
 		GameViewWindow::setSceneNum(levelOneScene);
+		audioSystem.setChangeBGM(false);
 		GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 
 		if (GameViewWindow::getSceneNum() != 0)

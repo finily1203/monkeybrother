@@ -483,6 +483,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 	int mainMenuScene = -1;
 
 	GameViewWindow::setSceneNum(mainMenuScene);
+	audioSystem.setChangeBGM(false);
 
 	cameraSystem.setCameraZoom(0.2f);
 	cameraSystem.setCameraPosition({0,0});

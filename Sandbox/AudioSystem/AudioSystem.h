@@ -71,7 +71,8 @@ public:
 	void setGenVol(float volPerc);
 	void setBgmVol(float volPerc);
 	void setSfxVol(float volPerc);
-
+	
+	void setChangeBGM(bool val);
 
 	void readAudioSettingsFromJSON(std::string const& filename);
 	void saveAudioSettingsToJSON(std::string const& filename, float sfxPercentage, float musicPercentage);
@@ -114,7 +115,7 @@ private:
 	float bgmVol; // bgm volume
 	float sfxVol; // sound effect volume
 
-	bool changeAmbience;
+	bool changeBGM;
 	bool changePanel;
 	size_t prevFrame;
 };

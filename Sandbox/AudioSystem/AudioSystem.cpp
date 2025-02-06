@@ -34,7 +34,7 @@ float AudioSystem::musicPercentage = 0.f;
 AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), assetBrowserChannel(nullptr)
                            , ambienceChannel(nullptr), pumpChannel(nullptr), rotationChannel(nullptr)
                            , cutsceneAmbienceChannel(nullptr), cutsceneAmbienceChannel2(nullptr), cutscenePanelChannel(nullptr), cutsceneHumanChannel(nullptr)
-                           , currSongIndex(0), genVol(0.f), bgmVol(0.f), sfxVol(0.f), changeAmbience(false), changePanel(false), prevFrame(0)
+                           , currSongIndex(0), genVol(0.f), bgmVol(0.f), sfxVol(0.f),changeBGM(false), changePanel(false), prevFrame(0)
 {
 
 	channelList = new std::vector<std::pair<std::string,FMOD::Channel*>>();
@@ -228,14 +228,45 @@ void AudioSystem::update() {
                 }
                 cutsceneAmbienceChannel = nullptr;
             }
-            changeAmbience = true;
         }
         prevFrame = currentFrame;
+    }
+
+    //main menu audio
+    else if (GameViewWindow::getSceneNum() == -1) {
+        if (!changeBGM) {
+            if (bgmChannel) {
+                FMOD_RESULT result = bgmChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for main menu BGM! (" << result << ")" << std::endl;
+                }
+                bgmChannel = nullptr;
+            }
+            changeBGM = true;
+        }
+
+        bool isBgmPlaying = false;
+        if (bgmChannel) {
+            bgmChannel->isPlaying(&isBgmPlaying);
+        }
+        if (!isBgmPlaying) {
+            playBgm("mainMenuBGM");
+        }
     }
 
     //only play if scene is 1 or 2
     else if(GameViewWindow::getSceneNum() == 1 || GameViewWindow::getSceneNum() == 2)
     {
+        if (!changeBGM) {
+            if (bgmChannel) {
+                FMOD_RESULT result = bgmChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for main menu BGM! (" << result << ")" << std::endl;
+                }
+                bgmChannel = nullptr;
+            }
+			changeBGM = true;
+        }
 
         // Ensure BGM and ambience play only if they are not already playing
         bool isBgmPlaying = false;
@@ -409,7 +440,6 @@ void AudioSystem::update() {
 			incAllVol();
             (*GLFWFunctions::keyState)[Key::PERIOD] = false;
         }
-
     }
 
     assetsManager.GetAudioSystem()->update();
@@ -705,4 +735,9 @@ void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfx
 
     outputFile << audioSettings.dump(2);
     outputFile.close();
+}
+
+void AudioSystem::setChangeBGM(bool val)
+{
+	changeBGM = val;
 }
