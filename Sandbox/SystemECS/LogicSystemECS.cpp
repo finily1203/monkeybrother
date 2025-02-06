@@ -471,6 +471,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// decrement the pause menu count and load the main menu back into the scene
 		GLFWFunctions::pauseMenuCount--;
+		GameViewWindow::setSceneNum(-1);
 		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
 
