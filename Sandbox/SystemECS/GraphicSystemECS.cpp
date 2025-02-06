@@ -218,17 +218,22 @@ void GraphicSystemECS::update(float dt) {
 
         if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
         {
+            // this audioType variable stores the entityId of the current audio icon entity
             std::string audioType = ecsCoordinator.getEntityID(entity);
             TransformComponent arrowTransform{}, soundbarTransform{};
 
+            // set the audio arrow Id based on the audioType Id
             std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
                 (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
 
+            // set the soundbar Id based on the audioType Id
             std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbarBase" :
                 (audioType == "musicAudio") ? "musicSoundbarBase" : "";
 
+            // ensure that both strings are not empty
             if (!audioArrowId.empty() && !soundbarId.empty())
             {
+                // retrieve the soundbar entity based on the current soundbar Id 
                 for (auto& soundbarEntity : ecsCoordinator.getAllLiveEntities())
                 {
                     if (ecsCoordinator.getEntityID(soundbarEntity) == soundbarId)
@@ -238,6 +243,7 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                // retrieve the audio arrow entity based on the current audio arrow Id
                 for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
                 {
                     if (ecsCoordinator.getEntityID(arrowEntity) == audioArrowId)
@@ -247,8 +253,11 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                // find the left boundary of the soundbar entity
                 float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
 
+                // set the audio texture Id to be mute when the audio arrow x position reaches the left
+                // boundary of the soundbar x position
                 std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
                 transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                 ecsCoordinator.setTextureID(entity, textureName);
@@ -259,6 +268,8 @@ void GraphicSystemECS::update(float dt) {
         if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ||
             ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
         {
+            // initialize the values that counts the number active notches for sfx and music
+            // audio, start and end x position for both sfx and music audio
             int activeNotchesSFX{}, activeNotchesMusic{};
             float startPosSFX{}, endPosSFX{};
             float startPosMusic{}, endPosMusic{};
@@ -268,6 +279,8 @@ void GraphicSystemECS::update(float dt) {
             // Identify arrow positions for SFX and Music
             for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
             {
+                // below checks which audio arrow entity Id it is and it will get the transform
+                // component of that particular audio arrow entity
                 std::string arrowId = ecsCoordinator.getEntityID(arrowEntity);
                 if (arrowId == "sfxSoundbarArrow")
                 {
@@ -280,19 +293,23 @@ void GraphicSystemECS::update(float dt) {
                 }
             }
 
+            // a vector that stores pairs of entity and their corresponding components
+            // for sfx and music notches 
             std::vector<std::pair<Entity, TransformComponent>> sfxNotches, musicNotches;
 
-            // Separate SFX and Music Notches
+            // Separate sfx and music notches
             for (auto& notchEntity : ecsCoordinator.getAllLiveEntities())
             {
                 std::string notchId = ecsCoordinator.getEntityID(notchEntity);
                 TransformComponent notchTransform = ecsCoordinator.getComponent<TransformComponent>(notchEntity);
 
+                // add a sfx notch to the sfxNotches vector
                 if (notchId.find("sfxNotch") != std::string::npos)
                 {
                     sfxNotches.emplace_back(notchEntity, notchTransform);
                 }
 
+                // add a music notch to the musicNotches vector
                 else if (notchId.find("musicNotch") != std::string::npos)
                 {
                     musicNotches.emplace_back(notchEntity, notchTransform);
@@ -301,11 +318,14 @@ void GraphicSystemECS::update(float dt) {
 
             float sfxPercentage{}, musicPercentage{};
 
+            // ensuring that there are 10 elements inside the sfxNotches vector
             if (sfxNotches.size() == 10)
             {
+                // calculating the start x position of the first sfx notch
                 startPosSFX = sfxNotches[0].second.position.GetX() - (sfxNotches[0].second.scale.GetX() / 2.0f);
+                // calculating the end x position of the tenth sfx notch
                 endPosSFX = sfxNotches[9].second.position.GetX() + (sfxNotches[9].second.scale.GetX() / 2.0f);
-
+                // below are the codes that calculates the sfx audio percentage
                 float arrowPosSFX = sfxArrowTransform.position.GetX();
                 float progressSFX = std::abs((arrowPosSFX - startPosSFX) / (endPosSFX - startPosSFX));
                 sfxPercentage = std::round(progressSFX * 10.f) * 10.f;
@@ -313,11 +333,14 @@ void GraphicSystemECS::update(float dt) {
                 AudioSystem::sfxPercentage = sfxPercentage;
             }
 
+            // ensuring that there are 10 elements inside the musicNotches vector
             if (musicNotches.size() == 10)
             {
+                // calculating the start x position of the first music notch
                 startPosMusic = musicNotches[0].second.position.GetX() - (musicNotches[0].second.scale.GetX() / 2.0f);
+                // calculating the end x position of the tenth music notch
                 endPosMusic = musicNotches[9].second.position.GetX() + (musicNotches[9].second.scale.GetX() / 2.0f);
-
+                // below are the codes that calculates the music audio percentage
                 float arrowPosMusic = musicArrowTransform.position.GetX();
                 float progressMusic = std::abs((arrowPosMusic - startPosMusic) / (endPosMusic - startPosMusic));
                 musicPercentage = std::round(progressMusic * 10.f) * 10.f;
@@ -397,6 +420,19 @@ void GraphicSystemECS::update(float dt) {
                     {
                         ecsCoordinator.setTextureID(entity, "buttonRetry");
                         //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("buttonRetry"), transform.mdl_xform);
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "pauseRetryButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveRetryButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeRetryButton");
+                        }
                     }
 
                     else if (ecsCoordinator.getEntityID(entity) == "startButton")
