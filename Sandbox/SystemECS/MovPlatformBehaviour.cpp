@@ -24,8 +24,8 @@ void MovPlatformBehaviour::update(Entity entity) {
 	//calculate the distance between the start position and the current position
 	//if it is greater than the maxDistance, move back
 
-	float distTravelled = sqrt(pow(position.GetX() - movement.startPos.GetX(), 2) +
-							   pow(position.GetY() - movement.startPos.GetY(), 2));
+	float distTravelled = static_cast<float>(sqrt(pow(position.GetX() - movement.startPos.GetX(), 2) +
+							   pow(position.GetY() - movement.startPos.GetY(), 2)));
 	
 
 	if (distTravelled > movement.maxDistance)

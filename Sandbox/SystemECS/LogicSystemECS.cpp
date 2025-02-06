@@ -182,7 +182,7 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 			if (layerManager.getEntityVisibility(entity))
 			{
 				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-				ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
+				//ButtonComponent& button = ecsCoordinator.getComponent<ButtonComponent>(entity);
 
 				if (mouseIsOverButton(mouseX, mouseY, transform))
 				{
