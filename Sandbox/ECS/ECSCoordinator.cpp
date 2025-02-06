@@ -480,7 +480,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
-	//int mainMenuScene = -1;
+	int mainMenuScene = -1;
 
 	GameViewWindow::setSceneNum(mainMenuScene);
 
