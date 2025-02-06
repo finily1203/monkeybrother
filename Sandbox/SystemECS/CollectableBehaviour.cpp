@@ -37,8 +37,8 @@ void CollectableBehaviour::update(Entity entity) {
             bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
 
             if (isColliding) {
-                playerTransform.scale.SetX(playerTransform.scale.GetX() + 50.0f);
-                playerTransform.scale.SetY(playerTransform.scale.GetY() + 50.0f);
+                playerTransform.scale.SetX(playerTransform.scale.GetX() + 25.0f);
+                playerTransform.scale.SetY(playerTransform.scale.GetY() + 25.0f);
                 auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
                 playerPhysics.mass += 0.5f;
 
