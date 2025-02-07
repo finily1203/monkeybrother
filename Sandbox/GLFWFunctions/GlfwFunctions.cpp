@@ -240,10 +240,10 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
     if (!GameViewWindow::getPaused()) {
 
-        /*if ((*keyState)[Key::NUM_1]) {
+        if ((*keyState)[Key::NUM_1]) {
             debug_flag = !debug_flag;
             isGuiOpen = ~isGuiOpen;
-        }*/
+        }
     }
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
@@ -285,13 +285,13 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         }
     }
 
-    if ((*keyState)[Key::S])
-        audioStopped = ~audioStopped;
+    /*if ((*keyState)[Key::S])
+        audioStopped = ~audioStopped;*/
 
-    if ((*keyState)[Key::N]) {
+    /*if ((*keyState)[Key::N]) {
         audioNext = ~audioNext;
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
-    }
+    }*/
 
     if ((*keyState)[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
