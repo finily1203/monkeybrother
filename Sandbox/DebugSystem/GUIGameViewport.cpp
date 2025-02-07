@@ -790,6 +790,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 
 }
 
+// create save JSON file path
 std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
@@ -818,6 +819,7 @@ std::string GameViewWindow::GenerateSaveJSONFile(int& saveNumber)
 	return jsonPath;
 }
 
+// create a new entity JSON object which will be saved to the JSON file
 nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& transform, std::string const& entityId, std::string const& textureId, ECSCoordinator& ecs, Entity& entity)
 {
 	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
@@ -1057,6 +1059,7 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	return entityJSON;
 }
 
+// return the centered vector of the mouse position in the game world
 ImVec2 GameViewWindow::GetCenteredMousePosition() {
 
 	// Calculate the game scene bounds in screen space
@@ -1080,6 +1083,7 @@ ImVec2 GameViewWindow::GetCenteredMousePosition() {
 	return ImVec2(normalizedX, normalizedY);
 }
 
+// return the normalized vector coordinates in the IMGUI viewport
 ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY) {
 	myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
 
@@ -1134,6 +1138,7 @@ ImVec2 GameViewWindow::NormalizeViewportCoordinates(float screenX, float screenY
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
+// return the mouse position vector in the game world
 ImVec2 GameViewWindow::GetMouseWorldPosition() {
 	if (IsPointInViewport(globalMousePos.x, globalMousePos.y)) {
 		return NormalizeViewportCoordinates(globalMousePos.x, globalMousePos.y);
@@ -1204,6 +1209,7 @@ ImVec2 GameViewWindow::ViewportToWorld(float viewportX, float viewportY) {
 	return ImVec2(static_cast<float>(worldX), static_cast<float>(worldY));
 }
 
+// Convert screen coordinates to world coordinates
 ImVec2 GameViewWindow::ScreenToWorld(float screenX, float screenY) {
 	ImVec2 viewportCoords = ScreenToViewport(screenX, screenY);
 	return ViewportToWorld(viewportCoords.x, viewportCoords.y);
@@ -1309,6 +1315,7 @@ void GameViewWindow::SaveSceneToJSON(std::string const& filename)
 	serializer.WriteInt(scene, "scene", filename);
 }
 
+// retrieve the prefabs JSON file path
 std::string GameViewWindow::GetPrefabJSONPath(std::string const& filename)
 {
 	std::string execPath = FilePathManager::GetExecutablePath();
@@ -1316,6 +1323,7 @@ std::string GameViewWindow::GetPrefabJSONPath(std::string const& filename)
 	return jsonPath;
 }
 
+// load the prefabs from the JSON file
 void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string const& filepath)
 {
 	JSONSerializer serializer;

@@ -20,6 +20,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 
 void PlatformBehaviour::update(Entity entity) {
     
+	// Add closest platform component for platform collision
     if (!ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
         ClosestPlatform closestPlatform{};
         closestPlatform.isClosest = false;

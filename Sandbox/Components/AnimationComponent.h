@@ -1,5 +1,5 @@
 /*! All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
- * @author: Joel Chu (c.weiyuan), Javier Chua (javierjunliang.chua)
+ * @author: Javier Chua (javierjunliang.chua)
  * @team: MonkeHood
  * @course: CSD2401
  * @file: AnimationComponent.h
@@ -63,13 +63,7 @@ struct AnimationComponent {
     }
 
     void UpdateUVCoordinates() {
-        /*if (!isAnimated && currentFrame == 0) {
-            currentUVs[0] = glm::vec2(1.0f, 1.0f);
-            currentUVs[1] = glm::vec2(1.0f, 0.0f);
-            currentUVs[2] = glm::vec2(0.0f, 0.0f);
-            currentUVs[3] = glm::vec2(0.0f, 1.0f);
-            return;
-        }*/
+
 
         // Calculate frame size in UV coordinates
         float frameWidth = 1.0f / columns;

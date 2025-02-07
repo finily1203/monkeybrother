@@ -487,6 +487,7 @@ void AudioSystem::cleanup() {
 
 }
 
+//Function to play song of given name 
 void AudioSystem::playSong(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
     if (ambienceChannel) {
@@ -508,6 +509,7 @@ void AudioSystem::playSong(const std::string& songName) {
 
 }
 
+// function to play BGM of given name
 void AudioSystem::playBgm(const std::string& songName) {
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
     if (bgmChannel) {
@@ -530,6 +532,7 @@ void AudioSystem::playBgm(const std::string& songName) {
 
 }
 
+// Function to play the pump sound of given name
 void AudioSystem::playPumpSound(const std::string& soundName)
 {
     FMOD::Sound* audioSong = assetsManager.GetAudio(soundName);
@@ -553,6 +556,7 @@ void AudioSystem::playPumpSound(const std::string& soundName)
     }
 }
 
+// Function to play sound effect of given name
 void AudioSystem::playSoundEffect(const std::string& soundEffectName)
 {
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
@@ -568,6 +572,7 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
     }
 }
 
+// function to play rotation effect of given name
 void AudioSystem::playRotationEffect(const std::string& soundEffectName)
 {
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
@@ -583,6 +588,7 @@ void AudioSystem::playRotationEffect(const std::string& soundEffectName)
     }
 }
 
+// function to play sound asset browser of given name
 void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
 {
 	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
@@ -598,6 +604,7 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
     }
 }
 
+// function to play cutscene ambience of given name
 void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
 {
     FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
@@ -613,6 +620,7 @@ void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
     }
 }
 
+// function to play cutscene ambience 2 of given name
 void AudioSystem::playCutsceneAmbience2(const std::string& ambienceName)
 {
 	FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
@@ -627,6 +635,7 @@ void AudioSystem::playCutsceneAmbience2(const std::string& ambienceName)
 	}
 }
 
+// function to play cutscene panel of given name
 void AudioSystem::playCutscenePanel(const std::string& panelName) {
     FMOD::Sound* audioSound = assetsManager.GetAudio(panelName);
     cutscenePanelChannel = nullptr;
@@ -641,6 +650,7 @@ void AudioSystem::playCutscenePanel(const std::string& panelName) {
     }
 }
 
+// function to play cutscene human of given name
 void AudioSystem::playCutsceneHuman(const std::string& humanName) {
     FMOD::Sound* audioSound = assetsManager.GetAudio(humanName);
     cutsceneHumanChannel = nullptr;
@@ -654,6 +664,7 @@ void AudioSystem::playCutsceneHuman(const std::string& humanName) {
     }
 }
 
+// function to decrease volume for all audio channels
 void AudioSystem::decAllVol()
 {
     genVol -= 0.05f;
@@ -675,6 +686,7 @@ void AudioSystem::decAllVol()
     rotationChannel->setVolume(sfxVol);
 }
 
+// function to increase volume for all audio channels
 void AudioSystem::incAllVol()
 {
     genVol += 0.05f;
@@ -697,22 +709,25 @@ void AudioSystem::incAllVol()
 }
 
 
-
+// retrieve the vector of audio channels
 std::vector<std::pair<std::string, FMOD::Channel*>> AudioSystem::getChannelList() const
 {
     return *channelList;
 }
 
+// retrieve the general audio volume
 float AudioSystem::getGenVol() const {
 	return genVol;
 }
+// retrieve the BGM audio volume
 float AudioSystem::getBgmVol() const {
 	return bgmVol;
 }
+// retrieve the SFX audio volume
 float AudioSystem::getSfxVol() const {
 	return sfxVol;
 }
-
+// set the general audio volume
 void AudioSystem::setGenVol(float volPerc) {
     genVol = (volPerc / 100.0f) * 0.5f;
     ambienceChannel->setVolume(genVol);
@@ -720,11 +735,14 @@ void AudioSystem::setGenVol(float volPerc) {
 	cutsceneHumanChannel->setVolume(genVol);
 }
 
+// set the BGM audio volume
 void AudioSystem::setBgmVol(float volPerc) {
     bgmVol = (volPerc / 100.0f) * 0.1f;
     bgmChannel->setVolume(bgmVol);
 
 }
+
+// set the SFX audio volume
 void AudioSystem::setSfxVol(float volPerc) {
     sfxVol = (volPerc / 100.0f) * 1.0f;
     soundEffectChannel->setVolume(sfxVol);
@@ -734,6 +752,7 @@ void AudioSystem::setSfxVol(float volPerc) {
 	cutscenePanelChannel->setVolume(sfxVol);
 }
 
+// read audio settings for sfx and music audio from JSON file
 void AudioSystem::readAudioSettingsFromJSON(std::string const& filename)
 {
     nlohmann::json audioSettings;
@@ -772,6 +791,7 @@ void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfx
     outputFile.close();
 }
 
+// set the changeBGM boolean
 void AudioSystem::setChangeBGM(bool val)
 {
 	changeBGM = val;

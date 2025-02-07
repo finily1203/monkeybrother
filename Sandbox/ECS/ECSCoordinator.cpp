@@ -8,12 +8,19 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 		 Joel Chu (c.weiyuan): Defined most of the functions with regards to
 							   the ECS system. This includes the creation,
 							   updating and the destruction of objects.
-							   70%
+							   40%
 		 Ian Loi (ian.loi): Defined the LoadEntityFromJSON, SaveEntityToJSON and 
 						    UpdateEntityData functions that load data from JSON file to
 							the entity, save data from entity to JSON file and update
 							entity data respectively.
 						    30%
+		 Lee Jing Wen (jingwen.lee): Added the LoadMainMenuFromJSON, LoadPauseMenuFromJSON,
+									LoadOptionsMenuFromJSON that load the main menu, pause menu, options
+									menu that loads entities from JSON files.
+									20%
+		  Liu Yaoting (yaoting.liu): Added the LoadIntroCutsceneFromJSON
+									functions that load cutscene entities from JSON files.
+									10%
 *//*___________________________________________________________________________-*/
 
 #include "ECSCoordinator.h"
@@ -782,7 +789,7 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	//GameViewWindow::setSceneNum(mainMenuScene);
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
-
+// function that loads the options settings entities from options settings JSON file
 void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename) {
 	JSONSerializer serializer;
 	int cutsceneScene = -2;
@@ -1035,30 +1042,37 @@ float ECSCoordinator::getRandomVal(float min = -100.0f, float max = 100.0f) {
 	return dis(gen); 
 }
 
+// retrieve the vector that contains all live entities in the scene
 std::vector<Entity> ECSCoordinator::getAllLiveEntities() {
 	return entityManager->getLiveEntities();
 }
 
+// retrieve the entity Id for the current entity
 std::string ECSCoordinator::getEntityID(Entity entity) {
 	return entityManager->getEntityId(entity);
 }
 
+// retrieve the entity from the entity Id
 Entity ECSCoordinator::getEntityFromID(std::string ID) {
 	return entityManager->getEntityById(ID);
 }
 
+// set the entity Id for the current entity
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
 }
 
+// set texture Id for the current entity
 void ECSCoordinator::setTextureID(Entity entity, std::string ID) {
 	entityManager->setTextureId(entity, ID);
 }
 
+// retrieve the texture Id for the current entity
 std::string ECSCoordinator::getTextureID(Entity entity) {
 	return entityManager->getTextureId(entity);
 }
 
+// retrieve the signature for the current entity
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
 	return entityManager->getSignature(entity);
 }

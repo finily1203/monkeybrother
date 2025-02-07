@@ -21,10 +21,11 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 std::vector<CutsceneSystem::CutsceneFrame>* CutsceneSystem::m_frames;
 bool hasZoomBeenSet = false;
 
+// constructor
 CutsceneSystem::CutsceneSystem()
     : m_currentFrameIndex(0), m_currentFrameTime(0.0f), m_isPlaying(false), m_originalZoom(1.0f) {
 }
-
+// initial delay for the cutscene
 void CutsceneSystem::initialise() {
     if (!m_frames) {
         m_frames = new std::vector<CutsceneFrame>();
@@ -34,7 +35,7 @@ void CutsceneSystem::initialise() {
     m_currentFrameTime = 0.0f;
     m_isPlaying = false;
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::update() {
     // Update delay timer
     if (m_delayTimer < m_initialDelay) {
@@ -142,7 +143,7 @@ void CutsceneSystem::update() {
         m_currentFrameTime += GLFWFunctions::delta_time;
     }
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::cleanup() {
     delete m_frames;
     m_frames = nullptr;
@@ -150,15 +151,15 @@ void CutsceneSystem::cleanup() {
     m_currentFrameIndex = 0;
     m_currentFrameTime = 0.0f;
 }
-
+// check if the cutscene can accept input
 SystemType CutsceneSystem::getSystem() {
     return SystemType::CutsceneSystemType;
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::addFrame(const myMath::Vector2D& position, float zoom, float duration) {
     m_frames->emplace_back(position, zoom, duration);
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::start() {
     if (m_frames->empty()) {
         return;
@@ -179,20 +180,20 @@ void CutsceneSystem::start() {
     cameraSystem.setCameraPosition(m_frames->at(0).cameraPosition);
     cameraSystem.setCameraZoom(m_frames->at(0).zoom);
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::stop() {
     m_isPlaying = false;
     cameraSystem.setCameraZoom(m_originalZoom);
 }
-
+// check if the cutscene can accept input
 bool CutsceneSystem::isPlaying() const {
     return m_isPlaying;
 }
-
+// check if the cutscene can accept input
 bool CutsceneSystem::isFinished() const {
     return !m_isPlaying && m_currentFrameIndex >= m_frames->size();
 }
-
+// check if the cutscene can accept input
 void CutsceneSystem::skipToEnd() {
     if (!m_frames->empty()) {
         // Move camera to final position and zoom
@@ -206,18 +207,18 @@ void CutsceneSystem::skipToEnd() {
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
     cameraSystem.setCameraZoom(1.0f);
 }
-
+// check if the cutscene can accept input
 size_t CutsceneSystem::getCurrentFrameIndex() const {
 	return m_currentFrameIndex;
 }
-
+// check if the cutscene can accept input
 bool CutsceneSystem::getFrameCompletion(size_t index) const {
     if (index < m_frames->size() && index >= 0) {
         return m_frames->at(index).hasCompleted;
     }
     return false;
 }
-
+// check if the cutscene can accept input
 myMath::Vector2D CutsceneSystem::lerp(const myMath::Vector2D& start, const myMath::Vector2D& end, float t) {
     // Smooth the interpolation using easing function
     t = t * t * (3 - 2 * t); // Smoothstep formula

@@ -254,7 +254,7 @@ void Inspector::Update() {
 		ImGui::EndPopup();
 	}
 
-	// Handle dragging
+	// Handle entity dragging
 	if (draggedEntityID != -1 && !isSelectingEntity) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(draggedEntityID);
 		if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) || ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID)
@@ -299,7 +299,7 @@ void Inspector::Update() {
 				isOver = false;
 		}
 
-
+		// Handle entity dragging
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
 			if (isOver) {
@@ -391,6 +391,7 @@ void Inspector::Update() {
 	ImVec2 middle = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(middle, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
+	// Delete Entity warning popup
 	if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Text("Are you sure you want to delete this entity?");
 		ImGui::Separator();
@@ -419,6 +420,7 @@ void Inspector::Update() {
 
 }
 
+// Render the Inspector window + logic for modifying entity data
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
 	ImGui::Begin("Inspector");
 
@@ -725,7 +727,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		currentItem = 0;
 	}
 
-	// Create the combo box
+	// Create the behavior options box for the entity
 	ImGui::SetNextItemWidth(200);
 	if (ImGui::BeginCombo("##dropdown", items[currentItem])) {
 		for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
@@ -829,7 +831,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	static char selectedTexture[256] = "Select a texture...";
 	strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
 
-	// Create the dropdown
+	// Create the texture dropdown box for the entity
 	ImGui::SetNextItemWidth(200);
 	if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
 	{
@@ -869,7 +871,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		checked = false;
 	}
 
-	 // State variable
+	 // Spritesheet animation editor
 	if (ImGui::Checkbox("Animation", &checked)) {
 		if (checked) {
 			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {

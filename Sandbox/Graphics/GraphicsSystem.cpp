@@ -73,6 +73,7 @@ SystemType GraphicsSystem::getSystem() {
     return GraphicsSystemType;
 }
 
+//Intialize the graphics system
 void GraphicsSystem::initialise() {
 
 
@@ -148,6 +149,7 @@ void GraphicsSystem::initialise() {
 
 void GraphicsSystem::update() {}
 
+// Update graphics system based on animation component
 void GraphicsSystem::Update(float deltaTime, const AnimationComponent& animation) {
     (void)deltaTime;
     if (animation.isAnimated) {

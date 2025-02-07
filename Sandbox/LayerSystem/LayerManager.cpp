@@ -199,7 +199,7 @@ bool LayerManager::getGuiVisibility(int layer) {
 		return false;
 	}
 }
-
+//if entity is in any layer, return the layer number, if not in any layer it will be in layer 0
 int LayerManager::getEntityLayer(Entity entity) {
 	for (auto& layer : *m_Layers) {
 		auto& entities = layer.second.entities;

@@ -7,14 +7,20 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @brief:  This header file includes the class ECSCoordinator that handles all the ECS
 		 parts of ECS and ensure that they are all able to communicate with each other.
 		 Function templates can be found here instead of the source file.
-		 Joel Chu (c.weiyuan): Declared the ECSCoordinator class that links the ECS
-							   parts together. Declared most of the functions here
-							   as well.
-							   90%
-		Ian Loi (ian.loi): Declared the LoadEntityFromJSON, SaveEntityToJSON and 
-						   UpdateEntity functions that load, save and update data for
-						   entities.
-						   10%
+		 Joel Chu (c.weiyuan):	Declared the ECSCoordinator class that links the ECS
+								parts together. Declared most of the functions here
+								as well.
+								40%
+		 Ian Loi (ian.loi):		Declared the LoadEntityFromJSON, SaveEntityToJSON and 
+								UpdateEntity functions that load, save and update data for
+								entities.
+								30%
+		 Lee Jing Wen (jingwen.lee):	Provided declarations for the functions that load
+										the main menu, pause menu, options menu, and cutscene
+										20%
+		 Liu Yaoting (yaoting.liu):		Provided declarations for the functions that load
+										the main menu, pause menu, options menu, and cutscene
+										10%
 *//*___________________________________________________________________________-*/
 #pragma once
 #include "EngineDefinitions.h"
