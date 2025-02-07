@@ -422,17 +422,14 @@ void AudioSystem::update() {
                 }
             }
 
-            if (GLFWFunctions::audioNext) {
-                switch (GLFWFunctions::audioNum) {
-                case 0:
-                    playSong("Ambience.wav");
-                    break;
-                case 1:
-                    playSong("bubbles");
-                    break;
-                }
-                GLFWFunctions::audioNext = false;
-            }
+            //if (GLFWFunctions::audioNext) {
+            //    switch (GLFWFunctions::audioNum) {
+            //    case 0:
+            //        playSong("Ambience.wav");
+            //        break;
+            //    }
+            //    GLFWFunctions::audioNext = false;
+            //}
         }
 
         if (GLFWFunctions::isRotating) {
@@ -466,15 +463,6 @@ void AudioSystem::update() {
             GLFWFunctions::collectAudio = false;
         }
 
-        if ((*GLFWFunctions::keyState)[Key::COMMA]) {
-			decAllVol();
-            (*GLFWFunctions::keyState)[Key::COMMA] = false;
-
-        }
-        else if ((*GLFWFunctions::keyState)[Key::PERIOD]) {
-			incAllVol();
-            (*GLFWFunctions::keyState)[Key::PERIOD] = false;
-        }
     }
 
     assetsManager.GetAudioSystem()->update();

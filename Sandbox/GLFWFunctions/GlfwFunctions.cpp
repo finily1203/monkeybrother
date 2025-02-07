@@ -285,13 +285,13 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         }
     }
 
-    if ((*keyState)[Key::S])
-        audioStopped = ~audioStopped;
+    /*if ((*keyState)[Key::S])
+        audioStopped = ~audioStopped;*/
 
-    if ((*keyState)[Key::N]) {
+    /*if ((*keyState)[Key::N]) {
         audioNext = ~audioNext;
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
-    }
+    }*/
 
     if ((*keyState)[Key::ESCAPE]) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
