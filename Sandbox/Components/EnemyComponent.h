@@ -15,6 +15,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 struct EnemyComponent
 {
 	bool isEnemy;
+	bool isClockwise;
 
-	EnemyComponent() : isEnemy(false) {}
+	EnemyComponent() : isEnemy(false), isClockwise(false) {}
 };

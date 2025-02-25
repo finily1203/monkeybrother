@@ -37,9 +37,12 @@ public:
 	int& getCurrentWaypointIndex();
 
 	void updatePatrolState(Entity entity);
+	void updateEntityRotation(Entity entity, myMath::Vector2D velocity);
 
 private:
 	STATE currentState;
 	std::vector<myMath::Vector2D> waypoints;
 	int currentWaypointIndex = 0;
+	bool isFacingRight;
+	bool moveHorizontal;
 };

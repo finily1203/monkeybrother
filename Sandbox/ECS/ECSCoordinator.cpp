@@ -321,6 +321,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			// read the enemy data from the JSON file
 			EnemyComponent enemy{};
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+			serializer.ReadObject(enemy.isClockwise, entityId, "entities.enemy.isClockwise");
 
 			ecs.addComponent(entityObj, enemy);
 

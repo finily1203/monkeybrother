@@ -257,6 +257,7 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 
 		EnemyComponent enemy{};
 		enemy.isEnemy = true;  // Set default for new enemy
+		enemy.isClockwise = true;
 
 		MovementComponent movement{};
 		movement.speed = 5.0f;  // Default speed
