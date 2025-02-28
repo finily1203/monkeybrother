@@ -252,4 +252,15 @@ std::string FilePathManager::GetIntroCutsceneJSONPath()
 	std::string jsonPathString = jsonPath.string();
 
 	return jsonPathString;
-}   
+}
+
+// this function retrieves the tutorial page JSON file
+std::string FilePathManager::GetTutorialJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "tutorialMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

@@ -58,6 +58,8 @@ int GLFWFunctions::defultWindowHeight = 0;
 int GLFWFunctions::collectableCount = 0;
 int GLFWFunctions::pauseMenuCount = 0;
 int GLFWFunctions::optionsMenuCount = 0;
+int GLFWFunctions::tutorialMenuCount = 0;
+int GLFWFunctions::tutorialCurrentPage = 1;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
@@ -253,37 +255,37 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = false;
     }
 
-    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
-        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        audioPaused = ~audioPaused;
-        GLFWFunctions::gamePaused = true;
+    //if ((*keyState)[Key::P]) {
+    //    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    //    audioPaused = ~audioPaused;
+    //    GLFWFunctions::gamePaused = true;
 
-        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
-        {
-            GLFWFunctions::pauseMenuCount++;
-            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-        }
+    //    if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
+    //    {
+    //        GLFWFunctions::pauseMenuCount++;
+    //        ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+    //    }
 
-        else if (GLFWFunctions::optionsMenuCount != 1)
-        {
-            for (auto currEntity : ecsCoordinator.getAllLiveEntities())
-            {
-                if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-                    ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-                    ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-                {
-                    ecsCoordinator.destroyEntity(currEntity);
-                }
-            }
+    //    else if (GLFWFunctions::optionsMenuCount != 1)
+    //    {
+    //        for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+    //        {
+    //            if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				//	ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+    //            {
+    //                ecsCoordinator.destroyEntity(currEntity);
+    //            }
+    //        }
 
-            GLFWFunctions::gamePaused = false;
-            GLFWFunctions::pauseMenuCount--;
-        }
-    }
+    //        GLFWFunctions::gamePaused = false;
+    //        GLFWFunctions::pauseMenuCount--;
+    //    }
+    //}
 
     /*if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;*/
@@ -293,8 +295,36 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }*/
 
-    if ((*keyState)[Key::ESCAPE]) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    if ((*keyState)[Key::ESCAPE] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
+        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        //audioPaused = ~audioPaused;
+        GLFWFunctions::gamePaused = true;
+
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1)
+        {
+            GLFWFunctions::pauseMenuCount++;
+            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+        }
+
+        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1))
+        {
+            for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+            {
+                if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+                    ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+                    ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+                {
+                    ecsCoordinator.destroyEntity(currEntity);
+                }
+            }
+
+            GLFWFunctions::gamePaused = false;
+            GLFWFunctions::pauseMenuCount--;
+        }
     }
     if (action == GLFW_PRESS) {
 

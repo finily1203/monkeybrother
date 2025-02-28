@@ -120,6 +120,7 @@ public:
 	std::string getEntityID(Entity entity);
 	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
+	bool entityExists(Entity entity);
 
 	// load all entities for the scene from JSON
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);
@@ -134,6 +135,8 @@ public:
 	void SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the cutscene data from JSON file
 	void LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the tutorial page entities from JSON
+	void LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();

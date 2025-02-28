@@ -242,6 +242,37 @@ void GraphicSystemECS::update(float dt) {
                     ecsCoordinator.setTextureID(entity, "optionsMenu");
                 }
 
+                if (ecsCoordinator.getEntityID(entity) == "tutorialBaseBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "tutorialMovementBase", "tutorialKeyItems1Base",
+                                                                  "tutorialKeyItems2Base", "tutorialWaterCurrentBase",
+                                                                  "tutorialEscapeBase", "tutorialFilterBase",
+                                                                  "tutorialFishBase" };
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "pageCounter")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "pageCounter1", "pageCounter2", "pageCounter3",
+                                                                  "pageCounter4", "pageCounter5", "pageCounter6",
+                                                                  "pageCounter7" };
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
         if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
         {
             // this audioType variable stores the entityId of the current audio icon entity
@@ -567,7 +598,7 @@ void GraphicSystemECS::update(float dt) {
                         }
                     }
 
-                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu" || ecsCoordinator.getEntityID(entity) == "closeTutorialMenu")
                     {
                         ecsCoordinator.setTextureID(entity, "closePopupButton");
                         // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
@@ -603,6 +634,19 @@ void GraphicSystemECS::update(float dt) {
 
 
                         //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveSoundbar"), transform.mdl_xform);
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "nextTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "rightArrow");
+                        updateTutorialArrows();
+                    }
+
+
+                    else if (ecsCoordinator.getEntityID(entity) == "previousTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "leftArrow");
+                        updateTutorialArrows();
                     }
                 }
 
@@ -663,6 +707,39 @@ void GraphicSystemECS::update(float dt) {
                 }*/
             }
         }
+    }
+}
+
+void GraphicSystemECS::updateTutorialArrows()
+{
+    Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
+    Entity previousArrow = ecsCoordinator.getEntityFromID("previousTutorialPage");
+
+    TransformComponent& nextTransform = ecsCoordinator.getComponent<TransformComponent>(nextArrow);
+    TransformComponent& previousTransform = ecsCoordinator.getComponent<TransformComponent>(previousArrow);
+
+    if (GLFWFunctions::tutorialCurrentPage >= 1 && GLFWFunctions::tutorialCurrentPage < 7)
+    {
+        nextTransform.scale.SetX(100.f);
+        nextTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        nextTransform.scale.SetX(0.f);
+        nextTransform.scale.SetY(0.f);
+    }
+
+    if (GLFWFunctions::tutorialCurrentPage > 1 && GLFWFunctions::tutorialCurrentPage <= 7)
+    {
+        previousTransform.scale.SetX(100.f);
+        previousTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        previousTransform.scale.SetX(0.f);
+        previousTransform.scale.SetY(0.f);
     }
 }
 

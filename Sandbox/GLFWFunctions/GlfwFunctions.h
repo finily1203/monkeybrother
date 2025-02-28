@@ -103,6 +103,8 @@ struct GLFWFunctions {
 	static int collectableCount;
 	static int pauseMenuCount;
 	static int optionsMenuCount;
+	static int tutorialMenuCount;
+	static int tutorialCurrentPage;
 
 	static int defultWindowWidth;
 	static int defultWindowHeight;

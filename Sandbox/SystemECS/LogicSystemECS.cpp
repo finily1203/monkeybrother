@@ -96,6 +96,8 @@ void MouseBehaviour::update(Entity entity) {
 void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mouseY)
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	int optionsMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("optionsMenuBg"));
+	int tutorialMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("tutorialBaseBg"));
 
 	// looping through all the live entities in the scene
 	for (auto& entity : allEntities)
@@ -103,6 +105,16 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 		// ensuring that the entity is a button if it contains a button component
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
+			int entityLayer = layerManager.getEntityLayer(entity);
+
+			if (GLFWFunctions::optionsMenuCount > 0 || GLFWFunctions::tutorialMenuCount > 0)
+			{
+				if (entityLayer < optionsMenuLayer || entityLayer < tutorialMenuLayer)
+				{
+					continue;
+				}
+			}
+
 			//check if entity is visible
 			if (layerManager.getEntityVisibility(entity))
 			{
@@ -201,12 +213,25 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 	GLFWFunctions::isHovering = false;
 	setHoveredButton("");
 
+	int optionsMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("optionsMenuBg"));
+	int tutorialMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("tutorialBaseBg"));
+
 	// looping through all live entities in the current scene
 	for (auto& entity : allEntities)
 	{
 		// checking that the entity is a button
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
+			int entityLayer = layerManager.getEntityLayer(entity);
+
+			if (GLFWFunctions::optionsMenuCount > 0 || GLFWFunctions::tutorialMenuCount > 0)
+			{
+				if (entityLayer < optionsMenuLayer || entityLayer < tutorialMenuLayer)
+				{
+					continue;
+				}
+			}
+
 			//check if entity is visible
 			if (layerManager.getEntityVisibility(entity))
 			{
@@ -396,6 +421,37 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 	}
 
+	// this handles the how to play button
+	else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton")
+	{
+		if (GLFWFunctions::pauseMenuCount == 1)
+		{
+			for (auto currEntity : allEntities)
+			{
+				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+				{
+					ecsCoordinator.destroyEntity(currEntity);
+				}
+			}
+
+			// decrement the count since the pause menu is already destroyed
+			GLFWFunctions::pauseMenuCount--;
+		}
+
+		if (GLFWFunctions::tutorialMenuCount < 1)
+		{
+			GLFWFunctions::tutorialMenuCount++;
+			ecsCoordinator.LoadTutorialMenuFromJSON(ecsCoordinator, FilePathManager::GetTutorialJSONPath());
+		}
+	}
+
 	// this handles the closing of the pause menu button and resume level button
 	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
 	{
@@ -458,6 +514,46 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "closeTutorialMenu")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "tutorialBaseBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
+				ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
+				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::tutorialMenuCount--;
+		GLFWFunctions::tutorialCurrentPage = 1;
+
+		// checks the current scene is a game level, not the main menu scene and a pause menu does 
+		// not exist in the current scene
+		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+		{
+			// load the pause menu and increment the pause menu count
+			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+			GLFWFunctions::pauseMenuCount++;
+		}
+
+		// set the game pause state to true
+		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "nextTutorialPage")
+	{
+		GLFWFunctions::tutorialCurrentPage++;
+	}
+
+	else if (entityId == "previousTutorialPage")
+	{
+		GLFWFunctions::tutorialCurrentPage--;
 	}
 
 	// this handles the logic for exiting the level and goes back to the main menu button
@@ -527,9 +623,6 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// save the sfx and music percentages to the audio settings JSON file
 		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
 
-		std::cout << "SFX: " << sfxPercentage << std::endl;
-		std::cout << "Music: " << musicPercentage << std::endl;
-
 		//change on audio side as well
 		audioSystem.setGenVol(musicPercentage);
 		audioSystem.setBgmVol(musicPercentage);
@@ -558,6 +651,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
 	}
+
+	
 }
 
 // MouseBehaviour object instance destructor
