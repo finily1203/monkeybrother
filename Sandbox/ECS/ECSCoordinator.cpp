@@ -322,6 +322,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			EnemyComponent enemy{};
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
 			serializer.ReadObject(enemy.isClockwise, entityId, "entities.enemy.isClockwise");
+			serializer.ReadObject(enemy.visionAngle, entityId, "entities.enemy.visionAngle");
+			serializer.ReadObject(enemy.visionDistance, entityId, "entities.enemy.visionDistance");
+			serializer.ReadObject(enemy.drawVisionDebug, entityId, "entities.enemy.drawVisionDebug");
 
 			ecs.addComponent(entityObj, enemy);
 

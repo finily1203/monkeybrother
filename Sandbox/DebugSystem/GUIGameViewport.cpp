@@ -754,6 +754,9 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 				EnemyComponent enemy;
 				serializer.ReadObject(enemy.isEnemy, assetName, "entities.enemy.isEnemy");
 				serializer.ReadObject(enemy.isClockwise, assetName, "entities.enemy.isClockwise");
+				serializer.ReadObject(enemy.visionAngle, assetName, "entities.enemy.visionAngle");
+				serializer.ReadObject(enemy.visionDistance, assetName, "entities.enemy.visionDistance");
+				serializer.ReadObject(enemy.drawVisionDebug, assetName, "entities.enemy.drawVisionDebug");
 
 				PhysicsComponent physics;
 
@@ -916,7 +919,10 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<EnemyComponent>(entity)) {
 		entityJSON["enemy"] = { 
 			{"isEnemy", true},
-			{"isClockwise", true}
+			{"isClockwise", true},
+			{"visionAngle", 60.0 },
+			{"visionDistance", 300.0 },
+			{"drawVisionDebug", true }
 		};
 	}
 
@@ -1493,6 +1499,9 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 		EnemyComponent enemy;
 		serializer.ReadObject(enemy.isEnemy, entityId, "enemy.isEnemy");
 		serializer.ReadObject(enemy.isClockwise, entityId, "enemy.isClockwise");
+		serializer.ReadObject(enemy.visionAngle, entityId, "entities.enemy.visionAngle");
+		serializer.ReadObject(enemy.visionDistance, entityId, "entities.enemy.visionDistance");
+		serializer.ReadObject(enemy.drawVisionDebug, entityId, "entities.enemy.drawVisionDebug");
 		ecsCoordinator.addComponent(prefabEntity, enemy);
 	}
 }

@@ -41,6 +41,8 @@ public:
 	void updatePatrolState(Entity entity);
 	void updateEntityRotation(Entity entity, myMath::Vector2D velocity);
 
+	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
+
 private:
 	STATE currentState;
 	std::vector<myMath::Vector2D> waypoints;

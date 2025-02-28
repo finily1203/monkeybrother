@@ -149,6 +149,8 @@ void GraphicSystemECS::update(float dt) {
                 bool isFilter = ecsCoordinator.hasComponent<FilterComponent>(entity);
                 //bool isExit = ecsCoordinator.hasComponent<ExitComponent>(entity);
 
+				bool isEnemy = ecsCoordinator.hasComponent<EnemyComponent>(entity);
+
 				auto& behaviour = ecsCoordinator.getComponent<BehaviourComponent>(entity);
 
                 // Use hasMovement for the update parameter
@@ -587,6 +589,15 @@ void GraphicSystemECS::update(float dt) {
                     }
                     else {
                         ecsCoordinator.setTextureID(entity, "exitFilter");
+                    }
+                }
+
+                if (isEnemy)
+                {
+					auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+                    if (enemy.drawVisionDebug) {
+						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
                     }
                 }
 

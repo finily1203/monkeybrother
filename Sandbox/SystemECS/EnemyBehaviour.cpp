@@ -26,24 +26,24 @@ EnemyBehaviour::EnemyBehaviour() {
 	//For now all enemies have same way point
     
     //Test CW
-    waypoints.push_back(myMath::Vector2D(-200, 200));
-    waypoints.push_back(myMath::Vector2D(200, 200));
-    waypoints.push_back(myMath::Vector2D(200, -200));
-    waypoints.push_back(myMath::Vector2D(-200, -200));
-    waypoints.push_back(myMath::Vector2D(-200, -100));
-    waypoints.push_back(myMath::Vector2D(-100, -100));
-    waypoints.push_back(myMath::Vector2D(-100, 100));
-    waypoints.push_back(myMath::Vector2D(-200, 100));
+    //waypoints.push_back(myMath::Vector2D(-200, 200));
+    //waypoints.push_back(myMath::Vector2D(200, 200));
+    //waypoints.push_back(myMath::Vector2D(200, -200));
+    //waypoints.push_back(myMath::Vector2D(-200, -200));
+    //waypoints.push_back(myMath::Vector2D(-200, -100));
+    //waypoints.push_back(myMath::Vector2D(-100, -100));
+    //waypoints.push_back(myMath::Vector2D(-100, 100));
+    //waypoints.push_back(myMath::Vector2D(-200, 100));
 
     //Test ACW
-    //waypoints.push_back(myMath::Vector2D(-200, 200));
-	//waypoints.push_back(myMath::Vector2D(-200, 100));
-	//waypoints.push_back(myMath::Vector2D(-100, 100));
-	//waypoints.push_back(myMath::Vector2D(-100, -100));
-	//waypoints.push_back(myMath::Vector2D(-200, -100));
-	//waypoints.push_back(myMath::Vector2D(-200, -200));
-	//waypoints.push_back(myMath::Vector2D(200, -200));
-	//waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(-200, 200));
+	waypoints.push_back(myMath::Vector2D(-200, 100));
+	waypoints.push_back(myMath::Vector2D(-100, 100));
+	waypoints.push_back(myMath::Vector2D(-100, -100));
+	waypoints.push_back(myMath::Vector2D(-200, -100));
+	waypoints.push_back(myMath::Vector2D(-200, -200));
+	waypoints.push_back(myMath::Vector2D(200, -200));
+	waypoints.push_back(myMath::Vector2D(200, 200));
 
 }
 
@@ -57,6 +57,12 @@ void EnemyBehaviour::update(Entity entity) {
 
 	updateEntityRotation(entity, velocity);
 
+    auto playerEntity = ecsCoordinator.getEntityFromID("player");
+	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
+	if (enemySeePlayer) {
+        std::cout << "Enemy Sees Player" << std::endl;
+	}
+
 	switch (currentState) {
 	case PATROL:
 		updatePatrolState(entity);
@@ -67,8 +73,6 @@ void EnemyBehaviour::update(Entity entity) {
 		break;
 	}
 }
-
-
 
 void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D velocity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
@@ -137,6 +141,8 @@ void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D veloci
 		
     }
 }
+
+// ==================================== PATROL STATE IMPLEMENTATION ==================================== //
 
 std::vector<myMath::Vector2D>& EnemyBehaviour::getWaypoints() {
 	return waypoints;
@@ -216,3 +222,68 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     }
 
 }
+
+// ==================================== PATROL STATE IMPLEMENTATION ==================================== //
+
+// ==================================== CHASE STATE IMPLEMENTATION ==================================== //
+bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
+    auto& enemyTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+    auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);
+    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+
+    // Calculate vector to player
+    myMath::Vector2D dirToPlayer = playerTransform.position - enemyTransform.position;
+    float distanceToPlayer = static_cast<float>(std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2)));
+
+    // Check if player is within vision distance
+    if (distanceToPlayer > enemyComponent.visionDistance) {
+        return false;
+    }
+
+    // Normalize direction vector
+    myMath::Vector2D normalizedDirToPlayer = dirToPlayer;
+    float length = static_cast<float>(std::sqrt(std::pow(normalizedDirToPlayer.GetX(), 2) + std::pow(normalizedDirToPlayer.GetY(), 2)));
+    if (length > 0) {
+        normalizedDirToPlayer.SetX(normalizedDirToPlayer.GetX() / length);
+        normalizedDirToPlayer.SetY(normalizedDirToPlayer.GetY() / length);
+    }
+
+    // Get the forward vector based on enemy orientation and facing direction
+    myMath::Vector2D forwardVector;
+    if (isFacingRight) {
+        forwardVector.SetX(1.0f);
+    }
+    else {
+        forwardVector.SetX(-1.0f);
+    }
+    forwardVector.SetY(0.0f);
+
+    // Apply rotation from entity orientation
+    float radians = enemyTransform.orientation.GetX() * (3.14159265358979323846 / 180.0);
+    float cosTheta = static_cast<float>(std::cos(radians));
+    float sinTheta = static_cast<float>(std::sin(radians));
+    float rotatedX = forwardVector.GetX() * cosTheta - forwardVector.GetY() * sinTheta;
+    float rotatedY = forwardVector.GetX() * sinTheta + forwardVector.GetY() * cosTheta;
+    forwardVector.SetX(rotatedX);
+    forwardVector.SetY(rotatedY);
+
+    // Calculate dot product between forward vector and direction to player
+    float dotProduct = forwardVector.GetX() * normalizedDirToPlayer.GetX() +
+        forwardVector.GetY() * normalizedDirToPlayer.GetY();
+
+    // Convert cone half-angle to radians and calculate cosine
+    float halfAngleRadians = (enemyComponent.visionAngle / 2.0f) * (3.14159265358979323846 / 180.0);
+    float cosHalfAngle = static_cast<float>(std::cos(halfAngleRadians));
+
+    // Check if player is within the cone angle
+    if (dotProduct < cosHalfAngle) {
+        return false;
+    }
+
+    // At this point, player is within vision distance and angle
+    // Later, you can add raycast logic here to check for walls
+    return true;
+}
+
+
+// ==================================== CHASE STATE IMPLEMENTATION ==================================== //

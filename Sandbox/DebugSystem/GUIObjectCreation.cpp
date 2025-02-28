@@ -258,6 +258,9 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		EnemyComponent enemy{};
 		enemy.isEnemy = true;  // Set default for new enemy
 		enemy.isClockwise = true;
+		enemy.visionAngle = 60.0f;
+		enemy.visionDistance = 200.0f;
+		enemy.drawVisionDebug = true;
 
 		MovementComponent movement{};
 		movement.speed = 5.0f;  // Default speed
