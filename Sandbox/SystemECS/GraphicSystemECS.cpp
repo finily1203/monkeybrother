@@ -165,40 +165,6 @@ void GraphicSystemECS::update(float dt) {
                 /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
                 /*--------------------------------------------------------------------------------
                 --------------------------------------------------------------------------------*/
-
-                // check if the player has collected all the collectables
-                // Created a win text entity
-                //if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::gameOver == false && GameViewWindow::getSceneNum() > -1) {
-                //    createTextEntity(
-                //        ecsCoordinator,
-                //        "You Win!",
-                //        "Antonio",
-                //        myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
-                //        myMath::Vector2D(-30, 40),         // Position
-                //        "winTextBox"                       // Unique ID
-                //    );
-                //    GLFWFunctions::gameOver = true;
-                //}
-                //// lose text entity
-                //if (GLFWFunctions::instantLose && GLFWFunctions::gameOver == false) {
-                //    createTextEntity(
-                //        ecsCoordinator,
-                //        "You Lose!",
-                //        "Antonio",
-                //        myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
-                //        myMath::Vector2D(-30, 40),          // Position
-                //        "loseTextBox"                       // Unique ID
-                //    );
-                //    GLFWFunctions::gameOver = true;
-                //}
-                //// 
-                //if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
-                //    if (ecsCoordinator.getEntityID(entity) == "winTextBox")
-                //    {
-                //        auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
-                //        font.text = "Exit!";
-                //    }
-                //}
                 // cheat code 
                 if (GLFWFunctions::instantWin)
                 {
@@ -658,9 +624,6 @@ void GraphicSystemECS::update(float dt) {
 
                 //std::cout << "isPump on? " << (GLFWFunctions::isPumpOn ? "true" : "false") << std::endl;
 
-                /*if (isPlayer) {
-                    graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("eyes.png"), transform.mdl_xform, animation.currentUVs);
-                }*/
             }
         }
     }

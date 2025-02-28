@@ -366,6 +366,108 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
     glEnd();
 }
 
+void GraphicsSystem::drawDebugVisionCone(TransformComponent transform, float coneAngle, float coneDistance, myMath::Matrix3x3 viewMatrix) {
+    // Start drawing lines
+    glBegin(GL_LINES);
+
+    // Set color for vision cone (e.g., yellow)
+    glColor3f(1.0f, 1.0f, 0.0f);
+
+    // Calculate the half angle in radians
+    float halfAngleRad = glm::radians(coneAngle / 2.0f);
+
+    // Define the rotation angle from the entity's orientation
+    float entityAngle = glm::radians(transform.orientation.GetX());
+
+    // Direction adjustment based on facing direction
+    float facingMultiplier = 1.0f; // Change to -1.0f if your scale.x is negative when facing left
+    if (transform.scale.GetX() < 0) {
+        facingMultiplier = -1.0f;
+    }
+
+    // Calculate the center line and two edge lines of the cone
+    glm::vec4 origin(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Center line of the cone
+    glm::vec4 centerLine(facingMultiplier * coneDistance, 0.0f, 0.0f, 1.0f);
+
+    // Two edge lines
+    glm::vec4 edgeLine1(facingMultiplier * coneDistance * cos(-halfAngleRad),
+        coneDistance * sin(-halfAngleRad),
+        0.0f, 1.0f);
+    glm::vec4 edgeLine2(facingMultiplier * coneDistance * cos(halfAngleRad),
+        coneDistance * sin(halfAngleRad),
+        0.0f, 1.0f);
+
+    // Create the entity rotation matrix
+    glm::mat4 rotationMat = glm::rotate(glm::mat4(1.0f), entityAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    // Create the translation matrix
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f),
+        glm::vec3(transform.position.GetX(),
+            transform.position.GetY(),
+            0.0f));
+
+    // Convert view matrix
+    glm::mat3 viewMat = myMath::Matrix3x3::ConvertToGLMMat3(viewMatrix);
+    glm::mat4 viewMat4 = {
+        viewMat[0][0], viewMat[0][1], viewMat[0][2], 0,
+        viewMat[1][0], viewMat[1][1], viewMat[1][2], 0,
+        0,             0,             viewMat[2][2], 0,
+        viewMat[2][0], viewMat[2][1], 1,             1
+    };
+
+    // Create projection matrix
+    glm::mat4 projMat = glm::ortho(
+        -GLFWFunctions::windowWidth / 2.0f,
+        GLFWFunctions::windowWidth / 2.0f,
+        -GLFWFunctions::windowHeight / 2.0f,
+        GLFWFunctions::windowHeight / 2.0f
+    );
+
+    // Transform all points
+    glm::vec4 originTransformed = projMat * viewMat4 * translationMat * rotationMat * origin;
+    glm::vec4 centerLineTransformed = projMat * viewMat4 * translationMat * rotationMat * centerLine;
+    glm::vec4 edgeLine1Transformed = projMat * viewMat4 * translationMat * rotationMat * edgeLine1;
+    glm::vec4 edgeLine2Transformed = projMat * viewMat4 * translationMat * rotationMat * edgeLine2;
+
+    // Draw center line (optional)
+    glVertex2f(originTransformed.x, originTransformed.y);
+    glVertex2f(centerLineTransformed.x, centerLineTransformed.y);
+
+    // Draw cone edges
+    glVertex2f(originTransformed.x, originTransformed.y);
+    glVertex2f(edgeLine1Transformed.x, edgeLine1Transformed.y);
+
+    glVertex2f(originTransformed.x, originTransformed.y);
+    glVertex2f(edgeLine2Transformed.x, edgeLine2Transformed.y);
+
+    // Draw arc segments to connect the edges (optional, makes it look more like a cone)
+    const int arcSegments = 20;
+    glm::vec4 prevPoint = edgeLine1Transformed;
+
+    for (int i = 1; i <= arcSegments; i++) {
+        float t = static_cast<float>(i) / arcSegments;
+        float angle = -halfAngleRad + t * (2 * halfAngleRad);
+
+        glm::vec4 arcPoint(facingMultiplier * coneDistance * cos(angle),
+            coneDistance * sin(angle),
+            0.0f, 1.0f);
+
+        glm::vec4 arcPointTransformed = projMat * viewMat4 * translationMat * rotationMat * arcPoint;
+
+        glVertex2f(prevPoint.x, prevPoint.y);
+        glVertex2f(arcPointTransformed.x, arcPointTransformed.y);
+
+        prevPoint = arcPointTransformed;
+    }
+
+    // Connect last segment
+    glVertex2f(prevPoint.x, prevPoint.y);
+    glVertex2f(edgeLine2Transformed.x, edgeLine2Transformed.y);
+
+    glEnd();
+}
 
 void GraphicsSystem::DrawObject(DrawMode mode, const GLuint texture, const myMath::Matrix3x3& xform, const std::vector<glm::vec2>& uvCoords) {
     if (mode == DrawMode::TEXTURE)

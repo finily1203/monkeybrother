@@ -17,5 +17,10 @@ struct EnemyComponent
 	bool isEnemy;
 	bool isClockwise;
 
-	EnemyComponent() : isEnemy(false), isClockwise(false) {}
+	float visionAngle;
+	float visionDistance;
+	bool drawVisionDebug;
+
+
+	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true) {}
 };

@@ -24,37 +24,26 @@ EnemyBehaviour::EnemyBehaviour() {
 	moveHorizontal = true;
 
 	//For now all enemies have same way point
-	//waypoints.push_back(myMath::Vector2D(400, 200));
-	//waypoints.push_back(myMath::Vector2D(300, 200));
-	//waypoints.push_back(myMath::Vector2D(300, 100));
-     
-	//waypoints.push_back(myMath::Vector2D(-200, 200)); // left top
- //   waypoints.push_back(myMath::Vector2D(-200, -200)); // left bottom
-	//waypoints.push_back(myMath::Vector2D(200, -200)); // right bottom
-	//waypoints.push_back(myMath::Vector2D(200, 200)); // right top
-
-    //waypoints.push_back(myMath::Vector2D(-200, 200)); // left top
-    //waypoints.push_back(myMath::Vector2D(200, 200)); // right top
-    //waypoints.push_back(myMath::Vector2D(200, -200)); // right bottom
-    //waypoints.push_back(myMath::Vector2D(-200, -200)); // left bottom
-
-    //waypoints.push_back(myMath::Vector2D(-200, 200));
-    //waypoints.push_back(myMath::Vector2D(200, 200));
-    //waypoints.push_back(myMath::Vector2D(200, -200));
-    //waypoints.push_back(myMath::Vector2D(-200, -200));
-    //waypoints.push_back(myMath::Vector2D(-200, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, 100));
-    //waypoints.push_back(myMath::Vector2D(-200, 100));
-
+    
+    //Test CW
     waypoints.push_back(myMath::Vector2D(-200, 200));
-	waypoints.push_back(myMath::Vector2D(-200, 100));
-	waypoints.push_back(myMath::Vector2D(-100, 100));
-	waypoints.push_back(myMath::Vector2D(-100, -100));
-	waypoints.push_back(myMath::Vector2D(-200, -100));
-	waypoints.push_back(myMath::Vector2D(-200, -200));
-	waypoints.push_back(myMath::Vector2D(200, -200));
-	waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(200, -200));
+    waypoints.push_back(myMath::Vector2D(-200, -200));
+    waypoints.push_back(myMath::Vector2D(-200, -100));
+    waypoints.push_back(myMath::Vector2D(-100, -100));
+    waypoints.push_back(myMath::Vector2D(-100, 100));
+    waypoints.push_back(myMath::Vector2D(-200, 100));
+
+    //Test ACW
+    //waypoints.push_back(myMath::Vector2D(-200, 200));
+	//waypoints.push_back(myMath::Vector2D(-200, 100));
+	//waypoints.push_back(myMath::Vector2D(-100, 100));
+	//waypoints.push_back(myMath::Vector2D(-100, -100));
+	//waypoints.push_back(myMath::Vector2D(-200, -100));
+	//waypoints.push_back(myMath::Vector2D(-200, -200));
+	//waypoints.push_back(myMath::Vector2D(200, -200));
+	//waypoints.push_back(myMath::Vector2D(200, 200));
 
 }
 
@@ -106,7 +95,7 @@ void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D veloci
         float rotationAngle = 0.0f;
 
         if (std::abs(velocity.GetY()) > minVelocityThreshold) {
-			std::cout << velocity.GetY() << std::endl;
+			//std::cout << velocity.GetY() << std::endl;
             float yDirection = 0.f;
             if (velocity.GetY() < 0.f) {
                 if (clockwise) { yDirection = velocity.GetY(); }

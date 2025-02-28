@@ -31,6 +31,8 @@ public:
 		std::vector<myMath::Vector2D>().swap(waypoints);
 	}
 
+	//void drawDebugVisionCone(Entity entity, myMath::Matrix3x3 viewMatrix);
+
 	void update(Entity entity) override;
 	void switchState(STATE newState);
 	std::vector<myMath::Vector2D>& getWaypoints();
