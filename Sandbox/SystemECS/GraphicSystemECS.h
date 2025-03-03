@@ -38,4 +38,6 @@ public:
 
 private:
 	MouseBehaviour mouseBehaviour;
+	bool fpsEntityCreated = false;
+
 };

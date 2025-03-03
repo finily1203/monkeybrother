@@ -154,12 +154,14 @@ public:
 
 	void test5();
 	void initialiseSystemsAndComponents();
-
+	void ensureFPSDisplay(); // Method to ensure FPS display exists
+	Entity getFPSDisplayEntity() const { return fpsDisplayEntity; }
 private:
 	std::unique_ptr<EntityManager> entityManager;
 	std::unique_ptr<ComponentManager> componentManager;
 	std::unique_ptr<SystemManager> systemManager;
-
+	Entity fpsDisplayEntity = 0; 
+	bool fpsDisplayCreated = false;
 	Entity firstEntity;
 };
 

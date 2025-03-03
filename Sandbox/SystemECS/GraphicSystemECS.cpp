@@ -96,6 +96,24 @@ void GraphicSystemECS::update(float dt) {
             playerTransform = &ecsCoordinator.getComponent<TransformComponent>(entity);
             break;
         }
+
+    }
+    Entity fpsEntity = ecsCoordinator.getFPSDisplayEntity();
+    if (fpsEntity != 0) {
+       
+        if (ecsCoordinator.hasComponent<FontComponent>(fpsEntity)) {
+            auto& font = ecsCoordinator.getComponent<FontComponent>(fpsEntity);
+
+           
+            if (GLFWFunctions::showFPS) {
+                char fpsText[32];
+                snprintf(fpsText, sizeof(fpsText), "FPS:%.0f", GLFWFunctions::fps);
+                font.text = fpsText;
+            }
+            else {
+                font.text = ""; 
+            }
+        }
     }
 
     // Update camera once per frame

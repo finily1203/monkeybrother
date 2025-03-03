@@ -66,7 +66,7 @@ bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
-
+bool GLFWFunctions::showFPS = true;
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
 bool GLFWFunctions::newSceneLoaded = false;
@@ -322,6 +322,11 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         if ((*keyState)[Key::L] && (*keyState)[Key::O] && (*keyState)[Key::S] && (*keyState)[Key::E]) {
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
+        }
+
+        if (mappedKey == Key::M) {
+            showFPS = !showFPS; 
+            std::cout << "FPS Display: " << (showFPS ? "Shown" : "Hidden") << std::endl;
         }
 
         if ((*keyState)[Key::F] && action == GLFW_PRESS && !GameViewWindow::getPaused()) {

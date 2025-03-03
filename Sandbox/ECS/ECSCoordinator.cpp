@@ -58,9 +58,122 @@ void ECSCoordinator::initialise() {
 	systemManager = std::make_unique<SystemManager>();
 }
 
+
+void ECSCoordinator::ensureFPSDisplay() {
+
+	if (fpsDisplayCreated && fpsDisplayEntity != 0) {
+		bool entityExists = false;
+		for (auto entity : getAllLiveEntities()) {
+			if (entity == fpsDisplayEntity) {
+				entityExists = true;
+				break;
+			}
+		}
+		if (entityExists) {
+			return;
+		}
+	}
+
+	JSONSerializer serializer;
+	std::string configPath = FilePathManager::GetFPSConfigJSONPath();
+
+	if (!serializer.Open(configPath)) {
+		std::cerr << "Error: Could not open FPS display configuration from " << configPath << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	if (!jsonObj.contains("fpsDisplay")) {
+		
+		return;
+	}
+
+	const auto& fpsConfig = jsonObj["fpsDisplay"];
+
+	
+	if (!fpsConfig.contains("position") || !fpsConfig.contains("font")) {
+		
+		return;
+	}
+
+	fpsDisplayEntity = createEntity();
+
+	TransformComponent transform{};
+	transform.position.SetX(fpsConfig["position"]["x"].get<float>());
+	transform.position.SetY(fpsConfig["position"]["y"].get<float>());
+
+	if (fpsConfig.contains("scale")) {
+		transform.scale.SetX(fpsConfig["scale"]["x"].get<float>());
+		transform.scale.SetY(fpsConfig["scale"]["y"].get<float>());
+	}
+
+	addComponent(fpsDisplayEntity, transform);
+
+	FontComponent font{};
+	const auto& fontConfig = fpsConfig["font"];
+
+	if (!fontConfig.contains("id") || !fontConfig.contains("scale") ||
+		!fontConfig.contains("color") || !fontConfig.contains("textBoxWidth")) {
+		std::cerr << "Error: Font configuration missing required properties" << std::endl;
+		destroyEntity(fpsDisplayEntity);
+		return;
+	}
+
+	font.fontId = fontConfig["id"].get<std::string>();
+	font.textScale = fontConfig["scale"].get<float>();
+	font.textBoxWidth = fontConfig["textBoxWidth"].get<float>();
+
+	// Set text prefix, if available
+	font.text = fontConfig.contains("prefix") ? fontConfig["prefix"].get<std::string>() : "FPS: ";
+
+	// Set font color
+	const auto& colorConfig = fontConfig["color"];
+	font.color = myMath::Vector3D(
+		colorConfig["r"].get<float>(),
+		colorConfig["g"].get<float>(),
+		colorConfig["b"].get<float>()
+	);
+
+
+	if (!GLFWFunctions::showFPS) {
+		font.text = "";
+	}
+
+	addComponent(fpsDisplayEntity, font);
+
+
+	entityManager->setEntityId(fpsDisplayEntity, "fpsDisplay");
+
+	// Add to appropriate layer
+	int layerToUse = 0; // Default to layer 0 if not specified
+
+	if (fpsConfig.contains("layer")) {
+		int targetLayer = fpsConfig["layer"].get<int>();
+
+		if (targetLayer >= 0) {
+			layerToUse = targetLayer;
+		}
+		else {
+			
+			layerToUse = layerManager.getLayerCount() - 1;
+			if (layerToUse < 0) layerToUse = 0;
+		}
+	}
+
+	while (layerManager.getLayerCount() <= layerToUse) {
+		layerManager.addNewLayer();
+	}
+
+	layerManager.addEntityToLayer(layerToUse, fpsDisplayEntity);
+
+	fpsDisplayCreated = true;
+}
+
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
+	ensureFPSDisplay();
 	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
