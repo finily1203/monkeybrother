@@ -43,6 +43,8 @@ public:
 
 	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
 
+	void updateChaseState(Entity entity);
+
 private:
 	STATE currentState;
 	std::vector<myMath::Vector2D> waypoints;

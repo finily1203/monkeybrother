@@ -26,24 +26,24 @@ EnemyBehaviour::EnemyBehaviour() {
 	//For now all enemies have same way point
     
     //Test CW
-    //waypoints.push_back(myMath::Vector2D(-200, 200));
-    //waypoints.push_back(myMath::Vector2D(200, 200));
-    //waypoints.push_back(myMath::Vector2D(200, -200));
-    //waypoints.push_back(myMath::Vector2D(-200, -200));
-    //waypoints.push_back(myMath::Vector2D(-200, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, 100));
-    //waypoints.push_back(myMath::Vector2D(-200, 100));
+    waypoints.push_back(myMath::Vector2D(-200, 200));
+    waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(200, -200));
+    waypoints.push_back(myMath::Vector2D(-200, -200));
+    waypoints.push_back(myMath::Vector2D(-200, -100));
+    waypoints.push_back(myMath::Vector2D(-100, -100));
+    waypoints.push_back(myMath::Vector2D(-100, 100));
+    waypoints.push_back(myMath::Vector2D(-200, 100));
 
     //Test ACW
-    waypoints.push_back(myMath::Vector2D(-200, 200));
-	waypoints.push_back(myMath::Vector2D(-200, 100));
-	waypoints.push_back(myMath::Vector2D(-100, 100));
-	waypoints.push_back(myMath::Vector2D(-100, -100));
-	waypoints.push_back(myMath::Vector2D(-200, -100));
-	waypoints.push_back(myMath::Vector2D(-200, -200));
-	waypoints.push_back(myMath::Vector2D(200, -200));
-	waypoints.push_back(myMath::Vector2D(200, 200));
+ //   waypoints.push_back(myMath::Vector2D(-200, 200));
+	//waypoints.push_back(myMath::Vector2D(-200, 100));
+	//waypoints.push_back(myMath::Vector2D(-100, 100));
+	//waypoints.push_back(myMath::Vector2D(-100, -100));
+	//waypoints.push_back(myMath::Vector2D(-200, -100));
+	//waypoints.push_back(myMath::Vector2D(-200, -200));
+	//waypoints.push_back(myMath::Vector2D(200, -200));
+	//waypoints.push_back(myMath::Vector2D(200, 200));
 
 }
 
@@ -60,14 +60,17 @@ void EnemyBehaviour::update(Entity entity) {
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
 	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
 	if (enemySeePlayer) {
+		//switchState(CHASE);
         std::cout << "Enemy Sees Player" << std::endl;
 	}
 
 	switch (currentState) {
 	case PATROL:
+		std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
 		updatePatrolState(entity);
 		break;
 	case CHASE:
+        //updateChaseState(entity);
 		break;
 	case ATTACK:
 		break;
@@ -222,7 +225,6 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     }
 
 }
-
 // ==================================== PATROL STATE IMPLEMENTATION ==================================== //
 
 // ==================================== CHASE STATE IMPLEMENTATION ==================================== //
@@ -285,5 +287,64 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     return true;
 }
 
+
+void EnemyBehaviour::updateChaseState(Entity entity) {
+    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+    auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+    auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
+
+    // Get player entity
+    auto playerEntity = ecsCoordinator.getEntityFromID("player");
+    myMath::Vector2D playerPos = ecsCoordinator.getComponent<TransformComponent>(playerEntity).position;
+
+    // Calculate direction to player
+    myMath::Vector2D dirToPlayer = playerPos - transform.position;
+    float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2));
+
+    // Check if player is within vision distance
+    auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);
+    if (distanceToPlayer > enemyComponent.visionDistance) {
+        switchState(PATROL);
+        return;
+    }
+
+    // Normalize the direction vector
+    if (distanceToPlayer > 0) {
+        dirToPlayer /= distanceToPlayer;
+    }
+
+    // Apply movement force
+    float chaseForce = 20.0f; // Example chase force magnitude
+    forceManager.AddForce(entity, dirToPlayer * chaseForce);
+
+    // Physics calculations
+    float invMass = physics.mass > 0.f ? 1.f / physics.mass : 0.f;
+    physics.acceleration = physics.accumulatedForce * invMass;
+
+    // Update velocity
+    physics.velocity.SetX(physics.velocity.GetX() + physics.acceleration.GetX() * GLFWFunctions::delta_time);
+    physics.velocity.SetY(physics.velocity.GetY() + physics.acceleration.GetY() * GLFWFunctions::delta_time);
+
+    // Set max speed limit
+    const float maxSpeed = 0.3f; // Slightly faster than patrol
+    if (physics.velocity.GetX() > maxSpeed) physics.velocity.SetX(maxSpeed);
+    if (physics.velocity.GetX() < -maxSpeed) physics.velocity.SetX(-maxSpeed);
+    if (physics.velocity.GetY() > maxSpeed) physics.velocity.SetY(maxSpeed);
+    if (physics.velocity.GetY() < -maxSpeed) physics.velocity.SetY(-maxSpeed);
+
+    // Apply velocity to position
+    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
+    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
+
+    // Flip enemy direction based on movement
+    if (dirToPlayer.GetX() > 0) {
+        isFacingRight = true;
+    }
+    else {
+        isFacingRight = false;
+    }
+
+}
 
 // ==================================== CHASE STATE IMPLEMENTATION ==================================== //
