@@ -292,38 +292,38 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     return true;
 }
 
-bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
-	//for every entity that posseses the isClosest component
-	myMath::Vector2D rayOrigin = enemyPos;
-	myMath::Vector2D rayDirection = playerPos - enemyPos;
-	float rayLength = std::sqrt(std::pow(rayDirection.GetX(), 2) + std::pow(rayDirection.GetY(), 2));
+//bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
+//	//for every entity that posseses the isClosest component
+//	myMath::Vector2D rayOrigin = enemyPos;
+//	myMath::Vector2D rayDirection = playerPos - enemyPos;
+//	float rayLength = std::sqrt(std::pow(rayDirection.GetX(), 2) + std::pow(rayDirection.GetY(), 2));
+//
+//    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+//        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
+//		    auto platformOBB = collisionSystemRef->createOBBFromEntity(entity);
+//            float tMin = 0.f;
+//            float tMax = 0.f;
+//
+//            if (collisionSystemRef->checkRayOBBCollision(rayOrigin, rayDirection, platformOBB, tMin, tMax)) {
+//                // If intersection happens before reaching the player, it's obstructed
+//                if (tMin >= 0 && tMin <= rayLength) {
+//                    return true;
+//                }
+//            }
+//        }
+//    }
+//
+//
+//	return false;
+//}
 
-    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
-		    auto platformOBB = collisionSystemRef->createOBBFromEntity(entity);
-            float tMin = 0.f;
-            float tMax = 0.f;
-
-            if (collisionSystemRef->checkRayOBBCollision(rayOrigin, rayDirection, platformOBB, tMin, tMax)) {
-                // If intersection happens before reaching the player, it's obstructed
-                if (tMin >= 0 && tMin <= rayLength) {
-                    return true;
-                }
-            }
-        }
-    }
-
-
-	return false;
-}
-
-bool EnemyBehaviour::checkRayOBBCollision(const myMath::Vector2D& rayOrigin, 
-    const myMath::Vector2D& rayDirection, myMath::Vector2D& center,
-    myMath::Vector2D halfExtents, float rotation, myMath::Vector2D axes, 
-    float tMin, float tMax)
-{
-
-}
+//bool EnemyBehaviour::checkRayOBBCollision(const myMath::Vector2D& rayOrigin, 
+//    const myMath::Vector2D& rayDirection, myMath::Vector2D& center,
+//    myMath::Vector2D halfExtents, float rotation, myMath::Vector2D axes, 
+//    float tMin, float tMax)
+//{
+//
+//}
 
 
 void EnemyBehaviour::updateChaseState(Entity entity) {
