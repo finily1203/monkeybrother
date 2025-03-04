@@ -42,6 +42,9 @@ public:
     // Circle vs OBB collision detection using SAT
     bool checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration);
 
+    // Ray vs OBB collision detection
+	// bool checkRayOBBCollision(const myMath::Vector2D& rayOrigin, const myMath::Vector2D& rayDirection, const OBB& platformOBB, float& tMin, float& tMax);
+
     // OBB vs OBB collision detection using SAT (CAN DETECT OBB COLLISION)
     bool checkOBBCollisionSAT(const OBB& obb1, const OBB& obb2, myMath::Vector2D& normal, float& penetration);
 

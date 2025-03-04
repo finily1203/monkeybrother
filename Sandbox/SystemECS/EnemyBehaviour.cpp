@@ -26,24 +26,24 @@ EnemyBehaviour::EnemyBehaviour() {
 	//For now all enemies have same way point
     
     //Test CW
-    waypoints.push_back(myMath::Vector2D(-200, 200));
-    waypoints.push_back(myMath::Vector2D(200, 200));
-    waypoints.push_back(myMath::Vector2D(200, -200));
-    waypoints.push_back(myMath::Vector2D(-200, -200));
-    waypoints.push_back(myMath::Vector2D(-200, -100));
-    waypoints.push_back(myMath::Vector2D(-100, -100));
-    waypoints.push_back(myMath::Vector2D(-100, 100));
-    waypoints.push_back(myMath::Vector2D(-200, 100));
+    //waypoints.push_back(myMath::Vector2D(-200, 200));
+    //waypoints.push_back(myMath::Vector2D(200, 200));
+    //waypoints.push_back(myMath::Vector2D(200, -200));
+    //waypoints.push_back(myMath::Vector2D(-200, -200));
+    //waypoints.push_back(myMath::Vector2D(-200, -100));
+    //waypoints.push_back(myMath::Vector2D(-100, -100));
+    //waypoints.push_back(myMath::Vector2D(-100, 100));
+    //waypoints.push_back(myMath::Vector2D(-200, 100));
 
     //Test ACW
- //   waypoints.push_back(myMath::Vector2D(-200, 200));
-	//waypoints.push_back(myMath::Vector2D(-200, 100));
-	//waypoints.push_back(myMath::Vector2D(-100, 100));
-	//waypoints.push_back(myMath::Vector2D(-100, -100));
-	//waypoints.push_back(myMath::Vector2D(-200, -100));
-	//waypoints.push_back(myMath::Vector2D(-200, -200));
-	//waypoints.push_back(myMath::Vector2D(200, -200));
-	//waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(-200, 200));
+	waypoints.push_back(myMath::Vector2D(-200, 100));
+	waypoints.push_back(myMath::Vector2D(-100, 100));
+	waypoints.push_back(myMath::Vector2D(-100, -100));
+	waypoints.push_back(myMath::Vector2D(-200, -100));
+	waypoints.push_back(myMath::Vector2D(-200, -200));
+	waypoints.push_back(myMath::Vector2D(200, -200));
+	waypoints.push_back(myMath::Vector2D(200, 200));
 
 }
 
@@ -60,17 +60,17 @@ void EnemyBehaviour::update(Entity entity) {
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
 	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
 	if (enemySeePlayer) {
-		//switchState(CHASE);
+		switchState(CHASE);
         std::cout << "Enemy Sees Player" << std::endl;
 	}
 
 	switch (currentState) {
 	case PATROL:
-		std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
+		//std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
 		updatePatrolState(entity);
 		break;
 	case CHASE:
-        //updateChaseState(entity);
+        updateChaseState(entity);
 		break;
 	case ATTACK:
 		break;
@@ -284,7 +284,45 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
 
     // At this point, player is within vision distance and angle
     // Later, you can add raycast logic here to check for walls
+
+	if (isWallBlockingVision(enemyTransform.position, playerTransform.position)) {
+		return false;
+	}
+
     return true;
+}
+
+bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
+	//for every entity that posseses the isClosest component
+	myMath::Vector2D rayOrigin = enemyPos;
+	myMath::Vector2D rayDirection = playerPos - enemyPos;
+	float rayLength = std::sqrt(std::pow(rayDirection.GetX(), 2) + std::pow(rayDirection.GetY(), 2));
+
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
+		    auto platformOBB = collisionSystemRef->createOBBFromEntity(entity);
+            float tMin = 0.f;
+            float tMax = 0.f;
+
+            if (collisionSystemRef->checkRayOBBCollision(rayOrigin, rayDirection, platformOBB, tMin, tMax)) {
+                // If intersection happens before reaching the player, it's obstructed
+                if (tMin >= 0 && tMin <= rayLength) {
+                    return true;
+                }
+            }
+        }
+    }
+
+
+	return false;
+}
+
+bool EnemyBehaviour::checkRayOBBCollision(const myMath::Vector2D& rayOrigin, 
+    const myMath::Vector2D& rayDirection, myMath::Vector2D& center,
+    myMath::Vector2D halfExtents, float rotation, myMath::Vector2D axes, 
+    float tMin, float tMax)
+{
+
 }
 
 
@@ -300,14 +338,19 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
 
     // Calculate direction to player
     myMath::Vector2D dirToPlayer = playerPos - transform.position;
+	std::cout << dirToPlayer.GetX() << ", " << dirToPlayer.GetY() << std::endl;
+
     float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2));
 
     // Check if player is within vision distance
     auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);
-    if (distanceToPlayer > enemyComponent.visionDistance) {
-        switchState(PATROL);
-        return;
-    }
+
+	if (!doesEnemySeePlayer(entity, playerEntity)) {
+        if (distanceToPlayer > enemyComponent.visionDistance) {
+            switchState(PATROL);
+            return;
+        }
+	}
 
     // Normalize the direction vector
     if (distanceToPlayer > 0) {
@@ -338,12 +381,12 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
     // Flip enemy direction based on movement
-    if (dirToPlayer.GetX() > 0) {
-        isFacingRight = true;
-    }
-    else {
-        isFacingRight = false;
-    }
+    //if (dirToPlayer.GetX() > 0) {
+    //    isFacingRight = true;
+    //}
+    //else {
+    //    isFacingRight = false;
+    //}
 
 }
 
