@@ -21,6 +21,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "FontSystem.h"
 #include "LayerManager.h"
 #include "CutsceneSystem.h"
+#include "GUIGridSystem.h"
 
 
 enum SystemType { //For perfomance viewer
@@ -45,3 +46,4 @@ extern DebugSystem debugSystem;
 extern FontSystem fontSystem;
 extern LayerManager layerManager;
 extern CutsceneSystem cutsceneSystem;
+extern GridSystem gridSystem;

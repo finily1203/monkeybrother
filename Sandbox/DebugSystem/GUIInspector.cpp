@@ -57,7 +57,12 @@ int columns = 1;
 int frames = 1;
 bool playerExists = false;
 
+bool Inspector::isCtrlDragging = false;
+Entity Inspector::duplicatedEntity = -1;
+bool Inspector::hasDuplicated = false;
 
+bool Inspector::isDraggingCopies = false;
+std::set<std::pair<int, int>>* Inspector::filledCells;
 
 void Inspector::Initialise() {
 	overlappingEntities = new std::vector<std::pair<int, std::string>>();
@@ -73,6 +78,9 @@ void Inspector::Initialise() {
 		assetNames->push_back(asset);
 		std::cout << asset << std::endl;
 	}
+
+	isDraggingCopies = false;
+	filledCells = new std::set<std::pair<int, int>>();
 }
 
 void Inspector::Update() {
@@ -302,23 +310,88 @@ void Inspector::Update() {
 		// Handle entity dragging
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
+
+			bool isCtrlPressed = ImGui::GetIO().KeyCtrl;
+
 			if (isOver) {
 				moveable = true;
-			}
-			if (moveable) {
-				if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) || ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID)
-					|| ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
-					transform.position.SetX(centeredMouse.x);
-					transform.position.SetY(centeredMouse.y);
+
+				// Start Ctrl+drag copy operation
+				if (isCtrlPressed && !isDraggingCopies && draggedEntityID != -1) {
+					isDraggingCopies = true;
+					duplicatedEntity = draggedEntityID;
+					filledCells->clear();
+
+					// Add the original entity's cell to filled cells
+					auto& transform = ecsCoordinator.getComponent<TransformComponent>(duplicatedEntity);
+					myMath::Vector2D origPos = transform.position;
+					myMath::Vector2D snappedOrigPos = gridSystem.snapToGrid(origPos);
+					int origCellX = static_cast<int>(snappedOrigPos.GetX() / gridSystem.getCellSize());
+					int origCellY = static_cast<int>(snappedOrigPos.GetY() / gridSystem.getCellSize());
+					filledCells->insert({ origCellX, origCellY });
 				}
-				else {
-					transform.position.SetX(mouseWorldPos.x);
-					transform.position.SetY(mouseWorldPos.y);
+			}
+
+			if (moveable) {
+				// Regular dragging behavior for non-Ctrl case
+				if (!isCtrlPressed) {
+					if (isDraggingCopies) {
+						// User released Ctrl while dragging - stop copy mode
+						isDraggingCopies = false;
+						filledCells->clear();
+					}
+
+					// Normal entity dragging (unchanged)
+					if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) ||
+						ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID) ||
+						ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
+						transform.position.SetX(centeredMouse.x);
+						transform.position.SetY(centeredMouse.y);
+					}
+					else {
+						transform.position.SetX(mouseWorldPos.x);
+						transform.position.SetY(mouseWorldPos.y);
+					}
+				}
+				// Ctrl+drag copy mode
+				else if (isDraggingCopies) {
+					// Convert mouse position to grid cell
+					myMath::Vector2D mousePos(mouseWorldPos.x, mouseWorldPos.y);
+					myMath::Vector2D snappedMousePos = gridSystem.snapToGrid(mousePos);
+					int mouseCellX = static_cast<int>(snappedMousePos.GetX() / gridSystem.getCellSize());
+					int mouseCellY = static_cast<int>(snappedMousePos.GetY() / gridSystem.getCellSize());
+
+					// Check if this is a new cell that we haven't filled yet
+					if (filledCells->find({ mouseCellX, mouseCellY }) == filledCells->end()) {
+						// Create new entity at this cell
+						Entity newEntity = CloneEntity(duplicatedEntity);
+
+						// Position at the cell's center
+						auto& newTransform = ecsCoordinator.getComponent<TransformComponent>(newEntity);
+						newTransform.position = snappedMousePos;
+
+						// Mark this cell as filled
+						filledCells->insert({ mouseCellX, mouseCellY });
+					}
 				}
 			}
 		}
-		else {
-			moveable = false;
+		else { // Mouse released
+			if (isDraggingCopies) {
+				isDraggingCopies = false;
+				filledCells->clear();
+			}
+
+			if (moveable) {
+				// Snap to grid if in tile map mode
+				if (GameViewWindow::isTileMapMode()) {
+					myMath::Vector2D currentPos = transform.position;
+					myMath::Vector2D snappedPos = gridSystem.snapToGrid(currentPos);
+					transform.position = snappedPos;
+				}
+
+				moveable = false;
+			}
 		}
 	}
 
@@ -950,4 +1023,124 @@ void Inspector::Cleanup() {
 	overlappingEntities = nullptr;
 	delete assetNames;
 	assetNames = nullptr;
+	delete filledCells;
+	filledCells = nullptr;
+}
+
+Entity Inspector::CloneEntity(Entity sourceEntity) {
+	static int copyCounter = 1;
+
+    Entity newEntity = ecsCoordinator.createEntity();
+    
+    // Copy the entity ID with a suffix to avoid duplicates
+    std::string originalID = ecsCoordinator.getEntityID(sourceEntity);
+	std::string newID = originalID + "_copy" + std::to_string(copyCounter);
+	copyCounter++;
+    ecsCoordinator.setEntityID(newEntity, newID);
+    
+    // Copy the texture ID
+    std::string textureID = ecsCoordinator.getTextureID(sourceEntity);
+    ecsCoordinator.setTextureID(newEntity, textureID);
+    
+    // Add the entity to the same layer as the original
+    int layer = layerManager.getEntityLayer(sourceEntity);
+    layerManager.addEntityToLayer(layer, newEntity);
+    
+    // Copy TransformComponent (required for all entities)
+    if (ecsCoordinator.hasComponent<TransformComponent>(sourceEntity)) {
+        TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, transform);
+    }
+    
+    // Copy other components as needed
+    auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+    
+    // Copy AABBComponent if exists
+    if (ecsCoordinator.hasComponent<AABBComponent>(sourceEntity)) {
+        AABBComponent aabb = ecsCoordinator.getComponent<AABBComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, aabb);
+    }
+    
+    // Copy PhysicsComponent if exists
+    if (ecsCoordinator.hasComponent<PhysicsComponent>(sourceEntity)) {
+        PhysicsComponent physics = ecsCoordinator.getComponent<PhysicsComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, physics);
+    }
+    
+    // Copy FontComponent if exists
+    if (ecsCoordinator.hasComponent<FontComponent>(sourceEntity)) {
+        FontComponent font = ecsCoordinator.getComponent<FontComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, font);
+    }
+    
+    // Copy AnimationComponent if exists
+    if (ecsCoordinator.hasComponent<AnimationComponent>(sourceEntity)) {
+        AnimationComponent animation = ecsCoordinator.getComponent<AnimationComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, animation);
+    }
+    
+    // Copy CollectableComponent if exists
+    if (ecsCoordinator.hasComponent<CollectableComponent>(sourceEntity)) {
+        CollectableComponent collectable = ecsCoordinator.getComponent<CollectableComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, collectable);
+        GLFWFunctions::collectableCount++;
+    }
+    
+    // Copy PumpComponent if exists
+    if (ecsCoordinator.hasComponent<PumpComponent>(sourceEntity)) {
+        PumpComponent pump = ecsCoordinator.getComponent<PumpComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, pump);
+    }
+    
+    // Copy ExitComponent if exists
+    if (ecsCoordinator.hasComponent<ExitComponent>(sourceEntity)) {
+        ExitComponent exit = ecsCoordinator.getComponent<ExitComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, exit);
+    }
+    
+    // Copy FilterComponent if exists
+    if (ecsCoordinator.hasComponent<FilterComponent>(sourceEntity)) {
+        FilterComponent filter = ecsCoordinator.getComponent<FilterComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, filter);
+    }
+    
+    // Copy ButtonComponent if exists
+    if (ecsCoordinator.hasComponent<ButtonComponent>(sourceEntity)) {
+        ButtonComponent button = ecsCoordinator.getComponent<ButtonComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, button);
+    }
+    
+    // Copy UIComponent if exists
+    if (ecsCoordinator.hasComponent<UIComponent>(sourceEntity)) {
+        UIComponent ui = ecsCoordinator.getComponent<UIComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, ui);
+    }
+    
+    // Copy BehaviourComponent and assign the same behaviour type
+    if (ecsCoordinator.hasComponent<BehaviourComponent>(sourceEntity)) {
+        BehaviourComponent behaviour = ecsCoordinator.getComponent<BehaviourComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, behaviour);
+        
+        // Assign the same behaviour implementation
+        if (logicSystemRef->hasBehaviour<EnemyBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<EnemyBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<EffectPumpBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<ExitBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<ExitBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<CollectableBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<PlatformBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<MouseBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<MouseBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<FilterBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<FilterBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<MovPlatformBehaviour>());
+        }
+        // Don't clone Player component - there should only be one player
+    }
+    
+    return newEntity;
 }

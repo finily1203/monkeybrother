@@ -98,6 +98,8 @@ public:
 
 	static bool getPaused() { return isPaused; }
 
+	static bool isTileMapMode() { return tileMapMode; }
+
 	static int getSceneNum() { return scene; }
 
 	static void setSceneNum(int sceneNum) { scene = sceneNum; }
@@ -115,6 +117,7 @@ public:
 	static void CaptureMainWindow(); //Capture rendered game scene
 
 private:
+	static bool tileMapMode;
 	static int saveNum;
 	static int fileNum;
 	static int viewportWidth;

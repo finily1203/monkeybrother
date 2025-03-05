@@ -133,6 +133,7 @@
     <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
     <ClCompile Include="DebugSystem\GUIInspector.cpp" />
     <ClCompile Include="DebugSystem\GUIObjectCreation.cpp" />
+    <ClCompile Include="DebugSystem\GUIGridSystem.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="ECS\ComponentManager.cpp" />
     <ClCompile Include="ECS\ECSCoordinator.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="DebugSystem\GUIGridSystem.h" />
     <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
     <ClInclude Include="DebugSystem\GUIInspector.h" />
     <ClInclude Include="DebugSystem\GUIObjectCreation.h" />

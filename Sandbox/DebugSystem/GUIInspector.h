@@ -42,6 +42,8 @@ public:
 
 	static void LoadInspectorFromJSON(std::string const& filename);
 
+	static Entity CloneEntity(Entity sourceEntity);
+	
 	static int selectEntityID;
 	static int draggedEntityID;
 	static bool isSelectingEntity;
@@ -51,5 +53,12 @@ public:
 	static char textBuffer[MAXTEXTSIZE];
 	static ImVec2 mouseWorldPos;
 	static std::vector<std::pair<int, std::string>>* overlappingEntities;
+
+	static bool isCtrlDragging;        
+	static Entity duplicatedEntity;      
+	static bool hasDuplicated;
+
+	static bool isDraggingCopies;
+	static std::set<std::pair<int, int>>* filledCells;
 };
 

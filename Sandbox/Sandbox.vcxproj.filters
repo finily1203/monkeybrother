@@ -53,6 +53,7 @@
     <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
     <ClCompile Include="LayerSystem\LayerManager.cpp" />
     <ClCompile Include="CutsceneSystem\CutsceneSystem.cpp" />
+    <ClCompile Include="DebugSystem\GUIGridSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -128,6 +129,7 @@
     <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="LayerSystem\LayerManager.h" />
     <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
+    <ClInclude Include="DebugSystem\GUIGridSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

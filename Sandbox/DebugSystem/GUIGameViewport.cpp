@@ -108,12 +108,15 @@ float GameViewWindow::initialZoom;
 float GameViewWindow::mouseWheelScaleFactor;
 int GameViewWindow::objectCounter = 1;
 bool playerExist = false;
+bool GameViewWindow::tileMapMode = false;
 
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
 	//currentZoom = cameraSystem.getCameraZoom();
+
+	gridSystem.initialise(64.0f, 100, 100);
 }
 bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
@@ -163,7 +166,8 @@ void GameViewWindow::Update() {
 			nlohmann::ordered_json jsonData;
 			jsonData["entities"] = nlohmann::ordered_json::array();
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 			std::ofstream outputFile(saveFile);
 			if (outputFile.is_open()) {
@@ -192,7 +196,8 @@ void GameViewWindow::Update() {
 			nlohmann::ordered_json jsonData;
 			jsonData["entities"] = nlohmann::ordered_json::array();
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 			std::ofstream outputFile(saveFile);
 			if (outputFile.is_open()) {
@@ -221,7 +226,8 @@ void GameViewWindow::Update() {
 			nlohmann::ordered_json jsonData;
 			jsonData["entities"] = nlohmann::ordered_json::array();
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 			std::ofstream outputFile(saveFile);
 			if (outputFile.is_open()) {
@@ -250,7 +256,8 @@ void GameViewWindow::Update() {
 			nlohmann::ordered_json jsonData;
 			jsonData["entities"] = nlohmann::ordered_json::array();
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 			std::ofstream outputFile(saveFile);
 			if (outputFile.is_open()) {
@@ -279,7 +286,8 @@ void GameViewWindow::Update() {
 			nlohmann::ordered_json jsonData;
 			jsonData["entities"] = nlohmann::ordered_json::array();
 			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"}
+				{"id", "placeholderentity"},
+				{"textureId", ""}
 				});
 			std::ofstream outputFile(saveFile);
 			if (outputFile.is_open()) {
@@ -465,8 +473,6 @@ void GameViewWindow::Update() {
 		clickedZoom = !clickedZoom;
 	}
 
-	ImGui::SameLine(0, optionsButtonPadding);
-
 	if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
 		GLFWFunctions::allow_camera_movement = true;
 	}
@@ -507,6 +513,12 @@ void GameViewWindow::Update() {
 		cameraSystem.setCameraZoom(currentZoom);
 	}
 
+	ImGui::SameLine(0, optionsButtonPadding);
+
+	if (ImGui::Button(tileMapMode ? "TileMap: Enabled" : "TileMap: Disabled") /*|| ImGui::IsKeyPressed(ImGuiKey_Q)*/) {
+		tileMapMode = !tileMapMode;
+	}
+
 	viewportPos = ImGui::GetWindowPos();
 
 	if (GameViewWindow::IsPointInViewport(globalMousePos.x, globalMousePos.y))
@@ -524,6 +536,10 @@ void GameViewWindow::Update() {
 		currentZoom = std::clamp(currentZoom, MIN_ZOOM, MAX_ZOOM);
 
 		cameraSystem.setCameraZoom(currentZoom);
+	}
+
+	if (tileMapMode) {
+		gridSystem.drawGrid();
 	}
 
 	CaptureMainWindow();
@@ -719,26 +735,42 @@ void GameViewWindow::SaveViewportConfigToJSON(std::string const& filename)
 //Create entity from drag and drop
 void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier) {
 	if (specifier == PREFAB)
-	{
-		std::string assetPath = assetsManager.GetPrefabPath(assetName);
-		LoadPrefabFromJSON(assetName, assetPath);
-		return;
+    {
+        std::string assetPath = assetsManager.GetPrefabPath(assetName);
+        LoadPrefabFromJSON(assetName, assetPath);
+        return;
+    }
+
+    Entity dropEntity = ecsCoordinator.createEntity();
+
+    auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+
+    //default add to layer 0
+    layerManager.addEntityToLayer(0, dropEntity);
+
+    TransformComponent transform;
+    // Get the mouse world position
+    ImVec2 mouseWorldPos = Inspector::getMouseWorldPos();
+
+    // Convert to Vector2D for use with the grid system
+    myMath::Vector2D originalPos(mouseWorldPos.x, mouseWorldPos.y);
+
+    // Apply grid snapping
+    myMath::Vector2D snappedPos = gridSystem.snapToGrid(originalPos);
+
+	if (tileMapMode) {
+		// Use the snapped position
+		transform.position = snappedPos;
+		transform.scale = { gridSystem.getCellSize(), gridSystem.getCellSize() };
+		transform.orientation = { 0.0f, 0.0f };
+	}
+	else {
+		transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
+		transform.scale = { 100.0f, 100.0f };
+		transform.orientation = { 0.0f, 0.0f };
 	}
 
-
-	Entity dropEntity = ecsCoordinator.createEntity();
-
-	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-
-	//default add to layer 0
-	layerManager.addEntityToLayer(0, dropEntity);
-
-	TransformComponent transform;
-	transform.position = { Inspector::getMouseWorldPos().x, Inspector::getMouseWorldPos().y };
-	transform.scale = { 100.0f, 100.0f };
-	transform.orientation = { 0.0f, 0.0f };
-
-	ecsCoordinator.addComponent(dropEntity, transform);
+    ecsCoordinator.addComponent(dropEntity, transform);
 
 	BehaviourComponent behaviour;
 	behaviour.none = true;

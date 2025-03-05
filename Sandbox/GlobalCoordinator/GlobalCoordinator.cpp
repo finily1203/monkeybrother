@@ -21,3 +21,4 @@ FontSystem fontSystem;
 AudioSystem audioSystem;
 LayerManager layerManager;
 CutsceneSystem cutsceneSystem;
+GridSystem gridSystem;
