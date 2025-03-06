@@ -26,9 +26,12 @@ EnemyBehaviour::EnemyBehaviour() {
 	//For now all enemies have same way point
     
     //Test CW
-    waypoints.push_back(myMath::Vector2D(-200, 200));
-    waypoints.push_back(myMath::Vector2D(200, 200));
-    waypoints.push_back(myMath::Vector2D(200, -200));
+    waypoints.push_back(myMath::Vector2D(-200, 50));
+    //waypoints.push_back(myMath::Vector2D(200, 200));
+    waypoints.push_back(myMath::Vector2D(300, 100));
+    waypoints.push_back(myMath::Vector2D(-300, -100));
+
+    waypoints.push_back(myMath::Vector2D(-100, 0));
     waypoints.push_back(myMath::Vector2D(-200, -200));
     waypoints.push_back(myMath::Vector2D(-200, -100));
     waypoints.push_back(myMath::Vector2D(-100, -100));
@@ -81,68 +84,68 @@ void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D veloci
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 	auto& clockwise = ecsCoordinator.getComponent<EnemyComponent>(entity).isClockwise;
 
-    // Only update rotation if there's meaningful movement
-    const float minVelocityThreshold = 0.01f;
-    float velocityMagnitude = static_cast<float>(std::sqrt(std::pow(velocity.GetX(), 2) + std::pow(velocity.GetY(), 2)));
+  //  // Only update rotation if there's meaningful movement
+  //  const float minVelocityThreshold = 0.01f;
+  //  float velocityMagnitude = static_cast<float>(std::sqrt(std::pow(velocity.GetX(), 2) + std::pow(velocity.GetY(), 2)));
 
-    if (velocityMagnitude > minVelocityThreshold) {
-        // Handle horizontal orientation (flipping)
-        if (velocity.GetX() > minVelocityThreshold && !EnemyBehaviour::isFacingRight) {
-            // Fish is moving right but facing left, so flip it
-            transform.scale.SetX(std::abs(transform.scale.GetX())); // Make scale positive
-			EnemyBehaviour::isFacingRight = true;
-        }
-        else if (velocity.GetX() < -minVelocityThreshold && EnemyBehaviour::isFacingRight) {
-            // Fish is moving left but facing right, so flip it
-            transform.scale.SetX(-std::abs(transform.scale.GetX())); // Make scale negative
-			EnemyBehaviour::isFacingRight = false;
-        }
+  //  if (velocityMagnitude > minVelocityThreshold) {
+  //      // Handle horizontal orientation (flipping)
+  //      if (velocity.GetX() > minVelocityThreshold && !EnemyBehaviour::isFacingRight) {
+  //          // Fish is moving right but facing left, so flip it
+  //          transform.scale.SetX(std::abs(transform.scale.GetX())); // Make scale positive
+		//	EnemyBehaviour::isFacingRight = true;
+  //      }
+  //      else if (velocity.GetX() < -minVelocityThreshold && EnemyBehaviour::isFacingRight) {
+  //          // Fish is moving left but facing right, so flip it
+  //          transform.scale.SetX(-std::abs(transform.scale.GetX())); // Make scale negative
+		//	EnemyBehaviour::isFacingRight = false;
+  //      }
 
-        // Calculate proper rotation for up/down movement
-        float rotationAngle = 0.0f;
+  //      // Calculate proper rotation for up/down movement
+  //      float rotationAngle = 0.0f;
 
-        if (std::abs(velocity.GetY()) > minVelocityThreshold) {
-			//std::cout << velocity.GetY() << std::endl;
-            float yDirection = 0.f;
-            if (velocity.GetY() < 0.f) {
-                if (clockwise) { yDirection = velocity.GetY(); }
-                else { yDirection = -velocity.GetY(); }
-			}
-            else {
-                if (clockwise) { yDirection = -velocity.GetY(); }
-                else { yDirection = velocity.GetY(); }
-            }
+  //      if (std::abs(velocity.GetY()) > minVelocityThreshold) {
+		//	//std::cout << velocity.GetY() << std::endl;
+  //          float yDirection = 0.f;
+  //          if (velocity.GetY() < 0.f) {
+  //              if (clockwise) { yDirection = velocity.GetY(); }
+  //              else { yDirection = -velocity.GetY(); }
+		//	}
+  //          else {
+  //              if (clockwise) { yDirection = -velocity.GetY(); }
+  //              else { yDirection = velocity.GetY(); }
+  //          }
 
-            float xComponent = isFacingRight ? std::abs(velocity.GetX()) : -std::abs(velocity.GetX());
+  //          float xComponent = isFacingRight ? std::abs(velocity.GetX()) : -std::abs(velocity.GetX());
 
-            // Only calculate rotation if horizontal movement isn't dominant
-            if (std::abs(velocity.GetY()) > 0.5f * std::abs(velocity.GetX())) {
-                if (clockwise) {
-                    if (velocity.GetY() > 0.f && isFacingRight) {
-                        rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
-                    }
-                    else {
-                        rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
-                    }
-                }
-                else {
-                    if (velocity.GetY() < 0.f && isFacingRight) {
-						rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
-					}
-                    else {
-                        rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
-                    }
-                }
+  //          // Only calculate rotation if horizontal movement isn't dominant
+  //          if (std::abs(velocity.GetY()) > 0.5f * std::abs(velocity.GetX())) {
+  //              if (clockwise) {
+  //                  if (velocity.GetY() > 0.f && isFacingRight) {
+  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
+  //                  }
+  //                  else {
+  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
+  //                  }
+  //              }
+  //              else {
+  //                  if (velocity.GetY() < 0.f && isFacingRight) {
+		//				rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
+		//			}
+  //                  else {
+  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
+  //                  }
+  //              }
 
-                // Clamp the rotation to avoid extreme angles (-30° to 30°)
-                rotationAngle = std::max(-90.f, std::min(rotationAngle, 90.f));
-            }
-        }
+  //              // Clamp the rotation to avoid extreme angles (-30° to 30°)
+  //              rotationAngle = std::max(-90.f, std::min(rotationAngle, 90.f));
+  //          }
+  //      }
 
-        // Apply rotation
-		transform.orientation.SetX(rotationAngle);
-		
-    }
+  //      // Apply rotation
+		//transform.orientation.SetX(rotationAngle);
+		//
+  //  }
 }
 
 // ==================================== PATROL STATE IMPLEMENTATION ==================================== //
@@ -161,67 +164,51 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
+    Force force = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
     auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
+    myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
+    float mass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
 
-    // Set the current waypoint target
-    myMath::Vector2D target = currentWaypoints[currentWPIndex];
-
-    if (moveHorizontal) {
-        if (transform.position.GetX() >= target.GetX() - 1.f && transform.position.GetX() <= target.GetX() + 1.f) {
-			transform.position.SetX(target.GetX());
-			moveHorizontal = false;
-            physics.accumulatedForce.SetX(0.f);
-            physics.velocity.SetX(0.f);
-		}
-        else {
-            if (transform.position.GetX() < target.GetX()) {
-                forceManager.AddForce(entity, myMath::Vector2D(20.0f, 0.f));
-            }
-            else {
-                forceManager.AddForce(entity, myMath::Vector2D(-20.0f, 0.f));
-            }
-        }
-        // Physics calculations
-        float invMass = physics.mass > 0.f ? 1.f / physics.mass : 0.f;
-        physics.acceleration = physics.accumulatedForce * invMass;
-
-        // Update velocity
-        physics.velocity.SetX(physics.velocity.GetX() + physics.acceleration.GetX() * GLFWFunctions::delta_time);
-
-        const float maxSpeed = 0.2f; // Example max speed
-        if (physics.velocity.GetX() > maxSpeed) physics.velocity.SetX(maxSpeed);
-        if (physics.velocity.GetX() < -maxSpeed) physics.velocity.SetX(-maxSpeed);
-
-        // Apply velocity to position
-        transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
+    if (currentWaypoints.empty())
+    {
+        return; // No waypoints to follow
     }
-    else {
-        if (transform.position.GetY() >= target.GetY() - 1.f && transform.position.GetY() <= target.GetY() + 1.f) {
-            transform.position.SetY(target.GetY());
-			//std::cout << transform.position.GetY() << ", " << target.GetY() << std::endl;
-            moveHorizontal = true;
-            physics.accumulatedForce.SetY(0.f);
-            physics.velocity.SetY(0.f);
-            currentWPIndex = (currentWPIndex + 1) % currentWaypoints.size();
+
+    Console::GetLog() << "Waypoints: " << currentWaypoints.size() << std::endl;
+    Console::GetLog() << "Current waypoint: " << currentWPIndex << std::endl;
+
+    myMath::Vector2D targetWP = currentWaypoints[currentWPIndex];
+    myMath::Vector2D direction = targetWP - transform.position;
+
+    // Compute squared distance (avoid using .Length())
+    float squaredDist = direction.GetX() * direction.GetX() + direction.GetY() * direction.GetY();
+    float threshold = 100.0f; // Squared threshold (avoid sqrt)
+
+    // Move toward waypoint
+    float length = sqrt(squaredDist); // Compute length only once
+    if (length > 0)
+    {
+        direction.SetX(direction.GetX() / length); // Normalize direction
+        direction.SetY(direction.GetY() / length);
+    }
+
+    float speed = 3.f; // 3 for testing; 1.5 for actual
+    physics.velocity = direction * speed;
+    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
+    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
+
+    Console::GetLog() << "bsbsbsbsbsbs: " << squaredDist << " " << threshold << std::endl;
+    // If close enough to waypoint, switch to the next one
+    if (squaredDist < threshold)
+    {
+        if (currentWPIndex == currentWaypoints.size() - 1)
+        {
+            currentWPIndex = 0; // Loop back to first waypoint
         }
-        else {
-            if (transform.position.GetY() < target.GetY()) {
-                forceManager.AddForce(entity, myMath::Vector2D(0.f, 20.0f));
-            }
-            else {
-                forceManager.AddForce(entity, myMath::Vector2D(0.f, -20.0f));
-            }
+        else
+        {
+            currentWPIndex++;
         }
-        // Physics calculations
-        float invMass = physics.mass > 0.f ? 1.f / physics.mass : 0.f;
-        physics.acceleration = physics.accumulatedForce * invMass;
-        // Update velocity
-        physics.velocity.SetY(physics.velocity.GetY() + physics.acceleration.GetY() * GLFWFunctions::delta_time);
-        const float maxSpeed = 0.2f; // Example max speed
-        if (physics.velocity.GetY() > maxSpeed) physics.velocity.SetY(maxSpeed);
-        if (physics.velocity.GetY() < -maxSpeed) physics.velocity.SetY(-maxSpeed);
-        // Apply velocity to position
-        transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
     }
 
 }
