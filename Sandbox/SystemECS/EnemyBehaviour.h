@@ -45,8 +45,7 @@ public:
 
 	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
 	bool isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos);
-	bool checkRayOBBCollision(const myMath::Vector2D& rayOrigin, const myMath::Vector2D& rayDirection, myMath::Vector2D& center,
-							  myMath::Vector2D halfExtents, float rotation, myMath::Vector2D axes, float tMin, float tMax);
+	bool rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDir, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tmin, float& tmax);
 
 
 	void updateChaseState(Entity entity);

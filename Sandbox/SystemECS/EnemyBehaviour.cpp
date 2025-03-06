@@ -292,38 +292,54 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     return true;
 }
 
-//bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
-//	//for every entity that posseses the isClosest component
-//	myMath::Vector2D rayOrigin = enemyPos;
-//	myMath::Vector2D rayDirection = playerPos - enemyPos;
-//	float rayLength = std::sqrt(std::pow(rayDirection.GetX(), 2) + std::pow(rayDirection.GetY(), 2));
-//
-//    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-//        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
-//		    auto platformOBB = collisionSystemRef->createOBBFromEntity(entity);
-//            float tMin = 0.f;
-//            float tMax = 0.f;
-//
-//            if (collisionSystemRef->checkRayOBBCollision(rayOrigin, rayDirection, platformOBB, tMin, tMax)) {
-//                // If intersection happens before reaching the player, it's obstructed
-//                if (tMin >= 0 && tMin <= rayLength) {
-//                    return true;
-//                }
-//            }
-//        }
-//    }
-//
-//
-//	return false;
-//}
+bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
+            auto& wallTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+            myMath::Vector2D wallMin = { wallTransform.position.GetX() - (wallTransform.scale.GetX() / 2),
+                                         wallTransform.position.GetY() - (wallTransform.scale.GetY() / 2) };
+			myMath::Vector2D wallMax = { wallTransform.position.GetX() + (wallTransform.scale.GetX() / 2),
+										 wallTransform.position.GetY() + (wallTransform.scale.GetY() / 2) };
 
-//bool EnemyBehaviour::checkRayOBBCollision(const myMath::Vector2D& rayOrigin, 
-//    const myMath::Vector2D& rayDirection, myMath::Vector2D& center,
-//    myMath::Vector2D halfExtents, float rotation, myMath::Vector2D axes, 
-//    float tMin, float tMax)
-//{
-//
-//}
+            float tMin = 0.0f;
+            float tMax = 0.0f;
+            if (rayIntersectAABB(enemyPos, playerPos, wallMin, wallMax, tMin, tMax)) {
+				std::cout << "Wall blocking vision" << std::endl;
+                return true; // Ray is blocked by a wall
+            }
+        }
+    }
+
+
+	return false;
+}
+
+bool EnemyBehaviour::rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDirection, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tMin, float& tMax) {
+	tMin = (aabbMin.GetX() - rayOrigin.GetX()) / rayDirection.GetX();
+	tMax = (aabbMax.GetX() - rayOrigin.GetX()) / rayDirection.GetX();
+	if (tMin > tMax) {
+		float temp = tMin;
+		tMin = tMax;
+		tMax = temp;
+	}
+	float tyMin = (aabbMin.GetY() - rayOrigin.GetY()) / rayDirection.GetY();
+	float tyMax = (aabbMax.GetY() - rayOrigin.GetY()) / rayDirection.GetY();
+	if (tyMin > tyMax) {
+		float temp = tyMin;
+		tyMin = tyMax;
+		tyMax = temp;
+	}
+	if ((tMin > tyMax) || (tyMin > tMax)) {
+		return false;
+	}
+	if (tyMin > tMin) {
+		tMin = tyMin;
+	}
+	if (tyMax < tMax) {
+		tMax = tyMax;
+	}
+	return true;
+}
 
 
 void EnemyBehaviour::updateChaseState(Entity entity) {

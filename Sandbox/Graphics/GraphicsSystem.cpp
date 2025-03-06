@@ -368,10 +368,11 @@ void GraphicsSystem::drawDebugCircle(TransformComponent transform, myMath::Matri
 
 void GraphicsSystem::drawDebugVisionCone(TransformComponent transform, float coneAngle, float coneDistance, myMath::Matrix3x3 viewMatrix) {
     // Start drawing lines
+	glLineWidth(3.0f);
     glBegin(GL_LINES);
 
     // Set color for vision cone (e.g., yellow)
-    glColor3f(1.0f, 1.0f, 0.0f);
+    glColor3f(1.0f, 0.0f, 1.0f);
 
     // Calculate the half angle in radians
     float halfAngleRad = glm::radians(coneAngle / 2.0f);
