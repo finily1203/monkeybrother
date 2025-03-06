@@ -192,12 +192,24 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         direction.SetY(direction.GetY() / length);
     }
 
+    float angleRadians = atan2(direction.GetY(), direction.GetX()); // Get rotation in radians
+    float angleDegrees = angleRadians * (180.0f / 3.14159265359f); // Convert to degrees if needed
+
+    transform.orientation.SetX(angleDegrees);
+    if (angleDegrees < -90 || angleDegrees > 90) 
+    {
+        transform.scale.SetY(-std::abs(transform.scale.GetY()));
+    }
+    else 
+    {
+        transform.scale.SetY(std::abs(transform.scale.GetY()));
+    }
+
     float speed = 3.f; // 3 for testing; 1.5 for actual
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    Console::GetLog() << "bsbsbsbsbsbs: " << squaredDist << " " << threshold << std::endl;
     // If close enough to waypoint, switch to the next one
     if (squaredDist < threshold)
     {
