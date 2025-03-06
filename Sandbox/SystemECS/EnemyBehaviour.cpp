@@ -48,13 +48,13 @@ void EnemyBehaviour::update(Entity entity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
-	updateEntityRotation(entity, velocity);
+	//updateEntityRotation(entity, velocity);
 
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
 	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
 	if (enemySeePlayer) {
-		switchState(CHASE);
-        std::cout << "Enemy Sees Player" << std::endl;
+		//switchState(CHASE);
+        //std::cout << "Enemy Sees Player" << std::endl;
 	}
 
 	switch (currentState) {
@@ -195,7 +195,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    float speed = 3.f; // 3 for testing; 1.5 for actual
+    float speed = 0.5f; // 3 for testing; 1.5 for actual
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -272,7 +272,6 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     }
 
     // At this point, player is within vision distance and angle
-    // Later, you can add raycast logic here to check for walls
 
 	if (isWallBlockingVision(enemyTransform.position, playerTransform.position)) {
 		return false;
@@ -293,8 +292,16 @@ bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vec
             float tMin = 0.0f;
             float tMax = 0.0f;
             if (rayIntersectAABB(enemyPos, playerPos, wallMin, wallMax, tMin, tMax)) {
-				std::cout << "Wall blocking vision" << std::endl;
-                return true; // Ray is blocked by a wall
+				// If player distance is closer to enemy than wall, then wall is not blocking vision
+				float playerDist = static_cast<float>(std::sqrt(std::pow(playerPos.GetX() - enemyPos.GetX(), 2.0) + std::pow(playerPos.GetY() - enemyPos.GetY(), 2)));
+				float wallDist = static_cast<float>(std::sqrt(std::pow(wallTransform.position.GetX() - enemyPos.GetX(), 2.0) + std::pow(wallTransform.position.GetY() - enemyPos.GetY(), 2)));
+				std::cout << "Player dist: " << playerDist << ", " << "Wall dist: " << wallDist << std::endl;
+
+
+				//it will only return true if wallDist is less than playerDist
+                if (wallDist < playerDist) {
+                    return true; // Ray is blocked by a wall
+                }
             }
         }
     }
@@ -343,7 +350,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
 
     // Calculate direction to player
     myMath::Vector2D dirToPlayer = playerPos - transform.position;
-	std::cout << dirToPlayer.GetX() << ", " << dirToPlayer.GetY() << std::endl;
+	//std::cout << dirToPlayer.GetX() << ", " << dirToPlayer.GetY() << std::endl;
 
     float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2));
 
@@ -363,7 +370,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     }
 
     // Apply movement force
-    float chaseForce = 20.0f; // Example chase force magnitude
+    float chaseForce = 5.0f; // Example chase force magnitude
     forceManager.AddForce(entity, dirToPlayer * chaseForce);
 
     // Physics calculations
@@ -375,7 +382,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     physics.velocity.SetY(physics.velocity.GetY() + physics.acceleration.GetY() * GLFWFunctions::delta_time);
 
     // Set max speed limit
-    const float maxSpeed = 0.3f; // Slightly faster than patrol
+    const float maxSpeed = 0.5f; // Slightly faster than patrol
     if (physics.velocity.GetX() > maxSpeed) physics.velocity.SetX(maxSpeed);
     if (physics.velocity.GetX() < -maxSpeed) physics.velocity.SetX(-maxSpeed);
     if (physics.velocity.GetY() > maxSpeed) physics.velocity.SetY(maxSpeed);
