@@ -22,9 +22,16 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 float PlayerBehaviour::MOVEMENT_THRESHOLD = 0;      // Default values
 float PlayerBehaviour::BASE_ROTATION_SPEED = 0;     // Will be overwritten 
 float PlayerBehaviour::MAX_ROTATION_PER_FRAME = 0;  // during initialization
+float PlayerBehaviour::ROTATION_LIMIT = 0;
+float PlayerBehaviour::ROTATION_SPEED;
+bool PlayerBehaviour::ROTATION_ENABLED = false;
 
 void PlayerBehaviour::update(Entity entity) {
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
+	ROTATION_LIMIT = GLFWFunctions::rotationAngle;
+	ROTATION_ENABLED = GLFWFunctions::rotationLimitEnabled;
+	ROTATION_SPEED = GLFWFunctions::rotationSpeed;
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
@@ -54,16 +61,56 @@ void PlayerBehaviour::update(Entity entity) {
 			float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
 			rotationAmount *= (60.0f * GLFWFunctions::delta_time);
 			rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
-			rotation.SetX(rotation.GetX() + rotationAmount);
+
+			if (ROTATION_ENABLED == false)
+			{
+				rotation.SetX(rotation.GetX() + rotationAmount);
+			}
+			
+			else
+			{
+				// Calculate new rotation value
+				float newRotation = rotation.GetX() + rotationAmount;
+
+				// clamp rotation to within limits
+				newRotation = std::clamp(newRotation, -ROTATION_LIMIT, ROTATION_LIMIT);
+
+				// apply the clamped rotation
+				rotation.SetX(newRotation);
+			}
 		}
 	}
 	else {
 		// Keyboard rotation logic
 		if ((*GLFWFunctions::keyState)[Key::D]) {
-			rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
+			if (GLFWFunctions::rotationLimitEnabled == false)
+			{
+				rotation.SetX(rotation.GetX() + (ROTATION_SPEED * GLFWFunctions::delta_time));
+			}
+
+			else
+			{
+				float newRotation = rotation.GetX() + (ROTATION_SPEED * GLFWFunctions::delta_time);
+
+				// clamp rotation to within limits
+				newRotation = std::clamp(newRotation, -ROTATION_LIMIT, ROTATION_LIMIT);
+				rotation.SetX(newRotation);
+			}
 		}
 		else if ((*GLFWFunctions::keyState)[Key::A]) {
-			rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
+			if (ROTATION_ENABLED == false)
+			{
+				rotation.SetX(rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time));
+			}
+
+			else
+			{
+				float newRotation = rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time);
+
+				// clamp rotation to within limits
+				newRotation = std::clamp(newRotation, -ROTATION_LIMIT, ROTATION_LIMIT);
+				rotation.SetX(newRotation);
+			}
 		}
 	}
 

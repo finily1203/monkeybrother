@@ -763,6 +763,20 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 			ecs.addComponent(entityObj, button);
 		}
 
+		// entity that contains font component
+		if (entityData.contains("font"))
+		{
+			// read the font data from the JSON file
+			FontComponent font{};
+			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
+			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
+			serializer.ReadObject(font.color, entityId, "entities.font.color");
+			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+			serializer.ReadObject(font.textBoxWidth, entityId, "entities.font.text.BoxWidth");
+
+			ecs.addComponent(entityObj, font);
+		}
+
 		if (entityData.contains("behaviour"))
 		{
 			BehaviourComponent behaviour{};
@@ -912,6 +926,54 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
 				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+
+		if (entityId == "rotationAngleSliderNotch")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+
+		if (entityId == "rotationAngleValue")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+			{
+				FontComponent textComponent = getComponent<FontComponent>(entity);
+
+				serializer.WriteObject(textComponent.text, entityId, "entities.font.text.string");
+			}
+		}
+
+		if (entityId == "rotationSpeedSliderNotch")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+
+		if (entityId == "rotationSpeedValue")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+			{
+				FontComponent textComponent = getComponent<FontComponent>(entity);
+				
+				serializer.WriteObject(textComponent.text, entityId, "entities.font.text.string");
 			}
 		}
 	}

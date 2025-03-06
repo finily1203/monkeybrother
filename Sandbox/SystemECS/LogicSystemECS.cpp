@@ -130,7 +130,8 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 					
 					// this statement is only applicable when we press and hold down and drag
 					// the mouse cursor on the sfxSoundbarBase and musicSoundbarBase
-					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase")
+					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase" ||
+						entityId == "rotationAngleSlider" || entityId == "rotationSpeedSlider")
 					{
 						// set the bool isDragging to true
 						isDragging = true;
@@ -160,6 +161,9 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 	// setting the correct audio arrow based on the soundbar Id
 	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
 								(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+
+	std::string sliderNotch = (getSliderId() == "rotationAngleSlider") ? "rotationAngleSliderNotch" :
+							  (getSliderId() == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
 
 	// ensuring that the string is not empty
 	if (!soundbarArrow.empty())
@@ -196,6 +200,98 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 				{
 					TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					transform.position.SetX(cursorXCentered);
+					break;
+				}
+			}
+		}
+	}
+
+	else if (!sliderNotch.empty())
+	{
+		TransformComponent sliderTransform{}, notchTransform{};
+		bool foundSlider = false;
+		bool foundSliderNotch = false;
+
+		for (auto& entity : allEntities)
+		{
+			std::string entityId = ecsCoordinator.getEntityID(entity);
+			if (entityId == getSliderId())
+			{
+				sliderTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				foundSlider = true;
+			}
+
+			else if (entityId == sliderNotch)
+			{
+				notchTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				foundSliderNotch = true;
+			}
+
+			if (foundSlider && foundSliderNotch)
+			{
+				break;
+			}
+		}
+
+		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
+		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth + 1.5f;
+
+		if (cursorXCentered >= sliderLeft && cursorXCentered <= sliderRight)
+		{
+			for (auto& entity : allEntities)
+			{
+				std::string entityId = ecsCoordinator.getEntityID(entity);
+
+				if (entityId == sliderNotch && (getSliderId() != "rotationAngleSlider" || GLFWFunctions::rotationLimitEnabled == true))
+				{
+					TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					transform.position.SetX(cursorXCentered);
+
+					if (getSliderId() == "rotationAngleSlider")
+					{
+						float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+						GLFWFunctions::rotationAngle = static_cast<int>(90.f + (normalizedPos * 270.f));
+						GLFWFunctions::rotationAngle = std::ceil((GLFWFunctions::rotationAngle / 10)) * 10;
+						GLFWFunctions::rotationAngle = std::max(90, std::min(360, GLFWFunctions::rotationAngle));
+
+						for (auto& textEntity : allEntities)
+						{
+							if (ecsCoordinator.getEntityID(textEntity) == "rotationAngleValue")
+							{
+								if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+								{
+									FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+									textComponent.text = std::to_string(GLFWFunctions::rotationAngle);
+								}
+
+								break;
+							}
+						}
+					}
+
+					else if (getSliderId() == "rotationSpeedSlider")
+					{
+						float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+						GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 90.f));
+						GLFWFunctions::rotationSpeed = std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10;
+						GLFWFunctions::rotationSpeed = std::max(90, std::min(180, GLFWFunctions::rotationSpeed));
+
+						for (auto& textEntity : allEntities)
+						{
+							if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
+							{
+								if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+								{
+									FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+									textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
+								}
+
+								break;
+							}
+						}
+					}
+
 					break;
 				}
 			}
@@ -278,6 +374,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	std::string entityId = ecsCoordinator.getEntityID(entity);
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
 	setSoundbarId("");
+	setSliderId("");
 
 	// below are all the if statements that check which button is the current entity that you are
 	// clicking on
@@ -488,7 +585,10 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9"
+			"musicNotch8", "musicNotch9", "rotationAngleSlider",
+			"rotationAngleSliderNotch", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationAngleValue",
+			"enableRotationButton", "rotationSpeedValue"
 		};
 
 		// destroy the options menu
@@ -514,6 +614,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
+		cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
 	}
 
 	else if (entityId == "closeTutorialMenu")
@@ -611,17 +712,25 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9"
+			"musicNotch8", "musicNotch9", "rotationAngleSlider",
+			"rotationAngleSliderNotch", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationAngleValue",
+			"enableRotationButton", "rotationSpeedValue"
 		};
 
 		// initializing sfxPercentage and musicPercentage variables
 		float sfxPercentage = AudioSystem::sfxPercentage;
 		float musicPercentage = AudioSystem::musicPercentage;
 
+		bool rotationLimitEnabled = GLFWFunctions::rotationLimitEnabled;
+		int rotationAngle = GLFWFunctions::rotationAngle;
+		int rotationSpeed = GLFWFunctions::rotationSpeed;
+
 		// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
 		// save the sfx and music percentages to the audio settings JSON file
 		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
+		cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationLimitEnabled, rotationAngle, rotationSpeed);
 
 		//change on audio side as well
 		audioSystem.setGenVol(musicPercentage);
@@ -650,6 +759,111 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "rotationAngleSlider" || entityId == "rotationSpeedSlider")
+	{
+		// getting the window's width, height and cursor position x and y values
+		double mouseX{}, mouseY{};
+		int windowWidth{}, windowHeight{};
+		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+		setSliderId(entityId);
+		std::string const& currentSlider = getSliderId();
+
+		// finding the actual mouse cursor position based on the window dimensions
+		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+
+		std::string sliderNotchId = (entityId == "rotationAngleSlider") ? "rotationAngleSliderNotch" : "rotationSpeedSliderNotch";
+
+		TransformComponent sliderTransform{}, notchTransform{};
+		bool foundSlider = false;
+		bool foundSliderNotch = false;
+
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == entityId)
+			{
+				sliderTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				foundSlider = true;
+			}
+
+			else if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
+			{
+				notchTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				foundSliderNotch = true;
+			}
+
+			if (foundSlider && foundSliderNotch)
+			{
+				break;
+			}
+		}
+
+		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
+		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth + 1.5f;
+
+
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId && (currentSlider != "rotationAngleSlider" || GLFWFunctions::rotationLimitEnabled == true))
+			{
+				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				transform.position.SetX(cursorXCentered);
+
+				if (currentSlider == "rotationAngleSlider")
+				{
+					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+					GLFWFunctions::rotationAngle = static_cast<int>(90.f + (normalizedPos * 270.f));
+					GLFWFunctions::rotationAngle = std::ceil((GLFWFunctions::rotationAngle / 10)) * 10;
+					GLFWFunctions::rotationAngle = std::max(90, std::min(360, GLFWFunctions::rotationAngle));
+
+					for (auto& textEntity : allEntities)
+					{
+						if (ecsCoordinator.getEntityID(textEntity) == "rotationAngleValue")
+						{
+							if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+							{
+								FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+								textComponent.text = std::to_string(GLFWFunctions::rotationAngle);
+							}
+
+							break;
+						}
+					}
+				}
+
+				else if (currentSlider == "rotationSpeedSlider")
+				{
+					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 90.f));
+					GLFWFunctions::rotationSpeed = std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10;
+					GLFWFunctions::rotationSpeed = std::max(90, std::min(180, GLFWFunctions::rotationSpeed));
+
+					for (auto& textEntity : allEntities)
+					{
+						if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
+						{
+							if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+							{
+								FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+								textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
+							}
+
+							break;
+						}
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	else if (entityId == "enableRotationButton")
+	{
+		GLFWFunctions::rotationLimitEnabled = !GLFWFunctions::rotationLimitEnabled;
 	}
 
 	

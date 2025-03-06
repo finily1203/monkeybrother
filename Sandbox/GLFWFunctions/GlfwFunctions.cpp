@@ -60,6 +60,8 @@ int GLFWFunctions::pauseMenuCount = 0;
 int GLFWFunctions::optionsMenuCount = 0;
 int GLFWFunctions::tutorialMenuCount = 0;
 int GLFWFunctions::tutorialCurrentPage = 1;
+int GLFWFunctions::rotationAngle = 0;
+int GLFWFunctions::rotationSpeed = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
@@ -72,6 +74,7 @@ bool GLFWFunctions::changeLevel = false;
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
 bool GLFWFunctions::newSceneLoaded = false;
+bool GLFWFunctions::rotationLimitEnabled = false;
 
 MouseBehaviour mouseBehaviour;
 double GLFWFunctions::mouseXDelta = 0.0;

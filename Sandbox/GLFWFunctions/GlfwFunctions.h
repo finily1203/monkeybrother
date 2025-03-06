@@ -96,6 +96,7 @@ struct GLFWFunctions {
 	static float pauseTimer;
 	const static float pauseDuration;
 	static bool newSceneLoaded;
+	static bool rotationLimitEnabled;
 
 	static int audioNum;
 	static int windowWidth;
@@ -105,6 +106,8 @@ struct GLFWFunctions {
 	static int optionsMenuCount;
 	static int tutorialMenuCount;
 	static int tutorialCurrentPage;
+	static int rotationAngle;
+	static int rotationSpeed;
 
 	static int defultWindowWidth;
 	static int defultWindowHeight;

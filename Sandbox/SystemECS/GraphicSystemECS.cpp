@@ -273,6 +273,13 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                if (ecsCoordinator.getEntityID(entity) == "rotationAngleSliderNotch" || ecsCoordinator.getEntityID(entity) == "rotationSpeedSliderNotch")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "activeSoundbarNotch");
+                }
+
         if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
         {
             // this audioType variable stores the entityId of the current audio icon entity
@@ -611,7 +618,7 @@ void GraphicSystemECS::update(float dt) {
                         TransformComponent arrowTransform{};
 
                         std::string audioArrowId = (soundbarType == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
-                            (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+                                                   (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
                         if (!audioArrowId.empty())
                         {
@@ -647,6 +654,43 @@ void GraphicSystemECS::update(float dt) {
                     {
                         ecsCoordinator.setTextureID(entity, "leftArrow");
                         updateTutorialArrows();
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "enableRotationButton")
+                    {
+                        if (GLFWFunctions::rotationLimitEnabled == true)
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeSoundbarNotch");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveSoundbarNotch");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "rotationAngleSlider" || ecsCoordinator.getEntityID(entity) == "rotationSpeedSlider")
+                    {
+                        std::string sliderType = ecsCoordinator.getEntityID(entity);
+                        TransformComponent sliderTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+                        TransformComponent notchTransform{};
+
+                        std::string sliderNotchId = (sliderType == "rotationAngleSlider") ? "rotationAngleSliderNotch" :
+                                                    (sliderType == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
+
+                        if (!sliderNotchId.empty())
+                        {
+                            for (auto& sliderNotchEntity : ecsCoordinator.getAllLiveEntities())
+                            {
+                                if (ecsCoordinator.getEntityID(sliderNotchEntity) == sliderNotchId)
+                                {
+                                    notchTransform = ecsCoordinator.getComponent<TransformComponent>(sliderNotchEntity);
+                                    break;
+                                }
+                            }
+                        }
+
+                        ecsCoordinator.setTextureID(entity, "soundbarBase");
                     }
                 }
 
