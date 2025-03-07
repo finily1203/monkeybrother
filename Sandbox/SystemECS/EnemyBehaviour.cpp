@@ -53,13 +53,13 @@ void EnemyBehaviour::update(Entity entity) {
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
 	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
 	if (enemySeePlayer) {
-		//switchState(CHASE);
-        //std::cout << "Enemy Sees Player" << std::endl;
+		switchState(CHASE);
+        std::cout << "Enemy Sees Player" << std::endl;
 	}
 
 	switch (currentState) {
 	case PATROL:
-		//std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
+		std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
 		updatePatrolState(entity);
 		break;
 	case CHASE:
@@ -70,73 +70,73 @@ void EnemyBehaviour::update(Entity entity) {
 	}
 }
 
-void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D velocity) {
-    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-	auto& clockwise = ecsCoordinator.getComponent<EnemyComponent>(entity).isClockwise;
-
-  //  // Only update rotation if there's meaningful movement
-  //  const float minVelocityThreshold = 0.01f;
-  //  float velocityMagnitude = static_cast<float>(std::sqrt(std::pow(velocity.GetX(), 2) + std::pow(velocity.GetY(), 2)));
-
-  //  if (velocityMagnitude > minVelocityThreshold) {
-  //      // Handle horizontal orientation (flipping)
-  //      if (velocity.GetX() > minVelocityThreshold && !EnemyBehaviour::isFacingRight) {
-  //          // Fish is moving right but facing left, so flip it
-  //          transform.scale.SetX(std::abs(transform.scale.GetX())); // Make scale positive
-		//	EnemyBehaviour::isFacingRight = true;
-  //      }
-  //      else if (velocity.GetX() < -minVelocityThreshold && EnemyBehaviour::isFacingRight) {
-  //          // Fish is moving left but facing right, so flip it
-  //          transform.scale.SetX(-std::abs(transform.scale.GetX())); // Make scale negative
-		//	EnemyBehaviour::isFacingRight = false;
-  //      }
-
-  //      // Calculate proper rotation for up/down movement
-  //      float rotationAngle = 0.0f;
-
-  //      if (std::abs(velocity.GetY()) > minVelocityThreshold) {
-		//	//std::cout << velocity.GetY() << std::endl;
-  //          float yDirection = 0.f;
-  //          if (velocity.GetY() < 0.f) {
-  //              if (clockwise) { yDirection = velocity.GetY(); }
-  //              else { yDirection = -velocity.GetY(); }
-		//	}
-  //          else {
-  //              if (clockwise) { yDirection = -velocity.GetY(); }
-  //              else { yDirection = velocity.GetY(); }
-  //          }
-
-  //          float xComponent = isFacingRight ? std::abs(velocity.GetX()) : -std::abs(velocity.GetX());
-
-  //          // Only calculate rotation if horizontal movement isn't dominant
-  //          if (std::abs(velocity.GetY()) > 0.5f * std::abs(velocity.GetX())) {
-  //              if (clockwise) {
-  //                  if (velocity.GetY() > 0.f && isFacingRight) {
-  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
-  //                  }
-  //                  else {
-  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
-  //                  }
-  //              }
-  //              else {
-  //                  if (velocity.GetY() < 0.f && isFacingRight) {
-		//				rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
-		//			}
-  //                  else {
-  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
-  //                  }
-  //              }
-
-  //              // Clamp the rotation to avoid extreme angles (-30° to 30°)
-  //              rotationAngle = std::max(-90.f, std::min(rotationAngle, 90.f));
-  //          }
-  //      }
-
-  //      // Apply rotation
-		//transform.orientation.SetX(rotationAngle);
-		//
-  //  }
-}
+//void EnemyBehaviour::updateEntityRotation(Entity entity, myMath::Vector2D velocity) {
+//    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+//	auto& clockwise = ecsCoordinator.getComponent<EnemyComponent>(entity).isClockwise;
+//
+//  //  // Only update rotation if there's meaningful movement
+//  //  const float minVelocityThreshold = 0.01f;
+//  //  float velocityMagnitude = static_cast<float>(std::sqrt(std::pow(velocity.GetX(), 2) + std::pow(velocity.GetY(), 2)));
+//
+//  //  if (velocityMagnitude > minVelocityThreshold) {
+//  //      // Handle horizontal orientation (flipping)
+//  //      if (velocity.GetX() > minVelocityThreshold && !EnemyBehaviour::isFacingRight) {
+//  //          // Fish is moving right but facing left, so flip it
+//  //          transform.scale.SetX(std::abs(transform.scale.GetX())); // Make scale positive
+//		//	EnemyBehaviour::isFacingRight = true;
+//  //      }
+//  //      else if (velocity.GetX() < -minVelocityThreshold && EnemyBehaviour::isFacingRight) {
+//  //          // Fish is moving left but facing right, so flip it
+//  //          transform.scale.SetX(-std::abs(transform.scale.GetX())); // Make scale negative
+//		//	EnemyBehaviour::isFacingRight = false;
+//  //      }
+//
+//  //      // Calculate proper rotation for up/down movement
+//  //      float rotationAngle = 0.0f;
+//
+//  //      if (std::abs(velocity.GetY()) > minVelocityThreshold) {
+//		//	//std::cout << velocity.GetY() << std::endl;
+//  //          float yDirection = 0.f;
+//  //          if (velocity.GetY() < 0.f) {
+//  //              if (clockwise) { yDirection = velocity.GetY(); }
+//  //              else { yDirection = -velocity.GetY(); }
+//		//	}
+//  //          else {
+//  //              if (clockwise) { yDirection = -velocity.GetY(); }
+//  //              else { yDirection = velocity.GetY(); }
+//  //          }
+//
+//  //          float xComponent = isFacingRight ? std::abs(velocity.GetX()) : -std::abs(velocity.GetX());
+//
+//  //          // Only calculate rotation if horizontal movement isn't dominant
+//  //          if (std::abs(velocity.GetY()) > 0.5f * std::abs(velocity.GetX())) {
+//  //              if (clockwise) {
+//  //                  if (velocity.GetY() > 0.f && isFacingRight) {
+//  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
+//  //                  }
+//  //                  else {
+//  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
+//  //                  }
+//  //              }
+//  //              else {
+//  //                  if (velocity.GetY() < 0.f && isFacingRight) {
+//		//				rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * -(180.0 / 3.14159265358979323846));
+//		//			}
+//  //                  else {
+//  //                      rotationAngle = static_cast<float>(std::atan2(yDirection, xComponent) * (180.0 / 3.14159265358979323846));
+//  //                  }
+//  //              }
+//
+//  //              // Clamp the rotation to avoid extreme angles (-30° to 30°)
+//  //              rotationAngle = std::max(-90.f, std::min(rotationAngle, 90.f));
+//  //          }
+//  //      }
+//
+//  //      // Apply rotation
+//		//transform.orientation.SetX(rotationAngle);
+//		//
+//  //  }
+//}
 
 // ==================================== PATROL STATE IMPLEMENTATION ==================================== //
 
@@ -350,55 +350,55 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
 
     // Calculate direction to player
     myMath::Vector2D dirToPlayer = playerPos - transform.position;
-	//std::cout << dirToPlayer.GetX() << ", " << dirToPlayer.GetY() << std::endl;
 
     float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2));
 
     // Check if player is within vision distance
     auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);
 
-	if (!doesEnemySeePlayer(entity, playerEntity)) {
+    if (!doesEnemySeePlayer(entity, playerEntity)) {
         if (distanceToPlayer > enemyComponent.visionDistance) {
             switchState(PATROL);
             return;
         }
-	}
+    }
 
     // Normalize the direction vector
     if (distanceToPlayer > 0) {
-        dirToPlayer /= distanceToPlayer;
+        dirToPlayer.SetX(dirToPlayer.GetX() / distanceToPlayer);
+        dirToPlayer.SetY(dirToPlayer.GetY() / distanceToPlayer);
     }
 
-    // Apply movement force
-    float chaseForce = 5.0f; // Example chase force magnitude
-    forceManager.AddForce(entity, dirToPlayer * chaseForce);
+    // Calculate rotation angle - same as in patrol state
+    float angleRadians = atan2(dirToPlayer.GetY(), dirToPlayer.GetX());
+    float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
 
-    // Physics calculations
-    float invMass = physics.mass > 0.f ? 1.f / physics.mass : 0.f;
-    physics.acceleration = physics.accumulatedForce * invMass;
+    // Set rotation
+    transform.orientation.SetX(angleDegrees);
 
-    // Update velocity
-    physics.velocity.SetX(physics.velocity.GetX() + physics.acceleration.GetX() * GLFWFunctions::delta_time);
-    physics.velocity.SetY(physics.velocity.GetY() + physics.acceleration.GetY() * GLFWFunctions::delta_time);
+    // Handle flipping based on angle
+    if (angleDegrees < -90 || angleDegrees > 90)
+    {
+        transform.scale.SetY(-std::abs(transform.scale.GetY()));
+    }
+    else
+    {
+        transform.scale.SetY(std::abs(transform.scale.GetY()));
+    }
 
     // Set max speed limit
     const float maxSpeed = 0.5f; // Slightly faster than patrol
-    if (physics.velocity.GetX() > maxSpeed) physics.velocity.SetX(maxSpeed);
-    if (physics.velocity.GetX() < -maxSpeed) physics.velocity.SetX(-maxSpeed);
-    if (physics.velocity.GetY() > maxSpeed) physics.velocity.SetY(maxSpeed);
-    if (physics.velocity.GetY() < -maxSpeed) physics.velocity.SetY(-maxSpeed);
-
-    // Apply velocity to position
+    physics.velocity = dirToPlayer * maxSpeed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    // Flip enemy direction based on movement
-    //if (dirToPlayer.GetX() > 0) {
-    //    isFacingRight = true;
-    //}
-    //else {
-    //    isFacingRight = false;
-    //}
+    // Update isFacingRight based on direction
+    if (dirToPlayer.GetX() > 0) {
+        isFacingRight = true;
+    }
+    else {
+        isFacingRight = false;
+    }
 
 }
 
