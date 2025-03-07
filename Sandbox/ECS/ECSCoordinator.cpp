@@ -43,6 +43,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "PlatformBehaviour.h"
 #include "FilterBehaviour.h"
 #include "MovPlatformBehaviour.h"
+#include "NavigationBehaviour.h"
 
 #include <Windows.h>
 
@@ -369,6 +370,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			ecs.addComponent(entityObj, filter);
 		}
 
+		// entity that contains navigation component
+		if (entityData.contains("navigation")) {
+			// read isFilter from the JSON file
+			NavigationComponent navigation{};
+			serializer.ReadObject(navigation.isNavigation, entityId, "entities.filter.isNavigation");
+			serializer.ReadObject(navigation.isVisible, entityId, "entities.filter.isVisible");
+			ecs.addComponent(entityObj, navigation);
+		}
+
 		// entity that contains forces component
 		if (entityData.contains("forces"))
 		{
@@ -481,7 +491,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.movPlatform");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MovPlatformBehaviour>());
 			}
-
+			else
+			if (entityData["behaviour"].contains("navigation")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.navigation");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<NavigationBehaviour>());
+			}
 
 			ecs.addComponent(entityObj, behaviour);
 		}
@@ -1135,6 +1149,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<UIComponent>();
 	registerComponent<FilterComponent>();
 	registerComponent<MovPlatformComponent>();
+	registerComponent<NavigationComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 

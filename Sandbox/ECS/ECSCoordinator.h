@@ -54,6 +54,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ExitComponent.h"
 #include "FilterComponent.h"
 #include "MovPlatformComponent.h"
+#include "NavigationComponent.h"
 
 #include <iostream>
 #include <fstream>

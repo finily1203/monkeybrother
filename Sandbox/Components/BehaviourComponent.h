@@ -25,6 +25,7 @@ struct BehaviourComponent
 	bool platform;
 	bool filter;
 	bool movPlatform;
+	bool navigation;
 
-	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false), platform(false), filter(false), movPlatform(false) {}
+	BehaviourComponent() : none(false), player(false), enemy(false), pump(false), exit(false), collectable(false), button(false), platform(false), filter(false), movPlatform(false), navigation(false) {}
 };

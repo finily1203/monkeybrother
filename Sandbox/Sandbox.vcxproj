@@ -168,6 +168,7 @@
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
+    <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Components\GraphicsComponent.h" />
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\MovPlatformComponent.h" />
+    <ClInclude Include="Components\NavigationComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="Components\PlayerComponent.h" />
@@ -242,6 +244,7 @@
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
+    <ClInclude Include="SystemECS\NavigationBehaviour.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="SystemECS\PlatformBehaviour.h" />
