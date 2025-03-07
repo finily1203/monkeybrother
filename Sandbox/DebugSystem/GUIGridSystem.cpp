@@ -3,7 +3,7 @@
 #include "GUIConsole.h"
 
 GridSystem::GridSystem()
-    : m_cellSize(64.0f), m_gridWidth(50.0f), m_gridHeight(50.0f), m_isInitialized(false)
+    : m_cellSize(0), m_gridWidth(0), m_gridHeight(0), m_isInitialized(false)
 {
 }
 

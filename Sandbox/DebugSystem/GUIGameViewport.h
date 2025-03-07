@@ -116,6 +116,24 @@ public:
 
 	static void CaptureMainWindow(); //Capture rendered game scene
 
+	static int GetNextAvailableSaveID();
+
+	static void SaveToNamedFile(int saveID, const char* saveName);
+
+	static std::string GenerateNamedSaveJSONFile(int saveID, const char* saveName);
+
+	static void DisplaySaveSlots();
+
+	static void DisplaySaveFilesForLoading();
+
+    static std::string SanitizeFilename(const std::string& filename);
+
+    static void DeleteSaveFile(int saveID);
+
+	static std::map<int, std::string> ScanForSaveFiles();
+
+
+
 private:
 	static bool tileMapMode;
 	static int saveNum;
@@ -175,4 +193,8 @@ private:
 	static int scene;
 	static int objectCounter;
 
+	static char saveNameBuffer[256];
+	static bool isNamingSaveFile;
+	static std::map<int, std::string>* saveFileNames;
+	static int confirmDeleteSaveID;
 };

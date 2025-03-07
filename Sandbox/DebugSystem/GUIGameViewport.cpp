@@ -49,6 +49,7 @@ File Contributions: Lew Zong Han Owen (58%)
 #include "MovPlatformBehaviour.h"
 #include "FilterBehaviour.h"
 #include "UIComponent.h"
+#include <filesystem>
 
 //Variables for GameViewWindow
 int GameViewWindow::viewportHeight;
@@ -110,13 +111,24 @@ int GameViewWindow::objectCounter = 1;
 bool playerExist = false;
 bool GameViewWindow::tileMapMode = false;
 
+char GameViewWindow::saveNameBuffer[256];
+bool GameViewWindow::isNamingSaveFile;
+std::map<int, std::string> *GameViewWindow::saveFileNames;
+int GameViewWindow::confirmDeleteSaveID;
+
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
-	//currentZoom = cameraSystem.getCameraZoom();
 
-	gridSystem.initialise(64.0f, 100, 100);
+	if (!saveFileNames)
+		saveFileNames = new std::map<int, std::string>();
+
+	gridSystem.initialise(128.f,100,100);
+
+	confirmDeleteSaveID = -1;
+	isNamingSaveFile = false;
+	memset(saveNameBuffer, 0, sizeof(saveNameBuffer));
 }
 bool GameViewWindow::isPaused = false;
 //Handle viewport setup, processing and rendering
@@ -137,6 +149,8 @@ void GameViewWindow::Update() {
 
 	if (ImGui::Button("Save")) {
 		isSelectingSaveFile = true;
+		memset(saveNameBuffer, 0, sizeof(saveNameBuffer)); // Clear the buffer
+		strcpy_s(saveNameBuffer, "Untitled Save"); // Default name
 	}
 
 	if (isSelectingSaveFile) {
@@ -148,202 +162,45 @@ void GameViewWindow::Update() {
 	// Create popup modal window for loading of save files
 	if (ImGui::BeginPopupModal("Choose save files", &isSelectingSaveFile, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
+		// Show save name input field if creating a new save
+		if (isNamingSaveFile) {
+			ImGui::Text("Enter save name:");
+			ImGui::InputText("##SaveName", saveNameBuffer, IM_ARRAYSIZE(saveNameBuffer));
 
-		if (ImGui::Button("Slot 1", ImVec2(slotWindowWidth, fileWindowHeight))) {
-			saveNum = 1;
-			saveFileChosen = true;
-			isSelectingSaveFile = false;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine(0, optionsButtonPadding);
-		if (ImGui::Button("Clear 1", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
-			fileNum = 1;
-			std::string saveFile = GenerateSaveJSONFile(fileNum);
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
+			if (ImGui::Button("Save", ImVec2(120, 0))) {
+				// Generate a new save ID
+				int newSaveID = GetNextAvailableSaveID();
+				(*saveFileNames)[newSaveID] = std::string(saveNameBuffer);
+
+				// Save the actual file
+				SaveToNamedFile(newSaveID, saveNameBuffer);
+
+				isNamingSaveFile = false;
+				isSelectingSaveFile = false;
+				ImGui::CloseCurrentPopup();
 			}
 
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+				isNamingSaveFile = false;
+				ImGui::CloseCurrentPopup();
+			}
 		}
+		else {
+			ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
-		if (ImGui::Button("Slot 2", ImVec2(slotWindowWidth, fileWindowHeight))) {
-			saveNum = 2;
-			saveFileChosen = true;
-			isSelectingSaveFile = false;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine(0, optionsButtonPadding);
-		if (ImGui::Button("Clear 2", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
-			fileNum = 2;
-			std::string saveFile = GenerateSaveJSONFile(fileNum);
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
+			// Add a "New Save" button at the top
+			if (ImGui::Button("+ Create New Save", ImVec2(slotWindowWidth + clearSlotWindowWidth + optionsButtonPadding, fileWindowHeight))) {
+				isNamingSaveFile = true;
 			}
 
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
+			ImGui::Separator();
+
+			// Display existing saves with their custom names
+			DisplaySaveSlots();
+
+			ImGui::EndChild();
 		}
-
-		if (ImGui::Button("Slot 3", ImVec2(slotWindowWidth, fileWindowHeight))) {
-			saveNum = 3;
-			saveFileChosen = true;
-			isSelectingSaveFile = false;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine(0, optionsButtonPadding);
-		if (ImGui::Button("Clear 3", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
-			fileNum = 3;
-			std::string saveFile = GenerateSaveJSONFile(fileNum);
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
-			}
-
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-		}
-
-		if (ImGui::Button("Slot 4", ImVec2(slotWindowWidth, fileWindowHeight))) {
-			saveNum = 4;
-			saveFileChosen = true;
-			isSelectingSaveFile = false;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine(0, optionsButtonPadding);
-		if (ImGui::Button("Clear 4", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
-			fileNum = 4;
-			std::string saveFile = GenerateSaveJSONFile(fileNum);
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
-			}
-
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-		}
-
-		if (ImGui::Button("Slot 5", ImVec2(slotWindowWidth, fileWindowHeight))) {
-			saveNum = 5;
-			saveFileChosen = true;
-			isSelectingSaveFile = false;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine(0, optionsButtonPadding);
-		if (ImGui::Button("Clear 5", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
-			fileNum = 5;
-			std::string saveFile = GenerateSaveJSONFile(fileNum);
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
-			}
-
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-		}
-
-
-		if (saveFileChosen) {
-			std::string saveFile = GenerateSaveJSONFile(saveNum);
-
-			// Create base JSON structure using ordered_json consistently
-			nlohmann::ordered_json jsonData;
-			jsonData["entities"] = nlohmann::ordered_json::array();
-
-			// Add placeholder entity using ordered_json
-			jsonData["entities"].push_back(nlohmann::ordered_json{
-				{"id", "placeholderentity"},
-				{"textureId", ""}
-				});
-
-			// Save all currently live entities
-			for (int i = 0; i < layerManager.getLayerCount(); i++) {
-				for (auto entity : layerManager.getEntitiesFromLayer(i)) {
-					std::string entityId = ecsCoordinator.getEntityID(entity);
-					std::string textureId = ecsCoordinator.getTextureID(entity);
-					if (entityId != "placeholderentity") {
-						TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-						auto entityJson = AddNewEntityToJSON(transform, entityId, textureId, ecsCoordinator, entity);
-						jsonData["entities"].push_back(entityJson);
-					}
-				}
-			}
-
-			// Clear newEntities since they're already saved
-			DebugSystem::newEntities->clear();
-
-			// Save to file
-			std::ofstream outputFile(saveFile);
-			if (outputFile.is_open()) {
-				outputFile << jsonData.dump(2);
-				outputFile.close();
-			}
-
-			saveFileChosen = false;
-			isSelectingSaveFile = false;
-			//ImGui::CloseCurrentPopup();
-		}
-
-
-		ImGui::EndChild();
 
 		ImGui::EndPopup();
 	}
@@ -364,7 +221,6 @@ void GameViewWindow::Update() {
 
 	// Create popup modal window for loading of save files
 	if (ImGui::BeginPopupModal("Load save files", &isSelectingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-
 		ImGui::BeginChild("SaveFilesList", ImVec2(saveWindowWidth, saveWindowHeight), true);
 
 		if (ImGui::Button("Original File", ImVec2(fileWindowWidth, fileWindowHeight))) {
@@ -381,77 +237,12 @@ void GameViewWindow::Update() {
 			ImGui::CloseCurrentPopup();
 		}
 
-		if (ImGui::Button("Save 1", ImVec2(fileWindowWidth, fileWindowHeight))) {
-			saveNum = 1;
-			scene = saveNum;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-			loadFileChosen = true;
-			isSelectingFile = false;
-			ImGui::CloseCurrentPopup();
-		}
+		ImGui::Separator();
 
-		if (ImGui::Button("Save 2", ImVec2(fileWindowWidth, fileWindowHeight))) {
-			saveNum = 2;
-			scene = saveNum;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-			loadFileChosen = true;
-			isSelectingFile = false;
-			ImGui::CloseCurrentPopup();
-		}
-
-		if (ImGui::Button("Save 3", ImVec2(fileWindowWidth, fileWindowHeight))) {
-			saveNum = 3;
-			scene = saveNum;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-			loadFileChosen = true;
-			isSelectingFile = false;
-			ImGui::CloseCurrentPopup();
-		}
-
-		if (ImGui::Button("Save 4", ImVec2(fileWindowWidth, fileWindowHeight))) {
-			saveNum = 4;
-			scene = saveNum;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-			loadFileChosen = true;
-			isSelectingFile = false;
-			ImGui::CloseCurrentPopup();
-		}
-
-		if (ImGui::Button("Save 5", ImVec2(fileWindowWidth, fileWindowHeight))) {
-			saveNum = 5;
-			scene = saveNum;
-			GLFWFunctions::gamePaused = false;
-			GLFWFunctions::pauseMenuCount = 0;
-			GLFWFunctions::optionsMenuCount = 0;
-			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-			loadFileChosen = true;
-			isSelectingFile = false;
-			ImGui::CloseCurrentPopup();
-		}
-
-		if (loadFileChosen) {
-			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-				ecsCoordinator.destroyEntity(entity);
-			}
-
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(saveNum));
-			loadFileChosen = false;
-		}
+		// Display all saved games with their names
+		DisplaySaveFilesForLoading();
 
 		ImGui::EndChild();
-
 		ImGui::EndPopup();
 	}
 
@@ -586,6 +377,9 @@ void GameViewWindow::Cleanup() {
 		glDeleteTextures(1, &viewportTexture);
 		viewportTexture = 0;
 	}
+
+	delete saveFileNames;
+	saveFileNames = nullptr;
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
@@ -1522,4 +1316,269 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 		serializer.ReadObject(enemy.isEnemy, entityId, "enemy.isEnemy");
 		ecsCoordinator.addComponent(prefabEntity, enemy);
 	}
+}
+
+// Get the next available save ID
+int GameViewWindow::GetNextAvailableSaveID() {
+	// Find the highest existing save ID and add 1
+	int maxID = 0;
+	for (const auto& pair : *saveFileNames) {
+		if (pair.first > maxID) {
+			maxID = pair.first;
+		}
+	}
+	return maxID + 1;
+}
+
+// Save to a named file
+void GameViewWindow::SaveToNamedFile(int saveID, const char* saveName) {
+	std::string saveFile = GenerateNamedSaveJSONFile(saveID, saveName);
+
+	// Create base JSON structure using ordered_json consistently
+	nlohmann::ordered_json jsonData;
+	jsonData["saveName"] = saveName;
+	jsonData["entities"] = nlohmann::ordered_json::array();
+
+	// Add placeholder entity using ordered_json
+	jsonData["entities"].push_back(nlohmann::ordered_json{
+		{"id", "placeholderentity"},
+		{"textureId", ""}
+		});
+
+	// Save all currently live entities
+	for (int i = 0; i < layerManager.getLayerCount(); i++) {
+		for (auto entity : layerManager.getEntitiesFromLayer(i)) {
+			std::string entityId = ecsCoordinator.getEntityID(entity);
+			std::string textureId = ecsCoordinator.getTextureID(entity);
+			if (entityId != "placeholderentity") {
+				TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				auto entityJson = AddNewEntityToJSON(transform, entityId, textureId, ecsCoordinator, entity);
+				jsonData["entities"].push_back(entityJson);
+			}
+		}
+	}
+
+	// Save to file
+	std::ofstream outputFile(saveFile);
+	if (outputFile.is_open()) {
+		outputFile << jsonData.dump(2);
+		outputFile.close();
+	}
+}
+
+// Generate a unique filename based on ID and name
+std::string GameViewWindow::GenerateNamedSaveJSONFile(int saveID, const char* saveName) {
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string sanitizedName = SanitizeFilename(saveName);
+
+	// Format with the ID at the end (less visible) or as metadata
+	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) +
+		"\\Sandbox\\assets\\json\\save_" + sanitizedName + ".json";
+
+	return jsonPath;
+}
+
+// Display save slots with their custom names
+void GameViewWindow::DisplaySaveSlots() {
+	// Get the latest save files by scanning the directory
+	std::map<int, std::string> currentSaves = ScanForSaveFiles();
+
+	// First open a global popup if needed
+	if (confirmDeleteSaveID != -1) {
+		ImGui::OpenPopup("GlobalConfirmDeletePopup");
+	}
+
+	for (const auto& pair : currentSaves) {
+		int saveID = pair.first;
+		std::string saveName = pair.second;
+
+		ImGui::PushID(saveID);
+
+		if (ImGui::Button(saveName.c_str(), ImVec2(slotWindowWidth, fileWindowHeight))) {
+			saveNum = saveID;
+			saveFileChosen = true;
+			isSelectingSaveFile = false;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine(0, optionsButtonPadding);
+
+		// Modify the delete button
+		if (ImGui::Button("Delete", ImVec2(clearSlotWindowWidth, fileWindowHeight))) {
+			// Output to console for debugging
+			Console::GetLog() << "Delete button clicked for save ID: " << saveID << std::endl;
+
+			// Set the save ID to delete
+			confirmDeleteSaveID = saveID;
+
+			// We'll open the popup at the beginning of the next frame
+		}
+
+		ImGui::PopID();
+	}
+
+	// Center the confirmation popup
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	// Handle the confirmation popup outside of any ID scopes
+	if (ImGui::BeginPopupModal("GlobalConfirmDeletePopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Are you sure you want to delete this save?");
+
+		if (ImGui::Button("Yes", ImVec2(120, 0))) {
+			// Log the action
+			Console::GetLog() << "Confirming deletion of save ID: " << confirmDeleteSaveID << std::endl;
+
+			// Directly delete the file
+			DeleteSaveFile(confirmDeleteSaveID);
+
+			// Reset the confirmation ID
+			confirmDeleteSaveID = -1;
+
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No", ImVec2(120, 0))) {
+			// Reset the confirmation ID
+			confirmDeleteSaveID = -1;
+
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+}
+
+// Display save files for loading
+void GameViewWindow::DisplaySaveFilesForLoading() {
+	// Get the latest save files by scanning the directory
+	std::map<int, std::string> currentSaves = ScanForSaveFiles();
+
+	// Display each save file
+	for (const auto& pair : currentSaves) {
+		int saveID = pair.first;
+		std::string saveName = pair.second;
+
+		std::string buttonText = saveName;
+
+		if (ImGui::Button(buttonText.c_str(), ImVec2(fileWindowWidth, fileWindowHeight))) {
+			saveNum = saveID;
+			scene = saveID;
+			GLFWFunctions::gamePaused = false;
+			GLFWFunctions::pauseMenuCount = 0;
+			GLFWFunctions::optionsMenuCount = 0;
+			SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
+			loadFileChosen = true;
+			isSelectingFile = false;
+
+			// Clear existing entities
+			for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+				ecsCoordinator.destroyEntity(entity);
+			}
+
+			// Load the entities from the save file
+			std::string saveFilePath = GenerateNamedSaveJSONFile(saveID, saveName.c_str());
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, saveFilePath);
+			ImGui::CloseCurrentPopup();
+		}
+	}
+}
+
+// Sanitize filename to remove invalid characters
+std::string GameViewWindow::SanitizeFilename(const std::string& filename) {
+	std::string result = filename;
+	const std::string invalid_chars = "\\/:*?\"<>|";
+
+	for (char c : invalid_chars) {
+		result.erase(std::remove(result.begin(), result.end(), c), result.end());
+	}
+
+	// Replace spaces with underscores
+	std::replace(result.begin(), result.end(), ' ', '_');
+
+	return result;
+}
+
+// Delete a save file
+void GameViewWindow::DeleteSaveFile(int saveID) {
+	// Get current saves to find the one to delete
+	auto currentSaves = ScanForSaveFiles();
+
+	if (currentSaves.find(saveID) != currentSaves.end()) {
+		std::string saveName = currentSaves[saveID];
+		std::string saveFile = GenerateNamedSaveJSONFile(saveID, saveName.c_str());
+
+		// Print the path being deleted (for debugging)
+		std::cout << "Attempting to delete file: " << saveFile << std::endl;
+
+		// Check if file exists before trying to delete
+		if (std::filesystem::exists(saveFile)) {
+			try {
+				// Use filesystem::remove for better error handling
+				if (std::filesystem::remove(saveFile)) {
+					std::cout << "File deleted successfully!" << std::endl;
+				}
+				else {
+					std::cout << "Failed to delete file: unknown error" << std::endl;
+				}
+			}
+			catch (const std::filesystem::filesystem_error& e) {
+				std::cout << "Error deleting file: " << e.what() << std::endl;
+			}
+		}
+		else {
+			std::cout << "File does not exist: " << saveFile << std::endl;
+		}
+	}
+	else {
+		std::cout << "Save ID not found: " << saveID << std::endl;
+	}
+
+}
+
+std::map<int, std::string> GameViewWindow::ScanForSaveFiles() {
+	std::map<int, std::string> saveFiles;
+	int autoAssignedId = 1; // For auto-assigning IDs to files that don't have embedded IDs
+
+	// Get path to json directory
+	std::string execPath = FilePathManager::GetExecutablePath();
+	std::string jsonDir = execPath.substr(0, execPath.find_last_of("\\/")) + "\\Sandbox\\assets\\json\\";
+
+	try {
+		// Iterate through all files in the directory
+		for (const auto& entry : std::filesystem::directory_iterator(jsonDir)) {
+			if (entry.is_regular_file()) {
+				std::string filename = entry.path().filename().string();
+
+				// Check if file matches the new pattern: save_Name.json
+				if (filename.find("save_") == 0 && filename.find(".json") != std::string::npos) {
+					// Extract the name part between "save_" and ".json"
+					size_t prefixLen = 5; // length of "save_"
+					size_t dotPos = filename.find_last_of('.');
+
+					if (dotPos != std::string::npos && dotPos > prefixLen) {
+						std::string name = filename.substr(prefixLen, dotPos - prefixLen);
+
+						// Auto-assign an ID (order of discovery)
+						int id = autoAssignedId++;
+
+						// Convert underscores back to spaces for display
+						std::string displayName = name;
+						std::replace(displayName.begin(), displayName.end(), '_', ' ');
+
+						saveFiles[id] = displayName;
+					}
+				}
+			}
+		}
+	}
+	catch (std::exception& e) {
+		std::cout << "Error scanning save directory: " << e.what() << std::endl;
+	}
+
+	return saveFiles;
 }
