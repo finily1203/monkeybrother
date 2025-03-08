@@ -42,6 +42,22 @@ void CollectableBehaviour::update(Entity entity) {
                 auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
                 playerPhysics.mass += 0.5f;
 
+                
+                if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+                    auto& playerComp = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+                    // Start the growth animation for every collectable
+                    playerComp.isGrowing = true;
+                    playerComp.growStartTime = glfwGetTime();
+
+                    
+                    if (ecsCoordinator.hasComponent<AnimationComponent>(playerEntity)) {
+                        auto& playerAnim = ecsCoordinator.getComponent<AnimationComponent>(playerEntity);
+                       
+                        playerAnim.currentFrame = 0;
+                    }
+                }
+
                 GLFWFunctions::collectAudio = true;
 
                 createCollectAnimation(entity);
@@ -69,7 +85,6 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     ecsCoordinator.addComponent(newAnimationEntity, transform);
 
-    // Animation setup
     AnimationComponent animation{};
     animation.isAnimated = true;
     animation.totalFrames = 13.0f;
@@ -79,7 +94,6 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
-    // take layer of entity and add animation to that layer
     int newLayer = layerManager.getEntityLayer(entity);
     layerManager.addEntityToLayer(newLayer, newAnimationEntity);
 }

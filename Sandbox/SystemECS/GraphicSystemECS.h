@@ -35,7 +35,9 @@ public:
 	void update(float dt) override;
 
 	std::string getSystemECS() override;
-
+	void handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
+	void handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
+	void handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude);
 private:
 	MouseBehaviour mouseBehaviour;
 	bool fpsEntityCreated = false;
