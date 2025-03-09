@@ -49,34 +49,21 @@ double elapsedTimeSinceGrowStart(const PlayerComponent& player) {
 
 
 void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude) {
-    // Configuration parameters - could be moved to a class member or config file
-    struct MovementAnimConfig {
-        float movementThreshold = 5.0f;
-        const char* bodyTexture = "mossball_move_body";
-        const char* eyesTexture = "mossball_move_eyes";
-        float bodyFrames = 24.0f;
-        float bodyColumns = 8.0f;
-        float bodyRows = 3.0f;
-        float eyesFrames = 16.0f;
-        float eyesColumns = 8.0f;
-        float eyesRows = 2.0f;
-        float eyeFrameDuration = 0.1f;
-    } config;
+    
+    MovementAnimConfig config;
 
-    // Get player component to update its state
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
 
-    // Animation state tracking (static to persist between calls)
+    
     static float eyesAnimTime = 0.0f;
     static int eyesCurrentFrame = 0;
 
-    // Check if player is moving
     if (velocityMagnitude > config.movementThreshold) {
-        // Player is moving - play movement animations
+       
         player.lastMoveTime = glfwGetTime();
         player.isIdle = false;
 
-        // Configure body animation
+      
         AnimationComponent bodyAnimation = animation;
         bodyAnimation.isAnimated = true;
         bodyAnimation.totalFrames = config.bodyFrames;
@@ -84,7 +71,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         bodyAnimation.rows = config.bodyRows;
         bodyAnimation.UpdateUVCoordinates();
 
-        // Draw body
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(config.bodyTexture),
@@ -92,12 +78,12 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             bodyAnimation.currentUVs
         );
 
-        // Update eyes animation timing
+        
         eyesAnimTime += GLFWFunctions::delta_time;
         eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
             % static_cast<int>(config.eyesFrames);
 
-        // Configure eyes animation
+       
         AnimationComponent eyesAnimation = animation;
         eyesAnimation.isAnimated = true;
         eyesAnimation.totalFrames = config.eyesFrames;
@@ -106,7 +92,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         eyesAnimation.currentFrame = eyesCurrentFrame;
         eyesAnimation.UpdateUVCoordinates();
 
-        // Draw eyes
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(config.eyesTexture),
@@ -115,7 +100,7 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         );
     }
     else {
-        // Player is stationary - render default texture
+       
         std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
 
         graphicsSystem.DrawObject(
@@ -125,11 +110,11 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             animation.currentUVs
         );
 
-        // Reset eyes animation when idle
+      
         eyesAnimTime = 0.0f;
         eyesCurrentFrame = 0;
 
-        // Check if we should start an idle animation
+        
         double currentTime = glfwGetTime();
         const float IDLE_THRESHOLD = 3.0f; // Seconds before idle animation triggers
 
@@ -144,45 +129,30 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
 
 void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
-    struct AnimationConfig {
-        float columns;
-        float rows;
-        float totalFrames;
-        std::string textureName;
-    };
 
-    struct GrowthAnimationConfig {
-        AnimationConfig body;
-        AnimationConfig eyes;
-        float duration; // Duration of the growth animation in seconds
-    };
+   
+    GrowthAnimationConfig growthConfig;
+
     if (player.isGrowing) {
         double currentTime = glfwGetTime();
         double elapsedTime = currentTime - player.growStartTime;
 
-        // Configuration for growth animations
-        GrowthAnimationConfig growthConfig = {
-            {8.0f, 2.0f, 16.0f, "mossball_grow_body"}, // Body animation
-            {8.0f, 2.0f, 16.0f, "mossball_grow_eyes"}, // Eyes animation
-            1.0f // Duration of the growth animation
-        };
-
         if (elapsedTime <= growthConfig.duration) {
-            // Store original animation state
+            
             bool originalIsAnimated = animation.isAnimated;
             int originalCurrentFrame = animation.currentFrame;
             float originalColumns = animation.columns;
             float originalRows = animation.rows;
             std::vector<glm::vec2> originalUVs = animation.currentUVs;
 
-            // Calculate frame progress
+            
             float frameProgress = static_cast<float>(elapsedTime / growthConfig.duration);
             int currentGrowthFrame = static_cast<int>(frameProgress * growthConfig.body.totalFrames);
             if (currentGrowthFrame >= static_cast<int>(growthConfig.body.totalFrames)) {
                 currentGrowthFrame = static_cast<int>(growthConfig.body.totalFrames) - 1;
             }
 
-            // Configure and draw body animation
+            
             animation.isAnimated = true;
             animation.currentFrame = currentGrowthFrame;
             animation.columns = growthConfig.body.columns;
@@ -190,16 +160,16 @@ void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, Transfor
             animation.totalFrames = growthConfig.body.totalFrames;
             animation.UpdateUVCoordinates();
 
-            // Temporarily set the growth texture
+           
             std::string originalTexture = ecsCoordinator.getTextureID(playerEntity);
             ecsCoordinator.setTextureID(playerEntity, growthConfig.body.textureName);
 
-            // Draw body animation
+            
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(growthConfig.body.textureName),
                 transform.mdl_xform, animation.currentUVs);
 
-            // Draw eye animation
+          
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(growthConfig.eyes.textureName),
                 transform.mdl_xform, animation.currentUVs);
@@ -213,7 +183,7 @@ void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, Transfor
             ecsCoordinator.setTextureID(playerEntity, originalTexture);
         }
         else {
-            // End the growth animation
+            
             player.isGrowing = false;
 
             // Reset animation state
@@ -225,28 +195,13 @@ void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, Transfor
 
 void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+   
+    IdleAnimationConfig idleConfig;
+
     if (player.playingIdleAnim) {
         double currentTime = glfwGetTime();
         double elapsedIdleTime = currentTime - player.idleAnimStart;
-
-        struct AnimationConfig {
-            float columns;
-            float rows;
-            float totalFrames;
-            std::string textureName;
-        };
-
-        struct IdleAnimationConfig {
-            AnimationConfig body;
-            AnimationConfig eyes;
-            float duration; // Duration of the idle animation in seconds
-        };
-
-        IdleAnimationConfig idleConfig = {
-            {4.0f, 7.0f, 26.0f, "mossball_idle_bodyrecentre_start"}, // Body animation
-            {4.0f, 5.0f, 18.0f, "mossball_idle_eyesclose"},          // Eyes animation
-            1.5f // Duration of the idle animation
-        };
 
        
         bool originalIsAnimated = animation.isAnimated;
@@ -276,7 +231,7 @@ void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformC
             currentEyesFrame = static_cast<int>(idleConfig.eyes.totalFrames) - 1;
         }
 
-        // Draw body animation
+       
         animation.isAnimated = true;
         animation.currentFrame = currentBodyFrame;
         animation.columns = idleConfig.body.columns;
@@ -287,7 +242,7 @@ void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformC
             assetsManager.GetTexture(idleConfig.body.textureName),
             transform.mdl_xform, animation.currentUVs);
 
-        // Draw eye animation
+       
         animation.currentFrame = currentEyesFrame;
         animation.columns = idleConfig.eyes.columns;
         animation.rows = idleConfig.eyes.rows;

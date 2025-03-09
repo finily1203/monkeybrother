@@ -326,7 +326,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
         if (mappedKey == Key::M) {
             showFPS = !showFPS; 
-            std::cout << "FPS Display: " << (showFPS ? "Shown" : "Hidden") << std::endl;
+            std::cout << "FPS Display: " << (showFPS ? "ON" : "OFF") << std::endl;
         }
 
         if ((*keyState)[Key::F] && action == GLFW_PRESS && !GameViewWindow::getPaused()) {

@@ -124,10 +124,10 @@ void ECSCoordinator::ensureFPSDisplay() {
 	font.textScale = fontConfig["scale"].get<float>();
 	font.textBoxWidth = fontConfig["textBoxWidth"].get<float>();
 
-	// Set text prefix, if available
+	
 	font.text = fontConfig.contains("prefix") ? fontConfig["prefix"].get<std::string>() : "FPS: ";
 
-	// Set font color
+	
 	const auto& colorConfig = fontConfig["color"];
 	font.color = myMath::Vector3D(
 		colorConfig["r"].get<float>(),
@@ -145,8 +145,8 @@ void ECSCoordinator::ensureFPSDisplay() {
 
 	entityManager->setEntityId(fpsDisplayEntity, "fpsDisplay");
 
-	// Add to appropriate layer
-	int layerToUse = 0; // Default to layer 0 if not specified
+	
+	int layerToUse = 0; 
 
 	if (fpsConfig.contains("layer")) {
 		int targetLayer = fpsConfig["layer"].get<int>();

@@ -55,7 +55,7 @@ void PlayerBehaviour::update(Entity entity) {
 		playerComp.playingIdleAnim = false;
 	}
 	else {
-		// Check if we've been idle long enough to trigger animation
+		
 		double currentTime = glfwGetTime();
 		if (currentTime - playerComp.lastMoveTime > IDLE_TIME_THRESHOLD && !playerComp.isIdle) {
 			playerComp.isIdle = true;
@@ -64,12 +64,12 @@ void PlayerBehaviour::update(Entity entity) {
 		}
 	}
 
-	// Toggle between mouse and keyboard control when T is pressed
+	
 	static bool wasPressed = false;
 	if ((*GLFWFunctions::keyState)[Key::T]) {
 		if (!wasPressed) {
 			GLFWFunctions::useMouseRotation = !GLFWFunctions::useMouseRotation;
-			GLFWFunctions::updateCursorState(); // Update cursor state when toggling
+			GLFWFunctions::updateCursorState(); 
 			wasPressed = true;
 		}
 	}
@@ -78,7 +78,7 @@ void PlayerBehaviour::update(Entity entity) {
 	}
 
 	if (GLFWFunctions::useMouseRotation) {
-		// Mouse rotation logic
+		
 		double mouseMovement = GLFWFunctions::mouseXDelta;
 		if (std::abs(mouseMovement) > MOVEMENT_THRESHOLD) {
 			float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
@@ -97,12 +97,12 @@ void PlayerBehaviour::update(Entity entity) {
 		}
 	}
 
-	// Reset mouse delta regardless of control mode
+	
 	GLFWFunctions::mouseXDelta = 0.0;
 
 	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
 		if ((*GLFWFunctions::keyState)[Key::SPACE]) {
-			PhysicsSystemRef->SetAlrJumped(false);  // Set jump state to prevent multiple jumps
+			PhysicsSystemRef->SetAlrJumped(false);  
 			forceManager.AddForce(entity, myMath::Vector2D(-mag, -mag));
 		}
 	}

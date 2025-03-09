@@ -12,6 +12,42 @@
 
 #include "AnimationData.h"
 
+struct AnimationConfig {
+    float columns;
+    float rows;
+    float totalFrames;
+    std::string textureName;
+};
+
+
+struct MovementAnimConfig {
+    float movementThreshold = 5.0f;
+    const char* bodyTexture = "mossball_move_body";
+    const char* eyesTexture = "mossball_move_eyes";
+    float bodyFrames = 24.0f;
+    float bodyColumns = 8.0f;
+    float bodyRows = 3.0f;
+    float eyesFrames = 16.0f;
+    float eyesColumns = 8.0f;
+    float eyesRows = 2.0f;
+    float eyeFrameDuration = 0.1f;
+};
+
+
+struct GrowthAnimationConfig {
+    AnimationConfig body = { 8.0f, 2.0f, 16.0f, "mossball_grow_body" };
+    AnimationConfig eyes = { 8.0f, 2.0f, 16.0f, "mossball_grow_eyes" };
+    float duration = 1.0f; // Duration of the growth animation in seconds
+};
+
+
+struct IdleAnimationConfig {
+    AnimationConfig body = { 4.0f, 7.0f, 26.0f, "mossball_idle_bodyrecentre_start" };
+    AnimationConfig eyes = { 4.0f, 5.0f, 18.0f, "mossball_idle_eyesclose" };
+    float duration = 1.5f; // Duration of the idle animation
+};
+
+
 struct AnimationComponent {
     double creationTime;
     bool isAnimated;
