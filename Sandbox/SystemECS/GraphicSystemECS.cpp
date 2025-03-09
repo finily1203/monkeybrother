@@ -598,6 +598,7 @@ void GraphicSystemECS::update(float dt) {
                     if (enemy.drawVisionDebug) {
 						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
+						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, 50.f, cameraSystem.getViewMatrix());
                     }
                 }
 

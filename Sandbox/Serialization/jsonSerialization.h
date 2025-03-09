@@ -35,6 +35,7 @@ public:
 	void ReadSpecificObject(float&, nlohmann::json const&);
 	void ReadSpecificObject(bool&, nlohmann::json const&);
 	void ReadSpecificObject(std::string&, nlohmann::json const&);
+	void ReadSpecificObject(int&, nlohmann::json const&);
 
 	void WriteSpecificObject(myMath::Vector2D const&, nlohmann::json&);
 	void WriteSpecificObject(myMath::Matrix3x3 const&, nlohmann::json&);
@@ -42,6 +43,7 @@ public:
 	void WriteSpecificObject(float const&, nlohmann::json&);
 	void WriteSpecificObject(bool const&, nlohmann::json&);
 	void WriteSpecificObject(std::string const&, nlohmann::json&);
+	void WriteSpecificObject(int const&, nlohmann::json&);
 
 	template <typename T>
 	void ReadObject(T&, std::string const&, std::string const&);

@@ -261,6 +261,9 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		enemy.visionAngle = 60.0f;
 		enemy.visionDistance = 200.0f;
 		enemy.drawVisionDebug = true;
+		enemy.numWaypoints = 2;
+		enemy.waypoints.push_back({ 0.0f, 0.0f });
+		enemy.waypoints.push_back({ 100.0f, 100.0f });
 
 		MovementComponent movement{};
 		movement.speed = 5.0f;  // Default speed

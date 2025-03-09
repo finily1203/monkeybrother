@@ -40,8 +40,10 @@ public:
 	std::vector<myMath::Vector2D>& getWaypoints();
 	int& getCurrentWaypointIndex();
 
+	bool avoidWalls(Entity entity);
+	void startAvoid(Entity entity);
+
 	void updatePatrolState(Entity entity);
-	void updateEntityRotation(Entity entity, myMath::Vector2D velocity);
 
 	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
 	bool isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos);
@@ -56,4 +58,7 @@ private:
 	int currentWaypointIndex = 0;
 	bool isFacingRight;
 	bool moveHorizontal;
+	bool hasWaypointsBeenChanged;
+	bool isAvoidingWalls;
+	float avoidTimer;
 };

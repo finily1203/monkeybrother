@@ -757,6 +757,14 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 				serializer.ReadObject(enemy.visionAngle, assetName, "entities.enemy.visionAngle");
 				serializer.ReadObject(enemy.visionDistance, assetName, "entities.enemy.visionDistance");
 				serializer.ReadObject(enemy.drawVisionDebug, assetName, "entities.enemy.drawVisionDebug");
+				serializer.ReadObject(enemy.numWaypoints, assetName, "entities.enemy.numWaypoints");
+				for (int i = 0; i < enemy.numWaypoints; i++)
+				{
+					std::string waypoint = "entities.enemy.waypoint" + std::to_string(i + 1);
+					myMath::Vector2D waypointPos;
+					serializer.ReadObject(waypointPos, assetName, waypoint);
+					enemy.waypoints.push_back(waypointPos);
+				}
 
 				PhysicsComponent physics;
 
@@ -922,7 +930,10 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			{"isClockwise", true},
 			{"visionAngle", 60.0 },
 			{"visionDistance", 300.0 },
-			{"drawVisionDebug", true }
+			{"drawVisionDebug", true },
+			{"numWayPoints", 2 }, 
+			{"waypoint1", {"x", 0.f}, {"y", 0.f}},
+			{"waypoint2", {"x", 100.f}, {"y", 100.f}}
 		};
 	}
 
@@ -1499,9 +1510,15 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 		EnemyComponent enemy;
 		serializer.ReadObject(enemy.isEnemy, entityId, "enemy.isEnemy");
 		serializer.ReadObject(enemy.isClockwise, entityId, "enemy.isClockwise");
-		serializer.ReadObject(enemy.visionAngle, entityId, "entities.enemy.visionAngle");
-		serializer.ReadObject(enemy.visionDistance, entityId, "entities.enemy.visionDistance");
-		serializer.ReadObject(enemy.drawVisionDebug, entityId, "entities.enemy.drawVisionDebug");
+		serializer.ReadObject(enemy.visionAngle, entityId, "enemy.visionAngle");
+		serializer.ReadObject(enemy.visionDistance, entityId, "enemy.visionDistance");
+		serializer.ReadObject(enemy.drawVisionDebug, entityId, ".enemy.drawVisionDebug");
+		serializer.ReadObject(enemy.numWaypoints, entityId, "enemy.numWaypoints");
+		for (int i = 0; i < enemy.numWaypoints; i++) {
+			std::string waypoint = "enemy.waypoint" + std::to_string(i + 1);
+			serializer.ReadObject(enemy.waypoints[i], entityId, waypoint);
+		}
+
 		ecsCoordinator.addComponent(prefabEntity, enemy);
 	}
 }

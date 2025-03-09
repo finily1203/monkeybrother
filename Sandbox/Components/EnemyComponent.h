@@ -21,6 +21,8 @@ struct EnemyComponent
 	float visionDistance;
 	bool drawVisionDebug;
 
+	int numWaypoints;
+	std::vector<myMath::Vector2D> waypoints;
 
-	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true) {}
+	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true), numWaypoints(0) {}
 };

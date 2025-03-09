@@ -139,6 +139,15 @@ void JSONSerializer::ReadSpecificObject(std::string& object, nlohmann::json cons
 	}
 }
 
+// read a interger object from the JSON file
+void JSONSerializer::ReadSpecificObject(int& object, nlohmann::json const& jsonObj)
+{
+	if (jsonObj.is_number_integer())
+	{
+		object = jsonObj.get<int>();
+	}
+}
+
 // write a Vector2D data to the JSON file
 void JSONSerializer::WriteSpecificObject(myMath::Vector2D const& object, nlohmann::json& jsonObj)
 {
@@ -187,6 +196,12 @@ void JSONSerializer::WriteSpecificObject(bool const& object, nlohmann::json& jso
 
 // write a string object to the JSON file
 void JSONSerializer::WriteSpecificObject(std::string const& object, nlohmann::json& jsonObj)
+{
+	jsonObj = object;
+}
+
+// write an integer object to the JSON file
+void JSONSerializer::WriteSpecificObject(int const& object, nlohmann::json& jsonObj)
 {
 	jsonObj = object;
 }
