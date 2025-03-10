@@ -4,7 +4,7 @@
  * @course: CSD2401
  * @file: AnimationComponent.h
  * @brief: This header file includes the Animation Component to be used by ECS
- *         and physics and collision System to handle the logic of the game objects.
+ *         to handle the animation for the different entities in the game
  */
  /*___________________________________________________________________________*/
 
@@ -17,37 +17,39 @@ struct AnimationConfig {
     float rows;
     float totalFrames;
     std::string textureName;
+
+    AnimationConfig() : columns(0), rows(0), totalFrames(0), textureName("") {}
 };
 
 
 struct MovementAnimConfig {
-    float movementThreshold = 5.0f;
-    const char* bodyTexture = "mossball_move_body";
-    const char* eyesTexture = "mossball_move_eyes";
-    float bodyFrames = 24.0f;
-    float bodyColumns = 8.0f;
-    float bodyRows = 3.0f;
-    float eyesFrames = 16.0f;
-    float eyesColumns = 8.0f;
-    float eyesRows = 2.0f;
-    float eyeFrameDuration = 0.1f;
+    float movementThreshold;
+    std::string bodyTexture;
+    std::string eyesTexture;
+    float bodyFrames;
+    float bodyColumns;
+    float bodyRows;
+    float eyesFrames;
+    float eyesColumns;
+    float eyesRows;
+    float eyeFrameDuration;
+
+    MovementAnimConfig()
+        : movementThreshold(0), bodyTexture(""), eyesTexture(""),
+        bodyFrames(0), bodyColumns(0), bodyRows(0),
+        eyesFrames(0), eyesColumns(0), eyesRows(0), eyeFrameDuration(0) {}
 };
 
 
-struct GrowthAnimationConfig {
-    AnimationConfig body = { 8.0f, 2.0f, 16.0f, "mossball_grow_body" };
-    AnimationConfig eyes = { 8.0f, 2.0f, 16.0f, "mossball_grow_eyes" };
-    float duration = 1.0f; // Duration of the growth animation in seconds
+struct ComplexAnimationConfig {
+    AnimationConfig body;
+    AnimationConfig eyes;
+    float duration;
+
+    ComplexAnimationConfig() : duration(0) {}
 };
 
-
-struct IdleAnimationConfig {
-    AnimationConfig body = { 4.0f, 7.0f, 26.0f, "mossball_idle_bodyrecentre_start" };
-    AnimationConfig eyes = { 4.0f, 5.0f, 18.0f, "mossball_idle_eyesclose" };
-    float duration = 1.5f; // Duration of the idle animation
-};
-
-
+// Main animation component
 struct AnimationComponent {
     double creationTime;
     bool isAnimated;
@@ -58,6 +60,11 @@ struct AnimationComponent {
     float columns;
     float rows;
     std::vector<glm::vec2> currentUVs;
+
+    // Animation configurations without default values
+    MovementAnimConfig movementConfig;
+    ComplexAnimationConfig growthConfig;
+    ComplexAnimationConfig idleConfig;
 
     AnimationComponent()
         : isAnimated(false)
@@ -89,7 +96,6 @@ struct AnimationComponent {
     void Update() {
         if (!isAnimated || totalFrames <= 1.0f) return;
 
-
         double currentAbsoluteTime = glfwGetTime();
         double timeSinceCreation = currentAbsoluteTime - creationTime;
 
@@ -99,8 +105,6 @@ struct AnimationComponent {
     }
 
     void UpdateUVCoordinates() {
-
-
         // Calculate frame size in UV coordinates
         float frameWidth = 1.0f / columns;
         float frameHeight = 1.0f / rows;
@@ -114,7 +118,6 @@ struct AnimationComponent {
         float uMax = uMin + frameWidth;
         float vMax = 1.0f - (frameHeight * currentRow);
         float vMin = vMax - frameHeight;
-
 
         currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
         currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right

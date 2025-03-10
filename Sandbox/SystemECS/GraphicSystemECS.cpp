@@ -49,21 +49,34 @@ double elapsedTimeSinceGrowStart(const PlayerComponent& player) {
 
 
 void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude) {
-    
-    MovementAnimConfig config;
+   
+    const MovementAnimConfig& config = animation.movementConfig;
+
+   
+    if (config.bodyTexture.empty() || config.eyesTexture.empty() ||
+        config.bodyFrames == 0 || config.eyesFrames == 0) {
+        // Use default animation
+        std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture(defaultTexture),
+            transform.mdl_xform,
+            animation.currentUVs
+        );
+        return;
+    }
 
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
 
-    
     static float eyesAnimTime = 0.0f;
     static int eyesCurrentFrame = 0;
 
-    if (velocityMagnitude > config.movementThreshold) {
-       
+    
+    if (config.movementThreshold > 0 && velocityMagnitude > config.movementThreshold) {
         player.lastMoveTime = glfwGetTime();
         player.isIdle = false;
 
-      
+        // Body animation
         AnimationComponent bodyAnimation = animation;
         bodyAnimation.isAnimated = true;
         bodyAnimation.totalFrames = config.bodyFrames;
@@ -79,28 +92,29 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         );
 
         
-        eyesAnimTime += GLFWFunctions::delta_time;
-        eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
-            % static_cast<int>(config.eyesFrames);
+        if (config.eyeFrameDuration > 0) {
+            eyesAnimTime += GLFWFunctions::delta_time;
+            eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
+                % static_cast<int>(config.eyesFrames);
 
-       
-        AnimationComponent eyesAnimation = animation;
-        eyesAnimation.isAnimated = true;
-        eyesAnimation.totalFrames = config.eyesFrames;
-        eyesAnimation.columns = config.eyesColumns;
-        eyesAnimation.rows = config.eyesRows;
-        eyesAnimation.currentFrame = eyesCurrentFrame;
-        eyesAnimation.UpdateUVCoordinates();
+            AnimationComponent eyesAnimation = animation;
+            eyesAnimation.isAnimated = true;
+            eyesAnimation.totalFrames = config.eyesFrames;
+            eyesAnimation.columns = config.eyesColumns;
+            eyesAnimation.rows = config.eyesRows;
+            eyesAnimation.currentFrame = eyesCurrentFrame;
+            eyesAnimation.UpdateUVCoordinates();
 
-        graphicsSystem.DrawObject(
-            GraphicsSystem::DrawMode::TEXTURE,
-            assetsManager.GetTexture(config.eyesTexture),
-            transform.mdl_xform,
-            eyesAnimation.currentUVs
-        );
+            graphicsSystem.DrawObject(
+                GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture(config.eyesTexture),
+                transform.mdl_xform,
+                eyesAnimation.currentUVs
+            );
+        }
     }
     else {
-       
+        
         std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
 
         graphicsSystem.DrawObject(
@@ -110,13 +124,13 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             animation.currentUVs
         );
 
-      
+        // Reset eye animation
         eyesAnimTime = 0.0f;
         eyesCurrentFrame = 0;
 
-        
+        // Check for idle animation
         double currentTime = glfwGetTime();
-        const float IDLE_THRESHOLD = 3.0f; // Seconds before idle animation triggers
+        const float IDLE_THRESHOLD = 3.0f; 
 
         if (!player.isIdle && !player.playingIdleAnim &&
             (currentTime - player.lastMoveTime > IDLE_THRESHOLD)) {
@@ -130,29 +144,35 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
 void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
 
-   
-    GrowthAnimationConfig growthConfig;
+    // Get the growth configuration
+    const ComplexAnimationConfig& growthConfig = animation.growthConfig;
+
+    // skip custom animation if not loaded properly
+    if (growthConfig.body.textureName.empty() || growthConfig.eyes.textureName.empty() ||
+        growthConfig.duration <= 0 || growthConfig.body.totalFrames <= 0) {
+        return;
+    }
 
     if (player.isGrowing) {
         double currentTime = glfwGetTime();
         double elapsedTime = currentTime - player.growStartTime;
 
         if (elapsedTime <= growthConfig.duration) {
-            
+            // Store original animation state
             bool originalIsAnimated = animation.isAnimated;
             int originalCurrentFrame = animation.currentFrame;
             float originalColumns = animation.columns;
             float originalRows = animation.rows;
             std::vector<glm::vec2> originalUVs = animation.currentUVs;
 
-            
+            // Calculate frame progress
             float frameProgress = static_cast<float>(elapsedTime / growthConfig.duration);
             int currentGrowthFrame = static_cast<int>(frameProgress * growthConfig.body.totalFrames);
             if (currentGrowthFrame >= static_cast<int>(growthConfig.body.totalFrames)) {
                 currentGrowthFrame = static_cast<int>(growthConfig.body.totalFrames) - 1;
             }
 
-            
+           
             animation.isAnimated = true;
             animation.currentFrame = currentGrowthFrame;
             animation.columns = growthConfig.body.columns;
@@ -160,19 +180,20 @@ void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, Transfor
             animation.totalFrames = growthConfig.body.totalFrames;
             animation.UpdateUVCoordinates();
 
-           
-            std::string originalTexture = ecsCoordinator.getTextureID(playerEntity);
-            ecsCoordinator.setTextureID(playerEntity, growthConfig.body.textureName);
-
             
+            std::string originalTexture = ecsCoordinator.getTextureID(playerEntity);
+
+            // Draw body animation
             graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(growthConfig.body.textureName),
                 transform.mdl_xform, animation.currentUVs);
 
-          
-            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
-                assetsManager.GetTexture(growthConfig.eyes.textureName),
-                transform.mdl_xform, animation.currentUVs);
+            // Draw eye animation if configured
+            if (!growthConfig.eyes.textureName.empty() && growthConfig.eyes.totalFrames > 0) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture(growthConfig.eyes.textureName),
+                    transform.mdl_xform, animation.currentUVs);
+            }
 
             // Restore original animation state
             animation.isAnimated = originalIsAnimated;
@@ -196,42 +217,43 @@ void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, Transfor
 void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
 
+    // Get the idle configuration
+    const ComplexAnimationConfig& idleConfig = animation.idleConfig;
+
    
-    IdleAnimationConfig idleConfig;
+    if (idleConfig.body.textureName.empty() || idleConfig.duration <= 0 ||
+        idleConfig.body.totalFrames <= 0) {
+        return;
+    }
 
     if (player.playingIdleAnim) {
         double currentTime = glfwGetTime();
         double elapsedIdleTime = currentTime - player.idleAnimStart;
 
-       
+        // Store original animation state
         bool originalIsAnimated = animation.isAnimated;
         int originalCurrentFrame = animation.currentFrame;
         float originalColumns = animation.columns;
         float originalRows = animation.rows;
         std::vector<glm::vec2> originalUVs = animation.currentUVs;
 
-        
+        // Calculate frame progress
         float frameProgress = static_cast<float>(elapsedIdleTime / idleConfig.duration);
         if (frameProgress > 1.0f) {
             frameProgress = 1.0f;
 
-            if (elapsedIdleTime > 0.1f) {
+            if (elapsedIdleTime > idleConfig.duration + 0.1f) {
                 player.playingIdleAnim = false;
             }
         }
 
-        
+        // Calculate current body frame
         int currentBodyFrame = static_cast<int>(frameProgress * idleConfig.body.totalFrames);
         if (currentBodyFrame >= static_cast<int>(idleConfig.body.totalFrames)) {
             currentBodyFrame = static_cast<int>(idleConfig.body.totalFrames) - 1;
         }
 
-        int currentEyesFrame = static_cast<int>(frameProgress * idleConfig.eyes.totalFrames);
-        if (currentEyesFrame >= static_cast<int>(idleConfig.eyes.totalFrames)) {
-            currentEyesFrame = static_cast<int>(idleConfig.eyes.totalFrames) - 1;
-        }
-
-       
+        // Draw body animation
         animation.isAnimated = true;
         animation.currentFrame = currentBodyFrame;
         animation.columns = idleConfig.body.columns;
@@ -242,15 +264,23 @@ void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformC
             assetsManager.GetTexture(idleConfig.body.textureName),
             transform.mdl_xform, animation.currentUVs);
 
-       
-        animation.currentFrame = currentEyesFrame;
-        animation.columns = idleConfig.eyes.columns;
-        animation.rows = idleConfig.eyes.rows;
-        animation.totalFrames = idleConfig.eyes.totalFrames;
-        animation.UpdateUVCoordinates();
-        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
-            assetsManager.GetTexture(idleConfig.eyes.textureName),
-            transform.mdl_xform, animation.currentUVs);
+        // Draw eye animation if configured
+        if (!idleConfig.eyes.textureName.empty() && idleConfig.eyes.totalFrames > 0) {
+            // Calculate current eye frame
+            int currentEyesFrame = static_cast<int>(frameProgress * idleConfig.eyes.totalFrames);
+            if (currentEyesFrame >= static_cast<int>(idleConfig.eyes.totalFrames)) {
+                currentEyesFrame = static_cast<int>(idleConfig.eyes.totalFrames) - 1;
+            }
+
+            animation.currentFrame = currentEyesFrame;
+            animation.columns = idleConfig.eyes.columns;
+            animation.rows = idleConfig.eyes.rows;
+            animation.totalFrames = idleConfig.eyes.totalFrames;
+            animation.UpdateUVCoordinates();
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture(idleConfig.eyes.textureName),
+                transform.mdl_xform, animation.currentUVs);
+        }
 
         // Restore original animation state
         animation.isAnimated = originalIsAnimated;
