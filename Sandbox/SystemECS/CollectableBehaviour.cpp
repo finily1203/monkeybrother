@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "NavigationArrow.h"
 
 void CollectableBehaviour::update(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
@@ -42,12 +43,26 @@ void CollectableBehaviour::update(Entity entity) {
                 auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
                 playerPhysics.mass += 0.5f;
 
+                // Store which collectables still exist before removing this one
+                std::vector<Entity> remainingCollectables;
+                for (auto e : ecsCoordinator.getAllLiveEntities()) {
+                    if (e != entity && ecsCoordinator.hasComponent<CollectableComponent>(e)) {
+                        remainingCollectables.push_back(e);
+                    }
+                }
+                
                 GLFWFunctions::collectAudio = true;
+                // Remove the navigation arrow for this specific collectable
+                NavigationArrow::RemoveNavigationArrow(entity);
 
+                // Create collection animation and destroy the collectable
                 createCollectAnimation(entity);
-
-                ecsCoordinator.destroyEntity(entity);  // Destroy the collectable
+                ecsCoordinator.destroyEntity(entity);
                 GLFWFunctions::collectableCount--;
+
+                // Explicitly create arrows for each remaining collectable
+                auto logicSystem = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+                logicSystem->resetNavigationArrows();
             }
         }
     }

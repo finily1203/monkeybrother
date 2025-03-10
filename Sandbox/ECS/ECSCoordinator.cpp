@@ -44,6 +44,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "FilterBehaviour.h"
 #include "MovPlatformBehaviour.h"
 #include "NavigationBehaviour.h"
+#include "NavigationArrow.h"
 
 #include <Windows.h>
 
@@ -159,6 +160,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	NavigationArrow::Reset();
 	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
 	cameraSystem.setCameraZoom(1.0f);

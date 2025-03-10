@@ -162,43 +162,27 @@ void GraphicSystemECS::update(float dt) {
 
                 mouseBehaviour.update(entity);
 
-                /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
-                /*--------------------------------------------------------------------------------
-                --------------------------------------------------------------------------------*/
+                bool isNavigation = ecsCoordinator.hasComponent<NavigationComponent>(entity);
 
-                // check if the player has collected all the collectables
-                // Created a win text entity
-                //if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::gameOver == false && GameViewWindow::getSceneNum() > -1) {
-                //    createTextEntity(
-                //        ecsCoordinator,
-                //        "You Win!",
-                //        "Antonio",
-                //        myMath::Vector3D(1.0f, 1.0f, 1.0f), // White color
-                //        myMath::Vector2D(-30, 40),         // Position
-                //        "winTextBox"                       // Unique ID
-                //    );
-                //    GLFWFunctions::gameOver = true;
-                //}
-                //// lose text entity
-                //if (GLFWFunctions::instantLose && GLFWFunctions::gameOver == false) {
-                //    createTextEntity(
-                //        ecsCoordinator,
-                //        "You Lose!",
-                //        "Antonio",
-                //        myMath::Vector3D(1.0f, 0.0f, 0.0f), // Red color
-                //        myMath::Vector2D(-30, 40),          // Position
-                //        "loseTextBox"                       // Unique ID
-                //    );
-                //    GLFWFunctions::gameOver = true;
-                //}
-                //// 
-                //if (GLFWFunctions::collectableCount == 0 && GLFWFunctions::exitCollision) {
-                //    if (ecsCoordinator.getEntityID(entity) == "winTextBox")
-                //    {
-                //        auto& font = ecsCoordinator.getComponent<FontComponent>(entity);
-                //        font.text = "Exit!";
-                //    }
-                //}
+                if (isNavigation) {
+                    auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(entity);
+
+                    // Only render navigation arrows if they're set to visible
+                    if (!navComp.isVisible) {
+                        continue;
+                    }
+
+                    // Use identity matrix for navigation UI to keep it on screen regardless of camera
+                    if (ecsCoordinator.getEntityID(entity) == "nav_arrow") {
+                        // The model transformation needs to account for the camera position but not rotation
+                        // For UI elements like arrows that need to follow the camera but stay at screen edges
+                        transform.mdl_xform = graphicsSystem.UpdateObject(
+                            transform.position,
+                            transform.scale,
+                            transform.orientation,
+                            cameraSystem.getViewMatrix());
+                    }
+                }
                 // cheat code 
                 if (GLFWFunctions::instantWin)
                 {

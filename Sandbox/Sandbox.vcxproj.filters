@@ -54,6 +54,7 @@
     <ClCompile Include="LayerSystem\LayerManager.cpp" />
     <ClCompile Include="CutsceneSystem\CutsceneSystem.cpp" />
     <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
+    <ClCompile Include="SystemECS\NavigationArrow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -131,6 +132,7 @@
     <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
     <ClInclude Include="Components\NavigationComponent.h" />
     <ClInclude Include="SystemECS\NavigationBehaviour.h" />
+    <ClInclude Include="SystemECS\NavigationArrow.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

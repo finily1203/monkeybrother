@@ -168,6 +168,7 @@
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
+    <ClCompile Include="SystemECS\NavigationArrow.cpp" />
     <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
+    <ClInclude Include="SystemECS\NavigationArrow.h" />
     <ClInclude Include="SystemECS\NavigationBehaviour.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />

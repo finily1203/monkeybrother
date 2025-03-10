@@ -95,6 +95,7 @@ public:
 	}
 
 	std::string getSystemECS() override;
+	void resetNavigationArrows();
 
 private:
 	std::unordered_map<Entity, std::shared_ptr<BehaviourECS>> behaviours;
