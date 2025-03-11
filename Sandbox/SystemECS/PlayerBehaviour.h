@@ -23,7 +23,5 @@ public:
 	static float MOVEMENT_THRESHOLD;
 	static float BASE_ROTATION_SPEED;
 	static float MAX_ROTATION_PER_FRAME;
-	static float ROTATION_LIMIT;
 	static float ROTATION_SPEED;
-	static bool ROTATION_ENABLED;
 };

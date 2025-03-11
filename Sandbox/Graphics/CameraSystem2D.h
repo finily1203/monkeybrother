@@ -64,7 +64,7 @@ public:
     bool checkLockedComponent() const; // Check if camera is locked to an entity
 
     void readGameplaySettingsFromJSON(std::string const& filename);
-    void saveGameplaySettingsToJSON(std::string const& filename, bool enableRotationLimit, int angle, int speed);
+    void saveGameplaySettingsToJSON(std::string const& filename, int speed);
 
 private:
     myMath::Matrix3x3 m_ViewMatrix;

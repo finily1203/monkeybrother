@@ -176,13 +176,11 @@ void CameraSystem2D::readGameplaySettingsFromJSON(std::string const& filename)
         inputFile.close();
     }
 
-    GLFWFunctions::rotationLimitEnabled = gameplaySettings["rotationLimitEnabled"];
-    GLFWFunctions::rotationAngle = gameplaySettings["rotationAngle"];
     GLFWFunctions::rotationSpeed = gameplaySettings["rotationSpeed"];
 }
 
 // save the updated settings values to gameplay settings JSON file
-void CameraSystem2D::saveGameplaySettingsToJSON(std::string const& filename, bool enableRotationLimit, int angle, int speed)
+void CameraSystem2D::saveGameplaySettingsToJSON(std::string const& filename, int speed)
 {
     nlohmann::json gameplaySettings;
     std::ifstream inputFile(filename);
@@ -192,8 +190,6 @@ void CameraSystem2D::saveGameplaySettingsToJSON(std::string const& filename, boo
         inputFile.close();
     }
 
-    gameplaySettings["rotationLimitEnabled"] = enableRotationLimit;
-    gameplaySettings["rotationAngle"] = angle;
     gameplaySettings["rotationSpeed"] = speed;
 
     std::ofstream outputFile(filename);

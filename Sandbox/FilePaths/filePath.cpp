@@ -276,3 +276,25 @@ std::string FilePathManager::GetTutorialJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the quit level menu JSON file
+std::string FilePathManager::GetQuitLevelMenuJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "quitLevelMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
+
+// this function retrieves the level completed menu JSON file
+std::string FilePathManager::GetLevelCompletedMenuJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "levelCompletedMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

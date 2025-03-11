@@ -131,7 +131,7 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 					// this statement is only applicable when we press and hold down and drag
 					// the mouse cursor on the sfxSoundbarBase and musicSoundbarBase
 					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase" ||
-						entityId == "rotationAngleSlider" || entityId == "rotationSpeedSlider")
+						entityId == "rotationSpeedSlider")
 					{
 						// set the bool isDragging to true
 						isDragging = true;
@@ -162,8 +162,7 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
 								(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
-	std::string sliderNotch = (getSliderId() == "rotationAngleSlider") ? "rotationAngleSliderNotch" :
-							  (getSliderId() == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
+	std::string sliderNotch = (getSliderId() == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
 
 	// ensuring that the string is not empty
 	if (!soundbarArrow.empty())
@@ -235,7 +234,7 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 
 		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
 		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
-		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth + 1.5f;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth;
 
 		if (cursorXCentered >= sliderLeft && cursorXCentered <= sliderRight)
 		{
@@ -243,39 +242,17 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 			{
 				std::string entityId = ecsCoordinator.getEntityID(entity);
 
-				if (entityId == sliderNotch && (getSliderId() != "rotationAngleSlider" || GLFWFunctions::rotationLimitEnabled == true))
+				if (entityId == sliderNotch)
 				{
 					TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 					transform.position.SetX(cursorXCentered);
 
-					if (getSliderId() == "rotationAngleSlider")
+					if (getSliderId() == "rotationSpeedSlider")
 					{
 						float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
-						GLFWFunctions::rotationAngle = static_cast<int>(90.f + (normalizedPos * 270.f));
-						GLFWFunctions::rotationAngle = std::ceil((GLFWFunctions::rotationAngle / 10)) * 10;
-						GLFWFunctions::rotationAngle = std::max(90, std::min(360, GLFWFunctions::rotationAngle));
-
-						for (auto& textEntity : allEntities)
-						{
-							if (ecsCoordinator.getEntityID(textEntity) == "rotationAngleValue")
-							{
-								if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
-								{
-									FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
-									textComponent.text = std::to_string(GLFWFunctions::rotationAngle);
-								}
-
-								break;
-							}
-						}
-					}
-
-					else if (getSliderId() == "rotationSpeedSlider")
-					{
-						float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
-						GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 90.f));
-						GLFWFunctions::rotationSpeed = std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10;
-						GLFWFunctions::rotationSpeed = std::max(90, std::min(180, GLFWFunctions::rotationSpeed));
+						GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
+						GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
+						GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
 
 						for (auto& textEntity : allEntities)
 						{
@@ -585,10 +562,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationAngleSlider",
-			"rotationAngleSliderNotch", "rotationSpeedSlider",
-			"rotationSpeedSliderNotch", "rotationAngleValue",
-			"enableRotationButton", "rotationSpeedValue"
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationSpeedValue"
 		};
 
 		// destroy the options menu
@@ -663,13 +638,24 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// destroy all the entities in the current scene
 		for (auto currEntity : allEntities)
 		{
-			ecsCoordinator.destroyEntity(currEntity);
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
 		}
 
 		// decrement the pause menu count and load the main menu back into the scene
 		GLFWFunctions::pauseMenuCount--;
-		GameViewWindow::setSceneNum(-1);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+		//GameViewWindow::setSceneNum(-1);
+		//ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+		ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
 	}
 
 	// this handles the logic code for the sfx and music soundbarBase buttons
@@ -712,25 +698,21 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationAngleSlider",
-			"rotationAngleSliderNotch", "rotationSpeedSlider",
-			"rotationSpeedSliderNotch", "rotationAngleValue",
-			"enableRotationButton", "rotationSpeedValue"
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationSpeedValue"
 		};
 
 		// initializing sfxPercentage and musicPercentage variables
 		float sfxPercentage = AudioSystem::sfxPercentage;
 		float musicPercentage = AudioSystem::musicPercentage;
 
-		bool rotationLimitEnabled = GLFWFunctions::rotationLimitEnabled;
-		int rotationAngle = GLFWFunctions::rotationAngle;
 		int rotationSpeed = GLFWFunctions::rotationSpeed;
 
 		// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
 		// save the sfx and music percentages to the audio settings JSON file
 		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
-		cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationLimitEnabled, rotationAngle, rotationSpeed);
+		cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
 
 		//change on audio side as well
 		audioSystem.setGenVol(musicPercentage);
@@ -761,7 +743,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		GLFWFunctions::gamePaused = true;
 	}
 
-	else if (entityId == "rotationAngleSlider" || entityId == "rotationSpeedSlider")
+	else if (entityId == "rotationSpeedSlider")
 	{
 		// getting the window's width, height and cursor position x and y values
 		double mouseX{}, mouseY{};
@@ -774,7 +756,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// finding the actual mouse cursor position based on the window dimensions
 		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
 
-		std::string sliderNotchId = (entityId == "rotationAngleSlider") ? "rotationAngleSliderNotch" : "rotationSpeedSliderNotch";
+		std::string sliderNotchId = (entityId == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
 
 		TransformComponent sliderTransform{}, notchTransform{};
 		bool foundSlider = false;
@@ -802,44 +784,22 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
 		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
-		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth + 1.5f;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 1.95f) - notchHalfWidth;
 
 
 		for (auto& currEntity : allEntities)
 		{
-			if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId && (currentSlider != "rotationAngleSlider" || GLFWFunctions::rotationLimitEnabled == true))
+			if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
 			{
 				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
 				transform.position.SetX(cursorXCentered);
 
-				if (currentSlider == "rotationAngleSlider")
+				if (currentSlider == "rotationSpeedSlider")
 				{
 					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
-					GLFWFunctions::rotationAngle = static_cast<int>(90.f + (normalizedPos * 270.f));
-					GLFWFunctions::rotationAngle = std::ceil((GLFWFunctions::rotationAngle / 10)) * 10;
-					GLFWFunctions::rotationAngle = std::max(90, std::min(360, GLFWFunctions::rotationAngle));
-
-					for (auto& textEntity : allEntities)
-					{
-						if (ecsCoordinator.getEntityID(textEntity) == "rotationAngleValue")
-						{
-							if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
-							{
-								FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
-								textComponent.text = std::to_string(GLFWFunctions::rotationAngle);
-							}
-
-							break;
-						}
-					}
-				}
-
-				else if (currentSlider == "rotationSpeedSlider")
-				{
-					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
-					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 90.f));
-					GLFWFunctions::rotationSpeed = std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10;
-					GLFWFunctions::rotationSpeed = std::max(90, std::min(180, GLFWFunctions::rotationSpeed));
+					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
+					GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
+					GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
 
 					for (auto& textEntity : allEntities)
 					{
@@ -861,11 +821,71 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 	}
 
-	else if (entityId == "enableRotationButton")
+	else if (entityId == "quitToMainMenuButton")
 	{
-		GLFWFunctions::rotationLimitEnabled = !GLFWFunctions::rotationLimitEnabled;
+		for (auto& currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GameViewWindow::setSceneNum(-1);
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
 
+	else if (entityId == "returnToPauseMenuButton")
+	{
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "quitLevelMenuBase" ||
+				ecsCoordinator.getEntityID(currEntity) == "quitToMainMenuButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "returnToPauseMenuButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::pauseMenuCount++;
+		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+	}
+
+	else if (entityId == "nextLevelButton")
+	{
+		if (!GLFWFunctions::changeLevel)
+		{
+			int currScene = GameViewWindow::getSceneNum();
+			currScene++;
+
+			if (currScene > 2)
+			{
+				currScene = -1;
+
+				//for (auto& currEntity : allEntities)
+				//{
+				//	ecsCoordinator.destroyEntity(currEntity);
+				//}
+
+				//GameViewWindow::setSceneNum(currScene);
+				//ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+			}
+
+			GameViewWindow::setSceneNum(currScene);
+			GLFWFunctions::changeLevel = true;
+			GLFWFunctions::newSceneLoaded = true;
+		}
+	}
+
+	else if (entityId == "mainMenuButton")
+	{
+		int mainMenuScene = -1;
+
+		for (auto& currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GameViewWindow::setSceneNum(mainMenuScene);
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	}
 	
 }
 

@@ -47,14 +47,16 @@ void ExitBehaviour::update(Entity entity) {
 		bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, exitOBB, normal, penetration);
 		GLFWFunctions::exitCollision = isColliding;
 		if (isColliding) {
-			if(!GLFWFunctions::changeLevel){
-				int currScn = GameViewWindow::getSceneNum();
-				currScn++;
-				if (currScn > 2) currScn = -1;
-				GameViewWindow::setSceneNum(currScn);
-				GLFWFunctions::changeLevel = true;
-				GLFWFunctions::newSceneLoaded = true;
-			}
+			GLFWFunctions::gamePaused = true;
+			ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
+			//if(!GLFWFunctions::changeLevel){
+			//	int currScn = GameViewWindow::getSceneNum();
+			//	currScn++;
+			//	if (currScn > 2) currScn = -1;
+			//	GameViewWindow::setSceneNum(currScn);
+			//	GLFWFunctions::changeLevel = true;
+			//	GLFWFunctions::newSceneLoaded = true;
+			//}
 		}
 	}
 }

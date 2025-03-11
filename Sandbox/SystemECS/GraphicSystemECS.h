@@ -37,6 +37,7 @@ public:
 	std::string getSystemECS() override;
 
 	void updateTutorialArrows();
+	void updateButtons();
 
 private:
 	MouseBehaviour mouseBehaviour;

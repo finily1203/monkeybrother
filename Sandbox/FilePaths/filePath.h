@@ -71,4 +71,8 @@ public:
 	static std::string GetIntroCutsceneJSONPath();
 	// retrieve the tutorial page JSON path
 	static std::string GetTutorialJSONPath();
+	// retrieve the quit to main menu JSON path
+	static std::string GetQuitLevelMenuJSONPath();
+	// retrieve the level completed menu JSON path
+	static std::string GetLevelCompletedMenuJSONPath();
 };

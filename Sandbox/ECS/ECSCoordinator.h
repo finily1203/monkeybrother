@@ -137,6 +137,10 @@ public:
 	void LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the tutorial page entities from JSON
 	void LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the quit level menu entities from JSON
+	void LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the level completed menu entities from JSON
+	void LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
