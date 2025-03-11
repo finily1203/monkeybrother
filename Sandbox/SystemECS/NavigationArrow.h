@@ -18,12 +18,13 @@ public:
     static void CreateNavigationArrow(Entity targetEntity);
     static void RemoveNavigationArrow(Entity targetEntity);
     static void Reset();
+    static void Cleanup();
 
     static constexpr float ARROW_OFFSET = 100.0f; // How far from the player to render the arrow
     static constexpr float ARROW_SIZE = 50.0f;    // Size of the arrow
 
 private:
-    static std::unordered_map<Entity, Entity> targetToArrowMap;
+    static std::unordered_map<Entity, Entity> *targetToArrowMap;
     static Entity playerEntity;
 
     static void UpdateArrowPositionAndRotation(Entity arrowEntity, Entity targetEntity);

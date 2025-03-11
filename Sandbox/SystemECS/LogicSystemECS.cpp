@@ -34,6 +34,8 @@ void LogicSystemECS::initialise() {
 }
 
 void LogicSystemECS::cleanup() {
+	// Call NavigationArrow cleanup
+	NavigationArrow::Cleanup();
 	behaviours.clear();
 }
 

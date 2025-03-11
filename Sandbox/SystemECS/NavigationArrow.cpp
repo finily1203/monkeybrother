@@ -7,13 +7,18 @@
 
 #define M_PI 3.14159265358979323846
 #define ORBIT_RADIUS 150.0f
-std::unordered_map<Entity, Entity> NavigationArrow::targetToArrowMap;
+std::unordered_map<Entity, Entity> *NavigationArrow::targetToArrowMap;
 Entity NavigationArrow::playerEntity = 0;
 
 void NavigationArrow::Initialize() {
     // Reset static variables
     playerEntity = 0;
-    targetToArrowMap.clear();
+	if (!targetToArrowMap) {
+		targetToArrowMap = new std::unordered_map<Entity, Entity>();
+	}
+	
+	targetToArrowMap->clear();
+	
 
     // Find the player entity
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
@@ -46,7 +51,7 @@ void NavigationArrow::Update(float deltaTime) {
     // Update all navigation arrows
     std::vector<Entity> targetEntitiesToRemove;
 
-    for (auto it = targetToArrowMap.begin(); it != targetToArrowMap.end(); ) {
+    for (auto it = targetToArrowMap->begin(); it != targetToArrowMap->end(); ) {
         Entity targetEntity = it->first;
         Entity arrowEntity = it->second;
 
@@ -57,7 +62,7 @@ void NavigationArrow::Update(float deltaTime) {
                 ecsCoordinator.destroyEntity(arrowEntity);
             }
             // Erase from map and get next iterator
-            it = targetToArrowMap.erase(it);
+            it = targetToArrowMap->erase(it);
         }
         else {
             // Update arrow position and rotation
@@ -74,7 +79,7 @@ void NavigationArrow::CreateNavigationArrow(Entity targetEntity) {
     }
 
     // Don't create duplicate arrows
-    if (targetToArrowMap.find(targetEntity) != targetToArrowMap.end()) {
+    if (targetToArrowMap->find(targetEntity) != targetToArrowMap->end()) {
         // If arrow already exists for this target, we're done
         return;
     }
@@ -119,20 +124,20 @@ void NavigationArrow::CreateNavigationArrow(Entity targetEntity) {
     layerManager.addEntityToLayer(topLayer, arrowEntity);
 
     // Store the mapping
-    targetToArrowMap[targetEntity] = arrowEntity;
+    (*targetToArrowMap)[targetEntity] = arrowEntity;
 
     // Initial position update
     UpdateArrowPositionAndRotation(arrowEntity, targetEntity);
 }
 
 void NavigationArrow::RemoveNavigationArrow(Entity targetEntity) {
-    auto it = targetToArrowMap.find(targetEntity);
-    if (it != targetToArrowMap.end()) {
+    auto it = targetToArrowMap->find(targetEntity);
+    if (it != targetToArrowMap->end()) {
         Entity arrowEntity = it->second;
         if (ecsCoordinator.entityExists(arrowEntity)) {
             ecsCoordinator.destroyEntity(arrowEntity);
         }
-        targetToArrowMap.erase(it);
+        targetToArrowMap->erase(it);
     }
 }
 
@@ -225,12 +230,30 @@ myMath::Vector2D NavigationArrow::GetScreenEdgePosition(const myMath::Vector2D& 
 
 void NavigationArrow::Reset() {
     // Clear all existing navigation arrows
-    for (const auto& pair : targetToArrowMap) {
+    for (const auto& pair : *targetToArrowMap) {
         if (ecsCoordinator.entityExists(pair.second)) {
             ecsCoordinator.destroyEntity(pair.second);
         }
     }
 
-    targetToArrowMap.clear();
+    targetToArrowMap->clear();
     playerEntity = 0;
+}
+
+void NavigationArrow::Cleanup() {
+    // First, destroy all arrow entities
+    for (const auto& pair : *targetToArrowMap) {
+        Entity arrowEntity = pair.second;
+        if (ecsCoordinator.entityExists(arrowEntity)) {
+            ecsCoordinator.destroyEntity(arrowEntity);
+        }
+    }
+
+    // Clear the map and reset variables
+    delete targetToArrowMap;
+	targetToArrowMap = nullptr;
+    playerEntity = 0;
+
+    // Additional cleanup if needed (e.g., releasing other resources)
+    // ...
 }

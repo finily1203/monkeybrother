@@ -86,6 +86,7 @@ void ECSCoordinator::update() {
 		systemManager->update();
 
 		if (GLFWFunctions::changeLevel) {
+			NavigationArrow::Cleanup();
 			//delete all live entities
 			for (auto& entity : getAllLiveEntities()) {
 				destroyEntity(entity);
@@ -108,6 +109,9 @@ void ECSCoordinator::update() {
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
+	// Call NavigationArrow cleanup
+	NavigationArrow::Cleanup();
+
 	if (systemManager) systemManager->cleanup();
 	if (componentManager) componentManager->cleanup();
 	if (entityManager) entityManager->cleanup();
