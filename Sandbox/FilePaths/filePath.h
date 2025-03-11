@@ -65,5 +65,6 @@ public:
 	static std::string GetLayerJSONPath();
 	// retrieve the audio settings JSON path
 	static std::string GetAudioSettingsJSONPath();
-	static std::string GetIntroCutsceneJSONPath();	
+	static std::string GetIntroCutsceneJSONPath();
+	static std::string GetFPSConfigJSONPath();
 };

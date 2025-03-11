@@ -62,7 +62,7 @@ struct GLFWFunctions {
 	static bool isKeyPressed(Key key);
 	static bool isKeyReleased(Key key);
 	static bool isKeyHeld(Key key);
-
+	static bool showFPS;
 	static bool isMouseButtonPressed(MouseButton button);
 	static void updateCursorState();
 

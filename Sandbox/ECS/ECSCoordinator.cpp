@@ -58,9 +58,122 @@ void ECSCoordinator::initialise() {
 	systemManager = std::make_unique<SystemManager>();
 }
 
+
+void ECSCoordinator::ensureFPSDisplay() {
+
+	if (fpsDisplayCreated && fpsDisplayEntity != 0) {
+		bool entityExists = false;
+		for (auto entity : getAllLiveEntities()) {
+			if (entity == fpsDisplayEntity) {
+				entityExists = true;
+				break;
+			}
+		}
+		if (entityExists) {
+			return;
+		}
+	}
+
+	JSONSerializer serializer;
+	std::string configPath = FilePathManager::GetFPSConfigJSONPath();
+
+	if (!serializer.Open(configPath)) {
+		std::cerr << "Error: Could not open FPS display configuration from " << configPath << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	if (!jsonObj.contains("fpsDisplay")) {
+		
+		return;
+	}
+
+	const auto& fpsConfig = jsonObj["fpsDisplay"];
+
+	
+	if (!fpsConfig.contains("position") || !fpsConfig.contains("font")) {
+		
+		return;
+	}
+
+	fpsDisplayEntity = createEntity();
+
+	TransformComponent transform{};
+	transform.position.SetX(fpsConfig["position"]["x"].get<float>());
+	transform.position.SetY(fpsConfig["position"]["y"].get<float>());
+
+	if (fpsConfig.contains("scale")) {
+		transform.scale.SetX(fpsConfig["scale"]["x"].get<float>());
+		transform.scale.SetY(fpsConfig["scale"]["y"].get<float>());
+	}
+
+	addComponent(fpsDisplayEntity, transform);
+
+	FontComponent font{};
+	const auto& fontConfig = fpsConfig["font"];
+
+	if (!fontConfig.contains("id") || !fontConfig.contains("scale") ||
+		!fontConfig.contains("color") || !fontConfig.contains("textBoxWidth")) {
+		std::cerr << "Error: Font configuration missing required properties" << std::endl;
+		destroyEntity(fpsDisplayEntity);
+		return;
+	}
+
+	font.fontId = fontConfig["id"].get<std::string>();
+	font.textScale = fontConfig["scale"].get<float>();
+	font.textBoxWidth = fontConfig["textBoxWidth"].get<float>();
+
+	
+	font.text = fontConfig.contains("prefix") ? fontConfig["prefix"].get<std::string>() : "FPS: ";
+
+	
+	const auto& colorConfig = fontConfig["color"];
+	font.color = myMath::Vector3D(
+		colorConfig["r"].get<float>(),
+		colorConfig["g"].get<float>(),
+		colorConfig["b"].get<float>()
+	);
+
+
+	if (!GLFWFunctions::showFPS) {
+		font.text = "";
+	}
+
+	addComponent(fpsDisplayEntity, font);
+
+
+	entityManager->setEntityId(fpsDisplayEntity, "fpsDisplay");
+
+	
+	int layerToUse = 0; 
+
+	if (fpsConfig.contains("layer")) {
+		int targetLayer = fpsConfig["layer"].get<int>();
+
+		if (targetLayer >= 0) {
+			layerToUse = targetLayer;
+		}
+		else {
+			
+			layerToUse = layerManager.getLayerCount() - 1;
+			if (layerToUse < 0) layerToUse = 0;
+		}
+	}
+
+	while (layerManager.getLayerCount() <= layerToUse) {
+		layerManager.addNewLayer();
+	}
+
+	layerManager.addEntityToLayer(layerToUse, fpsDisplayEntity);
+
+	fpsDisplayCreated = true;
+}
+
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
+	ensureFPSDisplay();
 	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
@@ -290,18 +403,93 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// entity that contains animation component
 		if (entityData.contains("animation")) {
-			// read animation data from the JSON file
+			
 			AnimationComponent animation{};
-
-
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 			serializer.ReadObject(animation.totalFrames, entityId, "entities.animation.totalFrames");
 			serializer.ReadObject(animation.frameTime, entityId, "entities.animation.frameTime");
 			serializer.ReadObject(animation.columns, entityId, "entities.animation.columns");
 			serializer.ReadObject(animation.rows, entityId, "entities.animation.rows");
 
-			ecs.addComponent(entityObj, animation);
+			// Read movement animation config
+			if (entityData["animation"].contains("movementAnim")) {
+				serializer.ReadObject(animation.movementConfig.movementThreshold, entityId,
+					"entities.animation.movementAnim.threshold");
+				serializer.ReadObject(animation.movementConfig.bodyTexture, entityId,
+					"entities.animation.movementAnim.bodyTexture");
+				serializer.ReadObject(animation.movementConfig.eyesTexture, entityId,
+					"entities.animation.movementAnim.eyesTexture");
+				serializer.ReadObject(animation.movementConfig.bodyFrames, entityId,
+					"entities.animation.movementAnim.bodyFrames");
+				serializer.ReadObject(animation.movementConfig.bodyColumns, entityId,
+					"entities.animation.movementAnim.bodyColumns");
+				serializer.ReadObject(animation.movementConfig.bodyRows, entityId,
+					"entities.animation.movementAnim.bodyRows");
+				serializer.ReadObject(animation.movementConfig.eyesFrames, entityId,
+					"entities.animation.movementAnim.eyesFrames");
+				serializer.ReadObject(animation.movementConfig.eyesColumns, entityId,
+					"entities.animation.movementAnim.eyesColumns");
+				serializer.ReadObject(animation.movementConfig.eyesRows, entityId,
+					"entities.animation.movementAnim.eyesRows");
+				serializer.ReadObject(animation.movementConfig.eyeFrameDuration, entityId,
+					"entities.animation.movementAnim.eyeFrameDuration");
+			}
 
+			// Read growth animation configuration
+			if (entityData["animation"].contains("growthAnim")) {
+				// Body configuration
+				serializer.ReadObject(animation.growthConfig.body.columns, entityId,
+					"entities.animation.growthAnim.body.columns");
+				serializer.ReadObject(animation.growthConfig.body.rows, entityId,
+					"entities.animation.growthAnim.body.rows");
+				serializer.ReadObject(animation.growthConfig.body.totalFrames, entityId,
+					"entities.animation.growthAnim.body.totalFrames");
+				serializer.ReadObject(animation.growthConfig.body.textureName, entityId,
+					"entities.animation.growthAnim.body.textureName");
+
+				// Eyes configuration
+				serializer.ReadObject(animation.growthConfig.eyes.columns, entityId,
+					"entities.animation.growthAnim.eyes.columns");
+				serializer.ReadObject(animation.growthConfig.eyes.rows, entityId,
+					"entities.animation.growthAnim.eyes.rows");
+				serializer.ReadObject(animation.growthConfig.eyes.totalFrames, entityId,
+					"entities.animation.growthAnim.eyes.totalFrames");
+				serializer.ReadObject(animation.growthConfig.eyes.textureName, entityId,
+					"entities.animation.growthAnim.eyes.textureName");
+
+				// Duration
+				serializer.ReadObject(animation.growthConfig.duration, entityId,
+					"entities.animation.growthAnim.duration");
+			}
+
+			// Read idle animation config
+			if (entityData["animation"].contains("idleAnim")) {
+				// Body configuration
+				serializer.ReadObject(animation.idleConfig.body.columns, entityId,
+					"entities.animation.idleAnim.body.columns");
+				serializer.ReadObject(animation.idleConfig.body.rows, entityId,
+					"entities.animation.idleAnim.body.rows");
+				serializer.ReadObject(animation.idleConfig.body.totalFrames, entityId,
+					"entities.animation.idleAnim.body.totalFrames");
+				serializer.ReadObject(animation.idleConfig.body.textureName, entityId,
+					"entities.animation.idleAnim.body.textureName");
+
+				// Eyes configuration
+				serializer.ReadObject(animation.idleConfig.eyes.columns, entityId,
+					"entities.animation.idleAnim.eyes.columns");
+				serializer.ReadObject(animation.idleConfig.eyes.rows, entityId,
+					"entities.animation.idleAnim.eyes.rows");
+				serializer.ReadObject(animation.idleConfig.eyes.totalFrames, entityId,
+					"entities.animation.idleAnim.eyes.totalFrames");
+				serializer.ReadObject(animation.idleConfig.eyes.textureName, entityId,
+					"entities.animation.idleAnim.eyes.textureName");
+
+				// Duration
+				serializer.ReadObject(animation.idleConfig.duration, entityId,
+					"entities.animation.idleAnim.duration");
+			}
+
+			ecs.addComponent(entityObj, animation);
 		}
 
 		// entity that contains player component
