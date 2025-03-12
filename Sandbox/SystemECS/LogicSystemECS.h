@@ -42,6 +42,9 @@ public:
 	std::string getSoundbarId() const { return draggingSoundbarId; }
 	void setSoundbarId(std::string const& soundbarId) { draggingSoundbarId = soundbarId; }
 
+	std::string getSliderId() const { return draggingSliderId; }
+	void setSliderId(std::string const& sliderId) { draggingSliderId = sliderId; }
+
 	bool getIsDragging() const { return isDragging; }
 	void setIsDragging(bool dragging) { isDragging = dragging; }
 
@@ -51,6 +54,7 @@ private:
 	GLFWcursor* cursor = nullptr;
 	std::string currHoveredButton;
 	std::string draggingSoundbarId;
+	std::string draggingSliderId;
 	bool isDragging;
 };
 

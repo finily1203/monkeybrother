@@ -474,6 +474,58 @@ void GraphicSystemECS::update(float dt) {
                     ecsCoordinator.setTextureID(entity, "optionsMenu");
                 }
 
+                if (ecsCoordinator.getEntityID(entity) == "tutorialBaseBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "tutorialControlsBase", "tutorialMovementBase", 
+                                                                  "tutorialKeyItems1Base", "tutorialKeyItems2Base", 
+                                                                  "tutorialWaterCurrentBase", "tutorialEscapeBase", 
+                                                                  "tutorialFilterBase", "tutorialFishBase" };
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "pageCounter")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "pageCounter1", "pageCounter2", "pageCounter3",
+                                                                  "pageCounter4", "pageCounter5", "pageCounter6",
+                                                                  "pageCounter7", "pageCounter8"};
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "rotationSpeedSliderNotch")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "activeSoundbarNotch");
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "quitLevelMenuBase")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "quitLevelBase");
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "levelCompletedMenuBase")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "levelCompletedBase");
+                }
+
         if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
         {
             // this audioType variable stores the entityId of the current audio icon entity
@@ -799,7 +851,62 @@ void GraphicSystemECS::update(float dt) {
                         }
                     }
 
-                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+                    else if (ecsCoordinator.getEntityID(entity) == "quitToMainMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveYesButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeYesButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "returnToPauseMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveNoButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeNoButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "nextLevelButton")
+                    {
+                        updateButtons();
+
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveNextLevelButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeNextLevelButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "mainMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveMainMenuButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeMainMenuButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu" || 
+                             ecsCoordinator.getEntityID(entity) == "closeTutorialMenu")
                     {
                         ecsCoordinator.setTextureID(entity, "closePopupButton");
                         // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
@@ -812,7 +919,7 @@ void GraphicSystemECS::update(float dt) {
                         TransformComponent arrowTransform{};
 
                         std::string audioArrowId = (soundbarType == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
-                            (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+                                                   (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
                         if (!audioArrowId.empty())
                         {
@@ -835,6 +942,37 @@ void GraphicSystemECS::update(float dt) {
 
 
                         //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveSoundbar"), transform.mdl_xform);
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "nextTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "rightArrow");
+                        updateTutorialArrows();
+                    }
+
+
+                    else if (ecsCoordinator.getEntityID(entity) == "previousTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "leftArrow");
+                        updateTutorialArrows();
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "rotationSpeedSlider")
+                    {
+                        TransformComponent sliderTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+                        TransformComponent notchTransform{};
+
+                        
+                        for (auto& sliderNotchEntity : ecsCoordinator.getAllLiveEntities())
+                        {
+                            if (ecsCoordinator.getEntityID(sliderNotchEntity) == "rotationSpeedSliderNotch")
+                            {
+                                notchTransform = ecsCoordinator.getComponent<TransformComponent>(sliderNotchEntity);
+                                break;
+                            }
+                        }
+
+                        ecsCoordinator.setTextureID(entity, "soundbarBase");
                     }
                 }
 
@@ -927,6 +1065,62 @@ void GraphicSystemECS::update(float dt) {
                 }*/
             }
         }
+    }
+}
+
+void GraphicSystemECS::updateTutorialArrows()
+{
+    Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
+    Entity previousArrow = ecsCoordinator.getEntityFromID("previousTutorialPage");
+
+    TransformComponent& nextTransform = ecsCoordinator.getComponent<TransformComponent>(nextArrow);
+    TransformComponent& previousTransform = ecsCoordinator.getComponent<TransformComponent>(previousArrow);
+
+    if (GLFWFunctions::tutorialCurrentPage >= 1 && GLFWFunctions::tutorialCurrentPage < 8)
+    {
+        nextTransform.scale.SetX(100.f);
+        nextTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        nextTransform.scale.SetX(0.f);
+        nextTransform.scale.SetY(0.f);
+    }
+
+    if (GLFWFunctions::tutorialCurrentPage > 1 && GLFWFunctions::tutorialCurrentPage <= 8)
+    {
+        previousTransform.scale.SetX(100.f);
+        previousTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        previousTransform.scale.SetX(0.f);
+        previousTransform.scale.SetY(0.f);
+    }
+}
+
+void GraphicSystemECS::updateButtons()
+{
+    Entity nextLevelButton = ecsCoordinator.getEntityFromID("nextLevelButton");
+    Entity mainMenuButton = ecsCoordinator.getEntityFromID("mainMenuButton");
+
+    TransformComponent& nextLevelTransform = ecsCoordinator.getComponent<TransformComponent>(nextLevelButton);
+    TransformComponent& mainMenuTransform = ecsCoordinator.getComponent<TransformComponent>(mainMenuButton);
+
+    if (GameViewWindow::getSceneNum() > 1)
+    {
+        nextLevelTransform.scale.SetX(0.f);
+        nextLevelTransform.scale.SetY(0.f);
+        mainMenuTransform.position.SetX(5.f);
+    }
+
+    else
+    {
+        nextLevelTransform.scale.SetX(260.f);
+        nextLevelTransform.scale.SetY(130.f);
+        mainMenuTransform.position.SetX(125.f);
     }
 }
 

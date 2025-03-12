@@ -43,6 +43,8 @@ void CameraSystem2D::initialise()
     m_CameraPosition = myMath::Vector2D(0.0f, 0.0f);
     m_CameraRotation = 0.0f;
     m_CameraZoom = 0.2f;
+
+    readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
 }
 // Update function implementation
 void CameraSystem2D::update()
@@ -161,4 +163,42 @@ bool CameraSystem2D::checkLockedComponent() const
 }
 void CameraSystem2D::unlockFromComponent() {
     m_LockedComponent = nullptr;
+}
+
+// read the settings values from gameplay settings JSON file
+void CameraSystem2D::readGameplaySettingsFromJSON(std::string const& filename)
+{
+    nlohmann::json gameplaySettings;
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        inputFile >> gameplaySettings;
+        inputFile.close();
+    }
+
+    GLFWFunctions::rotationSpeed = gameplaySettings["rotationSpeed"];
+}
+
+// save the updated settings values to gameplay settings JSON file
+void CameraSystem2D::saveGameplaySettingsToJSON(std::string const& filename, int speed)
+{
+    nlohmann::json gameplaySettings;
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        inputFile >> gameplaySettings;
+        inputFile.close();
+    }
+
+    gameplaySettings["rotationSpeed"] = speed;
+
+    std::ofstream outputFile(filename);
+
+    if (!outputFile.is_open())
+    {
+        return;
+    }
+
+    outputFile << gameplaySettings.dump(2);
+    outputFile.close();
 }

@@ -23,9 +23,12 @@ float PlayerBehaviour::MOVEMENT_THRESHOLD = 0;      // Default values
 float PlayerBehaviour::BASE_ROTATION_SPEED = 0;     // Will be overwritten 
 float PlayerBehaviour::MAX_ROTATION_PER_FRAME = 0;  // during initialization
 const float IDLE_TIME_THRESHOLD = 3.0f;             
+float PlayerBehaviour::ROTATION_SPEED;
 
 void PlayerBehaviour::update(Entity entity) {
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
+	ROTATION_SPEED = GLFWFunctions::rotationSpeed;
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
@@ -84,16 +87,18 @@ void PlayerBehaviour::update(Entity entity) {
 			float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
 			rotationAmount *= (60.0f * GLFWFunctions::delta_time);
 			rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
+
 			rotation.SetX(rotation.GetX() + rotationAmount);
 		}
 	}
 	else {
 		// Keyboard rotation logic
 		if ((*GLFWFunctions::keyState)[Key::D]) {
-			rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
+			rotation.SetX(rotation.GetX() + (ROTATION_SPEED * GLFWFunctions::delta_time));
 		}
+
 		else if ((*GLFWFunctions::keyState)[Key::A]) {
-			rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
+				rotation.SetX(rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time));
 		}
 	}
 

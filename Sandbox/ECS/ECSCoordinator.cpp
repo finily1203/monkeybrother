@@ -203,6 +203,7 @@ void ECSCoordinator::update() {
 			}
 			int sceneNum = GameViewWindow::getSceneNum();
 			if (sceneNum == 1 || sceneNum == 2) {
+				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
 			}
@@ -951,6 +952,20 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 			ecs.addComponent(entityObj, button);
 		}
 
+		// entity that contains font component
+		if (entityData.contains("font"))
+		{
+			// read the font data from the JSON file
+			FontComponent font{};
+			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
+			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
+			serializer.ReadObject(font.color, entityId, "entities.font.color");
+			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+			serializer.ReadObject(font.textBoxWidth, entityId, "entities.font.text.BoxWidth");
+
+			ecs.addComponent(entityObj, font);
+		}
+
 		if (entityData.contains("behaviour"))
 		{
 			BehaviourComponent behaviour{};
@@ -1102,12 +1117,307 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 			}
 		}
+
+		if (entityId == "rotationSpeedSliderNotch")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+
+		if (entityId == "rotationSpeedValue")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+			{
+				FontComponent textComponent = getComponent<FontComponent>(entity);
+				
+				serializer.WriteObject(textComponent.text, entityId, "entities.font.text.string");
+			}
+		}
 	}
 
 	// checks if the JSON object is able to be saved to the JSON file 
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
+	}
+}
+
+// function that will load the tutorial page entities from tutorial page JSON file
+void ECSCoordinator::LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	// Load the entities
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
+	}
+}
+
+// function that will load the quit level menu from quit level JSON file
+void ECSCoordinator::LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+		
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
+	}
+}
+
+// function that loads the level completed menu entities from the JSON file
+void ECSCoordinator::LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 }
 
@@ -1248,6 +1558,13 @@ Entity ECSCoordinator::getEntityFromID(std::string ID) {
 // set the entity Id for the current entity
 void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
+}
+
+// check if entity exists
+bool ECSCoordinator::entityExists(Entity entity)
+{
+	auto entities = getAllLiveEntities();
+	return std::find(entities.begin(), entities.end(), entity) != entities.end();
 }
 
 // set texture Id for the current entity
