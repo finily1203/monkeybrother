@@ -24,11 +24,10 @@ public:
     static constexpr float ARROW_SIZE = 50.0f;    // Size of the arrow
 
 private:
-    static std::unordered_map<Entity, Entity> *targetToArrowMap;
+    static std::unordered_map<Entity, Entity>* targetToArrowMap;
     static Entity playerEntity;
+    static bool initialized;
 
     static void UpdateArrowPositionAndRotation(Entity arrowEntity, Entity targetEntity);
     static float CalculateAngleToTarget(const myMath::Vector2D& playerPos, const myMath::Vector2D& targetPos);
-    static bool IsEntityOnScreen(const myMath::Vector2D& entityPos, float entityRadius);
-    static myMath::Vector2D GetScreenEdgePosition(const myMath::Vector2D& playerPos, float angle);
 };

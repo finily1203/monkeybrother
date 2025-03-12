@@ -908,15 +908,21 @@ std::string LogicSystemECS::getSystemECS() {
 }
 
 void LogicSystemECS::resetNavigationArrows() {
-	// First remove any existing navigation arrows
+	// This now manages arrows more efficiently by reusing existing ones
+
+	// First, hide all existing nav arrows
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 		if (ecsCoordinator.hasComponent<NavigationComponent>(entity) &&
-			ecsCoordinator.getEntityID(entity)=="nav_arrow") {
-			ecsCoordinator.destroyEntity(entity);
+			ecsCoordinator.getEntityID(entity) == "nav_arrow") {
+			auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(entity);
+			navComp.isVisible = false;
 		}
 	}
 
-	// Then create new arrows for all collectables
+	// Reset the NavigationArrow system (clears mappings but keeps entities)
+	NavigationArrow::Reset();
+
+	// Then create arrows for all collectables (will reuse existing arrow entities)
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
 			NavigationArrow::CreateNavigationArrow(entity);

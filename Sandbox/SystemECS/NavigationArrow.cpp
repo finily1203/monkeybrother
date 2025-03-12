@@ -7,18 +7,20 @@
 
 #define M_PI 3.14159265358979323846
 #define ORBIT_RADIUS 150.0f
-std::unordered_map<Entity, Entity> *NavigationArrow::targetToArrowMap;
+std::unordered_map<Entity, Entity>* NavigationArrow::targetToArrowMap;
 Entity NavigationArrow::playerEntity = 0;
+bool NavigationArrow::initialized = false;
 
 void NavigationArrow::Initialize() {
     // Reset static variables
     playerEntity = 0;
-	if (!targetToArrowMap) {
-		targetToArrowMap = new std::unordered_map<Entity, Entity>();
-	}
-	
-	targetToArrowMap->clear();
-	
+
+    if (!targetToArrowMap) {
+        targetToArrowMap = new std::unordered_map<Entity, Entity>();
+    }
+
+    targetToArrowMap->clear();
+    initialized = true;
 
     // Find the player entity
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
@@ -32,6 +34,10 @@ void NavigationArrow::Initialize() {
 }
 
 void NavigationArrow::Update(float deltaTime) {
+    if (!initialized) {
+        Initialize();
+    }
+
     // Try to find player entity if we don't have a valid one
     if (playerEntity == 0 || !ecsCoordinator.entityExists(playerEntity)) {
         // Player not found, try to find it
@@ -49,19 +55,18 @@ void NavigationArrow::Update(float deltaTime) {
     }
 
     // Update all navigation arrows
-    std::vector<Entity> targetEntitiesToRemove;
-
     for (auto it = targetToArrowMap->begin(); it != targetToArrowMap->end(); ) {
         Entity targetEntity = it->first;
         Entity arrowEntity = it->second;
 
         // Check if target and arrow still exist
         if (!ecsCoordinator.entityExists(targetEntity) || !ecsCoordinator.entityExists(arrowEntity)) {
-            // If either doesn't exist, remove the arrow entity if it still exists
+            // If arrow still exists but target doesn't, hide the arrow rather than destroying it
             if (ecsCoordinator.entityExists(arrowEntity)) {
-                ecsCoordinator.destroyEntity(arrowEntity);
+                auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(arrowEntity);
+                navComp.isVisible = false;
             }
-            // Erase from map and get next iterator
+            // Remove from map
             it = targetToArrowMap->erase(it);
         }
         else {
@@ -74,13 +79,19 @@ void NavigationArrow::Update(float deltaTime) {
 
 void NavigationArrow::CreateNavigationArrow(Entity targetEntity) {
     // Check if the target exists
-    if (!ecsCoordinator.entityExists(targetEntity)) {
+    if (!initialized || !ecsCoordinator.entityExists(targetEntity)) {
         return;
     }
 
     // Don't create duplicate arrows
     if (targetToArrowMap->find(targetEntity) != targetToArrowMap->end()) {
-        // If arrow already exists for this target, we're done
+        // If arrow already exists for this target, make sure it's visible and update position
+        Entity arrowEntity = (*targetToArrowMap)[targetEntity];
+        if (ecsCoordinator.entityExists(arrowEntity)) {
+            auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(arrowEntity);
+            navComp.isVisible = true;
+            UpdateArrowPositionAndRotation(arrowEntity, targetEntity);
+        }
         return;
     }
 
@@ -100,28 +111,54 @@ void NavigationArrow::CreateNavigationArrow(Entity targetEntity) {
         }
     }
 
-    // Create a new arrow entity
-    Entity arrowEntity = ecsCoordinator.createEntity();
+    // Check if we have an unused arrow in our pool
+    Entity arrowEntity = 0;
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<NavigationComponent>(entity) &&
+            ecsCoordinator.getEntityID(entity) == "nav_arrow") {
 
-    // Set up components for the arrow
-    TransformComponent transform;
-    transform.scale.SetX(ARROW_SIZE);
-    transform.scale.SetY(ARROW_SIZE);
-    ecsCoordinator.addComponent(arrowEntity, transform);
+            // Check if this arrow is not already in our map
+            bool inUse = false;
+            for (const auto& pair : *targetToArrowMap) {
+                if (pair.second == entity) {
+                    inUse = true;
+                    break;
+                }
+            }
 
-    // Add navigation component
-    NavigationComponent navComp;
-    navComp.isNavigation = true;
-    navComp.isVisible = true; // Start hidden
-    ecsCoordinator.addComponent(arrowEntity, navComp);
+            if (!inUse) {
+                arrowEntity = entity;
+                auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(entity);
+                navComp.isVisible = true;
+                break;
+            }
+        }
+    }
 
-    // Set texture and entity ID
-    ecsCoordinator.setTextureID(arrowEntity, "nav_arrow"); // Use your nav_arrow texture
-    ecsCoordinator.setEntityID(arrowEntity, "nav_arrow");
+    // If no unused arrow found, create a new one
+    if (arrowEntity == 0) {
+        arrowEntity = ecsCoordinator.createEntity();
 
-    // Add to highest layer for UI elements
-    int topLayer = layerManager.getLayerCount() - 1;
-    layerManager.addEntityToLayer(topLayer, arrowEntity);
+        // Set up components for the arrow
+        TransformComponent transform;
+        transform.scale.SetX(ARROW_SIZE);
+        transform.scale.SetY(ARROW_SIZE);
+        ecsCoordinator.addComponent(arrowEntity, transform);
+
+        // Add navigation component
+        NavigationComponent navComp;
+        navComp.isNavigation = true;
+        navComp.isVisible = true;
+        ecsCoordinator.addComponent(arrowEntity, navComp);
+
+        // Set texture and entity ID
+        ecsCoordinator.setTextureID(arrowEntity, "nav_arrow");
+        ecsCoordinator.setEntityID(arrowEntity, "nav_arrow");
+
+        // Add to highest layer for UI elements
+        int topLayer = layerManager.getLayerCount() - 1;
+        layerManager.addEntityToLayer(topLayer, arrowEntity);
+    }
 
     // Store the mapping
     (*targetToArrowMap)[targetEntity] = arrowEntity;
@@ -131,16 +168,21 @@ void NavigationArrow::CreateNavigationArrow(Entity targetEntity) {
 }
 
 void NavigationArrow::RemoveNavigationArrow(Entity targetEntity) {
+    if (!initialized) {
+        return;
+    }
+
     auto it = targetToArrowMap->find(targetEntity);
     if (it != targetToArrowMap->end()) {
         Entity arrowEntity = it->second;
         if (ecsCoordinator.entityExists(arrowEntity)) {
-            ecsCoordinator.destroyEntity(arrowEntity);
+            // Instead of destroying, just hide it for potential reuse
+            auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(arrowEntity);
+            navComp.isVisible = false;
         }
         targetToArrowMap->erase(it);
     }
 }
-
 
 void NavigationArrow::UpdateArrowPositionAndRotation(Entity arrowEntity, Entity targetEntity) {
     if (playerEntity == 0 || !ecsCoordinator.entityExists(arrowEntity) || !ecsCoordinator.entityExists(targetEntity)) {
@@ -153,10 +195,6 @@ void NavigationArrow::UpdateArrowPositionAndRotation(Entity arrowEntity, Entity 
 
     myMath::Vector2D playerPos = playerTransform.position;
     myMath::Vector2D targetPos = targetTransform.position;
-
-    // Always make arrows visible regardless of whether target is on screen or not
-    auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(arrowEntity);
-    navComp.isVisible = true;
 
     // Calculate angle from player to target
     float angle = CalculateAngleToTarget(playerPos, targetPos);
@@ -187,61 +225,29 @@ float NavigationArrow::CalculateAngleToTarget(const myMath::Vector2D& playerPos,
     return angle;
 }
 
-bool NavigationArrow::IsEntityOnScreen(const myMath::Vector2D& entityPos, float entityRadius) {
-    // Get camera position and viewport dimensions
-    myMath::Vector2D cameraPos = cameraSystem.getCameraPosition();
-    float cameraZoom = cameraSystem.getCameraZoom();
-
-    // Calculate screen boundaries
-    float screenWidth = GLFWFunctions::windowWidth / cameraZoom;
-    float screenHeight = GLFWFunctions::windowHeight / cameraZoom;
-
-    float left = cameraPos.GetX() - (screenWidth / 2.0f);
-    float right = cameraPos.GetX() + (screenWidth / 2.0f);
-    float top = cameraPos.GetY() + (screenHeight / 2.0f);
-    float bottom = cameraPos.GetY() - (screenHeight / 2.0f);
-
-    // Check if the entity is fully outside the screen boundaries
-    if (entityPos.GetX() + entityRadius < left ||
-        entityPos.GetX() - entityRadius > right ||
-        entityPos.GetY() + entityRadius < bottom ||
-        entityPos.GetY() - entityRadius > top) {
-        return false;
+void NavigationArrow::Reset() {
+    if (!initialized || !targetToArrowMap) {
+        return;
     }
 
-    return true;
-}
-
-myMath::Vector2D NavigationArrow::GetScreenEdgePosition(const myMath::Vector2D& playerPos, float angle) {
-    // Convert angle to radians
-    float radians = angle * M_PI / 180.0f;
-
-    // Calculate direction vector
-    float dx = std::cos(radians);
-    float dy = std::sin(radians);
-
-    // Instead of positioning at screen edge, we'll position the arrow in orbit around the player
-    // Position arrow at a fixed radius around the player
-    float x = playerPos.GetX() + (ORBIT_RADIUS * dx);
-    float y = playerPos.GetY() + (ORBIT_RADIUS * dy);
-
-    return myMath::Vector2D(x, y);
-}
-
-void NavigationArrow::Reset() {
-    // Clear all existing navigation arrows
+    // Hide all arrows but keep them for reuse
     for (const auto& pair : *targetToArrowMap) {
-        if (ecsCoordinator.entityExists(pair.second)) {
-            ecsCoordinator.destroyEntity(pair.second);
+        Entity arrowEntity = pair.second;
+        if (ecsCoordinator.entityExists(arrowEntity)) {
+            auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(arrowEntity);
+            navComp.isVisible = false;
         }
     }
 
     targetToArrowMap->clear();
-    playerEntity = 0;
 }
 
 void NavigationArrow::Cleanup() {
-    // First, destroy all arrow entities
+    if (!initialized || !targetToArrowMap) {
+        return;
+    }
+
+    // Now we actually destroy all arrow entities
     for (const auto& pair : *targetToArrowMap) {
         Entity arrowEntity = pair.second;
         if (ecsCoordinator.entityExists(arrowEntity)) {
@@ -249,11 +255,17 @@ void NavigationArrow::Cleanup() {
         }
     }
 
+    // Also destroy any other unused navigation arrows
+    for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+        if (ecsCoordinator.hasComponent<NavigationComponent>(entity) &&
+            ecsCoordinator.getEntityID(entity) == "nav_arrow") {
+            ecsCoordinator.destroyEntity(entity);
+        }
+    }
+
     // Clear the map and reset variables
     delete targetToArrowMap;
-	targetToArrowMap = nullptr;
+    targetToArrowMap = nullptr;
     playerEntity = 0;
-
-    // Additional cleanup if needed (e.g., releasing other resources)
-    // ...
+    initialized = false;
 }
