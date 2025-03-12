@@ -1352,12 +1352,17 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 // Get the next available save ID
 int GameViewWindow::GetNextAvailableSaveID() {
 	// Find the highest existing save ID and add 1
+	std::map<int, std::string> currentSaves = ScanForSaveFiles();
+
+	// Find the highest existing save ID
 	int maxID = 0;
-	for (const auto& pair : *saveFileNames) {
+	for (const auto& pair : currentSaves) {
 		if (pair.first > maxID) {
 			maxID = pair.first;
 		}
 	}
+
+	// Return the next available ID
 	return maxID + 1;
 }
 
@@ -1404,7 +1409,7 @@ std::string GameViewWindow::GenerateNamedSaveJSONFile(int saveID, const char* sa
 
 	// Format with the ID at the end (less visible) or as metadata
 	std::string jsonPath = execPath.substr(0, execPath.find_last_of("\\/")) +
-		"\\Sandbox\\assets\\json\\save_" + sanitizedName + ".json";
+		"\\Sandbox\\assets\\json\\save_" + std::to_string(saveID) + "_" + sanitizedName + ".json";
 
 	return jsonPath;
 }
@@ -1426,6 +1431,12 @@ void GameViewWindow::DisplaySaveSlots() {
 		ImGui::PushID(saveID);
 
 		if (ImGui::Button(saveName.c_str(), ImVec2(slotWindowWidth, fileWindowHeight))) {
+			// Get the save name from the selected save
+			std::string selectedSaveName = saveName;
+
+			// Save to the selected file
+			SaveToNamedFile(saveID, selectedSaveName.c_str());
+
 			saveNum = saveID;
 			saveFileChosen = true;
 			isSelectingSaveFile = false;
@@ -1573,7 +1584,6 @@ void GameViewWindow::DeleteSaveFile(int saveID) {
 
 std::map<int, std::string> GameViewWindow::ScanForSaveFiles() {
 	std::map<int, std::string> saveFiles;
-	int autoAssignedId = 1; // For auto-assigning IDs to files that don't have embedded IDs
 
 	// Get path to json directory
 	std::string execPath = FilePathManager::GetExecutablePath();
@@ -1585,24 +1595,35 @@ std::map<int, std::string> GameViewWindow::ScanForSaveFiles() {
 			if (entry.is_regular_file()) {
 				std::string filename = entry.path().filename().string();
 
-				// Check if file matches the new pattern: save_Name.json
+				// Check if filename starts with "save_"
 				if (filename.find("save_") == 0 && filename.find(".json") != std::string::npos) {
-					// Extract the name part between "save_" and ".json"
+					// Extract the ID part after "save_"
 					size_t prefixLen = 5; // length of "save_"
+					size_t underscorePos = filename.find('_', prefixLen);
 					size_t dotPos = filename.find_last_of('.');
+					int id = 0;
+					std::string name;
 
-					if (dotPos != std::string::npos && dotPos > prefixLen) {
-						std::string name = filename.substr(prefixLen, dotPos - prefixLen);
-
-						// Auto-assign an ID (order of discovery)
-						int id = autoAssignedId++;
-
-						// Convert underscores back to spaces for display
-						std::string displayName = name;
-						std::replace(displayName.begin(), displayName.end(), '_', ' ');
-
-						saveFiles[id] = displayName;
+					if (underscorePos != std::string::npos && underscorePos < dotPos) {
+						// Format: save_ID_name.json
+						std::string idStr = filename.substr(prefixLen, underscorePos - prefixLen);
+						name = filename.substr(underscorePos + 1, dotPos - (underscorePos + 1));
+						try {
+							id = std::stoi(idStr);
+						}
+						catch (std::exception& e) {
+							std::cout << "Error parsing save ID: " << e.what() << std::endl;
+							continue;
+						}
 					}
+					else {
+						// Detect and skip files that don't have the expected format
+						continue;
+					}
+
+					// Convert underscores to spaces for display
+					std::replace(name.begin(), name.end(), '_', ' ');
+					saveFiles[id] = name;
 				}
 			}
 		}

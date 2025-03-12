@@ -170,9 +170,30 @@ std::string FilePathManager::GetPhysicsPath()
 std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 {
     std::filesystem::path execPath = GetExecutablePath();
-    std::string saveFile = "save" + std::to_string(saveCount) + ".json";
-    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / saveFile;
 
+    // Look for existing save file with this ID
+    std::string jsonDir = execPath.parent_path().string() + "\\Sandbox\\assets\\json\\";
+    std::string prefix = "save_" + std::to_string(saveCount) + "_";
+
+    // Default filename in case no existing file is found
+    std::string saveFile = prefix + "unnamed.json";
+
+    try {
+        // Check if there's already a save file with this ID
+        for (const auto& entry : std::filesystem::directory_iterator(jsonDir)) {
+            std::string filename = entry.path().filename().string();
+            if (filename.find(prefix) == 0 && filename.find(".json") != std::string::npos) {
+                // Found an existing save with this ID
+                saveFile = filename;
+                break;
+            }
+        }
+    }
+    catch (std::exception& e) {
+        // If there's an error, just use the default filename
+    }
+
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / saveFile;
     std::string jsonPathString = jsonPath.string();
 
     return jsonPathString;
