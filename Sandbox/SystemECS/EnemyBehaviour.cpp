@@ -27,6 +27,7 @@ EnemyBehaviour::EnemyBehaviour() {
     avoidTimer = 0.f;
     chaseAnimationCreated = false;
     attackAnimationCreated = false;
+    timesAvoided = 0;
 
 	//For now all enemies have same way point
     
@@ -498,11 +499,11 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         dirToPlayer.SetY(dirToPlayer.GetY() / distanceToPlayer);
     }
 
-    // Calculate rotation angle - same as in patrol state
+    // Calculate rotation angle
     float angleRadians = atan2(dirToPlayer.GetY(), dirToPlayer.GetX());
     float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
 
-    // Set rotation
+    // Set orientation of x based on angle
     transform.orientation.SetX(angleDegrees);
 
     // Handle flipping based on angle
@@ -515,13 +516,11 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    // Set max speed limit
-    const float maxSpeed = 0.5f; // Slightly faster than patrol
+    const float maxSpeed = 0.5f;
     physics.velocity = dirToPlayer * maxSpeed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    // Update isFacingRight based on direction
     if (dirToPlayer.GetX() > 0) {
         isFacingRight = true;
     }

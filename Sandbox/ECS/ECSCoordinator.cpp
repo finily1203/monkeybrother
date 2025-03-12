@@ -516,6 +516,9 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		float mag = playerForce.GetMagnitude();
 		forceManager.AddForce(entity, myMath::Vector2D(-.3, -.3));
 	}*/
+
+	//set player alive whenever new stage is loaded
+	GLFWFunctions::isPlayerDead = false;
 }
 
 // function that loads the main menu entities from the manu menu JSON file

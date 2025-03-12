@@ -68,4 +68,5 @@ private:
 	float avoidTimer;
 	bool chaseAnimationCreated;
 	bool attackAnimationCreated;
+	int timesAvoided;
 };
