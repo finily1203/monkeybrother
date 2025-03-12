@@ -70,6 +70,8 @@ bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
 bool GLFWFunctions::showFPS = true;
+bool GLFWFunctions::isPlayerDead = false;
+
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
 bool GLFWFunctions::newSceneLoaded = false;

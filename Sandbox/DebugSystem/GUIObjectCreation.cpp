@@ -264,6 +264,7 @@ void ObjectCreation::ObjectCreationCondition(const char* items[], int itemIndex,
 		enemy.numWaypoints = 2;
 		enemy.waypoints.push_back({ 0.0f, 0.0f });
 		enemy.waypoints.push_back({ 100.0f, 100.0f });
+		enemy.currState = 0;
 
 		MovementComponent movement{};
 		movement.speed = 5.0f;  // Default speed

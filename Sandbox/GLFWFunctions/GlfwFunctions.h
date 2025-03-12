@@ -119,6 +119,8 @@ struct GLFWFunctions {
 	static bool filterClogged; // rmb to remove this
 	static bool changeLevel;
 
+	static bool isPlayerDead;
+
 	static double mouseXDelta; // Add this to track mouse movement
 
 	static std::unordered_map<Key, bool>* keyState;

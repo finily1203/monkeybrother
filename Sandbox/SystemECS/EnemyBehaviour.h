@@ -49,8 +49,13 @@ public:
 	bool isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos);
 	bool rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDir, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tmin, float& tmax);
 
-
 	void updateChaseState(Entity entity);
+	bool checkPlayerCollision(Entity entity, Entity playerEntity);
+
+	void updateAttackState(Entity entity);
+
+	void createChaseAnimation(Entity entity);
+	void createAttackAnimation(Entity entity);
 
 private:
 	STATE currentState;
@@ -61,4 +66,6 @@ private:
 	bool hasWaypointsBeenChanged;
 	bool isAvoidingWalls;
 	float avoidTimer;
+	bool chaseAnimationCreated;
+	bool attackAnimationCreated;
 };

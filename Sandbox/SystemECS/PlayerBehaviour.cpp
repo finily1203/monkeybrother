@@ -26,6 +26,29 @@ const float IDLE_TIME_THRESHOLD = 3.0f;
 float PlayerBehaviour::ROTATION_SPEED;
 
 void PlayerBehaviour::update(Entity entity) {
+	if (GLFWFunctions::isPlayerDead) {
+		if (!playDeathAnimation) {
+			deathAnimationProgress = 0.0f;
+			playDeathAnimation = true;
+
+			initialScale = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
+		}
+
+		const float deathAnimationDuration = 3.0f;
+		deathAnimationProgress += GLFWFunctions::delta_time;
+		float t = std::min(deathAnimationProgress / deathAnimationDuration, 1.0f);
+		float scaleFactor = 1.0f - t;
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		transform.scale = initialScale * scaleFactor;
+
+		return;
+	}
+
+	if (playDeathAnimation) {
+		playDeathAnimation = false;
+		deathAnimationProgress = 0.0f;
+	}
+
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
 	ROTATION_SPEED = GLFWFunctions::rotationSpeed;

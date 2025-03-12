@@ -14,6 +14,12 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #pragma once
 struct EnemyComponent
 {
+	enum class STATE {
+		PATROL,
+		CHASE,
+		ATTACK
+	};
+
 	bool isEnemy;
 	bool isClockwise;
 
@@ -24,5 +30,7 @@ struct EnemyComponent
 	int numWaypoints;
 	std::vector<myMath::Vector2D> waypoints;
 
-	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true), numWaypoints(0) {}
+	int currState;
+
+	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true), numWaypoints(0), currState(0) {}
 };

@@ -525,6 +525,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 				std::cout << "Waypoint " << i << ": " << enemy.waypoints[i].GetX() << ", " << enemy.waypoints[i].GetY() << std::endl;
 			}
+			serializer.ReadObject(enemy.currState, entityId, "entities.enemy.currState");
 
 			ecs.addComponent(entityObj, enemy);
 
