@@ -145,7 +145,7 @@ void EnemyBehaviour::update(Entity entity) {
 
 bool EnemyBehaviour::avoidWalls(Entity entity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-    auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+    //auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
 	auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
@@ -280,9 +280,9 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
     Force force = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-    auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
+    //auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
     myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
-    float mass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
+    //float mass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
 
     if (currentWaypoints.empty())
     {
@@ -375,7 +375,7 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     forwardVector.SetY(0.0f);
 
     // Apply rotation from entity orientation
-    float radians = enemyTransform.orientation.GetX() * (3.14159265358979323846 / 180.0);
+    float radians = enemyTransform.orientation.GetX() * (3.14159265358979323846f / 180.0f);
     float cosTheta = static_cast<float>(std::cos(radians));
     float sinTheta = static_cast<float>(std::sin(radians));
     float rotatedX = forwardVector.GetX() * cosTheta - forwardVector.GetY() * sinTheta;
@@ -388,7 +388,7 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
         forwardVector.GetY() * normalizedDirToPlayer.GetY();
 
     // Convert cone half-angle to radians and calculate cosine
-    float halfAngleRadians = (enemyComponent.visionAngle / 2.0f) * (3.14159265358979323846 / 180.0);
+    float halfAngleRadians = (enemyComponent.visionAngle / 2.0f) * (3.14159265358979323846f / 180.0f);
     float cosHalfAngle = static_cast<float>(std::cos(halfAngleRadians));
 
     // Check if player is within the cone angle
@@ -467,7 +467,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
+    //auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
 
     // Get player entity
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
@@ -476,7 +476,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     // Calculate direction to player
     myMath::Vector2D dirToPlayer = playerPos - transform.position;
 
-    float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2) + std::pow(dirToPlayer.GetY(), 2));
+    float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2.f) + std::pow(dirToPlayer.GetY(), 2.f));
 
     // Check if player is within vision distance
     auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);

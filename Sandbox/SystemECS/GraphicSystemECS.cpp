@@ -1010,9 +1010,9 @@ void GraphicSystemECS::update(float dt) {
                 {
 					auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
                     if (enemy.drawVisionDebug) {
-						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
-                        graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
+						auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
+						graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
+                        graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
                     }
 
                     if (enemy.currState == 0) {

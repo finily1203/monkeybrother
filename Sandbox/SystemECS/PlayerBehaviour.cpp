@@ -51,7 +51,7 @@ void PlayerBehaviour::update(Entity entity) {
 
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
-	ROTATION_SPEED = GLFWFunctions::rotationSpeed;
+	ROTATION_SPEED = static_cast<float>(GLFWFunctions::rotationSpeed);
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;

@@ -30,6 +30,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "FilterBehaviour.h"
 #include "MovPlatformBehaviour.h"
 #include "GUIAssetBrowser.h"
+#include "BackgroundComponent.h"
 #include <memory>
 
 std::vector<std::pair<int, std::string>>* Inspector::overlappingEntities;
@@ -58,7 +59,7 @@ int frames = 1;
 bool playerExists = false;
 
 bool Inspector::isCtrlDragging = false;
-Entity Inspector::duplicatedEntity = -1;
+int Inspector::duplicatedEntity = -1;
 bool Inspector::hasDuplicated = false;
 
 bool Inspector::isDraggingCopies = false;
@@ -323,8 +324,8 @@ void Inspector::Update() {
 					filledCells->clear();
 
 					// Add the original entity's cell to filled cells
-					auto& transform = ecsCoordinator.getComponent<TransformComponent>(duplicatedEntity);
-					myMath::Vector2D origPos = transform.position;
+					auto& transformation = ecsCoordinator.getComponent<TransformComponent>(duplicatedEntity);
+					myMath::Vector2D origPos = transformation.position;
 					myMath::Vector2D snappedOrigPos = gridSystem.snapToGrid(origPos);
 					int origCellX = static_cast<int>(snappedOrigPos.GetX() / gridSystem.getCellSize());
 					int origCellY = static_cast<int>(snappedOrigPos.GetY() / gridSystem.getCellSize());
@@ -356,8 +357,8 @@ void Inspector::Update() {
 				// Ctrl+drag copy mode
 				else if (isDraggingCopies) {
 					// Convert mouse position to grid cell
-					myMath::Vector2D mousePos(mouseWorldPos.x, mouseWorldPos.y);
-					myMath::Vector2D snappedMousePos = gridSystem.snapToGrid(mousePos);
+					myMath::Vector2D mousePosition(mouseWorldPos.x, mouseWorldPos.y);
+					myMath::Vector2D snappedMousePos = gridSystem.snapToGrid(mousePosition);
 					int mouseCellX = static_cast<int>(snappedMousePos.GetX() / gridSystem.getCellSize());
 					int mouseCellY = static_cast<int>(snappedMousePos.GetY() / gridSystem.getCellSize());
 
@@ -507,6 +508,278 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	std::string entityID = ecs.getEntityID(selectedEntityID);
 	ImGui::Text("Entity ID: %s", entityID.c_str());
 	ImGui::Separator();
+
+	// Add a Components button that opens a popup with all available components
+	if (ImGui::Button("Edit Components")) {
+		ImGui::OpenPopup("Component Editor");
+	}
+
+	// Component Editor Popup
+	if (ImGui::BeginPopupModal("Component Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Add or remove components for entity: %s", entityID.c_str());
+		ImGui::Separator();
+
+		// Create checkboxes for each component type
+		// TransformComponent is a special case - all entities must have it
+		bool hasTransform = ecs.hasComponent<TransformComponent>(selectedEntityID);
+		ImGui::BeginDisabled();  // Disable the checkbox because all entities must have transforms
+		ImGui::Checkbox("Transform Component", &hasTransform);
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::TextDisabled("(Required)");
+
+		// AABB Component
+		bool hasAABB = ecs.hasComponent<AABBComponent>(selectedEntityID);
+		if (ImGui::Checkbox("AABB Component", &hasAABB)) {
+			if (hasAABB && !ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+				AABBComponent aabb;
+				// Initialize with default values based on entity's transform
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				aabb.left = -transform.scale.GetX() / 2.0f;
+				aabb.right = transform.scale.GetX() / 2.0f;
+				aabb.top = transform.scale.GetY() / 2.0f;
+				aabb.bottom = -transform.scale.GetY() / 2.0f;
+				ecs.addComponent(selectedEntityID, aabb);
+			}
+			else if (!hasAABB && ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+				ecs.removeComponent<AABBComponent>(selectedEntityID);
+			}
+		}
+
+		// Physics Component
+		bool hasPhysics = ecs.hasComponent<PhysicsComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Physics Component", &hasPhysics)) {
+			if (hasPhysics && !ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+				PhysicsComponent physics;
+				// Initialize with reasonable defaults
+				physics.mass = 1.0f;
+				physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+				physics.dampening = 0.9f;
+				physics.maxVelocity = 200.0f;
+				ecs.addComponent(selectedEntityID, physics);
+			}
+			else if (!hasPhysics && ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+				ecs.removeComponent<PhysicsComponent>(selectedEntityID);
+			}
+		}
+
+		// Animation Component
+		bool hasAnimation = ecs.hasComponent<AnimationComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Animation Component", &hasAnimation)) {
+			if (hasAnimation && !ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+				AnimationComponent animation;
+				animation.isAnimated = true;
+				animation.totalFrames = 1.0f;
+				animation.frameTime = 0.05f;
+				animation.columns = 1.0f;
+				animation.rows = 1.0f;
+				ecs.addComponent(selectedEntityID, animation);
+			}
+			else if (!hasAnimation && ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+				ecs.removeComponent<AnimationComponent>(selectedEntityID);
+			}
+		}
+
+		// Font Component
+		bool hasFont = ecs.hasComponent<FontComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Font Component", &hasFont)) {
+			if (hasFont && !ecs.hasComponent<FontComponent>(selectedEntityID)) {
+				FontComponent font;
+				font.text = "New Text";
+				font.textScale = 1.0f;
+				font.textBoxWidth = 300.0f;
+				font.color = myMath::Vector3D(1.0f, 1.0f, 1.0f);
+				font.fontId = "default";  // Assuming you have a default font
+				ecs.addComponent(selectedEntityID, font);
+			}
+			else if (!hasFont && ecs.hasComponent<FontComponent>(selectedEntityID)) {
+				ecs.removeComponent<FontComponent>(selectedEntityID);
+			}
+		}
+
+		// Player Component
+		bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Player Component", &hasPlayer)) {
+			// Check if a player already exists
+			bool playerExists = false;
+			if (hasPlayer && !ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+				for (auto& entity : ecs.getAllLiveEntities()) {
+					if (entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
+						playerExists = true;
+						break;
+					}
+				}
+
+				if (!playerExists) {
+					PlayerComponent player;
+					player.isPlayer = true;
+					ecs.addComponent(selectedEntityID, player);
+				}
+				else {
+					// Only one player allowed - show a warning
+					ImGui::OpenPopup("Player Warning");
+					hasPlayer = false;
+				}
+			}
+			else if (!hasPlayer && ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+				ecs.removeComponent<PlayerComponent>(selectedEntityID);
+			}
+		}
+
+		// Warning popup for player component
+		if (ImGui::BeginPopupModal("Player Warning", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Only one player entity can exist in the scene.");
+			ImGui::Separator();
+			if (ImGui::Button("OK", ImVec2(120, 0))) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		// Enemy Component
+		bool hasEnemy = ecs.hasComponent<EnemyComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Enemy Component", &hasEnemy)) {
+			if (hasEnemy && !ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+				EnemyComponent enemy;
+				enemy.isEnemy = true;
+				enemy.isClockwise = true;
+				enemy.visionAngle = 60.0f;
+				enemy.visionDistance = 300.0f;
+				enemy.drawVisionDebug = true;
+				enemy.numWaypoints = 2;
+				// Add default waypoints
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				enemy.waypoints.push_back(transform.position);
+				enemy.waypoints.push_back(myMath::Vector2D(transform.position.GetX() + 100, transform.position.GetY()));
+				ecs.addComponent(selectedEntityID, enemy);
+			}
+			else if (!hasEnemy && ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+				ecs.removeComponent<EnemyComponent>(selectedEntityID);
+			}
+		}
+
+		// Collectable Component
+		bool hasCollectable = ecs.hasComponent<CollectableComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Collectable Component", &hasCollectable)) {
+			if (hasCollectable && !ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+				CollectableComponent collectable;
+				collectable.isCollectable = true;
+				ecs.addComponent(selectedEntityID, collectable);
+				GLFWFunctions::collectableCount++;
+			}
+			else if (!hasCollectable && ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+				ecs.removeComponent<CollectableComponent>(selectedEntityID);
+				if (GLFWFunctions::collectableCount > 0)
+					GLFWFunctions::collectableCount--;
+			}
+		}
+
+		// Pump Component
+		bool hasPump = ecs.hasComponent<PumpComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Pump Component", &hasPump)) {
+			if (hasPump && !ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+				PumpComponent pump;
+				pump.isPump = true;
+				pump.pumpForce = 3.0f;
+				ecs.addComponent(selectedEntityID, pump);
+			}
+			else if (!hasPump && ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+				ecs.removeComponent<PumpComponent>(selectedEntityID);
+			}
+		}
+
+		// Exit Component
+		bool hasExit = ecs.hasComponent<ExitComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Exit Component", &hasExit)) {
+			if (hasExit && !ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+				ExitComponent exit;
+				exit.isExit = true;
+				ecs.addComponent(selectedEntityID, exit);
+			}
+			else if (!hasExit && ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+				ecs.removeComponent<ExitComponent>(selectedEntityID);
+			}
+		}
+
+		// Background Component
+		bool hasBackground = ecs.hasComponent<BackgroundComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Background Component", &hasBackground)) {
+			if (hasBackground && !ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+				BackgroundComponent background;
+				background.isBackground = true;
+				ecs.addComponent(selectedEntityID, background);
+			}
+			else if (!hasBackground && ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+				ecs.removeComponent<BackgroundComponent>(selectedEntityID);
+			}
+		}
+
+		// UI Component
+		bool hasUI = ecs.hasComponent<UIComponent>(selectedEntityID);
+		if (ImGui::Checkbox("UI Component", &hasUI)) {
+			if (hasUI && !ecs.hasComponent<UIComponent>(selectedEntityID)) {
+				UIComponent ui;
+				ui.isUI = true;
+				ecs.addComponent(selectedEntityID, ui);
+			}
+			else if (!hasUI && ecs.hasComponent<UIComponent>(selectedEntityID)) {
+				ecs.removeComponent<UIComponent>(selectedEntityID);
+			}
+		}
+
+		// Button Component
+		bool hasButton = ecs.hasComponent<ButtonComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Button Component", &hasButton)) {
+			if (hasButton && !ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+				ButtonComponent button;
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				button.originalScale = transform.scale;
+				button.hoveredScale = myMath::Vector2D(transform.scale.GetX() * 1.1f, transform.scale.GetY() * 1.1f);
+				button.isButton = true;
+				ecs.addComponent(selectedEntityID, button);
+			}
+			else if (!hasButton && ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+				ecs.removeComponent<ButtonComponent>(selectedEntityID);
+			}
+		}
+
+		// Filter Component
+		bool hasFilter = ecs.hasComponent<FilterComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Filter Component", &hasFilter)) {
+			if (hasFilter && !ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+				FilterComponent filter;
+				filter.isFilter = true;
+				filter.isFilterClogged = false;
+				ecs.addComponent(selectedEntityID, filter);
+			}
+			else if (!hasFilter && ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+				ecs.removeComponent<FilterComponent>(selectedEntityID);
+			}
+		}
+
+		// Moving Platform Component
+		bool hasMovPlatform = ecs.hasComponent<MovPlatformComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Moving Platform Component", &hasMovPlatform)) {
+			if (hasMovPlatform && !ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+				MovPlatformComponent movPlatform;
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				movPlatform.speed = 50.0f;
+				movPlatform.maxDistance = 200.0f;
+				movPlatform.startPos = transform.position;
+				movPlatform.direction = myMath::Vector2D(1.0f, 0.0f);  // Default horizontal movement
+				ecs.addComponent(selectedEntityID, movPlatform);
+			}
+			else if (!hasMovPlatform && ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+				ecs.removeComponent<MovPlatformComponent>(selectedEntityID);
+			}
+		}
+
+		ImGui::Separator();
+		if (ImGui::Button("Close", ImVec2(120, 0))) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 
 	if (ecsCoordinator.getEntityID(selectedEntityID) == "placeholderentity") {}
 	else
@@ -899,7 +1172,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		{
 			assetNames->push_back(asset);
 		}
+		assetsManager.setAssetListChanged(false);
 	}
+
 	// Add a static string to store the current selected item
 	static char selectedTexture[256] = "Select a texture...";
 	strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());

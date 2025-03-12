@@ -55,7 +55,7 @@ public:
 	static std::vector<std::pair<int, std::string>>* overlappingEntities;
 
 	static bool isCtrlDragging;        
-	static Entity duplicatedEntity;      
+	static int duplicatedEntity;      
 	static bool hasDuplicated;
 
 	static bool isDraggingCopies;
