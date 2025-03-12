@@ -60,21 +60,6 @@ void ExitBehaviour::update(Entity entity) {
         auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
         auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
 
-		bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, exitOBB, normal, penetration);
-		GLFWFunctions::exitCollision = isColliding;
-		if (isColliding) {
-			GLFWFunctions::gamePaused = true;
-			ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
-			//if(!GLFWFunctions::changeLevel){
-			//	int currScn = GameViewWindow::getSceneNum();
-			//	currScn++;
-			//	if (currScn > 2) currScn = -1;
-			//	GameViewWindow::setSceneNum(currScn);
-			//	GLFWFunctions::changeLevel = true;
-			//	GLFWFunctions::newSceneLoaded = true;
-			//}
-		}
-	}
         for (auto& findPlayer : ecsCoordinator.getAllLiveEntities()) {
             if (ecsCoordinator.hasComponent<PlayerComponent>(findPlayer)) {
                 playerEntity = findPlayer;
@@ -97,15 +82,17 @@ void ExitBehaviour::update(Entity entity) {
         GLFWFunctions::exitCollision = isColliding;
         if (isColliding) {
             if (!GLFWFunctions::changeLevel) {
-                int currScn = GameViewWindow::getSceneNum();
-                currScn++;
-                if (currScn > 2) currScn = -1;
-                GameViewWindow::setSceneNum(currScn);
-                GLFWFunctions::changeLevel = true;
-                GLFWFunctions::newSceneLoaded = true;
+                GLFWFunctions::gamePaused = true;
+                ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
+                //int currScn = GameViewWindow::getSceneNum();
+                //currScn++;
+                //if (currScn > 2) currScn = -1;
+                //GameViewWindow::setSceneNum(currScn);
+                //GLFWFunctions::changeLevel = true;
+                //GLFWFunctions::newSceneLoaded = true;
 
-                // Reset exit arrow state for next level
-                exitArrowCreated = false;
+                //// Reset exit arrow state for next level
+                //exitArrowCreated = false;
             }
         }
     }
