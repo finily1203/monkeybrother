@@ -14,7 +14,7 @@
 class NavigationArrow {
 public:
     static void Initialize();
-    static void Update(float deltaTime);
+    static void Update();
     static void CreateNavigationArrow(Entity targetEntity);
     static void RemoveNavigationArrow(Entity targetEntity);
     static void Reset();

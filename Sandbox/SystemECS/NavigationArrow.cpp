@@ -33,7 +33,7 @@ void NavigationArrow::Initialize() {
     // Note: It's okay if we don't find the player yet - we'll keep trying in Update
 }
 
-void NavigationArrow::Update(float deltaTime) {
+void NavigationArrow::Update() {
     if (!initialized) {
         Initialize();
     }
@@ -201,7 +201,7 @@ void NavigationArrow::UpdateArrowPositionAndRotation(Entity arrowEntity, Entity 
 
     // Position arrow in orbit around the player in the direction of the target
     float orbitRadius = ORBIT_RADIUS; // Orbit radius around player
-    float radians = angle * M_PI / 180.0f;
+    float radians = static_cast<float>(angle * M_PI / 180.0f);
 
     // Calculate orbit position
     float arrowX = playerPos.GetX() + orbitRadius * std::cos(radians);
@@ -220,7 +220,7 @@ float NavigationArrow::CalculateAngleToTarget(const myMath::Vector2D& playerPos,
     float dy = targetPos.GetY() - playerPos.GetY();
 
     // Calculate angle in degrees (0 degrees is pointing right)
-    float angle = std::atan2(dy, dx) * 180.0f / M_PI;
+    float angle = static_cast<float>(std::atan2(dy, dx) * 180.0f / M_PI);
 
     return angle;
 }
