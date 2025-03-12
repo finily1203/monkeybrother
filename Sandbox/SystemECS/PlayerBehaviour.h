@@ -28,4 +28,6 @@ public:
 	bool playDeathAnimation = false;
 	float deathAnimationProgress = 0.0f;
 	myMath::Vector2D initialScale;
+	static float HOLD_TIME;
+	static float ACCELERATION;
 };

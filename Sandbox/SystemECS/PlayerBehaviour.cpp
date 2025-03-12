@@ -24,6 +24,8 @@ float PlayerBehaviour::BASE_ROTATION_SPEED = 0;     // Will be overwritten
 float PlayerBehaviour::MAX_ROTATION_PER_FRAME = 0;  // during initialization
 const float IDLE_TIME_THRESHOLD = 3.0f;             
 float PlayerBehaviour::ROTATION_SPEED;
+float PlayerBehaviour::HOLD_TIME = 0.f;
+float PlayerBehaviour::ACCELERATION = 0.f;
 
 void PlayerBehaviour::update(Entity entity) {
 	if (GLFWFunctions::isPlayerDead) {
@@ -52,6 +54,9 @@ void PlayerBehaviour::update(Entity entity) {
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
 	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
 	ROTATION_SPEED = static_cast<float>(GLFWFunctions::rotationSpeed);
+	//ROTATION_SPEED = GLFWFunctions::rotationSpeed;
+	const float timeThreshold = 3.f;
+	const float accelerationRate = 10.f;
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
@@ -117,11 +122,39 @@ void PlayerBehaviour::update(Entity entity) {
 	else {
 		// Keyboard rotation logic
 		if ((*GLFWFunctions::keyState)[Key::D]) {
+			HOLD_TIME += GLFWFunctions::delta_time;
+
+			if (HOLD_TIME >= timeThreshold)
+			{
+				ACCELERATION += accelerationRate * GLFWFunctions::delta_time;
+				ROTATION_SPEED += ACCELERATION;
+			}
+
 			rotation.SetX(rotation.GetX() + (ROTATION_SPEED * GLFWFunctions::delta_time));
 		}
 
 		else if ((*GLFWFunctions::keyState)[Key::A]) {
-				rotation.SetX(rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time));
+			HOLD_TIME += GLFWFunctions::delta_time;
+
+			if (HOLD_TIME >= timeThreshold)
+			{
+				ACCELERATION += accelerationRate * GLFWFunctions::delta_time;
+				ROTATION_SPEED += ACCELERATION;
+			}
+
+			rotation.SetX(rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time));
+		}
+
+		else
+		{
+			HOLD_TIME = 0.f;
+			//ACCELERATION = 0.f;
+
+			if (ACCELERATION > 0.f)
+			{
+				ACCELERATION -= accelerationRate * GLFWFunctions::delta_time;
+				ACCELERATION = std::max(ACCELERATION, 0.f);
+			}
 		}
 	}
 

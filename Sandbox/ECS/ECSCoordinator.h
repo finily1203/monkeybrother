@@ -121,7 +121,6 @@ public:
 	std::string getEntityID(Entity entity);
 	Entity getEntityFromID(std::string ID);
 	void setEntityID(Entity entity, std::string ID);
-	bool entityExists(Entity entity);
 
 	// load all entities for the scene from JSON
 	void LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename);

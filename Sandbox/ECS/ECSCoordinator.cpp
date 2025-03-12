@@ -1597,13 +1597,6 @@ void ECSCoordinator::setEntityID(Entity entity, std::string ID) {
 	entityManager->setEntityId(entity, ID);
 }
 
-// check if entity exists
-bool ECSCoordinator::entityExists(Entity entity)
-{
-	auto entities = getAllLiveEntities();
-	return std::find(entities.begin(), entities.end(), entity) != entities.end();
-}
-
 // set texture Id for the current entity
 void ECSCoordinator::setTextureID(Entity entity, std::string ID) {
 	entityManager->setTextureId(entity, ID);
