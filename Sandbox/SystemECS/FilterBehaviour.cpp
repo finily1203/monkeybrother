@@ -119,6 +119,8 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
     ecsCoordinator.setEntityID(newAnimationEntity, "cloggedAnimation");
     ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_DefunctFilter.png");
 
+	int layer = layerManager.getEntityLayer(entity);
+
     // Transform setup
     TransformComponent transform{};
     auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
