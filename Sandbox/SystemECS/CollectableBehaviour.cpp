@@ -76,9 +76,6 @@ void CollectableBehaviour::update(Entity entity) {
                 ecsCoordinator.destroyEntity(entity);
                 GLFWFunctions::collectableCount--;
 
-                // Explicitly create arrows for each remaining collectable
-                auto logicSystem = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-                logicSystem->resetNavigationArrows();
             }
         }
     }

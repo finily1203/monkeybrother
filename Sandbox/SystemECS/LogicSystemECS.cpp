@@ -54,19 +54,13 @@ void LogicSystemECS::update(float dt) {
 	}
 	// Update navigation arrows
 	NavigationArrow::Update(dt);
-	NavigationArrow::Reset();
+	//NavigationArrow::Reset();
 	// Check for collectables without navigation arrows
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
 		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
 			NavigationArrow::CreateNavigationArrow(entity);
 		}
 	}
-	//for each entity, update the behaviour
-	//for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-	//	if (behaviours.find(entity) != behaviours.end()) {
-	//		behaviours[entity]->update(entity);
-	//	}
-	//}
 	if (GLFWFunctions::useMouseRotation) {
 		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
@@ -925,21 +919,4 @@ void LogicSystemECS::ApplyForce(Entity entity, const myMath::Vector2D& appliedFo
 
 std::string LogicSystemECS::getSystemECS() {
 	return "LogicSystemECS";
-}
-
-void LogicSystemECS::resetNavigationArrows() {
-	// First remove any existing navigation arrows
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.hasComponent<NavigationComponent>(entity) &&
-			ecsCoordinator.getEntityID(entity)=="nav_arrow") {
-			ecsCoordinator.destroyEntity(entity);
-		}
-	}
-
-	// Then create new arrows for all collectables
-	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
-		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
-			NavigationArrow::CreateNavigationArrow(entity);
-		}
-	}
 }

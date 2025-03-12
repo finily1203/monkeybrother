@@ -366,23 +366,45 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             fullscreen = !fullscreen;
             GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
+            // Save current window position and size before switching
+            int currentX, currentY, currentWidth, currentHeight;
+            glfwGetWindowPos(pWindow, &currentX, &currentY);
+            glfwGetWindowSize(pWindow, &currentWidth, &currentHeight);
+
             if (fullscreen) {
+                // Get the video mode of the primary monitor
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                // Store original window dimensions if we aren't already in fullscreen
+                if (!fullscreen) {
+                    windowWidth = currentWidth;
+                    windowHeight = currentHeight;
+                }
+
+                // Switch to fullscreen mode
                 glfwSetWindowMonitor(
                     pWindow,
                     monitor,
-                    0, 0,
+                    0, 0,  // Position (0,0) for fullscreen
                     mode->width,
                     mode->height,
                     mode->refreshRate
                 );
+
+                // Update global window dimensions
+                windowWidth = mode->width;
+                windowHeight = mode->height;
             }
             else {
                 // Switch to windowed mode
-                int windowedWidth = defultWindowWidth;  // Desired windowed mode width
-                int windowedHeight = defultWindowHeight; // Desired windowed mode height
-                int x = 150;             // Desired X position for the window
-                int y = 150;             // Desired Y position for the window
+                // Use default size if we don't have saved dimensions
+                int windowedWidth = defultWindowWidth > 0 ? defultWindowWidth : 1280;
+                int windowedHeight = defultWindowHeight > 0 ? defultWindowHeight : 720;
+
+                // Center the window on the monitor
+                const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+                int x = (mode->width - windowedWidth) / 2;
+                int y = (mode->height - windowedHeight) / 2;
 
                 glfwSetWindowMonitor(
                     pWindow,
@@ -393,12 +415,20 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                     0
                 );
 
-                // Restore window decorations
+                // Restore window decorations and properties
                 glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
                 glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
+
+
+                windowWidth = windowedWidth;
+                windowHeight = windowedHeight;
             }
 
+
+            glViewport(0, 0, windowWidth, windowHeight);
+
             std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
+            std::cout << "Window dimensions: " << windowWidth << "x" << windowHeight << std::endl;
         }
 
     }
