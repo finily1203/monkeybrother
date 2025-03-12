@@ -23,14 +23,19 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "NavigationArrow.h"
 
 #include "Debug.h"
 #include "GUIConsole.h"
 #include "GUIGameViewport.h"
 
-void LogicSystemECS::initialise() {}
+void LogicSystemECS::initialise() {
+	NavigationArrow::Initialize();
+}
 
 void LogicSystemECS::cleanup() {
+	// Call NavigationArrow cleanup
+	NavigationArrow::Cleanup();
 	behaviours.clear();
 }
 
@@ -47,12 +52,15 @@ void LogicSystemECS::update(float dt) {
 			}
 		}
 	}
-	//for each entity, update the behaviour
-	//for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-	//	if (behaviours.find(entity) != behaviours.end()) {
-	//		behaviours[entity]->update(entity);
-	//	}
-	//}
+	// Update navigation arrows
+	NavigationArrow::Update(dt);
+	//NavigationArrow::Reset();
+	// Check for collectables without navigation arrows
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
+			NavigationArrow::CreateNavigationArrow(entity);
+		}
+	}
 	if (GLFWFunctions::useMouseRotation) {
 		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
@@ -96,6 +104,8 @@ void MouseBehaviour::update(Entity entity) {
 void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mouseY)
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	int optionsMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("optionsMenuBg"));
+	int tutorialMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("tutorialBaseBg"));
 
 	// looping through all the live entities in the scene
 	for (auto& entity : allEntities)
@@ -103,6 +113,16 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 		// ensuring that the entity is a button if it contains a button component
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
+			int entityLayer = layerManager.getEntityLayer(entity);
+
+			if (GLFWFunctions::optionsMenuCount > 0 || GLFWFunctions::tutorialMenuCount > 0)
+			{
+				if (entityLayer < optionsMenuLayer || entityLayer < tutorialMenuLayer)
+				{
+					continue;
+				}
+			}
+
 			//check if entity is visible
 			if (layerManager.getEntityVisibility(entity))
 			{
@@ -118,7 +138,8 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 					
 					// this statement is only applicable when we press and hold down and drag
 					// the mouse cursor on the sfxSoundbarBase and musicSoundbarBase
-					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase")
+					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase" ||
+						entityId == "rotationSpeedSlider")
 					{
 						// set the bool isDragging to true
 						isDragging = true;
@@ -148,6 +169,8 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 	// setting the correct audio arrow based on the soundbar Id
 	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
 								(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+
+	std::string sliderNotch = (getSliderId() == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
 
 	// ensuring that the string is not empty
 	if (!soundbarArrow.empty())
@@ -190,6 +213,76 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 		}
 	}
 
+	else if (!sliderNotch.empty())
+	{
+		TransformComponent sliderTransform{}, notchTransform{};
+		bool foundSlider = false;
+		bool foundSliderNotch = false;
+
+		for (auto& entity : allEntities)
+		{
+			std::string entityId = ecsCoordinator.getEntityID(entity);
+			if (entityId == getSliderId())
+			{
+				sliderTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				foundSlider = true;
+			}
+
+			else if (entityId == sliderNotch)
+			{
+				notchTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+				foundSliderNotch = true;
+			}
+
+			if (foundSlider && foundSliderNotch)
+			{
+				break;
+			}
+		}
+
+		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
+		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 2.f) - notchHalfWidth;
+
+		if (cursorXCentered >= sliderLeft && cursorXCentered <= sliderRight)
+		{
+			for (auto& entity : allEntities)
+			{
+				std::string entityId = ecsCoordinator.getEntityID(entity);
+
+				if (entityId == sliderNotch)
+				{
+					TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+					transform.position.SetX(cursorXCentered);
+
+					if (getSliderId() == "rotationSpeedSlider")
+					{
+						float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+						GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
+						GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
+						GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
+
+						for (auto& textEntity : allEntities)
+						{
+							if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
+							{
+								if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+								{
+									FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+									textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
+								}
+
+								break;
+							}
+						}
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
 	(void)window;
 	(void)mouseY;
 }
@@ -201,12 +294,25 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 	GLFWFunctions::isHovering = false;
 	setHoveredButton("");
 
+	int optionsMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("optionsMenuBg"));
+	int tutorialMenuLayer = layerManager.getEntityLayer(ecsCoordinator.getEntityFromID("tutorialBaseBg"));
+
 	// looping through all live entities in the current scene
 	for (auto& entity : allEntities)
 	{
 		// checking that the entity is a button
 		if (ecsCoordinator.hasComponent<ButtonComponent>(entity))
 		{
+			int entityLayer = layerManager.getEntityLayer(entity);
+
+			if (GLFWFunctions::optionsMenuCount > 0 || GLFWFunctions::tutorialMenuCount > 0)
+			{
+				if (entityLayer < optionsMenuLayer || entityLayer < tutorialMenuLayer)
+				{
+					continue;
+				}
+			}
+
 			//check if entity is visible
 			if (layerManager.getEntityVisibility(entity))
 			{
@@ -253,6 +359,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	std::string entityId = ecsCoordinator.getEntityID(entity);
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
 	setSoundbarId("");
+	setSliderId("");
 
 	// below are all the if statements that check which button is the current entity that you are
 	// clicking on
@@ -396,6 +503,37 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 	}
 
+	// this handles the how to play button
+	else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton")
+	{
+		if (GLFWFunctions::pauseMenuCount == 1)
+		{
+			for (auto currEntity : allEntities)
+			{
+				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+				{
+					ecsCoordinator.destroyEntity(currEntity);
+				}
+			}
+
+			// decrement the count since the pause menu is already destroyed
+			GLFWFunctions::pauseMenuCount--;
+		}
+
+		if (GLFWFunctions::tutorialMenuCount < 1)
+		{
+			GLFWFunctions::tutorialMenuCount++;
+			ecsCoordinator.LoadTutorialMenuFromJSON(ecsCoordinator, FilePathManager::GetTutorialJSONPath());
+		}
+	}
+
 	// this handles the closing of the pause menu button and resume level button
 	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
 	{
@@ -432,7 +570,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9"
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationSpeedValue"
 		};
 
 		// destroy the options menu
@@ -458,6 +597,47 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
+		cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
+	}
+
+	else if (entityId == "closeTutorialMenu")
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "tutorialBaseBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
+				ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
+				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::tutorialMenuCount--;
+		GLFWFunctions::tutorialCurrentPage = 1;
+
+		// checks the current scene is a game level, not the main menu scene and a pause menu does 
+		// not exist in the current scene
+		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+		{
+			// load the pause menu and increment the pause menu count
+			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+			GLFWFunctions::pauseMenuCount++;
+		}
+
+		// set the game pause state to true
+		GLFWFunctions::gamePaused = true;
+	}
+
+	else if (entityId == "nextTutorialPage")
+	{
+		GLFWFunctions::tutorialCurrentPage++;
+	}
+
+	else if (entityId == "previousTutorialPage")
+	{
+		GLFWFunctions::tutorialCurrentPage--;
 	}
 
 	// this handles the logic for exiting the level and goes back to the main menu button
@@ -466,13 +646,22 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// destroy all the entities in the current scene
 		for (auto currEntity : allEntities)
 		{
-			ecsCoordinator.destroyEntity(currEntity);
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
 		}
 
 		// decrement the pause menu count and load the main menu back into the scene
 		GLFWFunctions::pauseMenuCount--;
-		GameViewWindow::setSceneNum(-1);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+		ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
 	}
 
 	// this handles the logic code for the sfx and music soundbarBase buttons
@@ -515,20 +704,21 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
 			"musicNotch2", "musicNotch3", "musicNotch4",
 			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9"
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
+			"rotationSpeedSliderNotch", "rotationSpeedValue"
 		};
 
 		// initializing sfxPercentage and musicPercentage variables
 		float sfxPercentage = AudioSystem::sfxPercentage;
 		float musicPercentage = AudioSystem::musicPercentage;
 
+		int rotationSpeed = GLFWFunctions::rotationSpeed;
+
 		// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
 		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
 		// save the sfx and music percentages to the audio settings JSON file
 		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
-
-		std::cout << "SFX: " << sfxPercentage << std::endl;
-		std::cout << "Music: " << musicPercentage << std::endl;
+		cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
 
 		//change on audio side as well
 		audioSystem.setGenVol(musicPercentage);
@@ -558,6 +748,143 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// set the game pause state to true
 		GLFWFunctions::gamePaused = true;
 	}
+
+	else if (entityId == "rotationSpeedSlider")
+	{
+		// getting the window's width, height and cursor position x and y values
+		double mouseX{}, mouseY{};
+		int windowWidth{}, windowHeight{};
+		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+		setSliderId(entityId);
+		std::string const& currentSlider = getSliderId();
+
+		// finding the actual mouse cursor position based on the window dimensions
+		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+
+		std::string sliderNotchId = (entityId == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
+
+		TransformComponent sliderTransform{}, notchTransform{};
+		bool foundSlider = false;
+		bool foundSliderNotch = false;
+
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == entityId)
+			{
+				sliderTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				foundSlider = true;
+			}
+
+			else if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
+			{
+				notchTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				foundSliderNotch = true;
+			}
+
+			if (foundSlider && foundSliderNotch)
+			{
+				break;
+			}
+		}
+
+		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
+		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
+		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 1.95f) - notchHalfWidth;
+
+
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
+			{
+				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+				transform.position.SetX(cursorXCentered);
+
+				if (currentSlider == "rotationSpeedSlider")
+				{
+					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
+					GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
+					GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
+
+					for (auto& textEntity : allEntities)
+					{
+						if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
+						{
+							if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
+							{
+								FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
+								textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
+							}
+
+							break;
+						}
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	else if (entityId == "quitToMainMenuButton")
+	{
+		for (auto& currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GameViewWindow::setSceneNum(-1);
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	}
+
+	else if (entityId == "returnToPauseMenuButton")
+	{
+		for (auto& currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "quitLevelMenuBase" ||
+				ecsCoordinator.getEntityID(currEntity) == "quitToMainMenuButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "returnToPauseMenuButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::pauseMenuCount++;
+		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+	}
+
+	else if (entityId == "nextLevelButton")
+	{
+		if (!GLFWFunctions::changeLevel)
+		{
+			int currScene = GameViewWindow::getSceneNum();
+			currScene++;
+
+			if (currScene > 2)
+			{
+				currScene = -1;
+			}
+
+			GameViewWindow::setSceneNum(currScene);
+			GLFWFunctions::changeLevel = true;
+			GLFWFunctions::newSceneLoaded = true;
+		}
+	}
+
+	else if (entityId == "mainMenuButton")
+	{
+		int mainMenuScene = -1;
+
+		for (auto& currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GameViewWindow::setSceneNum(mainMenuScene);
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	}
+	
 }
 
 // MouseBehaviour object instance destructor
@@ -583,4 +910,3 @@ void LogicSystemECS::ApplyForce(Entity entity, const myMath::Vector2D& appliedFo
 std::string LogicSystemECS::getSystemECS() {
 	return "LogicSystemECS";
 }
-

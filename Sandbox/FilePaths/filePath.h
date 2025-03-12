@@ -65,5 +65,16 @@ public:
 	static std::string GetLayerJSONPath();
 	// retrieve the audio settings JSON path
 	static std::string GetAudioSettingsJSONPath();
-	static std::string GetIntroCutsceneJSONPath();	
+	//static std::string GetIntroCutsceneJSONPath();
+	static std::string GetFPSConfigJSONPath();
+	// retrieve the gameplay settings JSON path
+	static std::string GetGameplaySettingsJSONPath();
+	// retrieve the intro cutscene JSON path
+	static std::string GetIntroCutsceneJSONPath();
+	// retrieve the tutorial page JSON path
+	static std::string GetTutorialJSONPath();
+	// retrieve the quit to main menu JSON path
+	static std::string GetQuitLevelMenuJSONPath();
+	// retrieve the level completed menu JSON path
+	static std::string GetLevelCompletedMenuJSONPath();
 };

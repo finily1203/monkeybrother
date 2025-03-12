@@ -170,9 +170,26 @@ std::string FilePathManager::GetPhysicsPath()
 std::string FilePathManager::GetSaveJSONPath(int& saveCount)
 {
     std::filesystem::path execPath = GetExecutablePath();
-    std::string saveFile = "save" + std::to_string(saveCount) + ".json";
-    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / saveFile;
 
+    // Look for existing save file with this ID
+    std::string jsonDir = execPath.parent_path().string() + "\\Sandbox\\assets\\json\\";
+    std::string prefix = "save_" + std::to_string(saveCount) + "_";
+
+    // Default filename in case no existing file is found
+    std::string saveFile = prefix + "unnamed.json";
+
+    // Check if there's already a save file with this ID
+    for (const auto& entry : std::filesystem::directory_iterator(jsonDir)) {
+        std::string filename = entry.path().filename().string();
+        if (filename.find(prefix) == 0 && filename.find(".json") != std::string::npos) {
+            // Found an existing save with this ID
+            saveFile = filename;
+            break;
+        }
+    }
+    
+
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / saveFile;
     std::string jsonPathString = jsonPath.string();
 
     return jsonPathString;
@@ -243,6 +260,18 @@ std::string FilePathManager::GetAudioSettingsJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the gameplay settings JSON file
+std::string FilePathManager::GetGameplaySettingsJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "gameplaySettings.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
+
 // this function retrieves the intro cutscene JSON file
 std::string FilePathManager::GetIntroCutsceneJSONPath()
 {
@@ -253,3 +282,46 @@ std::string FilePathManager::GetIntroCutsceneJSONPath()
 
 	return jsonPathString;
 }   
+
+std::string FilePathManager::GetFPSConfigJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "fpsConfig.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
+
+// this function retrieves the tutorial page JSON file
+std::string FilePathManager::GetTutorialJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "tutorialMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
+
+// this function retrieves the quit level menu JSON file
+std::string FilePathManager::GetQuitLevelMenuJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "quitLevelMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
+
+// this function retrieves the level completed menu JSON file
+std::string FilePathManager::GetLevelCompletedMenuJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "levelCompletedMenu.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

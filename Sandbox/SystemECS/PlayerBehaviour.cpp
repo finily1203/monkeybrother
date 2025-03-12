@@ -22,6 +22,10 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 float PlayerBehaviour::MOVEMENT_THRESHOLD = 0;      // Default values
 float PlayerBehaviour::BASE_ROTATION_SPEED = 0;     // Will be overwritten 
 float PlayerBehaviour::MAX_ROTATION_PER_FRAME = 0;  // during initialization
+const float IDLE_TIME_THRESHOLD = 3.0f;             
+float PlayerBehaviour::ROTATION_SPEED;
+float PlayerBehaviour::HOLD_TIME = 0.f;
+float PlayerBehaviour::ACCELERATION = 0.f;
 
 void PlayerBehaviour::update(Entity entity) {
 	if (GLFWFunctions::isPlayerDead) {
@@ -48,6 +52,11 @@ void PlayerBehaviour::update(Entity entity) {
 	}
 
 	auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
+	ROTATION_SPEED = static_cast<float>(GLFWFunctions::rotationSpeed);
+	//ROTATION_SPEED = GLFWFunctions::rotationSpeed;
+	const float timeThreshold = 3.f;
+	const float accelerationRate = 10.f;
 
 	Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
@@ -55,14 +64,43 @@ void PlayerBehaviour::update(Entity entity) {
 	myMath::Vector2D& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
 	float mag = playerForce.GetMagnitude();
 
-	//auto& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
+	
+	auto& physicsComp = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+	auto& velocity = physicsComp.velocity;
 
-	// Toggle between mouse and keyboard control when T is pressed
+	
+	auto& playerComp = ecsCoordinator.getComponent<PlayerComponent>(entity);
+
+
+	float velocityMagnitude = std::sqrt(velocity.GetX() * velocity.GetX() + velocity.GetY() * velocity.GetY());
+	bool isMoving = velocityMagnitude > 5.0f; // Use same threshold as in GraphicSystemECS
+
+
+	bool hasInput = (*GLFWFunctions::keyState)[Key::A] || (*GLFWFunctions::keyState)[Key::D] ||
+		(*GLFWFunctions::keyState)[Key::SPACE] || std::abs(GLFWFunctions::mouseXDelta) > 0.1;
+
+
+	if (isMoving || hasInput) {
+		playerComp.lastMoveTime = glfwGetTime();
+		playerComp.isIdle = false;
+		playerComp.playingIdleAnim = false;
+	}
+	else {
+		
+		double currentTime = glfwGetTime();
+		if (currentTime - playerComp.lastMoveTime > IDLE_TIME_THRESHOLD && !playerComp.isIdle) {
+			playerComp.isIdle = true;
+			playerComp.idleAnimStart = currentTime;
+			playerComp.playingIdleAnim = true;
+		}
+	}
+
+	
 	static bool wasPressed = false;
 	if ((*GLFWFunctions::keyState)[Key::T]) {
 		if (!wasPressed) {
 			GLFWFunctions::useMouseRotation = !GLFWFunctions::useMouseRotation;
-			GLFWFunctions::updateCursorState(); // Update cursor state when toggling
+			GLFWFunctions::updateCursorState(); 
 			wasPressed = true;
 		}
 	}
@@ -71,31 +109,61 @@ void PlayerBehaviour::update(Entity entity) {
 	}
 
 	if (GLFWFunctions::useMouseRotation) {
-		// Mouse rotation logic
+		
 		double mouseMovement = GLFWFunctions::mouseXDelta;
 		if (std::abs(mouseMovement) > MOVEMENT_THRESHOLD) {
 			float rotationAmount = static_cast<float>(mouseMovement) * BASE_ROTATION_SPEED;
 			rotationAmount *= (60.0f * GLFWFunctions::delta_time);
 			rotationAmount = std::clamp(rotationAmount, -MAX_ROTATION_PER_FRAME, MAX_ROTATION_PER_FRAME);
+
 			rotation.SetX(rotation.GetX() + rotationAmount);
 		}
 	}
 	else {
 		// Keyboard rotation logic
 		if ((*GLFWFunctions::keyState)[Key::D]) {
-			rotation.SetX(rotation.GetX() + (180.f * GLFWFunctions::delta_time));
+			HOLD_TIME += GLFWFunctions::delta_time;
+
+			if (HOLD_TIME >= timeThreshold)
+			{
+				ACCELERATION += accelerationRate * GLFWFunctions::delta_time;
+				ROTATION_SPEED += ACCELERATION;
+			}
+
+			rotation.SetX(rotation.GetX() + (ROTATION_SPEED * GLFWFunctions::delta_time));
 		}
+
 		else if ((*GLFWFunctions::keyState)[Key::A]) {
-			rotation.SetX(rotation.GetX() - (180.f * GLFWFunctions::delta_time));
+			HOLD_TIME += GLFWFunctions::delta_time;
+
+			if (HOLD_TIME >= timeThreshold)
+			{
+				ACCELERATION += accelerationRate * GLFWFunctions::delta_time;
+				ROTATION_SPEED += ACCELERATION;
+			}
+
+			rotation.SetX(rotation.GetX() - (ROTATION_SPEED * GLFWFunctions::delta_time));
+		}
+
+		else
+		{
+			HOLD_TIME = 0.f;
+			//ACCELERATION = 0.f;
+
+			if (ACCELERATION > 0.f)
+			{
+				ACCELERATION -= accelerationRate * GLFWFunctions::delta_time;
+				ACCELERATION = std::max(ACCELERATION, 0.f);
+			}
 		}
 	}
 
-	// Reset mouse delta regardless of control mode
+	
 	GLFWFunctions::mouseXDelta = 0.0;
 
 	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
 		if ((*GLFWFunctions::keyState)[Key::SPACE]) {
-			PhysicsSystemRef->SetAlrJumped(false);  // Set jump state to prevent multiple jumps
+			PhysicsSystemRef->SetAlrJumped(false);  
 			forceManager.AddForce(entity, myMath::Vector2D(-mag, -mag));
 		}
 	}
@@ -141,6 +209,5 @@ void PlayerBehaviour::update(Entity entity) {
 		if ((*GLFWFunctions::keyState)[Key::A]) {
 			cameraSystem.setCameraRotation(cameraSystem.getCameraRotation() - 0.1f * GLFWFunctions::delta_time);
 		}
-
 	}
 }

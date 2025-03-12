@@ -53,6 +53,9 @@
     <ClCompile Include="DebugSystem\GUIAudioPanel.cpp" />
     <ClCompile Include="LayerSystem\LayerManager.cpp" />
     <ClCompile Include="CutsceneSystem\CutsceneSystem.cpp" />
+    <ClCompile Include="DebugSystem\GUIGridSystem.cpp" />
+    <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
+    <ClCompile Include="SystemECS\NavigationArrow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -128,7 +131,11 @@
     <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="LayerSystem\LayerManager.h" />
     <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
+    <ClInclude Include="DebugSystem\GUIGridSystem.h" />
     <ClInclude Include="Components\OBBComponent.h" />
+    <ClInclude Include="Components\NavigationComponent.h" />
+    <ClInclude Include="SystemECS\NavigationBehaviour.h" />
+    <ClInclude Include="SystemECS\NavigationArrow.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

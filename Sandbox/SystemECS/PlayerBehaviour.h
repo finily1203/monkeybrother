@@ -23,8 +23,11 @@ public:
 	static float MOVEMENT_THRESHOLD;
 	static float BASE_ROTATION_SPEED;
 	static float MAX_ROTATION_PER_FRAME;
+	static float ROTATION_SPEED;
 
 	bool playDeathAnimation = false;
 	float deathAnimationProgress = 0.0f;
 	myMath::Vector2D initialScale;
+	static float HOLD_TIME;
+	static float ACCELERATION;
 };

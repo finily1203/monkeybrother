@@ -43,6 +43,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "PlatformBehaviour.h"
 #include "FilterBehaviour.h"
 #include "MovPlatformBehaviour.h"
+#include "NavigationBehaviour.h"
+#include "NavigationArrow.h"
 
 #include <Windows.h>
 
@@ -58,9 +60,122 @@ void ECSCoordinator::initialise() {
 	systemManager = std::make_unique<SystemManager>();
 }
 
+
+void ECSCoordinator::ensureFPSDisplay() {
+
+	if (fpsDisplayCreated && fpsDisplayEntity != 0) {
+		bool entityExists = false;
+		for (auto entity : getAllLiveEntities()) {
+			if (entity == fpsDisplayEntity) {
+				entityExists = true;
+				break;
+			}
+		}
+		if (entityExists) {
+			return;
+		}
+	}
+
+	JSONSerializer serializer;
+	std::string configPath = FilePathManager::GetFPSConfigJSONPath();
+
+	if (!serializer.Open(configPath)) {
+		std::cerr << "Error: Could not open FPS display configuration from " << configPath << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	if (!jsonObj.contains("fpsDisplay")) {
+		
+		return;
+	}
+
+	const auto& fpsConfig = jsonObj["fpsDisplay"];
+
+	
+	if (!fpsConfig.contains("position") || !fpsConfig.contains("font")) {
+		
+		return;
+	}
+
+	fpsDisplayEntity = createEntity();
+
+	TransformComponent transform{};
+	transform.position.SetX(fpsConfig["position"]["x"].get<float>());
+	transform.position.SetY(fpsConfig["position"]["y"].get<float>());
+
+	if (fpsConfig.contains("scale")) {
+		transform.scale.SetX(fpsConfig["scale"]["x"].get<float>());
+		transform.scale.SetY(fpsConfig["scale"]["y"].get<float>());
+	}
+
+	addComponent(fpsDisplayEntity, transform);
+
+	FontComponent font{};
+	const auto& fontConfig = fpsConfig["font"];
+
+	if (!fontConfig.contains("id") || !fontConfig.contains("scale") ||
+		!fontConfig.contains("color") || !fontConfig.contains("textBoxWidth")) {
+		std::cerr << "Error: Font configuration missing required properties" << std::endl;
+		destroyEntity(fpsDisplayEntity);
+		return;
+	}
+
+	font.fontId = fontConfig["id"].get<std::string>();
+	font.textScale = fontConfig["scale"].get<float>();
+	font.textBoxWidth = fontConfig["textBoxWidth"].get<float>();
+
+	
+	font.text = fontConfig.contains("prefix") ? fontConfig["prefix"].get<std::string>() : "FPS: ";
+
+	
+	const auto& colorConfig = fontConfig["color"];
+	font.color = myMath::Vector3D(
+		colorConfig["r"].get<float>(),
+		colorConfig["g"].get<float>(),
+		colorConfig["b"].get<float>()
+	);
+
+
+	if (!GLFWFunctions::showFPS) {
+		font.text = "";
+	}
+
+	addComponent(fpsDisplayEntity, font);
+
+
+	entityManager->setEntityId(fpsDisplayEntity, "fpsDisplay");
+
+	
+	int layerToUse = 0; 
+
+	if (fpsConfig.contains("layer")) {
+		int targetLayer = fpsConfig["layer"].get<int>();
+
+		if (targetLayer >= 0) {
+			layerToUse = targetLayer;
+		}
+		else {
+			
+			layerToUse = layerManager.getLayerCount() - 1;
+			if (layerToUse < 0) layerToUse = 0;
+		}
+	}
+
+	while (layerManager.getLayerCount() <= layerToUse) {
+		layerManager.addNewLayer();
+	}
+
+	layerManager.addEntityToLayer(layerToUse, fpsDisplayEntity);
+
+	fpsDisplayCreated = true;
+}
+
 //Updates the ECS system
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
+	ensureFPSDisplay();
 	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
@@ -84,12 +199,14 @@ void ECSCoordinator::update() {
 		systemManager->update();
 
 		if (GLFWFunctions::changeLevel) {
+			NavigationArrow::Cleanup();
 			//delete all live entities
 			for (auto& entity : getAllLiveEntities()) {
 				destroyEntity(entity);
 			}
 			int sceneNum = GameViewWindow::getSceneNum();
 			if (sceneNum == 1 || sceneNum == 2) {
+				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
 			}
@@ -106,6 +223,9 @@ void ECSCoordinator::update() {
 //Cleans up the ECS system by calling the cleanup function
 //for the entity manager, component manager and system manager
 void ECSCoordinator::cleanup() {
+	// Call NavigationArrow cleanup
+	NavigationArrow::Cleanup();
+
 	if (systemManager) systemManager->cleanup();
 	if (componentManager) componentManager->cleanup();
 	if (entityManager) entityManager->cleanup();
@@ -158,6 +278,7 @@ void ECSCoordinator::destroyEntity(Entity entity)
 
 void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	NavigationArrow::Reset();
 	GLFWFunctions::collectableCount = 0;
 	JSONSerializer serializer;
 	cameraSystem.setCameraZoom(1.0f);
@@ -290,18 +411,93 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// entity that contains animation component
 		if (entityData.contains("animation")) {
-			// read animation data from the JSON file
+			
 			AnimationComponent animation{};
-
-
 			serializer.ReadObject(animation.isAnimated, entityId, "entities.animation.isAnimated");
 			serializer.ReadObject(animation.totalFrames, entityId, "entities.animation.totalFrames");
 			serializer.ReadObject(animation.frameTime, entityId, "entities.animation.frameTime");
 			serializer.ReadObject(animation.columns, entityId, "entities.animation.columns");
 			serializer.ReadObject(animation.rows, entityId, "entities.animation.rows");
 
-			ecs.addComponent(entityObj, animation);
+			// Read movement animation config
+			if (entityData["animation"].contains("movementAnim")) {
+				serializer.ReadObject(animation.movementConfig.movementThreshold, entityId,
+					"entities.animation.movementAnim.threshold");
+				serializer.ReadObject(animation.movementConfig.bodyTexture, entityId,
+					"entities.animation.movementAnim.bodyTexture");
+				serializer.ReadObject(animation.movementConfig.eyesTexture, entityId,
+					"entities.animation.movementAnim.eyesTexture");
+				serializer.ReadObject(animation.movementConfig.bodyFrames, entityId,
+					"entities.animation.movementAnim.bodyFrames");
+				serializer.ReadObject(animation.movementConfig.bodyColumns, entityId,
+					"entities.animation.movementAnim.bodyColumns");
+				serializer.ReadObject(animation.movementConfig.bodyRows, entityId,
+					"entities.animation.movementAnim.bodyRows");
+				serializer.ReadObject(animation.movementConfig.eyesFrames, entityId,
+					"entities.animation.movementAnim.eyesFrames");
+				serializer.ReadObject(animation.movementConfig.eyesColumns, entityId,
+					"entities.animation.movementAnim.eyesColumns");
+				serializer.ReadObject(animation.movementConfig.eyesRows, entityId,
+					"entities.animation.movementAnim.eyesRows");
+				serializer.ReadObject(animation.movementConfig.eyeFrameDuration, entityId,
+					"entities.animation.movementAnim.eyeFrameDuration");
+			}
 
+			// Read growth animation configuration
+			if (entityData["animation"].contains("growthAnim")) {
+				// Body configuration
+				serializer.ReadObject(animation.growthConfig.body.columns, entityId,
+					"entities.animation.growthAnim.body.columns");
+				serializer.ReadObject(animation.growthConfig.body.rows, entityId,
+					"entities.animation.growthAnim.body.rows");
+				serializer.ReadObject(animation.growthConfig.body.totalFrames, entityId,
+					"entities.animation.growthAnim.body.totalFrames");
+				serializer.ReadObject(animation.growthConfig.body.textureName, entityId,
+					"entities.animation.growthAnim.body.textureName");
+
+				// Eyes configuration
+				serializer.ReadObject(animation.growthConfig.eyes.columns, entityId,
+					"entities.animation.growthAnim.eyes.columns");
+				serializer.ReadObject(animation.growthConfig.eyes.rows, entityId,
+					"entities.animation.growthAnim.eyes.rows");
+				serializer.ReadObject(animation.growthConfig.eyes.totalFrames, entityId,
+					"entities.animation.growthAnim.eyes.totalFrames");
+				serializer.ReadObject(animation.growthConfig.eyes.textureName, entityId,
+					"entities.animation.growthAnim.eyes.textureName");
+
+				// Duration
+				serializer.ReadObject(animation.growthConfig.duration, entityId,
+					"entities.animation.growthAnim.duration");
+			}
+
+			// Read idle animation config
+			if (entityData["animation"].contains("idleAnim")) {
+				// Body configuration
+				serializer.ReadObject(animation.idleConfig.body.columns, entityId,
+					"entities.animation.idleAnim.body.columns");
+				serializer.ReadObject(animation.idleConfig.body.rows, entityId,
+					"entities.animation.idleAnim.body.rows");
+				serializer.ReadObject(animation.idleConfig.body.totalFrames, entityId,
+					"entities.animation.idleAnim.body.totalFrames");
+				serializer.ReadObject(animation.idleConfig.body.textureName, entityId,
+					"entities.animation.idleAnim.body.textureName");
+
+				// Eyes configuration
+				serializer.ReadObject(animation.idleConfig.eyes.columns, entityId,
+					"entities.animation.idleAnim.eyes.columns");
+				serializer.ReadObject(animation.idleConfig.eyes.rows, entityId,
+					"entities.animation.idleAnim.eyes.rows");
+				serializer.ReadObject(animation.idleConfig.eyes.totalFrames, entityId,
+					"entities.animation.idleAnim.eyes.totalFrames");
+				serializer.ReadObject(animation.idleConfig.eyes.textureName, entityId,
+					"entities.animation.idleAnim.eyes.textureName");
+
+				// Duration
+				serializer.ReadObject(animation.idleConfig.duration, entityId,
+					"entities.animation.idleAnim.duration");
+			}
+
+			ecs.addComponent(entityObj, animation);
 		}
 
 		// entity that contains player component
@@ -383,6 +579,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			serializer.ReadObject(filter.isFilter, entityId, "entities.filter.isFilter");
 			serializer.ReadObject(filter.isFilterClogged, entityId, "entities.filter.isFilterClogged");
 			ecs.addComponent(entityObj, filter);
+		}
+
+		// entity that contains navigation component
+		if (entityData.contains("navigation")) {
+			// read isFilter from the JSON file
+			NavigationComponent navigation{};
+			serializer.ReadObject(navigation.isNavigation, entityId, "entities.filter.isNavigation");
+			serializer.ReadObject(navigation.isVisible, entityId, "entities.filter.isVisible");
+			ecs.addComponent(entityObj, navigation);
 		}
 
 		// entity that contains forces component
@@ -497,7 +702,11 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.movPlatform");
 				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MovPlatformBehaviour>());
 			}
-
+			else
+			if (entityData["behaviour"].contains("navigation")) {
+				serializer.ReadObject(behaviour.platform, entityId, "entities.behaviour.navigation");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<NavigationBehaviour>());
+			}
 
 			ecs.addComponent(entityObj, behaviour);
 		}
@@ -782,6 +991,20 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 			ecs.addComponent(entityObj, button);
 		}
 
+		// entity that contains font component
+		if (entityData.contains("font"))
+		{
+			// read the font data from the JSON file
+			FontComponent font{};
+			serializer.ReadObject(font.text, entityId, "entities.font.text.string");
+			serializer.ReadObject(font.textScale, entityId, "entities.font.textScale.scale");
+			serializer.ReadObject(font.color, entityId, "entities.font.color");
+			serializer.ReadObject(font.fontId, entityId, "entities.font.fontId.fontName");
+			serializer.ReadObject(font.textBoxWidth, entityId, "entities.font.text.BoxWidth");
+
+			ecs.addComponent(entityObj, font);
+		}
+
 		if (entityData.contains("behaviour"))
 		{
 			BehaviourComponent behaviour{};
@@ -933,12 +1156,307 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 			}
 		}
+
+		if (entityId == "rotationSpeedSliderNotch")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
+			{
+				TransformComponent transform = getComponent<TransformComponent>(entity);
+
+				serializer.WriteObject(transform.position, entityId, "entities.transform.position");
+				serializer.WriteObject(transform.scale, entityId, "entities.transform.scale");
+				serializer.WriteObject(transform.orientation, entityId, "entities.transform.orientation");
+				serializer.WriteObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+			}
+		}
+
+		if (entityId == "rotationSpeedValue")
+		{
+			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
+			{
+				FontComponent textComponent = getComponent<FontComponent>(entity);
+				
+				serializer.WriteObject(textComponent.text, entityId, "entities.font.text.string");
+			}
+		}
 	}
 
 	// checks if the JSON object is able to be saved to the JSON file 
 	if (!serializer.Save(filename))
 	{
 		std::cout << "Error: could not save to file " << filename << std::endl;
+	}
+}
+
+// function that will load the tutorial page entities from tutorial page JSON file
+void ECSCoordinator::LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	// Load the entities
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
+	}
+}
+
+// function that will load the quit level menu from quit level JSON file
+void ECSCoordinator::LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+		
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
+	}
+}
+
+// function that loads the level completed menu entities from the JSON file
+void ECSCoordinator::LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
 	}
 }
 
@@ -1001,6 +1519,7 @@ void ECSCoordinator::initialiseSystemsAndComponents() {
 	registerComponent<UIComponent>();
 	registerComponent<FilterComponent>();
 	registerComponent<MovPlatformComponent>();
+	registerComponent<NavigationComponent>();
 
 	//LOGIC MUST COME FIRST BEFORE PHYSICS FOLLOWED BY RENDERING
 
@@ -1094,4 +1613,10 @@ std::string ECSCoordinator::getTextureID(Entity entity) {
 // retrieve the signature for the current entity
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
 	return entityManager->getSignature(entity);
+}
+
+bool ECSCoordinator::entityExists(Entity entity)
+{
+	auto entities = getAllLiveEntities();
+	return std::find(entities.begin(), entities.end(), entity) != entities.end();
 }

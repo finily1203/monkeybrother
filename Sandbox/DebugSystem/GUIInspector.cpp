@@ -30,6 +30,7 @@ File Contributions: Lew Zong Han Owen (100%)
 #include "FilterBehaviour.h"
 #include "MovPlatformBehaviour.h"
 #include "GUIAssetBrowser.h"
+#include "BackgroundComponent.h"
 #include <memory>
 
 std::vector<std::pair<int, std::string>>* Inspector::overlappingEntities;
@@ -57,7 +58,12 @@ int columns = 1;
 int frames = 1;
 bool playerExists = false;
 
+bool Inspector::isCtrlDragging = false;
+int Inspector::duplicatedEntity = -1;
+bool Inspector::hasDuplicated = false;
 
+bool Inspector::isDraggingCopies = false;
+std::set<std::pair<int, int>>* Inspector::filledCells;
 
 void Inspector::Initialise() {
 	overlappingEntities = new std::vector<std::pair<int, std::string>>();
@@ -73,6 +79,9 @@ void Inspector::Initialise() {
 		assetNames->push_back(asset);
 		std::cout << asset << std::endl;
 	}
+
+	isDraggingCopies = false;
+	filledCells = new std::set<std::pair<int, int>>();
 }
 
 void Inspector::Update() {
@@ -302,23 +311,88 @@ void Inspector::Update() {
 		// Handle entity dragging
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
 			GameViewWindow::IsPointInViewport(mousePos.x, mousePos.y)) {
+
+			bool isCtrlPressed = ImGui::GetIO().KeyCtrl;
+
 			if (isOver) {
 				moveable = true;
-			}
-			if (moveable) {
-				if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) || ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID)
-					|| ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
-					transform.position.SetX(centeredMouse.x);
-					transform.position.SetY(centeredMouse.y);
+
+				// Start Ctrl+drag copy operation
+				if (isCtrlPressed && !isDraggingCopies && draggedEntityID != -1) {
+					isDraggingCopies = true;
+					duplicatedEntity = draggedEntityID;
+					filledCells->clear();
+
+					// Add the original entity's cell to filled cells
+					auto& transformation = ecsCoordinator.getComponent<TransformComponent>(duplicatedEntity);
+					myMath::Vector2D origPos = transformation.position;
+					myMath::Vector2D snappedOrigPos = gridSystem.snapToGrid(origPos);
+					int origCellX = static_cast<int>(snappedOrigPos.GetX() / gridSystem.getCellSize());
+					int origCellY = static_cast<int>(snappedOrigPos.GetY() / gridSystem.getCellSize());
+					filledCells->insert({ origCellX, origCellY });
 				}
-				else {
-					transform.position.SetX(mouseWorldPos.x);
-					transform.position.SetY(mouseWorldPos.y);
+			}
+
+			if (moveable) {
+				// Regular dragging behavior for non-Ctrl case
+				if (!isCtrlPressed) {
+					if (isDraggingCopies) {
+						// User released Ctrl while dragging - stop copy mode
+						isDraggingCopies = false;
+						filledCells->clear();
+					}
+
+					// Normal entity dragging (unchanged)
+					if (ecsCoordinator.hasComponent<FontComponent>(draggedEntityID) ||
+						ecsCoordinator.hasComponent<ButtonComponent>(draggedEntityID) ||
+						ecsCoordinator.hasComponent<UIComponent>(draggedEntityID)) {
+						transform.position.SetX(centeredMouse.x);
+						transform.position.SetY(centeredMouse.y);
+					}
+					else {
+						transform.position.SetX(mouseWorldPos.x);
+						transform.position.SetY(mouseWorldPos.y);
+					}
+				}
+				// Ctrl+drag copy mode
+				else if (isDraggingCopies) {
+					// Convert mouse position to grid cell
+					myMath::Vector2D mousePosition(mouseWorldPos.x, mouseWorldPos.y);
+					myMath::Vector2D snappedMousePos = gridSystem.snapToGrid(mousePosition);
+					int mouseCellX = static_cast<int>(snappedMousePos.GetX() / gridSystem.getCellSize());
+					int mouseCellY = static_cast<int>(snappedMousePos.GetY() / gridSystem.getCellSize());
+
+					// Check if this is a new cell that we haven't filled yet
+					if (filledCells->find({ mouseCellX, mouseCellY }) == filledCells->end()) {
+						// Create new entity at this cell
+						Entity newEntity = CloneEntity(duplicatedEntity);
+
+						// Position at the cell's center
+						auto& newTransform = ecsCoordinator.getComponent<TransformComponent>(newEntity);
+						newTransform.position = snappedMousePos;
+
+						// Mark this cell as filled
+						filledCells->insert({ mouseCellX, mouseCellY });
+					}
 				}
 			}
 		}
-		else {
-			moveable = false;
+		else { // Mouse released
+			if (isDraggingCopies) {
+				isDraggingCopies = false;
+				filledCells->clear();
+			}
+
+			if (moveable) {
+				// Snap to grid if in tile map mode
+				if (GameViewWindow::isTileMapMode()) {
+					myMath::Vector2D currentPos = transform.position;
+					myMath::Vector2D snappedPos = gridSystem.snapToGrid(currentPos);
+					transform.position = snappedPos;
+				}
+
+				moveable = false;
+			}
 		}
 	}
 
@@ -434,6 +508,278 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 	std::string entityID = ecs.getEntityID(selectedEntityID);
 	ImGui::Text("Entity ID: %s", entityID.c_str());
 	ImGui::Separator();
+
+	// Add a Components button that opens a popup with all available components
+	if (ImGui::Button("Edit Components")) {
+		ImGui::OpenPopup("Component Editor");
+	}
+
+	// Component Editor Popup
+	if (ImGui::BeginPopupModal("Component Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Add or remove components for entity: %s", entityID.c_str());
+		ImGui::Separator();
+
+		// Create checkboxes for each component type
+		// TransformComponent is a special case - all entities must have it
+		bool hasTransform = ecs.hasComponent<TransformComponent>(selectedEntityID);
+		ImGui::BeginDisabled();  // Disable the checkbox because all entities must have transforms
+		ImGui::Checkbox("Transform Component", &hasTransform);
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::TextDisabled("(Required)");
+
+		// AABB Component
+		bool hasAABB = ecs.hasComponent<AABBComponent>(selectedEntityID);
+		if (ImGui::Checkbox("AABB Component", &hasAABB)) {
+			if (hasAABB && !ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+				AABBComponent aabb;
+				// Initialize with default values based on entity's transform
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				aabb.left = -transform.scale.GetX() / 2.0f;
+				aabb.right = transform.scale.GetX() / 2.0f;
+				aabb.top = transform.scale.GetY() / 2.0f;
+				aabb.bottom = -transform.scale.GetY() / 2.0f;
+				ecs.addComponent(selectedEntityID, aabb);
+			}
+			else if (!hasAABB && ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+				ecs.removeComponent<AABBComponent>(selectedEntityID);
+			}
+		}
+
+		// Physics Component
+		bool hasPhysics = ecs.hasComponent<PhysicsComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Physics Component", &hasPhysics)) {
+			if (hasPhysics && !ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+				PhysicsComponent physics;
+				// Initialize with reasonable defaults
+				physics.mass = 1.0f;
+				physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+				physics.dampening = 0.9f;
+				physics.maxVelocity = 200.0f;
+				ecs.addComponent(selectedEntityID, physics);
+			}
+			else if (!hasPhysics && ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+				ecs.removeComponent<PhysicsComponent>(selectedEntityID);
+			}
+		}
+
+		// Animation Component
+		bool hasAnimation = ecs.hasComponent<AnimationComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Animation Component", &hasAnimation)) {
+			if (hasAnimation && !ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+				AnimationComponent animation;
+				animation.isAnimated = true;
+				animation.totalFrames = 1.0f;
+				animation.frameTime = 0.05f;
+				animation.columns = 1.0f;
+				animation.rows = 1.0f;
+				ecs.addComponent(selectedEntityID, animation);
+			}
+			else if (!hasAnimation && ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+				ecs.removeComponent<AnimationComponent>(selectedEntityID);
+			}
+		}
+
+		// Font Component
+		bool hasFont = ecs.hasComponent<FontComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Font Component", &hasFont)) {
+			if (hasFont && !ecs.hasComponent<FontComponent>(selectedEntityID)) {
+				FontComponent font;
+				font.text = "New Text";
+				font.textScale = 1.0f;
+				font.textBoxWidth = 300.0f;
+				font.color = myMath::Vector3D(1.0f, 1.0f, 1.0f);
+				font.fontId = "default";  // Assuming you have a default font
+				ecs.addComponent(selectedEntityID, font);
+			}
+			else if (!hasFont && ecs.hasComponent<FontComponent>(selectedEntityID)) {
+				ecs.removeComponent<FontComponent>(selectedEntityID);
+			}
+		}
+
+		// Player Component
+		bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Player Component", &hasPlayer)) {
+			// Check if a player already exists
+			bool playerExists = false;
+			if (hasPlayer && !ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+				for (auto& entity : ecs.getAllLiveEntities()) {
+					if (entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
+						playerExists = true;
+						break;
+					}
+				}
+
+				if (!playerExists) {
+					PlayerComponent player;
+					player.isPlayer = true;
+					ecs.addComponent(selectedEntityID, player);
+				}
+				else {
+					// Only one player allowed - show a warning
+					ImGui::OpenPopup("Player Warning");
+					hasPlayer = false;
+				}
+			}
+			else if (!hasPlayer && ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+				ecs.removeComponent<PlayerComponent>(selectedEntityID);
+			}
+		}
+
+		// Warning popup for player component
+		if (ImGui::BeginPopupModal("Player Warning", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Only one player entity can exist in the scene.");
+			ImGui::Separator();
+			if (ImGui::Button("OK", ImVec2(120, 0))) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		// Enemy Component
+		bool hasEnemy = ecs.hasComponent<EnemyComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Enemy Component", &hasEnemy)) {
+			if (hasEnemy && !ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+				EnemyComponent enemy;
+				enemy.isEnemy = true;
+				enemy.isClockwise = true;
+				enemy.visionAngle = 60.0f;
+				enemy.visionDistance = 300.0f;
+				enemy.drawVisionDebug = true;
+				enemy.numWaypoints = 2;
+				// Add default waypoints
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				enemy.waypoints.push_back(transform.position);
+				enemy.waypoints.push_back(myMath::Vector2D(transform.position.GetX() + 100, transform.position.GetY()));
+				ecs.addComponent(selectedEntityID, enemy);
+			}
+			else if (!hasEnemy && ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+				ecs.removeComponent<EnemyComponent>(selectedEntityID);
+			}
+		}
+
+		// Collectable Component
+		bool hasCollectable = ecs.hasComponent<CollectableComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Collectable Component", &hasCollectable)) {
+			if (hasCollectable && !ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+				CollectableComponent collectable;
+				collectable.isCollectable = true;
+				ecs.addComponent(selectedEntityID, collectable);
+				GLFWFunctions::collectableCount++;
+			}
+			else if (!hasCollectable && ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+				ecs.removeComponent<CollectableComponent>(selectedEntityID);
+				if (GLFWFunctions::collectableCount > 0)
+					GLFWFunctions::collectableCount--;
+			}
+		}
+
+		// Pump Component
+		bool hasPump = ecs.hasComponent<PumpComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Pump Component", &hasPump)) {
+			if (hasPump && !ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+				PumpComponent pump;
+				pump.isPump = true;
+				pump.pumpForce = 3.0f;
+				ecs.addComponent(selectedEntityID, pump);
+			}
+			else if (!hasPump && ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+				ecs.removeComponent<PumpComponent>(selectedEntityID);
+			}
+		}
+
+		// Exit Component
+		bool hasExit = ecs.hasComponent<ExitComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Exit Component", &hasExit)) {
+			if (hasExit && !ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+				ExitComponent exit;
+				exit.isExit = true;
+				ecs.addComponent(selectedEntityID, exit);
+			}
+			else if (!hasExit && ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+				ecs.removeComponent<ExitComponent>(selectedEntityID);
+			}
+		}
+
+		// Background Component
+		bool hasBackground = ecs.hasComponent<BackgroundComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Background Component", &hasBackground)) {
+			if (hasBackground && !ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+				BackgroundComponent background;
+				background.isBackground = true;
+				ecs.addComponent(selectedEntityID, background);
+			}
+			else if (!hasBackground && ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+				ecs.removeComponent<BackgroundComponent>(selectedEntityID);
+			}
+		}
+
+		// UI Component
+		bool hasUI = ecs.hasComponent<UIComponent>(selectedEntityID);
+		if (ImGui::Checkbox("UI Component", &hasUI)) {
+			if (hasUI && !ecs.hasComponent<UIComponent>(selectedEntityID)) {
+				UIComponent ui;
+				ui.isUI = true;
+				ecs.addComponent(selectedEntityID, ui);
+			}
+			else if (!hasUI && ecs.hasComponent<UIComponent>(selectedEntityID)) {
+				ecs.removeComponent<UIComponent>(selectedEntityID);
+			}
+		}
+
+		// Button Component
+		bool hasButton = ecs.hasComponent<ButtonComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Button Component", &hasButton)) {
+			if (hasButton && !ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+				ButtonComponent button;
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				button.originalScale = transform.scale;
+				button.hoveredScale = myMath::Vector2D(transform.scale.GetX() * 1.1f, transform.scale.GetY() * 1.1f);
+				button.isButton = true;
+				ecs.addComponent(selectedEntityID, button);
+			}
+			else if (!hasButton && ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+				ecs.removeComponent<ButtonComponent>(selectedEntityID);
+			}
+		}
+
+		// Filter Component
+		bool hasFilter = ecs.hasComponent<FilterComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Filter Component", &hasFilter)) {
+			if (hasFilter && !ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+				FilterComponent filter;
+				filter.isFilter = true;
+				filter.isFilterClogged = false;
+				ecs.addComponent(selectedEntityID, filter);
+			}
+			else if (!hasFilter && ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+				ecs.removeComponent<FilterComponent>(selectedEntityID);
+			}
+		}
+
+		// Moving Platform Component
+		bool hasMovPlatform = ecs.hasComponent<MovPlatformComponent>(selectedEntityID);
+		if (ImGui::Checkbox("Moving Platform Component", &hasMovPlatform)) {
+			if (hasMovPlatform && !ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+				MovPlatformComponent movPlatform;
+				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+				movPlatform.speed = 50.0f;
+				movPlatform.maxDistance = 200.0f;
+				movPlatform.startPos = transform.position;
+				movPlatform.direction = myMath::Vector2D(1.0f, 0.0f);  // Default horizontal movement
+				ecs.addComponent(selectedEntityID, movPlatform);
+			}
+			else if (!hasMovPlatform && ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+				ecs.removeComponent<MovPlatformComponent>(selectedEntityID);
+			}
+		}
+
+		ImGui::Separator();
+		if (ImGui::Button("Close", ImVec2(120, 0))) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 
 	if (ecsCoordinator.getEntityID(selectedEntityID) == "placeholderentity") {}
 	else
@@ -826,7 +1172,9 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		{
 			assetNames->push_back(asset);
 		}
+		assetsManager.setAssetListChanged(false);
 	}
+
 	// Add a static string to store the current selected item
 	static char selectedTexture[256] = "Select a texture...";
 	strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
@@ -950,4 +1298,124 @@ void Inspector::Cleanup() {
 	overlappingEntities = nullptr;
 	delete assetNames;
 	assetNames = nullptr;
+	delete filledCells;
+	filledCells = nullptr;
+}
+
+Entity Inspector::CloneEntity(Entity sourceEntity) {
+	static int copyCounter = 1;
+
+    Entity newEntity = ecsCoordinator.createEntity();
+    
+    // Copy the entity ID with a suffix to avoid duplicates
+    std::string originalID = ecsCoordinator.getEntityID(sourceEntity);
+	std::string newID = originalID + "_copy" + std::to_string(copyCounter);
+	copyCounter++;
+    ecsCoordinator.setEntityID(newEntity, newID);
+    
+    // Copy the texture ID
+    std::string textureID = ecsCoordinator.getTextureID(sourceEntity);
+    ecsCoordinator.setTextureID(newEntity, textureID);
+    
+    // Add the entity to the same layer as the original
+    int layer = layerManager.getEntityLayer(sourceEntity);
+    layerManager.addEntityToLayer(layer, newEntity);
+    
+    // Copy TransformComponent (required for all entities)
+    if (ecsCoordinator.hasComponent<TransformComponent>(sourceEntity)) {
+        TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, transform);
+    }
+    
+    // Copy other components as needed
+    auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+    
+    // Copy AABBComponent if exists
+    if (ecsCoordinator.hasComponent<AABBComponent>(sourceEntity)) {
+        AABBComponent aabb = ecsCoordinator.getComponent<AABBComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, aabb);
+    }
+    
+    // Copy PhysicsComponent if exists
+    if (ecsCoordinator.hasComponent<PhysicsComponent>(sourceEntity)) {
+        PhysicsComponent physics = ecsCoordinator.getComponent<PhysicsComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, physics);
+    }
+    
+    // Copy FontComponent if exists
+    if (ecsCoordinator.hasComponent<FontComponent>(sourceEntity)) {
+        FontComponent font = ecsCoordinator.getComponent<FontComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, font);
+    }
+    
+    // Copy AnimationComponent if exists
+    if (ecsCoordinator.hasComponent<AnimationComponent>(sourceEntity)) {
+        AnimationComponent animation = ecsCoordinator.getComponent<AnimationComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, animation);
+    }
+    
+    // Copy CollectableComponent if exists
+    if (ecsCoordinator.hasComponent<CollectableComponent>(sourceEntity)) {
+        CollectableComponent collectable = ecsCoordinator.getComponent<CollectableComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, collectable);
+        GLFWFunctions::collectableCount++;
+    }
+    
+    // Copy PumpComponent if exists
+    if (ecsCoordinator.hasComponent<PumpComponent>(sourceEntity)) {
+        PumpComponent pump = ecsCoordinator.getComponent<PumpComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, pump);
+    }
+    
+    // Copy ExitComponent if exists
+    if (ecsCoordinator.hasComponent<ExitComponent>(sourceEntity)) {
+        ExitComponent exit = ecsCoordinator.getComponent<ExitComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, exit);
+    }
+    
+    // Copy FilterComponent if exists
+    if (ecsCoordinator.hasComponent<FilterComponent>(sourceEntity)) {
+        FilterComponent filter = ecsCoordinator.getComponent<FilterComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, filter);
+    }
+    
+    // Copy ButtonComponent if exists
+    if (ecsCoordinator.hasComponent<ButtonComponent>(sourceEntity)) {
+        ButtonComponent button = ecsCoordinator.getComponent<ButtonComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, button);
+    }
+    
+    // Copy UIComponent if exists
+    if (ecsCoordinator.hasComponent<UIComponent>(sourceEntity)) {
+        UIComponent ui = ecsCoordinator.getComponent<UIComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, ui);
+    }
+    
+    // Copy BehaviourComponent and assign the same behaviour type
+    if (ecsCoordinator.hasComponent<BehaviourComponent>(sourceEntity)) {
+        BehaviourComponent behaviour = ecsCoordinator.getComponent<BehaviourComponent>(sourceEntity);
+        ecsCoordinator.addComponent(newEntity, behaviour);
+        
+        // Assign the same behaviour implementation
+        if (logicSystemRef->hasBehaviour<EnemyBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<EnemyBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<EffectPumpBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<ExitBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<ExitBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<CollectableBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<PlatformBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<MouseBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<MouseBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<FilterBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<FilterBehaviour>());
+        } else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(sourceEntity)) {
+            logicSystemRef->assignBehaviour(newEntity, std::make_shared<MovPlatformBehaviour>());
+        }
+        // Don't clone Player component - there should only be one player
+    }
+    
+    return newEntity;
 }

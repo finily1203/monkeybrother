@@ -54,6 +54,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ExitComponent.h"
 #include "FilterComponent.h"
 #include "MovPlatformComponent.h"
+#include "NavigationComponent.h"
 
 #include <iostream>
 #include <fstream>
@@ -116,6 +117,8 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
+	bool entityExists(Entity entity);
+
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
 	Entity getEntityFromID(std::string ID);
@@ -134,6 +137,12 @@ public:
 	void SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the cutscene data from JSON file
 	void LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the tutorial page entities from JSON
+	void LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the quit level menu entities from JSON
+	void LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the level completed menu entities from JSON
+	void LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();
@@ -154,12 +163,14 @@ public:
 
 	void test5();
 	void initialiseSystemsAndComponents();
-
+	void ensureFPSDisplay(); // Method to ensure FPS display exists
+	Entity getFPSDisplayEntity() const { return fpsDisplayEntity; }
 private:
 	std::unique_ptr<EntityManager> entityManager;
 	std::unique_ptr<ComponentManager> componentManager;
 	std::unique_ptr<SystemManager> systemManager;
-
+	Entity fpsDisplayEntity = 0; 
+	bool fpsDisplayCreated = false;
 	Entity firstEntity;
 };
 

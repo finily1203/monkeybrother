@@ -133,6 +133,7 @@
     <ClCompile Include="DebugSystem\GUIHierarchyList.cpp" />
     <ClCompile Include="DebugSystem\GUIInspector.cpp" />
     <ClCompile Include="DebugSystem\GUIObjectCreation.cpp" />
+    <ClCompile Include="DebugSystem\GUIGridSystem.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="ECS\ComponentManager.cpp" />
     <ClCompile Include="ECS\ECSCoordinator.cpp" />
@@ -168,6 +169,8 @@
     <ClCompile Include="SystemECS\LogicSystemECS.cpp" />
     <ClCompile Include="SystemECS\FontSystemECS.cpp" />
     <ClCompile Include="SystemECS\MovPlatformBehaviour.cpp" />
+    <ClCompile Include="SystemECS\NavigationArrow.cpp" />
+    <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
     <ClCompile Include="SystemECS\PhyColliSystemECS.cpp" />
     <ClCompile Include="SystemECS\GraphicSystemECS.cpp" />
     <ClCompile Include="SystemECS\PlatformBehaviour.cpp" />
@@ -191,6 +194,7 @@
     <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\MovPlatformComponent.h" />
     <ClInclude Include="Components\OBBComponent.h" />
+    <ClInclude Include="Components\NavigationComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\FontComponent.h" />
     <ClInclude Include="Components\PlayerComponent.h" />
@@ -203,6 +207,7 @@
     <ClInclude Include="DebugSystem\GUIAudioPanel.h" />
     <ClInclude Include="DebugSystem\GUIConsole.h" />
     <ClInclude Include="DebugSystem\GUIGameViewport.h" />
+    <ClInclude Include="DebugSystem\GUIGridSystem.h" />
     <ClInclude Include="DebugSystem\GUIHierarchyList.h" />
     <ClInclude Include="DebugSystem\GUIInspector.h" />
     <ClInclude Include="DebugSystem\GUIObjectCreation.h" />
@@ -243,6 +248,8 @@
     <ClInclude Include="SystemECS\LogicSystemECS.h" />
     <ClInclude Include="SystemECS\FontSystemECS.h" />
     <ClInclude Include="SystemECS\MovPlatformBehaviour.h" />
+    <ClInclude Include="SystemECS\NavigationArrow.h" />
+    <ClInclude Include="SystemECS\NavigationBehaviour.h" />
     <ClInclude Include="SystemECS\PhyColliSystemECS.h" />
     <ClInclude Include="SystemECS\GraphicSystemECS.h" />
     <ClInclude Include="SystemECS\PlatformBehaviour.h" />

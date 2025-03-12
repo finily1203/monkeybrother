@@ -11,7 +11,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
                                Most of the content in this file is taken from
                                WindowSystem.cpp and modified to fit the scope
                                for creating object in ECS.
-                               100%
+                               
+         Javier Chua (javierjunliang.chua): Handle the logic of rendering of the animation
 *//*___________________________________________________________________________-*/
 #include "GraphicSystemECS.h"
 
@@ -34,47 +35,260 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "vector"
 
 
-void createTextEntity(
-    ECSCoordinator& ecs,
-    const std::string& text,
-    const std::string& fontId,
-    const myMath::Vector3D& color,
-    const myMath::Vector2D& position,
-    const std::string& entityId
-) {
-    Entity textEntity = ecs.createEntity();
-
-    // Font Component
-    FontComponent font{};
-    font.text = text;
-    font.textScale = 1.0f;
-    font.color = color;
-    font.fontId = fontId;
-    ecsCoordinator.addComponent(textEntity, font);
-
-    // Transform Component
-    TransformComponent transform{};
-    transform.position = position;
-    transform.scale.SetX(0); // Initial scale (could be animated later)
-    transform.scale.SetY(0);
-    ecsCoordinator.addComponent(textEntity, transform);
-
-    // Behaviour Component
-    BehaviourComponent behaviour{};
-    behaviour.none = true;
-    ecsCoordinator.addComponent(textEntity, behaviour);
-
-    // Assign an ID for reference
-    ecsCoordinator.setEntityID(textEntity, entityId);
-
-    // Debugging log (optional)
-    // std::cout << entityId << " Text Created" << std::endl;
-}
-
 //std::unique_ptr<EntityManager> entityManager;
 //Initialise currently does not do anything
 void GraphicSystemECS::initialise() {
 
+}
+
+double elapsedTimeSinceGrowStart(const PlayerComponent& player) {
+    if (!player.isGrowing) return 1.0f;
+    return glfwGetTime() - player.growStartTime;
+}
+
+
+
+void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude) {
+   
+    const MovementAnimConfig& config = animation.movementConfig;
+
+   
+    if (config.bodyTexture.empty() || config.eyesTexture.empty() ||
+        config.bodyFrames == 0 || config.eyesFrames == 0) {
+        // Use default animation
+        std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture(defaultTexture),
+            transform.mdl_xform,
+            animation.currentUVs
+        );
+        return;
+    }
+
+    auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+    static float eyesAnimTime = 0.0f;
+    static int eyesCurrentFrame = 0;
+
+    
+    if (config.movementThreshold > 0 && velocityMagnitude > config.movementThreshold) {
+        player.lastMoveTime = glfwGetTime();
+        player.isIdle = false;
+
+        // Body animation
+        AnimationComponent bodyAnimation = animation;
+        bodyAnimation.isAnimated = true;
+        bodyAnimation.totalFrames = config.bodyFrames;
+        bodyAnimation.columns = config.bodyColumns;
+        bodyAnimation.rows = config.bodyRows;
+        bodyAnimation.UpdateUVCoordinates();
+
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture(config.bodyTexture),
+            transform.mdl_xform,
+            bodyAnimation.currentUVs
+        );
+
+        
+        if (config.eyeFrameDuration > 0) {
+            eyesAnimTime += GLFWFunctions::delta_time;
+            eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
+                % static_cast<int>(config.eyesFrames);
+
+            AnimationComponent eyesAnimation = animation;
+            eyesAnimation.isAnimated = true;
+            eyesAnimation.totalFrames = config.eyesFrames;
+            eyesAnimation.columns = config.eyesColumns;
+            eyesAnimation.rows = config.eyesRows;
+            eyesAnimation.currentFrame = eyesCurrentFrame;
+            eyesAnimation.UpdateUVCoordinates();
+
+            graphicsSystem.DrawObject(
+                GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture(config.eyesTexture),
+                transform.mdl_xform,
+                eyesAnimation.currentUVs
+            );
+        }
+    }
+    else {
+        
+        std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
+
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture(defaultTexture),
+            transform.mdl_xform,
+            animation.currentUVs
+        );
+
+        // Reset eye animation
+        eyesAnimTime = 0.0f;
+        eyesCurrentFrame = 0;
+
+        // Check for idle animation
+        double currentTime = glfwGetTime();
+        const float IDLE_THRESHOLD = 3.0f; 
+
+        if (!player.isIdle && !player.playingIdleAnim &&
+            (currentTime - player.lastMoveTime > IDLE_THRESHOLD)) {
+            player.isIdle = true;
+            player.playingIdleAnim = true;
+            player.idleAnimStart = currentTime;
+        }
+    }
+}
+
+void GraphicSystemECS::handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
+    auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+    // Get the growth configuration
+    const ComplexAnimationConfig& growthConfig = animation.growthConfig;
+
+    // skip custom animation if not loaded properly
+    if (growthConfig.body.textureName.empty() || growthConfig.eyes.textureName.empty() ||
+        growthConfig.duration <= 0 || growthConfig.body.totalFrames <= 0) {
+        return;
+    }
+
+    if (player.isGrowing) {
+        double currentTime = glfwGetTime();
+        double elapsedTime = currentTime - player.growStartTime;
+
+        if (elapsedTime <= growthConfig.duration) {
+            // Store original animation state
+            bool originalIsAnimated = animation.isAnimated;
+            int originalCurrentFrame = animation.currentFrame;
+            float originalColumns = animation.columns;
+            float originalRows = animation.rows;
+            std::vector<glm::vec2> originalUVs = animation.currentUVs;
+
+            // Calculate frame progress
+            float frameProgress = static_cast<float>(elapsedTime / growthConfig.duration);
+            int currentGrowthFrame = static_cast<int>(frameProgress * growthConfig.body.totalFrames);
+            if (currentGrowthFrame >= static_cast<int>(growthConfig.body.totalFrames)) {
+                currentGrowthFrame = static_cast<int>(growthConfig.body.totalFrames) - 1;
+            }
+
+           
+            animation.isAnimated = true;
+            animation.currentFrame = currentGrowthFrame;
+            animation.columns = growthConfig.body.columns;
+            animation.rows = growthConfig.body.rows;
+            animation.totalFrames = growthConfig.body.totalFrames;
+            animation.UpdateUVCoordinates();
+
+            
+            std::string originalTexture = ecsCoordinator.getTextureID(playerEntity);
+
+            // Draw body animation
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture(growthConfig.body.textureName),
+                transform.mdl_xform, animation.currentUVs);
+
+            // Draw eye animation if configured
+            if (!growthConfig.eyes.textureName.empty() && growthConfig.eyes.totalFrames > 0) {
+                graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture(growthConfig.eyes.textureName),
+                    transform.mdl_xform, animation.currentUVs);
+            }
+
+            // Restore original animation state
+            animation.isAnimated = originalIsAnimated;
+            animation.currentFrame = originalCurrentFrame;
+            animation.columns = originalColumns;
+            animation.rows = originalRows;
+            animation.currentUVs = originalUVs;
+            ecsCoordinator.setTextureID(playerEntity, originalTexture);
+        }
+        else {
+            
+            player.isGrowing = false;
+
+            // Reset animation state
+            animation.currentTime = 0.0f;
+            animation.Update();
+        }
+    }
+}
+
+void GraphicSystemECS::handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation) {
+    auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+    // Get the idle configuration
+    const ComplexAnimationConfig& idleConfig = animation.idleConfig;
+
+   
+    if (idleConfig.body.textureName.empty() || idleConfig.duration <= 0 ||
+        idleConfig.body.totalFrames <= 0) {
+        return;
+    }
+
+    if (player.playingIdleAnim) {
+        double currentTime = glfwGetTime();
+        double elapsedIdleTime = currentTime - player.idleAnimStart;
+
+        // Store original animation state
+        bool originalIsAnimated = animation.isAnimated;
+        int originalCurrentFrame = animation.currentFrame;
+        float originalColumns = animation.columns;
+        float originalRows = animation.rows;
+        std::vector<glm::vec2> originalUVs = animation.currentUVs;
+
+        // Calculate frame progress
+        float frameProgress = static_cast<float>(elapsedIdleTime / idleConfig.duration);
+        if (frameProgress > 1.0f) {
+            frameProgress = 1.0f;
+
+            if (elapsedIdleTime > idleConfig.duration + 0.1f) {
+                player.playingIdleAnim = false;
+            }
+        }
+
+        // Calculate current body frame
+        int currentBodyFrame = static_cast<int>(frameProgress * idleConfig.body.totalFrames);
+        if (currentBodyFrame >= static_cast<int>(idleConfig.body.totalFrames)) {
+            currentBodyFrame = static_cast<int>(idleConfig.body.totalFrames) - 1;
+        }
+
+        // Draw body animation
+        animation.isAnimated = true;
+        animation.currentFrame = currentBodyFrame;
+        animation.columns = idleConfig.body.columns;
+        animation.rows = idleConfig.body.rows;
+        animation.totalFrames = idleConfig.body.totalFrames;
+        animation.UpdateUVCoordinates();
+        graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture(idleConfig.body.textureName),
+            transform.mdl_xform, animation.currentUVs);
+
+        // Draw eye animation if configured
+        if (!idleConfig.eyes.textureName.empty() && idleConfig.eyes.totalFrames > 0) {
+            // Calculate current eye frame
+            int currentEyesFrame = static_cast<int>(frameProgress * idleConfig.eyes.totalFrames);
+            if (currentEyesFrame >= static_cast<int>(idleConfig.eyes.totalFrames)) {
+                currentEyesFrame = static_cast<int>(idleConfig.eyes.totalFrames) - 1;
+            }
+
+            animation.currentFrame = currentEyesFrame;
+            animation.columns = idleConfig.eyes.columns;
+            animation.rows = idleConfig.eyes.rows;
+            animation.totalFrames = idleConfig.eyes.totalFrames;
+            animation.UpdateUVCoordinates();
+            graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE,
+                assetsManager.GetTexture(idleConfig.eyes.textureName),
+                transform.mdl_xform, animation.currentUVs);
+        }
+
+        // Restore original animation state
+        animation.isAnimated = originalIsAnimated;
+        animation.currentFrame = originalCurrentFrame;
+        animation.columns = originalColumns;
+        animation.rows = originalRows;
+        animation.currentUVs = originalUVs;
+    }
 }
 
 //Update function to update the graphics system
@@ -95,6 +309,24 @@ void GraphicSystemECS::update(float dt) {
             playerEntity = entity;
             playerTransform = &ecsCoordinator.getComponent<TransformComponent>(entity);
             break;
+        }
+
+    }
+    Entity fpsEntity = ecsCoordinator.getFPSDisplayEntity();
+    if (fpsEntity != 0) {
+       
+        if (ecsCoordinator.hasComponent<FontComponent>(fpsEntity)) {
+            auto& font = ecsCoordinator.getComponent<FontComponent>(fpsEntity);
+
+           
+            if (GLFWFunctions::showFPS) {
+                char fpsText[32];
+                snprintf(fpsText, sizeof(fpsText), "FPS:%.0f", GLFWFunctions::fps);
+                font.text = fpsText;
+            }
+            else {
+                font.text = ""; 
+            }
         }
     }
 
@@ -164,9 +396,27 @@ void GraphicSystemECS::update(float dt) {
 
                 mouseBehaviour.update(entity);
 
-                /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
-                /*--------------------------------------------------------------------------------
-                --------------------------------------------------------------------------------*/
+                bool isNavigation = ecsCoordinator.hasComponent<NavigationComponent>(entity);
+
+                if (isNavigation) {
+                    auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(entity);
+
+                    // Only render navigation arrows if they're set to visible
+                    if (!navComp.isVisible) {
+                        continue;
+                    }
+
+                    // Use identity matrix for navigation UI to keep it on screen regardless of camera
+                    if (ecsCoordinator.getEntityID(entity) == "nav_arrow") {
+                        // The model transformation needs to account for the camera position but not rotation
+                        // For UI elements like arrows that need to follow the camera but stay at screen edges
+                        transform.mdl_xform = graphicsSystem.UpdateObject(
+                            transform.position,
+                            transform.scale,
+                            transform.orientation,
+                            cameraSystem.getViewMatrix());
+                    }
+                }
                 // cheat code 
                 if (GLFWFunctions::instantWin)
                 {
@@ -208,6 +458,58 @@ void GraphicSystemECS::update(float dt) {
                 {
                     transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
                     ecsCoordinator.setTextureID(entity, "optionsMenu");
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "tutorialBaseBg")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "tutorialControlsBase", "tutorialMovementBase", 
+                                                                  "tutorialKeyItems1Base", "tutorialKeyItems2Base", 
+                                                                  "tutorialWaterCurrentBase", "tutorialEscapeBase", 
+                                                                  "tutorialFilterBase", "tutorialFishBase" };
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "pageCounter")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    const std::vector<std::string> textureIds = { "pageCounter1", "pageCounter2", "pageCounter3",
+                                                                  "pageCounter4", "pageCounter5", "pageCounter6",
+                                                                  "pageCounter7", "pageCounter8"};
+
+                    int currentPage = GLFWFunctions::tutorialCurrentPage;
+                    if (currentPage >= 1 && currentPage <= textureIds.size())
+                    {
+                        ecsCoordinator.setTextureID(entity, textureIds[currentPage - 1]);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "rotationSpeedSliderNotch")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "activeSoundbarNotch");
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "quitLevelMenuBase")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "quitLevelBase");
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "levelCompletedMenuBase")
+                {
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "levelCompletedBase");
                 }
 
         if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
@@ -535,7 +837,62 @@ void GraphicSystemECS::update(float dt) {
                         }
                     }
 
-                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu")
+                    else if (ecsCoordinator.getEntityID(entity) == "quitToMainMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveYesButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeYesButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "returnToPauseMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveNoButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeNoButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "nextLevelButton")
+                    {
+                        updateButtons();
+
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveNextLevelButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeNextLevelButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "mainMenuButton")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveMainMenuButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeMainMenuButton");
+                        }
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu" || 
+                             ecsCoordinator.getEntityID(entity) == "closeTutorialMenu")
                     {
                         ecsCoordinator.setTextureID(entity, "closePopupButton");
                         // graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("closePopupButton"), transform.mdl_xform);
@@ -548,7 +905,7 @@ void GraphicSystemECS::update(float dt) {
                         TransformComponent arrowTransform{};
 
                         std::string audioArrowId = (soundbarType == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
-                            (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+                                                   (soundbarType == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
                         if (!audioArrowId.empty())
                         {
@@ -572,25 +929,89 @@ void GraphicSystemECS::update(float dt) {
 
                         //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture("unactiveSoundbar"), transform.mdl_xform);
                     }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "nextTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "rightArrow");
+                        updateTutorialArrows();
+                    }
+
+
+                    else if (ecsCoordinator.getEntityID(entity) == "previousTutorialPage")
+                    {
+                        ecsCoordinator.setTextureID(entity, "leftArrow");
+                        updateTutorialArrows();
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "rotationSpeedSlider")
+                    {
+                        TransformComponent sliderTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+                        TransformComponent notchTransform{};
+
+                        
+                        for (auto& sliderNotchEntity : ecsCoordinator.getAllLiveEntities())
+                        {
+                            if (ecsCoordinator.getEntityID(sliderNotchEntity) == "rotationSpeedSliderNotch")
+                            {
+                                notchTransform = ecsCoordinator.getComponent<TransformComponent>(sliderNotchEntity);
+                                break;
+                            }
+                        }
+
+                        ecsCoordinator.setTextureID(entity, "soundbarBase");
+                    }
                 }
 
                 //if is player, check visibility of player, if not visible do not render
                 if (isPlayer) {
                     auto& player = ecsCoordinator.getComponent<PlayerComponent>(entity);
+
+                    // Skip invisible players
                     if (!player.isVisible) {
                         continue;
                     }
 
+                    
+                    if (player.playingIdleAnim) {
+                        handlePlayerIdleAnimation(entity, transform, animation);
+                        continue; 
+                    }
+
+                    if (player.isGrowing) {
+                        handlePlayerGrowthAnimation(entity, transform, animation);
+                        const float GROWTH_DURATION = 1.0f;
+                        if (elapsedTimeSinceGrowStart(player) < GROWTH_DURATION) {
+                            continue;
+                        }
+                    }
+
+                   
+                    if (!ecsCoordinator.hasComponent<PhysicsComponent>(entity)) {
+                        continue;
+                    }
+
+                    
+                    auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+                    auto& velocity = physics.velocity;
+                    float velocityMagnitude = std::sqrt(velocity.GetX() * velocity.GetX() + velocity.GetY() * velocity.GetY());
+
+                    
+                    handlePlayerMovementAnimation(entity, transform, animation, velocityMagnitude);
+
+                    // Skip further rendering for this entity
+                    continue;
+                    
                     if (GLFWFunctions::isPlayerDead) {
                         ecsCoordinator.setTextureID(entity, "mossballDead");
-						auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-						playerAnimation.totalFrames = 24;
-						playerAnimation.columns = 8;
-						playerAnimation.rows = 3;
-					}
-					else {
-						ecsCoordinator.setTextureID(entity, "mossball");
+                        auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                        playerAnimation.totalFrames = 24;
+                        playerAnimation.columns = 8;
+                        playerAnimation.rows = 3;
                     }
+                    else {
+                        ecsCoordinator.setTextureID(entity, "mossball");
+                    }
+                    
                 }
 
                 if (isFilter) {
@@ -607,9 +1028,9 @@ void GraphicSystemECS::update(float dt) {
                 {
 					auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
                     if (enemy.drawVisionDebug) {
-						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
-                        graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
+						auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
+						graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
+                        graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
                     }
 
                     if (enemy.currState == 0) {
@@ -696,6 +1117,64 @@ void GraphicSystemECS::update(float dt) {
 
             }
         }
+    }
+}
+
+// this is to update the left and right arrows scale in real-time
+void GraphicSystemECS::updateTutorialArrows()
+{
+    Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
+    Entity previousArrow = ecsCoordinator.getEntityFromID("previousTutorialPage");
+
+    TransformComponent& nextTransform = ecsCoordinator.getComponent<TransformComponent>(nextArrow);
+    TransformComponent& previousTransform = ecsCoordinator.getComponent<TransformComponent>(previousArrow);
+
+    if (GLFWFunctions::tutorialCurrentPage >= 1 && GLFWFunctions::tutorialCurrentPage < 8)
+    {
+        nextTransform.scale.SetX(100.f);
+        nextTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        nextTransform.scale.SetX(0.f);
+        nextTransform.scale.SetY(0.f);
+    }
+
+    if (GLFWFunctions::tutorialCurrentPage > 1 && GLFWFunctions::tutorialCurrentPage <= 8)
+    {
+        previousTransform.scale.SetX(100.f);
+        previousTransform.scale.SetY(130.f);
+    }
+
+    else
+    {
+        previousTransform.scale.SetX(0.f);
+        previousTransform.scale.SetY(0.f);
+    }
+}
+
+// this is to update the level complete menu buttons in real-time
+void GraphicSystemECS::updateButtons()
+{
+    Entity nextLevelButton = ecsCoordinator.getEntityFromID("nextLevelButton");
+    Entity mainMenuButton = ecsCoordinator.getEntityFromID("mainMenuButton");
+
+    TransformComponent& nextLevelTransform = ecsCoordinator.getComponent<TransformComponent>(nextLevelButton);
+    TransformComponent& mainMenuTransform = ecsCoordinator.getComponent<TransformComponent>(mainMenuButton);
+
+    if (GameViewWindow::getSceneNum() > 1)
+    {
+        nextLevelTransform.scale.SetX(0.f);
+        nextLevelTransform.scale.SetY(0.f);
+        mainMenuTransform.position.SetX(5.f);
+    }
+
+    else
+    {
+        nextLevelTransform.scale.SetX(260.f);
+        nextLevelTransform.scale.SetY(130.f);
+        mainMenuTransform.position.SetX(125.f);
     }
 }
 

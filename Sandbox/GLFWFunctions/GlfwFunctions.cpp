@@ -58,6 +58,9 @@ int GLFWFunctions::defultWindowHeight = 0;
 int GLFWFunctions::collectableCount = 0;
 int GLFWFunctions::pauseMenuCount = 0;
 int GLFWFunctions::optionsMenuCount = 0;
+int GLFWFunctions::tutorialMenuCount = 0;
+int GLFWFunctions::tutorialCurrentPage = 1;
+int GLFWFunctions::rotationSpeed = 0;
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
@@ -66,6 +69,7 @@ bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
+bool GLFWFunctions::showFPS = true;
 bool GLFWFunctions::isPlayerDead = false;
 
 float GLFWFunctions::pauseTimer = 0.0f;
@@ -254,37 +258,37 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = false;
     }
 
-    if ((*keyState)[Key::P] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
-        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        audioPaused = ~audioPaused;
-        GLFWFunctions::gamePaused = true;
+    //if ((*keyState)[Key::P]) {
+    //    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    //    audioPaused = ~audioPaused;
+    //    GLFWFunctions::gamePaused = true;
 
-        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
-        {
-            GLFWFunctions::pauseMenuCount++;
-            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-        }
+    //    if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
+    //    {
+    //        GLFWFunctions::pauseMenuCount++;
+    //        ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+    //    }
 
-        else if (GLFWFunctions::optionsMenuCount != 1)
-        {
-            for (auto currEntity : ecsCoordinator.getAllLiveEntities())
-            {
-                if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-                    ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-                    ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-                    ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-                {
-                    ecsCoordinator.destroyEntity(currEntity);
-                }
-            }
+    //    else if (GLFWFunctions::optionsMenuCount != 1)
+    //    {
+    //        for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+    //        {
+    //            if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				//	ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+    //                ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+    //            {
+    //                ecsCoordinator.destroyEntity(currEntity);
+    //            }
+    //        }
 
-            GLFWFunctions::gamePaused = false;
-            GLFWFunctions::pauseMenuCount--;
-        }
-    }
+    //        GLFWFunctions::gamePaused = false;
+    //        GLFWFunctions::pauseMenuCount--;
+    //    }
+    //}
 
     /*if ((*keyState)[Key::S])
         audioStopped = ~audioStopped;*/
@@ -294,8 +298,36 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }*/
 
-    if ((*keyState)[Key::ESCAPE]) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    if ((*keyState)[Key::ESCAPE] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
+        glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        //audioPaused = ~audioPaused;
+        GLFWFunctions::gamePaused = true;
+
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1)
+        {
+            GLFWFunctions::pauseMenuCount++;
+            ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+        }
+
+        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1))
+        {
+            for (auto currEntity : ecsCoordinator.getAllLiveEntities())
+            {
+                if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+                    ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+                    ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+                    ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+                {
+                    ecsCoordinator.destroyEntity(currEntity);
+                }
+            }
+
+            GLFWFunctions::gamePaused = false;
+            GLFWFunctions::pauseMenuCount--;
+        }
     }
     if (action == GLFW_PRESS) {
 
@@ -325,27 +357,54 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             std::cout << "Instant Lose" << std::endl;
         }
 
+        if (mappedKey == Key::M) {
+            showFPS = !showFPS; 
+            std::cout << "FPS Display: " << (showFPS ? "ON" : "OFF") << std::endl;
+        }
+
         if ((*keyState)[Key::F] && action == GLFW_PRESS && !GameViewWindow::getPaused()) {
             fullscreen = !fullscreen;
             GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
+            // Save current window position and size before switching
+            int currentX, currentY, currentWidth, currentHeight;
+            glfwGetWindowPos(pWindow, &currentX, &currentY);
+            glfwGetWindowSize(pWindow, &currentWidth, &currentHeight);
+
             if (fullscreen) {
+                // Get the video mode of the primary monitor
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                // Store original window dimensions if we aren't already in fullscreen
+                if (!fullscreen) {
+                    windowWidth = currentWidth;
+                    windowHeight = currentHeight;
+                }
+
+                // Switch to fullscreen mode
                 glfwSetWindowMonitor(
                     pWindow,
                     monitor,
-                    0, 0,
+                    0, 0,  // Position (0,0) for fullscreen
                     mode->width,
                     mode->height,
                     mode->refreshRate
                 );
+
+                // Update global window dimensions
+                windowWidth = mode->width;
+                windowHeight = mode->height;
             }
             else {
                 // Switch to windowed mode
-                int windowedWidth = defultWindowWidth;  // Desired windowed mode width
-                int windowedHeight = defultWindowHeight; // Desired windowed mode height
-                int x = 150;             // Desired X position for the window
-                int y = 150;             // Desired Y position for the window
+                // Use default size if we don't have saved dimensions
+                int windowedWidth = defultWindowWidth > 0 ? defultWindowWidth : 1280;
+                int windowedHeight = defultWindowHeight > 0 ? defultWindowHeight : 720;
+
+                // Center the window on the monitor
+                const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+                int x = (mode->width - windowedWidth) / 2;
+                int y = (mode->height - windowedHeight) / 2;
 
                 glfwSetWindowMonitor(
                     pWindow,
@@ -356,12 +415,20 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                     0
                 );
 
-                // Restore window decorations
+                // Restore window decorations and properties
                 glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
                 glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
+
+
+                windowWidth = windowedWidth;
+                windowHeight = windowedHeight;
             }
 
+
+            glViewport(0, 0, windowWidth, windowHeight);
+
             std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
+            std::cout << "Window dimensions: " << windowWidth << "x" << windowHeight << std::endl;
         }
 
     }

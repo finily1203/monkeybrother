@@ -4,7 +4,7 @@
  * @course: CSD2401
  * @file: AnimationComponent.h
  * @brief: This header file includes the Animation Component to be used by ECS
- *         and physics and collision System to handle the logic of the game objects.
+ *         to handle the animation for the different entities in the game
  */
  /*___________________________________________________________________________*/
 
@@ -12,6 +12,44 @@
 
 #include "AnimationData.h"
 
+struct AnimationConfig {
+    float columns;
+    float rows;
+    float totalFrames;
+    std::string textureName;
+
+    AnimationConfig() : columns(0), rows(0), totalFrames(0), textureName("") {}
+};
+
+
+struct MovementAnimConfig {
+    float movementThreshold;
+    std::string bodyTexture;
+    std::string eyesTexture;
+    float bodyFrames;
+    float bodyColumns;
+    float bodyRows;
+    float eyesFrames;
+    float eyesColumns;
+    float eyesRows;
+    float eyeFrameDuration;
+
+    MovementAnimConfig()
+        : movementThreshold(0), bodyTexture(""), eyesTexture(""),
+        bodyFrames(0), bodyColumns(0), bodyRows(0),
+        eyesFrames(0), eyesColumns(0), eyesRows(0), eyeFrameDuration(0) {}
+};
+
+
+struct ComplexAnimationConfig {
+    AnimationConfig body;
+    AnimationConfig eyes;
+    float duration;
+
+    ComplexAnimationConfig() : duration(0) {}
+};
+
+// Main animation component
 struct AnimationComponent {
     double creationTime;
     bool isAnimated;
@@ -22,6 +60,11 @@ struct AnimationComponent {
     float columns;
     float rows;
     std::vector<glm::vec2> currentUVs;
+
+    // Animation configurations without default values
+    MovementAnimConfig movementConfig;
+    ComplexAnimationConfig growthConfig;
+    ComplexAnimationConfig idleConfig;
 
     AnimationComponent()
         : isAnimated(false)
@@ -53,7 +96,6 @@ struct AnimationComponent {
     void Update() {
         if (!isAnimated || totalFrames <= 1.0f) return;
 
-
         double currentAbsoluteTime = glfwGetTime();
         double timeSinceCreation = currentAbsoluteTime - creationTime;
 
@@ -63,8 +105,6 @@ struct AnimationComponent {
     }
 
     void UpdateUVCoordinates() {
-
-
         // Calculate frame size in UV coordinates
         float frameWidth = 1.0f / columns;
         float frameHeight = 1.0f / rows;
@@ -78,7 +118,6 @@ struct AnimationComponent {
         float uMax = uMin + frameWidth;
         float vMax = 1.0f - (frameHeight * currentRow);
         float vMin = vMax - frameHeight;
-
 
         currentUVs[0] = glm::vec2(uMax, vMax);  // Top right
         currentUVs[1] = glm::vec2(uMax, vMin);  // Bottom right

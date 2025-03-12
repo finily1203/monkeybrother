@@ -62,7 +62,7 @@ struct GLFWFunctions {
 	static bool isKeyPressed(Key key);
 	static bool isKeyReleased(Key key);
 	static bool isKeyHeld(Key key);
-
+	static bool showFPS;
 	static bool isMouseButtonPressed(MouseButton button);
 	static void updateCursorState();
 
@@ -103,6 +103,9 @@ struct GLFWFunctions {
 	static int collectableCount;
 	static int pauseMenuCount;
 	static int optionsMenuCount;
+	static int tutorialMenuCount;
+	static int tutorialCurrentPage;
+	static int rotationSpeed;
 
 	static int defultWindowWidth;
 	static int defultWindowHeight;

@@ -22,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "Systems.h"            // Include GameSystems
 #include "ECSCoordinator.h"     // Include ECS Coordinator
 #include "GlfwFunctions.h"
+#include "PlayerBehaviour.h"
 
 
 class CameraSystem2D : public GameSystems
@@ -61,6 +62,9 @@ public:
     void lockToComponent(const TransformComponent& component); // Lock camera to an entity
 	void unlockFromComponent(); // Unlock camera from entity
     bool checkLockedComponent() const; // Check if camera is locked to an entity
+
+    void readGameplaySettingsFromJSON(std::string const& filename);
+    void saveGameplaySettingsToJSON(std::string const& filename, int speed);
 
 private:
     myMath::Matrix3x3 m_ViewMatrix;

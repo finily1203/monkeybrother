@@ -16,6 +16,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "NavigationArrow.h"
 
 void CollectableBehaviour::update(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
@@ -42,12 +43,39 @@ void CollectableBehaviour::update(Entity entity) {
                 auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
                 playerPhysics.mass += 0.5f;
 
+                
+                if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
+                    auto& playerComp = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
+
+                    // Start the growth animation for every collectable
+                    playerComp.isGrowing = true;
+                    playerComp.growStartTime = glfwGetTime();
+
+                    
+                    if (ecsCoordinator.hasComponent<AnimationComponent>(playerEntity)) {
+                        auto& playerAnim = ecsCoordinator.getComponent<AnimationComponent>(playerEntity);
+                       
+                        playerAnim.currentFrame = 0;
+                    }
+                }
+
+                // Store which collectables still exist before removing this one
+                std::vector<Entity> remainingCollectables;
+                for (auto e : ecsCoordinator.getAllLiveEntities()) {
+                    if (e != entity && ecsCoordinator.hasComponent<CollectableComponent>(e)) {
+                        remainingCollectables.push_back(e);
+                    }
+                }
+                
                 GLFWFunctions::collectAudio = true;
+                // Remove the navigation arrow for this specific collectable
+                NavigationArrow::RemoveNavigationArrow(entity);
 
+                // Create collection animation and destroy the collectable
                 createCollectAnimation(entity);
-
-                ecsCoordinator.destroyEntity(entity);  // Destroy the collectable
+                ecsCoordinator.destroyEntity(entity);
                 GLFWFunctions::collectableCount--;
+
             }
         }
     }
@@ -69,7 +97,6 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     ecsCoordinator.addComponent(newAnimationEntity, transform);
 
-    // Animation setup
     AnimationComponent animation{};
     animation.isAnimated = true;
     animation.totalFrames = 13.0f;
@@ -79,7 +106,6 @@ void CollectableBehaviour::createCollectAnimation(Entity entity) {
 
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
-    // take layer of entity and add animation to that layer
     int newLayer = layerManager.getEntityLayer(entity);
     layerManager.addEntityToLayer(newLayer, newAnimationEntity);
 }
