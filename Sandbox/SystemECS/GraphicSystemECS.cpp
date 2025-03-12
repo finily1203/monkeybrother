@@ -985,14 +985,15 @@ void GraphicSystemECS::update(float dt) {
                     
                     if (GLFWFunctions::isPlayerDead) {
                         ecsCoordinator.setTextureID(entity, "mossballDead");
-						auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-						playerAnimation.totalFrames = 24;
-						playerAnimation.columns = 8;
-						playerAnimation.rows = 3;
-					}
-					else {
-						ecsCoordinator.setTextureID(entity, "mossball");
+                        auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                        playerAnimation.totalFrames = 24;
+                        playerAnimation.columns = 8;
+                        playerAnimation.rows = 3;
                     }
+                    else {
+                        ecsCoordinator.setTextureID(entity, "mossball");
+                    }
+                    
                 }
 
                 if (isFilter) {
