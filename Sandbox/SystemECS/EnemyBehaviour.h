@@ -25,21 +25,40 @@ public:
 		ATTACK
 	};
 
+
+
 	EnemyBehaviour();
 	~EnemyBehaviour() {
 		waypoints.clear();
 		std::vector<myMath::Vector2D>().swap(waypoints);
 	}
 
+	//void drawDebugVisionCone(Entity entity, myMath::Matrix3x3 viewMatrix);
+
 	void update(Entity entity) override;
 	void switchState(STATE newState);
 	std::vector<myMath::Vector2D>& getWaypoints();
 	int& getCurrentWaypointIndex();
 
+	bool avoidWalls(Entity entity);
+	void startAvoid(Entity entity);
+
 	void updatePatrolState(Entity entity);
+
+	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
+	bool isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos);
+	bool rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDir, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tmin, float& tmax);
+
+
+	void updateChaseState(Entity entity);
 
 private:
 	STATE currentState;
 	std::vector<myMath::Vector2D> waypoints;
 	int currentWaypointIndex = 0;
+	bool isFacingRight;
+	bool moveHorizontal;
+	bool hasWaypointsBeenChanged;
+	bool isAvoidingWalls;
+	float avoidTimer;
 };

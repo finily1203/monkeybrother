@@ -71,6 +71,7 @@ public:
     std::vector<GLViewport>* vps; // container for viewports
     void drawDebugOBB(TransformComponent transform, myMath::Matrix3x3 viewMatrix);
     void drawDebugCircle(const TransformComponent transform, const myMath::Matrix3x3 viewMatrix);
+	void drawDebugVisionCone(TransformComponent transform, float coneAngle, float coneDistance, myMath::Matrix3x3 viewMatrix);
 
 private:
     GLuint m_VAO;

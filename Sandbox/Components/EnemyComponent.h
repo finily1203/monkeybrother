@@ -15,6 +15,14 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 struct EnemyComponent
 {
 	bool isEnemy;
+	bool isClockwise;
 
-	EnemyComponent() : isEnemy(false) {}
+	float visionAngle;
+	float visionDistance;
+	bool drawVisionDebug;
+
+	int numWaypoints;
+	std::vector<myMath::Vector2D> waypoints;
+
+	EnemyComponent() : isEnemy(false), isClockwise(false), visionAngle(60.f), visionDistance(100.f), drawVisionDebug(true), numWaypoints(0) {}
 };

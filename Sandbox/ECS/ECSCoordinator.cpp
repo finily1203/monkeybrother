@@ -510,6 +510,21 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 			// read the enemy data from the JSON file
 			EnemyComponent enemy{};
 			serializer.ReadObject(enemy.isEnemy, entityId, "entities.enemy.isEnemy");
+			serializer.ReadObject(enemy.isClockwise, entityId, "entities.enemy.isClockwise");
+			serializer.ReadObject(enemy.visionAngle, entityId, "entities.enemy.visionAngle");
+			serializer.ReadObject(enemy.visionDistance, entityId, "entities.enemy.visionDistance");
+			serializer.ReadObject(enemy.drawVisionDebug, entityId, "entities.enemy.drawVisionDebug");
+			serializer.ReadObject(enemy.numWaypoints, entityId, "entities.enemy.numWaypoints");
+			std::cout << "Number of waypoints: " << enemy.numWaypoints << std::endl;
+			for (int i = 0; i < enemy.numWaypoints; i++)
+			{
+				std::string waypoint = "entities.enemy.waypoint" + std::to_string(i + 1);
+				myMath::Vector2D waypointPos;
+				serializer.ReadObject(waypointPos, entityId, waypoint);
+				enemy.waypoints.push_back(waypointPos);
+
+				std::cout << "Waypoint " << i << ": " << enemy.waypoints[i].GetX() << ", " << enemy.waypoints[i].GetY() << std::endl;
+			}
 
 			ecs.addComponent(entityObj, enemy);
 

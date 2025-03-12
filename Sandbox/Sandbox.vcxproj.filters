@@ -130,6 +130,7 @@
     <ClInclude Include="LayerSystem\LayerManager.h" />
     <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
     <ClInclude Include="DebugSystem\GUIGridSystem.h" />
+    <ClInclude Include="Components\OBBComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
