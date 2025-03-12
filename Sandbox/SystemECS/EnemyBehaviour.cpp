@@ -27,6 +27,7 @@ EnemyBehaviour::EnemyBehaviour() {
     avoidTimer = 0.f;
     chaseAnimationCreated = false;
     attackAnimationCreated = false;
+    timesAvoided = 0;
 
 	//For now all enemies have same way point
     
@@ -151,7 +152,7 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
     int& currentWPIndex = getCurrentWaypointIndex();
 
     // Parameters
-    const float minWallDistance = (enemy.visionDistance / 3.f); // Minimum distance to detect walls
+    const float minWallDistance = (enemy.visionDistance / 10.f); // Minimum distance to detect walls
 
     // If no waypoints, just return
     if (currentWaypoints.empty()) {
@@ -175,7 +176,7 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
     }
 
     // Calculate ray end point (a point in the direction of next waypoint)
-    myMath::Vector2D rayEnd = transform.position + (direction * minWallDistance);
+    myMath::Vector2D rayEnd = (direction * minWallDistance);
 
     // Check all potential wall entities
     for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
@@ -198,9 +199,12 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
             // Check if ray intersects with the wall's AABB
             if (rayIntersectAABB(transform.position, rayEnd, wallMin, wallMax, tMin, tMax)) {
                 // Only consider intersections within our minimum distance
-                if (tMin >= 0.0f && tMin <= 1.0f) {
+                if (tMin > 0.0f && tMin <= 1.0f) {
                     // Print debug message
-                    std::cout << "Wall Detected" << std::endl;
+                    //std::cout << "Wall Detected" << std::endl;
+					std::cout << "Wall Min: " << wallMin.GetX() << ", " << wallMin.GetY() << std::endl;
+					std::cout << "Wall Max: " << wallMax.GetX() << ", " << wallMax.GetY() << std::endl;
+                    std::cout << ecsCoordinator.getEntityID(wallEntity) << std::endl;
 
                     return true;
                 }
@@ -227,7 +231,7 @@ void EnemyBehaviour::startAvoid(Entity entity) {
         if (length > 0) {
             // Normalize and reverse direction
             myMath::Vector2D oppositeDir(-currentDir.GetX() / length, -currentDir.GetY() / length);
-            float speed = 0.5f; // Same speed as normal movement
+            float speed = 5.0f; // Same speed as normal movement
 
             // Set avoiding flag and timer
             isAvoidingWalls = true;
@@ -320,7 +324,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    float speed = 0.5f; 
+    float speed = 5.0f; 
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -358,30 +362,14 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
 
     // Normalize direction vector
     myMath::Vector2D normalizedDirToPlayer = dirToPlayer;
-    float length = static_cast<float>(std::sqrt(std::pow(normalizedDirToPlayer.GetX(), 2) + std::pow(normalizedDirToPlayer.GetY(), 2)));
-    if (length > 0) {
-        normalizedDirToPlayer.SetX(normalizedDirToPlayer.GetX() / length);
-        normalizedDirToPlayer.SetY(normalizedDirToPlayer.GetY() / length);
+    if (distanceToPlayer > 0) {
+        normalizedDirToPlayer.SetX(normalizedDirToPlayer.GetX() / distanceToPlayer);
+        normalizedDirToPlayer.SetY(normalizedDirToPlayer.GetY() / distanceToPlayer);
     }
 
-    // Get the forward vector based on enemy orientation and facing direction
-    myMath::Vector2D forwardVector;
-    if (isFacingRight) {
-        forwardVector.SetX(1.0f);
-    }
-    else {
-        forwardVector.SetX(-1.0f);
-    }
-    forwardVector.SetY(0.0f);
-
-    // Apply rotation from entity orientation
+    // Get the forward vector directly from the entity's orientation
     float radians = enemyTransform.orientation.GetX() * (3.14159265358979323846f / 180.0f);
-    float cosTheta = static_cast<float>(std::cos(radians));
-    float sinTheta = static_cast<float>(std::sin(radians));
-    float rotatedX = forwardVector.GetX() * cosTheta - forwardVector.GetY() * sinTheta;
-    float rotatedY = forwardVector.GetX() * sinTheta + forwardVector.GetY() * cosTheta;
-    forwardVector.SetX(rotatedX);
-    forwardVector.SetY(rotatedY);
+    myMath::Vector2D forwardVector(std::cos(radians), std::sin(radians));
 
     // Calculate dot product between forward vector and direction to player
     float dotProduct = forwardVector.GetX() * normalizedDirToPlayer.GetX() +
@@ -397,69 +385,75 @@ bool EnemyBehaviour::doesEnemySeePlayer(Entity entity, Entity playerEntity) {
     }
 
     // At this point, player is within vision distance and angle
-
-	if (isWallBlockingVision(enemyTransform.position, playerTransform.position)) {
-		return false;
-	}
+    if (isWallBlockingVision(enemyTransform.position, playerTransform.position)) {
+        return false;
+    }
 
     return true;
 }
 
 bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos) {
+    myMath::Vector2D dirToPlayer = playerPos - enemyPos;
+    float playerDist = static_cast<float>(std::sqrt(std::pow(dirToPlayer.GetX(), 2.0) + std::pow(dirToPlayer.GetY(), 2.0)));
+
     for (auto entity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<ClosestPlatform>(entity)) {
             auto& wallTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
             myMath::Vector2D wallMin = { wallTransform.position.GetX() - (wallTransform.scale.GetX() / 2),
                                          wallTransform.position.GetY() - (wallTransform.scale.GetY() / 2) };
-			myMath::Vector2D wallMax = { wallTransform.position.GetX() + (wallTransform.scale.GetX() / 2),
-										 wallTransform.position.GetY() + (wallTransform.scale.GetY() / 2) };
+            myMath::Vector2D wallMax = { wallTransform.position.GetX() + (wallTransform.scale.GetX() / 2),
+                                         wallTransform.position.GetY() + (wallTransform.scale.GetY() / 2) };
 
             float tMin = 0.0f;
-            float tMax = 0.0f;
-            if (rayIntersectAABB(enemyPos, playerPos, wallMin, wallMax, tMin, tMax)) {
-				// If player distance is closer to enemy than wall, then wall is not blocking vision
-				float playerDist = static_cast<float>(std::sqrt(std::pow(playerPos.GetX() - enemyPos.GetX(), 2.0) + std::pow(playerPos.GetY() - enemyPos.GetY(), 2)));
-				float wallDist = static_cast<float>(std::sqrt(std::pow(wallTransform.position.GetX() - enemyPos.GetX(), 2.0) + std::pow(wallTransform.position.GetY() - enemyPos.GetY(), 2)));
-				//std::cout << "Player dist: " << playerDist << ", " << "Wall dist: " << wallDist << std::endl;
+            float tMax = 1.0f;  // Important: set max to 1.0 to represent the full ray
 
+            if (rayIntersectAABB(enemyPos, dirToPlayer, wallMin, wallMax, tMin, tMax)) {
+                // If tMin is between 0 and 1, there's an intersection along the ray to player
+                if (tMin >= 0.0f && tMin <= 1.0f) {
+                    // Calculate the actual intersection point
+                    myMath::Vector2D intersectionPoint = enemyPos + dirToPlayer * tMin;
 
-				//it will only return true if wallDist is less than playerDist
-                if (wallDist < playerDist) {
-                    return true; // Ray is blocked by a wall
+                    // Calculate the distance to the intersection point
+                    myMath::Vector2D dirToIntersection = intersectionPoint - enemyPos;
+                    float intersectionDist = static_cast<float>(std::sqrt(
+                        std::pow(dirToIntersection.GetX(), 2.0) +
+                        std::pow(dirToIntersection.GetY(), 2.0)));
+
+                    // If the intersection is closer than the player, then the wall is blocking
+                    if (intersectionDist < playerDist) {
+                        // Optional: Add debug visualization of the intersection point
+                        std::cout << "Wall blocking at distance: " << intersectionDist
+                            << " (player at " << playerDist << ")" << std::endl;
+                        return true;
+                    }
                 }
             }
         }
     }
-
-
-	return false;
+    return false;
 }
 
-bool EnemyBehaviour::rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDirection, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tMin, float& tMax) {
-	tMin = (aabbMin.GetX() - rayOrigin.GetX()) / rayDirection.GetX();
-	tMax = (aabbMax.GetX() - rayOrigin.GetX()) / rayDirection.GetX();
-	if (tMin > tMax) {
-		float temp = tMin;
-		tMin = tMax;
-		tMax = temp;
-	}
-	float tyMin = (aabbMin.GetY() - rayOrigin.GetY()) / rayDirection.GetY();
-	float tyMax = (aabbMax.GetY() - rayOrigin.GetY()) / rayDirection.GetY();
-	if (tyMin > tyMax) {
-		float temp = tyMin;
-		tyMin = tyMax;
-		tyMax = temp;
-	}
-	if ((tMin > tyMax) || (tyMin > tMax)) {
-		return false;
-	}
-	if (tyMin > tMin) {
-		tMin = tyMin;
-	}
-	if (tyMax < tMax) {
-		tMax = tyMax;
-	}
-	return true;
+bool EnemyBehaviour::rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDirection,
+                                      myMath::Vector2D aabbMin, myMath::Vector2D aabbMax,
+                                      float& tMin, float& tMax) {
+    // Calculate inverse of ray direction to avoid division by zero
+    myMath::Vector2D invDir;
+    invDir.SetX(rayDirection.GetX() != 0 ? 1.0f / rayDirection.GetX() : FLT_MAX);
+    invDir.SetY(rayDirection.GetY() != 0 ? 1.0f / rayDirection.GetY() : FLT_MAX);
+
+    // Calculate t-values for intersections with each plane of the AABB
+    float t1x = (aabbMin.GetX() - rayOrigin.GetX()) * invDir.GetX();
+    float t2x = (aabbMax.GetX() - rayOrigin.GetX()) * invDir.GetX();
+    float t1y = (aabbMin.GetY() - rayOrigin.GetY()) * invDir.GetY();
+    float t2y = (aabbMax.GetY() - rayOrigin.GetY()) * invDir.GetY();
+
+    // Find the largest min t-value and smallest max t-value
+    tMin = std::max(std::min(t1x, t2x), std::min(t1y, t2y));
+    tMax = std::min(std::max(t1x, t2x), std::max(t1y, t2y));
+
+    // If tMax < 0, the ray is intersecting the AABB, but the entire AABB is behind the ray
+    // If tMin > tMax, the ray doesn't intersect the AABB
+    return tMax >= 0 && tMin <= tMax;
 }
 
 
@@ -498,11 +492,11 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         dirToPlayer.SetY(dirToPlayer.GetY() / distanceToPlayer);
     }
 
-    // Calculate rotation angle - same as in patrol state
+    // Calculate rotation angle
     float angleRadians = atan2(dirToPlayer.GetY(), dirToPlayer.GetX());
     float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
 
-    // Set rotation
+    // Set orientation of x based on angle
     transform.orientation.SetX(angleDegrees);
 
     // Handle flipping based on angle
@@ -515,13 +509,11 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    // Set max speed limit
-    const float maxSpeed = 0.5f; // Slightly faster than patrol
+    const float maxSpeed = 5.0f;
     physics.velocity = dirToPlayer * maxSpeed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
 
-    // Update isFacingRight based on direction
     if (dirToPlayer.GetX() > 0) {
         isFacingRight = true;
     }
