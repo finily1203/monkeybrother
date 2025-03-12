@@ -24,4 +24,6 @@ public:
 	static float BASE_ROTATION_SPEED;
 	static float MAX_ROTATION_PER_FRAME;
 	static float ROTATION_SPEED;
+	static float HOLD_TIME;
+	static float ACCELERATION;
 };

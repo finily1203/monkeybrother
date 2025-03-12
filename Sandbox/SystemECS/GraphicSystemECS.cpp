@@ -804,6 +804,7 @@ void GraphicSystemECS::update(float dt) {
     }
 }
 
+// this is to update the left and right arrows scale in real-time
 void GraphicSystemECS::updateTutorialArrows()
 {
     Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
@@ -837,6 +838,7 @@ void GraphicSystemECS::updateTutorialArrows()
     }
 }
 
+// this is to update the level complete menu buttons in real-time
 void GraphicSystemECS::updateButtons()
 {
     Entity nextLevelButton = ecsCoordinator.getEntityFromID("nextLevelButton");

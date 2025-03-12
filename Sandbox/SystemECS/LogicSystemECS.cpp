@@ -653,8 +653,6 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		// decrement the pause menu count and load the main menu back into the scene
 		GLFWFunctions::pauseMenuCount--;
-		//GameViewWindow::setSceneNum(-1);
-		//ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 		ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
 	}
 
@@ -858,14 +856,6 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			if (currScene > 2)
 			{
 				currScene = -1;
-
-				//for (auto& currEntity : allEntities)
-				//{
-				//	ecsCoordinator.destroyEntity(currEntity);
-				//}
-
-				//GameViewWindow::setSceneNum(currScene);
-				//ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 			}
 
 			GameViewWindow::setSceneNum(currScene);
