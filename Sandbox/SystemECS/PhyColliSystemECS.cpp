@@ -651,6 +651,8 @@ void PhysicsSystemECS::update(float dt)
 
     std::vector<Entity> collidingPlatforms = CollidingPlatforms(playerEntity);
 
+    if (GLFWFunctions::isPlayerDead) return;
+
     if (collidingPlatforms.size() == 0) 
     {
         closestPlatformEntity = FindClosestPlatform(playerEntity);

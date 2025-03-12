@@ -25,6 +25,8 @@ EnemyBehaviour::EnemyBehaviour() {
     hasWaypointsBeenChanged = true;
     isAvoidingWalls = false;
     avoidTimer = 0.f;
+    chaseAnimationCreated = false;
+    attackAnimationCreated = false;
 
 	//For now all enemies have same way point
     
@@ -96,9 +98,36 @@ void EnemyBehaviour::update(Entity entity) {
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
 	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
 	if (enemySeePlayer) {
-		switchState(CHASE);
-        std::cout << "Enemy Sees Player" << std::endl;
+        if (currentState != ATTACK) {
+            switchState(CHASE);
+            auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+            enemy.currState = CHASE;
+            attackAnimationCreated = false;
+
+            if (!chaseAnimationCreated)
+            {
+				createChaseAnimation(entity);
+				chaseAnimationCreated = true;
+                
+            }
+        }
 	}
+
+    // Check for player collision if in chase state
+    if (currentState == CHASE) {
+        bool collision = checkPlayerCollision(entity, playerEntity);
+        if (collision) {
+            switchState(ATTACK);
+			std::cout << "Player Collision Detected" << std::endl;
+			chaseAnimationCreated = false;
+
+            if (!attackAnimationCreated)
+            {
+                createAttackAnimation(entity);
+                attackAnimationCreated = true;
+            }
+        }
+    }
 
 	switch (currentState) {
 	case PATROL:
@@ -109,6 +138,7 @@ void EnemyBehaviour::update(Entity entity) {
         updateChaseState(entity);
 		break;
 	case ATTACK:
+		updateAttackState(entity);
 		break;
 	}
 }
@@ -116,11 +146,12 @@ void EnemyBehaviour::update(Entity entity) {
 bool EnemyBehaviour::avoidWalls(Entity entity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+	auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
 
     // Parameters
-    const float minWallDistance = 50.0f; // Minimum distance to detect walls
+    const float minWallDistance = (enemy.visionDistance / 3.f); // Minimum distance to detect walls
 
     // If no waypoints, just return
     if (currentWaypoints.empty()) {
@@ -185,6 +216,9 @@ void EnemyBehaviour::startAvoid(Entity entity) {
     if (!isAvoidingWalls) {
         auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+
+        enemy.currState = PATROL;
 
         // Store current direction to reverse it
         myMath::Vector2D currentDir = physics.velocity;
@@ -197,7 +231,7 @@ void EnemyBehaviour::startAvoid(Entity entity) {
 
             // Set avoiding flag and timer
             isAvoidingWalls = true;
-            avoidTimer = 5.0f; // Or whatever time value you want
+            avoidTimer = 2.0f; // Set to 2 seconds for now
 
             // Update velocity to move in opposite direction
             physics.velocity = oppositeDir * speed;
@@ -286,7 +320,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    float speed = 0.5f; // 3 for testing; 1.5 for actual
+    float speed = 0.5f; 
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -386,7 +420,7 @@ bool EnemyBehaviour::isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vec
 				// If player distance is closer to enemy than wall, then wall is not blocking vision
 				float playerDist = static_cast<float>(std::sqrt(std::pow(playerPos.GetX() - enemyPos.GetX(), 2.0) + std::pow(playerPos.GetY() - enemyPos.GetY(), 2)));
 				float wallDist = static_cast<float>(std::sqrt(std::pow(wallTransform.position.GetX() - enemyPos.GetX(), 2.0) + std::pow(wallTransform.position.GetY() - enemyPos.GetY(), 2)));
-				std::cout << "Player dist: " << playerDist << ", " << "Wall dist: " << wallDist << std::endl;
+				//std::cout << "Player dist: " << playerDist << ", " << "Wall dist: " << wallDist << std::endl;
 
 
 				//it will only return true if wallDist is less than playerDist
@@ -450,6 +484,10 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
     if (!doesEnemySeePlayer(entity, playerEntity)) {
         if (distanceToPlayer > enemyComponent.visionDistance) {
             switchState(PATROL);
+			auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+			enemy.currState = PATROL;
+            chaseAnimationCreated = false;
+            attackAnimationCreated = false;
             return;
         }
     }
@@ -493,4 +531,132 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
 
 }
 
+bool EnemyBehaviour::checkPlayerCollision(Entity enemyEntity, Entity playerEntity) {
+    auto& enemyTransform = ecsCoordinator.getComponent<TransformComponent>(enemyEntity);
+    auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+
+    // Get the orientation of the enemy (fish)
+    float enemyAngle = enemyTransform.orientation.GetX() * (3.14159265359f / 180.0f); // Convert to radians
+
+    // Define the player's collision box (assumed to be circular/spherical)
+    float playerRadius = playerTransform.scale.GetX() * 0.5f; // Assuming scale represents diameter
+
+    // Calculate the enemy's facing direction based on orientation
+    myMath::Vector2D facingDir(cos(enemyAngle), sin(enemyAngle));
+
+    // Calculate the front area of the enemy where the "mouth" would be
+    // (where collision with player should be detected)
+    myMath::Vector2D enemyCenter = enemyTransform.position;
+    myMath::Vector2D mouthOffset = facingDir * (enemyTransform.scale.GetX() * 0.5f); // Offset to front of fish
+    myMath::Vector2D mouthPos = enemyCenter + mouthOffset;
+
+    // Calculate distance from player to the mouth position
+    myMath::Vector2D playerToMouth = mouthPos - playerTransform.position;
+    float distance = sqrt(playerToMouth.GetX() * playerToMouth.GetX() +
+        playerToMouth.GetY() * playerToMouth.GetY());
+
+    // Check if the player is within the mouth area (using a smaller hit area)
+    float mouthRadius = enemyTransform.scale.GetX() * 0.3f; // Smaller than the actual width
+
+    if (distance < (mouthRadius + playerRadius)) {
+        // Perform a more precise OBB check
+        // Transform player position to enemy's local space
+        myMath::Vector2D localPlayerPos = playerTransform.position - enemyCenter;
+
+        // Rotate the player position to align with the enemy's orientation
+        float cosA = cos(-enemyAngle);
+        float sinA = sin(-enemyAngle);
+        float rotatedX = localPlayerPos.GetX() * cosA - localPlayerPos.GetY() * sinA;
+        float rotatedY = localPlayerPos.GetX() * sinA + localPlayerPos.GetY() * cosA;
+
+        // Now check if the rotated player position is within the enemy's bounding box
+        // But primarily focused on the front part (positive x-axis in local space)
+        if (rotatedX > 0 && // Only check front half of the fish
+            rotatedX < enemyTransform.scale.GetX() * 0.6f && // Front portion
+            abs(rotatedY) < enemyTransform.scale.GetY() * 0.5f) {
+
+            return true; // Collision detected in front of fish
+        }
+    }
+
+    return false; // No collision
+}
+
 // ==================================== CHASE STATE IMPLEMENTATION ==================================== //
+
+// ==================================== ATTACK STATE IMPLEMENTATION ==================================== //
+void EnemyBehaviour::updateAttackState(Entity entity) {
+	auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+	enemy.currState = ATTACK;
+    GLFWFunctions::isPlayerDead = true;
+}
+
+// ==================================== ATTACK STATE IMPLEMENTATION ==================================== //
+
+
+// ==================================== ANIMATION HANDLING ==================================== //
+
+void EnemyBehaviour::createChaseAnimation(Entity entity) {
+	Entity newAnimationEntity = ecsCoordinator.createEntity();
+
+	ecsCoordinator.setEntityID(newAnimationEntity, "fishAlertAnimation");
+	ecsCoordinator.setTextureID(newAnimationEntity, "alertAnimation");
+
+	// Transform setup (Alert should be slightly offset from enemy position)
+ 	TransformComponent transform{};
+	auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    transform.position = { entityTransform.position.GetX() + 50.0f, entityTransform.position.GetY() + 50.f };
+	transform.scale.SetX(100.0f);
+	transform.scale.SetY(100.0f);
+
+	ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+	// Animation setup
+	AnimationComponent animation{};
+	animation.isAnimated = true;
+	animation.totalFrames = 12.0f;
+	animation.frameTime = 0.1f;
+	animation.columns = 4.0f;
+	animation.rows = 3.0f;
+
+	ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+	// take layer of entity and add animation to that layer
+	int newLayer = layerManager.getEntityLayer(entity);
+	layerManager.addEntityToLayer(newLayer, newAnimationEntity);
+}
+
+void EnemyBehaviour::createAttackAnimation(Entity entity) {
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
+
+    ecsCoordinator.setEntityID(newAnimationEntity, "fishAttackAnimation");
+    ecsCoordinator.setTextureID(newAnimationEntity, "biteAnimation");
+
+    // Transform setup (Alert should be slightly offset from enemy position)
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    transform.position = { entityTransform.position.GetX() + (entityTransform.scale.GetX() * 0.4f), 
+                           entityTransform.position.GetY() - (entityTransform.scale.GetY() * 0.4f) };
+    transform.scale.SetX(100.0f);
+    transform.scale.SetY(100.0f);
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 8.0f;
+    animation.frameTime = 0.1f;
+    animation.columns = 8.0f;
+    animation.rows = 2.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // take layer of entity and add animation to that layer
+    int newLayer = layerManager.getEntityLayer(entity);
+    layerManager.addEntityToLayer(newLayer, newAnimationEntity);
+}
+
+// ==================================== ANIMATION HANDLING ==================================== //

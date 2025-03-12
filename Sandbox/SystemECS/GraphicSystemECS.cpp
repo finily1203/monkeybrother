@@ -580,6 +580,17 @@ void GraphicSystemECS::update(float dt) {
                     if (!player.isVisible) {
                         continue;
                     }
+
+                    if (GLFWFunctions::isPlayerDead) {
+                        ecsCoordinator.setTextureID(entity, "mossballDead");
+						auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+						playerAnimation.totalFrames = 24;
+						playerAnimation.columns = 8;
+						playerAnimation.rows = 3;
+					}
+					else {
+						ecsCoordinator.setTextureID(entity, "mossball");
+                    }
                 }
 
                 if (isFilter) {
@@ -598,7 +609,29 @@ void GraphicSystemECS::update(float dt) {
                     if (enemy.drawVisionDebug) {
 						auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
-						graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, 50.f, cameraSystem.getViewMatrix());
+                        graphicsSystem.drawDebugVisionCone(transform, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
+                    }
+
+                    if (enemy.currState == 0) {
+                        ecsCoordinator.setTextureID(entity, "goldfish");
+                        auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                        enemyAnimation.totalFrames = 24;
+                        enemyAnimation.columns = 4;
+                        enemyAnimation.rows = 6;
+                    }
+                    else if (enemy.currState == 1) {
+                        ecsCoordinator.setTextureID(entity, "goldfishAlert");
+                        auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                        enemyAnimation.totalFrames = 5;
+                        enemyAnimation.columns = 2;
+                        enemyAnimation.rows = 3;
+                    }
+                    else if (enemy.currState == 2) {
+                        ecsCoordinator.setTextureID(entity, "goldfishBite");
+						auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                        enemyAnimation.totalFrames = 16;
+                        enemyAnimation.columns = 4;
+                        enemyAnimation.rows = 4;
                     }
                 }
 
@@ -610,11 +643,36 @@ void GraphicSystemECS::update(float dt) {
 
                     anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
 
-                    // Check if one loop is completed
+                    if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
+                        ecsCoordinator.destroyEntity(entity); 
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "fishAlertAnimation") {
+                    auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                    double currentAbsoluteTime = glfwGetTime();
+                    double timeSinceCreation = currentAbsoluteTime - anim.creationTime;
+
+                    anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
+
                     if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
 
-                        // Optional: Trigger actions after one loop
-                        ecsCoordinator.destroyEntity(entity);  // Example: Destroy after one loop
+                        ecsCoordinator.destroyEntity(entity);
+                    }
+                }
+
+                if (ecsCoordinator.getEntityID(entity) == "fishAttackAnimation") {
+                    auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                    double currentAbsoluteTime = glfwGetTime();
+                    double timeSinceCreation = currentAbsoluteTime - anim.creationTime;
+
+                    anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
+
+                    if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
+
+                        ecsCoordinator.destroyEntity(entity);
                     }
                 }
 

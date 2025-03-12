@@ -765,6 +765,7 @@ void GameViewWindow::createDropEntity(const char* assetName, Specifier specifier
 					serializer.ReadObject(waypointPos, assetName, waypoint);
 					enemy.waypoints.push_back(waypointPos);
 				}
+				serializer.ReadObject(enemy.currState, assetName, "entities.enemy.currState");
 
 				PhysicsComponent physics;
 
@@ -933,7 +934,8 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 			{"drawVisionDebug", true },
 			{"numWayPoints", 2 }, 
 			{"waypoint1", {"x", 0.f}, {"y", 0.f}},
-			{"waypoint2", {"x", 100.f}, {"y", 100.f}}
+			{"waypoint2", {"x", 100.f}, {"y", 100.f}},
+			{"isChasing", false}
 		};
 	}
 
@@ -1518,6 +1520,7 @@ void GameViewWindow::LoadPrefabFromJSON(std::string const& filename, std::string
 			std::string waypoint = "enemy.waypoint" + std::to_string(i + 1);
 			serializer.ReadObject(enemy.waypoints[i], entityId, waypoint);
 		}
+		serializer.ReadObject(enemy.currState, entityId, "enemy.currState");
 
 		ecsCoordinator.addComponent(prefabEntity, enemy);
 	}
