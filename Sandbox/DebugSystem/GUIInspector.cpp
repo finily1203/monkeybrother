@@ -496,6 +496,7 @@ void Inspector::Update() {
 
 // Render the Inspector window + logic for modifying entity data
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
+	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
 	ImGui::Begin("Inspector");
 
 	if (selectedEntityID == -1) {
@@ -601,16 +602,16 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 		bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
 		if (ImGui::Checkbox("Player Component", &hasPlayer)) {
 			// Check if a player already exists
-			bool playerExists = false;
+			bool playerExist = false;
 			if (hasPlayer && !ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
 				for (auto& entity : ecs.getAllLiveEntities()) {
-					if (entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
-						playerExists = true;
+					if ((int)entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
+						playerExist = true;
 						break;
 					}
 				}
 
-				if (!playerExists) {
+				if (!playerExist) {
 					PlayerComponent player;
 					player.isPlayer = true;
 					ecs.addComponent(selectedEntityID, player);
@@ -771,6 +772,25 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			}
 			else if (!hasMovPlatform && ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
 				ecs.removeComponent<MovPlatformComponent>(selectedEntityID);
+			}
+		}
+
+		// Platform Component
+		bool hasClosestPlatform = ecs.hasComponent<ClosestPlatform>(selectedEntityID);
+		if (ImGui::Checkbox("Platform Component", &hasClosestPlatform)) {
+			if (hasClosestPlatform && !ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
+				ClosestPlatform closestPlatform{};
+				closestPlatform.isClosest = false;
+				ecs.addComponent(selectedEntityID, closestPlatform);
+
+				// Automatically assign platform behavior when adding platform component
+				logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
+
+				// If you also need to update the behavior dropdown selection
+				currentItem = 6;
+			}
+			else if (!hasClosestPlatform && ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
+				ecs.removeComponent<ClosestPlatform>(selectedEntityID);
 			}
 		}
 
@@ -1032,8 +1052,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 			layerManager.shiftEntityToLayer(originalLayer, selectedLayer, selectedEntityID);
 		}
 
-	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-
 	if (!logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID) 
 		&& ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
 		ecsCoordinator.removeComponent<ClosestPlatform>(selectedEntityID);
@@ -1092,6 +1110,10 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
 				// Add new component
 				switch (i) {
 				case 0:
+					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);
+					}
+
 					if (logicSystemRef->hasBehaviour(selectedEntityID))
 						logicSystemRef->unassignBehaviour(selectedEntityID);
 					break;

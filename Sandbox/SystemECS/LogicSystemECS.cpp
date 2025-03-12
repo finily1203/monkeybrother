@@ -53,7 +53,7 @@ void LogicSystemECS::update(float dt) {
 		}
 	}
 	// Update navigation arrows
-	NavigationArrow::Update(dt);
+	NavigationArrow::Update();
 	//NavigationArrow::Reset();
 	// Check for collectables without navigation arrows
 	for (auto entity : ecsCoordinator.getAllLiveEntities()) {

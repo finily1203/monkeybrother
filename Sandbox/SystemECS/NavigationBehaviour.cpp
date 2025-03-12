@@ -5,7 +5,7 @@
 #include "NavigationArrow.h"
 
 void NavigationBehaviour::update(Entity entity) {
-    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+    //auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& navigation = ecsCoordinator.getComponent<NavigationComponent>(entity);
 
     // Only update visible navigation arrows
