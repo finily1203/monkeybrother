@@ -270,6 +270,10 @@ std::string FilePathManager::GetFPSConfigJSONPath()
 {
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "fpsConfig.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
 }
 
 // this function retrieves the tutorial page JSON file
