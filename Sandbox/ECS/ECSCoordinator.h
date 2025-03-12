@@ -117,6 +117,8 @@ public:
 	//Helper function to get random value
 	float getRandomVal(float min, float max);
 
+	bool entityExists(Entity entity);
+
 	std::vector<Entity> getAllLiveEntities();
 	std::string getEntityID(Entity entity);
 	Entity getEntityFromID(std::string ID);

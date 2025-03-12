@@ -1611,3 +1611,9 @@ std::string ECSCoordinator::getTextureID(Entity entity) {
 ComponentSig ECSCoordinator::getEntitySignature(Entity entity) {
 	return entityManager->getSignature(entity);
 }
+
+bool ECSCoordinator::entityExists(Entity entity)
+{
+	auto entities = getAllLiveEntities();
+	return std::find(entities.begin(), entities.end(), entity) != entities.end();
+}
