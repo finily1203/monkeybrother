@@ -23,14 +23,19 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "NavigationArrow.h"
 
 #include "Debug.h"
 #include "GUIConsole.h"
 #include "GUIGameViewport.h"
 
-void LogicSystemECS::initialise() {}
+void LogicSystemECS::initialise() {
+	NavigationArrow::Initialize();
+}
 
 void LogicSystemECS::cleanup() {
+	// Call NavigationArrow cleanup
+	NavigationArrow::Cleanup();
 	behaviours.clear();
 }
 
@@ -45,6 +50,15 @@ void LogicSystemECS::update(float dt) {
 					behaviours[entity]->update(entity);
 				}
 			}
+		}
+	}
+	// Update navigation arrows
+	NavigationArrow::Update(dt);
+	NavigationArrow::Reset();
+	// Check for collectables without navigation arrows
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
+			NavigationArrow::CreateNavigationArrow(entity);
 		}
 	}
 	//for each entity, update the behaviour
@@ -913,3 +927,19 @@ std::string LogicSystemECS::getSystemECS() {
 	return "LogicSystemECS";
 }
 
+void LogicSystemECS::resetNavigationArrows() {
+	// First remove any existing navigation arrows
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		if (ecsCoordinator.hasComponent<NavigationComponent>(entity) &&
+			ecsCoordinator.getEntityID(entity)=="nav_arrow") {
+			ecsCoordinator.destroyEntity(entity);
+		}
+	}
+
+	// Then create new arrows for all collectables
+	for (auto entity : ecsCoordinator.getAllLiveEntities()) {
+		if (ecsCoordinator.hasComponent<CollectableComponent>(entity)) {
+			NavigationArrow::CreateNavigationArrow(entity);
+		}
+	}
+}

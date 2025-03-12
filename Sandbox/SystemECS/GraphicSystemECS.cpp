@@ -396,9 +396,27 @@ void GraphicSystemECS::update(float dt) {
 
                 mouseBehaviour.update(entity);
 
-                /*std::cout << GLFWFunctions::collectableCount << std::endl;*/
-                /*--------------------------------------------------------------------------------
-                --------------------------------------------------------------------------------*/
+                bool isNavigation = ecsCoordinator.hasComponent<NavigationComponent>(entity);
+
+                if (isNavigation) {
+                    auto& navComp = ecsCoordinator.getComponent<NavigationComponent>(entity);
+
+                    // Only render navigation arrows if they're set to visible
+                    if (!navComp.isVisible) {
+                        continue;
+                    }
+
+                    // Use identity matrix for navigation UI to keep it on screen regardless of camera
+                    if (ecsCoordinator.getEntityID(entity) == "nav_arrow") {
+                        // The model transformation needs to account for the camera position but not rotation
+                        // For UI elements like arrows that need to follow the camera but stay at screen edges
+                        transform.mdl_xform = graphicsSystem.UpdateObject(
+                            transform.position,
+                            transform.scale,
+                            transform.orientation,
+                            cameraSystem.getViewMatrix());
+                    }
+                }
                 // cheat code 
                 if (GLFWFunctions::instantWin)
                 {
