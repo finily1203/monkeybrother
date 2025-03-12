@@ -44,12 +44,12 @@ void CollectableBehaviour::update(Entity entity) {
                 playerPhysics.mass += 0.5f;
 
                 // Store which collectables still exist before removing this one
-                std::vector<Entity> remainingCollectables;
+                /*std::vector<Entity> remainingCollectables;
                 for (auto e : ecsCoordinator.getAllLiveEntities()) {
                     if (e != entity && ecsCoordinator.hasComponent<CollectableComponent>(e)) {
                         remainingCollectables.push_back(e);
                     }
-                }
+                }*/
                 
                 GLFWFunctions::collectAudio = true;
                 // Remove the navigation arrow for this specific collectable
@@ -61,8 +61,8 @@ void CollectableBehaviour::update(Entity entity) {
                 GLFWFunctions::collectableCount--;
 
                 // Explicitly create arrows for each remaining collectable
-                auto logicSystem = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-                logicSystem->resetNavigationArrows();
+                /*auto logicSystem = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+                logicSystem->resetNavigationArrows();*/
             }
         }
     }
