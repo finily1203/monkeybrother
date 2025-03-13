@@ -325,3 +325,12 @@ std::string FilePathManager::GetLevelCompletedMenuJSONPath()
 
     return jsonPathString;
 }
+
+// this function retrieves the game over menu JSON file
+std::string FilePathManager::GetGameOverMenuJSONPath()
+{
+	std::filesystem::path execPath = GetExecutablePath();
+	std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "gameOverMenu.json";
+	std::string jsonPathString = jsonPath.string();
+	return jsonPathString;
+}

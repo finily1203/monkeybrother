@@ -87,7 +87,7 @@ void FilterBehaviour::update(Entity entity) {
                         myMath::Vector2D(normal.GetX() / magnitude, normal.GetY() / magnitude) :
                         myMath::Vector2D(1.0f, 1.0f);  // Default upward push if zero
 
-                    float ejectForceMagnitude = 0.f;  // Stronger ejection force
+                    float ejectForceMagnitude = 1.f;  // Stronger ejection force
 
                     // Apply impulse force only once
                     auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
@@ -95,7 +95,9 @@ void FilterBehaviour::update(Entity entity) {
                     forceManager.ApplyForce(playerEntity, ejectDirection, ejectForceMagnitude);
 
                     // Move player further to avoid immediate re-collision
-                    playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));  // Increased distance
+                    //playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY()));  // Increased distance
+                    playerPos.SetX(filterPos.GetX() + ejectDirection.GetX() * 10.f + 50.f);
+                    playerPos.SetY(filterPos.GetY() + ejectDirection.GetY() * 10.f);
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
 					createCloggedAnimation(entity);
@@ -142,5 +144,5 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
     // Add to default layer 0
-    layerManager.addEntityToLayer(0, newAnimationEntity);
+    layerManager.addEntityToLayer(layer, newAnimationEntity);
 }
