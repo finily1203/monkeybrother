@@ -298,7 +298,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
     }*/
 
-    if ((*keyState)[Key::ESCAPE] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused()) {
+    if ((*keyState)[Key::ESCAPE] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused() && GameViewWindow::getSceneNum() != -3) {
         glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         //audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;

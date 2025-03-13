@@ -261,20 +261,6 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 						GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
 						GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
 						GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
-
-						for (auto& textEntity : allEntities)
-						{
-							if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
-							{
-								if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
-								{
-									FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
-									textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
-								}
-
-								break;
-							}
-						}
 					}
 
 					break;
@@ -472,6 +458,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the options button
 	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		// if pause menu already exists, destroy the pause menu
 		if (GLFWFunctions::pauseMenuCount == 1)
 		{
@@ -506,6 +494,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the how to play button
 	else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		if (GLFWFunctions::pauseMenuCount == 1)
 		{
 			for (auto currEntity : allEntities)
@@ -537,6 +527,11 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the closing of the pause menu button and resume level button
 	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
 	{
+		if (entityId == "resumeButton")
+		{
+			audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		}
+
 		// destroy the pause menu 
 		for (auto currEntity : allEntities)
 		{
@@ -563,15 +558,12 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	{
 		std::unordered_set<std::string> optionsMenuEntityNames = {
 			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxAudio", "musicAudio", "sfxSoundbarBase",
-			"musicSoundbarBase", "sfxSoundbarArrow", "musicSoundbarArrow", 
-			"sfxNotch0", "sfxNotch1", "sfxNotch2", "sfxNotch3",
-			"sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
-			"musicNotch2", "musicNotch3", "musicNotch4",
-			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
-			"rotationSpeedSliderNotch", "rotationSpeedValue"
+			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
+			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
+			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
+			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
 		};
 
 		// destroy the options menu
@@ -643,6 +635,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the logic for exiting the level and goes back to the main menu button
 	else if (entityId == "pauseQuitButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		// destroy all the entities in the current scene
 		for (auto currEntity : allEntities)
 		{
@@ -695,17 +689,16 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the logic for the confirm button
 	else if (entityId == "confirmButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		std::unordered_set<std::string> optionsMenuEntityNames = {
 			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxAudio", "musicAudio", "sfxSoundbarBase",
-			"musicSoundbarBase", "sfxSoundbarArrow", "musicSoundbarArrow",
-			"sfxNotch0", "sfxNotch1", "sfxNotch2", "sfxNotch3",
-			"sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1",
-			"musicNotch2", "musicNotch3", "musicNotch4",
-			"musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationSpeedSlider",
-			"rotationSpeedSliderNotch", "rotationSpeedValue"
+			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
+			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
+			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
+			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
+			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
 		};
 
 		// initializing sfxPercentage and musicPercentage variables
@@ -806,20 +799,6 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
 					GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
 					GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
-
-					for (auto& textEntity : allEntities)
-					{
-						if (ecsCoordinator.getEntityID(textEntity) == "rotationSpeedValue")
-						{
-							if (ecsCoordinator.hasComponent<FontComponent>(textEntity))
-							{
-								FontComponent& textComponent = ecsCoordinator.getComponent<FontComponent>(textEntity);
-								textComponent.text = std::to_string(GLFWFunctions::rotationSpeed);
-							}
-
-							break;
-						}
-					}
 				}
 
 				break;
@@ -829,6 +808,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "quitToMainMenuButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		for (auto& currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);
@@ -840,6 +821,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "returnToPauseMenuButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		for (auto& currEntity : allEntities)
 		{
 			if (ecsCoordinator.getEntityID(currEntity) == "quitLevelMenuBase" ||
@@ -856,12 +839,14 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "nextLevelButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		if (!GLFWFunctions::changeLevel)
 		{
 			int currScene = GameViewWindow::getSceneNum();
 			currScene++;
 
-			if (currScene > 2)
+			if (currScene > 5)
 			{
 				currScene = -1;
 			}
@@ -874,9 +859,53 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "mainMenuButton")
 	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
 		int mainMenuScene = -1;
 
 		for (auto& currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GameViewWindow::setSceneNum(mainMenuScene);
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	}
+
+	else if (entityId == "gameOverRetryButton")
+	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+		for (auto currEntity : allEntities)
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+
+		GLFWFunctions::gameOver = false;
+		GLFWFunctions::gamePaused = false;
+		GLFWFunctions::pauseMenuCount = 0;
+		GLFWFunctions::optionsMenuCount = 0;
+		GLFWFunctions::newSceneLoaded = true;
+
+		if (GameViewWindow::getSceneNum() != 0)
+		{
+			int scene = GameViewWindow::getSceneNum();
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
+		}
+
+		else
+		{
+			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+		}
+	}
+
+	else if (entityId == "gameOverQuitButton")
+	{
+		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+		int mainMenuScene = -1;
+
+		for (auto currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);
 		}

@@ -43,6 +43,11 @@ void PlayerBehaviour::update(Entity entity) {
 		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 		transform.scale = initialScale * scaleFactor;
 
+		if (transform.scale.GetX() < 0.1f || transform.scale.GetY() < 0.1f)
+		{
+			GLFWFunctions::changeLevel = true;
+		}
+
 		return;
 	}
 

@@ -77,4 +77,6 @@ public:
 	static std::string GetQuitLevelMenuJSONPath();
 	// retrieve the level completed menu JSON path
 	static std::string GetLevelCompletedMenuJSONPath();
+	// retrieve the game over menu JSON path
+	static std::string GetGameOverMenuJSONPath();
 };

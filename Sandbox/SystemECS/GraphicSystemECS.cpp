@@ -495,7 +495,7 @@ void GraphicSystemECS::update(float dt) {
                 {
                     transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
 
-                    ecsCoordinator.setTextureID(entity, "activeSoundbarNotch");
+                    ecsCoordinator.setTextureID(entity, "rotationSpeedNotch");
                 }
 
                 if (ecsCoordinator.getEntityID(entity) == "quitLevelMenuBase")
@@ -512,54 +512,12 @@ void GraphicSystemECS::update(float dt) {
                     ecsCoordinator.setTextureID(entity, "levelCompletedBase");
                 }
 
-        if (ecsCoordinator.getEntityID(entity) == "sfxAudio" || ecsCoordinator.getEntityID(entity) == "musicAudio")
-        {
-            // this audioType variable stores the entityId of the current audio icon entity
-            std::string audioType = ecsCoordinator.getEntityID(entity);
-            TransformComponent arrowTransform{}, soundbarTransform{};
-
-            // set the audio arrow Id based on the audioType Id
-            std::string audioArrowId = (audioType == "sfxAudio") ? "sfxSoundbarArrow" :
-                (audioType == "musicAudio") ? "musicSoundbarArrow" : "";
-
-            // set the soundbar Id based on the audioType Id
-            std::string soundbarId = (audioType == "sfxAudio") ? "sfxSoundbarBase" :
-                (audioType == "musicAudio") ? "musicSoundbarBase" : "";
-
-            // ensure that both strings are not empty
-            if (!audioArrowId.empty() && !soundbarId.empty())
-            {
-                // retrieve the soundbar entity based on the current soundbar Id 
-                for (auto& soundbarEntity : ecsCoordinator.getAllLiveEntities())
+                if (ecsCoordinator.getEntityID(entity) == "gameOverBG")
                 {
-                    if (ecsCoordinator.getEntityID(soundbarEntity) == soundbarId)
-                    {
-                        soundbarTransform = ecsCoordinator.getComponent<TransformComponent>(soundbarEntity);
-                        break;
-                    }
+                    transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
+
+                    ecsCoordinator.setTextureID(entity, "GameOverBG");
                 }
-
-                // retrieve the audio arrow entity based on the current audio arrow Id
-                for (auto& arrowEntity : ecsCoordinator.getAllLiveEntities())
-                {
-                    if (ecsCoordinator.getEntityID(arrowEntity) == audioArrowId)
-                    {
-                        arrowTransform = ecsCoordinator.getComponent<TransformComponent>(arrowEntity);
-                        break;
-                    }
-                }
-
-                // find the left boundary of the soundbar entity
-                float soundbarLeftBoundary = soundbarTransform.position.GetX() - (soundbarTransform.scale.GetX() / 2.15f);
-
-                // set the audio texture Id to be mute when the audio arrow x position reaches the left
-                // boundary of the soundbar x position
-                std::string textureName = (arrowTransform.position.GetX() <= soundbarLeftBoundary) ? "soundMute" : "soundOn";
-                transform.mdl_xform = graphicsSystem.UpdateObject(transform.position, transform.scale, transform.orientation, identityMatrix);
-                ecsCoordinator.setTextureID(entity, textureName);
-                //graphicsSystem.DrawObject(GraphicsSystem::DrawMode::TEXTURE, assetsManager.GetTexture(textureName), transform.mdl_xform);
-            }
-        }
 
         if (ecsCoordinator.getEntityID(entity).find("sfxNotch") != std::string::npos ||
             ecsCoordinator.getEntityID(entity).find("musicNotch") != std::string::npos)
@@ -958,7 +916,17 @@ void GraphicSystemECS::update(float dt) {
                             }
                         }
 
-                        ecsCoordinator.setTextureID(entity, "soundbarBase");
+                        ecsCoordinator.setTextureID(entity, "rotationSpeedSlider");
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "gameOverRetryButton")
+                    {
+                        ecsCoordinator.setTextureID(entity, "buttonRetry");
+                    }
+
+                    else if (ecsCoordinator.getEntityID(entity) == "gameOverQuitButton")
+                    {
+                        ecsCoordinator.setTextureID(entity, "buttonQuit");
                     }
                 }
 
@@ -1163,7 +1131,7 @@ void GraphicSystemECS::updateButtons()
     TransformComponent& nextLevelTransform = ecsCoordinator.getComponent<TransformComponent>(nextLevelButton);
     TransformComponent& mainMenuTransform = ecsCoordinator.getComponent<TransformComponent>(mainMenuButton);
 
-    if (GameViewWindow::getSceneNum() > 1)
+    if (GameViewWindow::getSceneNum() > 4)
     {
         nextLevelTransform.scale.SetX(0.f);
         nextLevelTransform.scale.SetY(0.f);
