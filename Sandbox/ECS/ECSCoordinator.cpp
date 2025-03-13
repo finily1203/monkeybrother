@@ -234,17 +234,10 @@ void ECSCoordinator::update() {
 				destroyEntity(entity);
 			}
 
-			auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("player"));
-			int sceneNum = 0;
+			//auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("player"));
+			///int sceneNum = 0;
 
-			if (playerTransform.scale.GetX() < 0.1f || playerTransform.scale.GetY() < 0.1f) {
-				sceneNum = -3;
-			}
-			else {
-				sceneNum = GameViewWindow::getSceneNum();
-
-			}
-			if (sceneNum >= 1 && sceneNum <= 9) {
+			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
