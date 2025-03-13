@@ -56,6 +56,7 @@
     <ClCompile Include="DebugSystem\GUIGridSystem.cpp" />
     <ClCompile Include="SystemECS\NavigationBehaviour.cpp" />
     <ClCompile Include="SystemECS\NavigationArrow.cpp" />
+    <ClCompile Include="CutsceneSystem\LoadingScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="Components\NavigationComponent.h" />
     <ClInclude Include="SystemECS\NavigationBehaviour.h" />
     <ClInclude Include="SystemECS\NavigationArrow.h" />
+    <ClInclude Include="CutsceneSystem\LoadingScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

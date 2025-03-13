@@ -22,6 +22,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LayerManager.h"
 #include "CutsceneSystem.h"
 #include "GUIGridSystem.h"
+#include "LoadingScreen.h"
 
 
 enum SystemType { //For perfomance viewer
@@ -34,7 +35,8 @@ enum SystemType { //For perfomance viewer
 	AssetsManagerType,
 	FontType,
 	LayerManagerType,
-	CutsceneSystemType
+	CutsceneSystemType,
+	LoadingScreenType
 };
 
 extern AudioSystem audioSystem;
@@ -47,3 +49,4 @@ extern FontSystem fontSystem;
 extern LayerManager layerManager;
 extern CutsceneSystem cutsceneSystem;
 extern GridSystem gridSystem;
+extern LoadingScreen loadingScreen;

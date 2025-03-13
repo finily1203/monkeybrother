@@ -122,6 +122,7 @@
     <ClCompile Include="AssetsManager\AssetsManager.cpp" />
     <ClCompile Include="AudioSystem\AudioSystem.cpp" />
     <ClCompile Include="CutsceneSystem\CutsceneSystem.cpp" />
+    <ClCompile Include="CutsceneSystem\LoadingScreen.cpp" />
     <ClCompile Include="DebugSystem\Crashlog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -201,6 +202,7 @@
     <ClInclude Include="Components\PumpComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="CutsceneSystem\CutsceneSystem.h" />
+    <ClInclude Include="CutsceneSystem\LoadingScreen.h" />
     <ClInclude Include="DebugSystem\Crashlog.h" />
     <ClInclude Include="DebugSystem\Debug.h" />
     <ClInclude Include="DebugSystem\GUIAssetBrowser.h" />

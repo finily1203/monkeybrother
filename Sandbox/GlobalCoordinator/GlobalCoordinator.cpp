@@ -22,3 +22,4 @@ AudioSystem audioSystem;
 LayerManager layerManager;
 CutsceneSystem cutsceneSystem;
 GridSystem gridSystem;
+LoadingScreen loadingScreen;

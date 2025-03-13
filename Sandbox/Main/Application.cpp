@@ -69,6 +69,8 @@ int main() {
 
 		engine->addSystem(&cutsceneSystem);
 
+		engine->addSystem(&loadingScreen);
+
 		engine->initialiseSystem();
 		ecsCoordinator.initialiseSystemsAndComponents();
 
