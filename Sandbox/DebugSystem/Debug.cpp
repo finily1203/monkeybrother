@@ -68,6 +68,18 @@ void DebugSystem::initialise() {
 	// Create directories (will create nested directories if they don't exist)
 	std::filesystem::create_directories(iniFilePath.parent_path());
 
+	if (std::filesystem::exists(iniFilePath)) {
+		// Convert to C-string for ImGui
+		std::string pathString = iniFilePath.string();  // Convert path to std::string
+		iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
+		std::copy(pathString.begin(), pathString.end(), iniPath);
+		iniPath[pathString.size()] = '\0';  // Ensure null terminator
+
+		io->IniFilename = iniPath;  // Assign only if file exists
+	}
+	else {
+		io->IniFilename = nullptr;  // Tell ImGui to use internal default settings
+	}
 	// Convert to C-string for ImGui
 	std::string pathString = iniFilePath.string();  // Convert path to std::string
 	iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
