@@ -72,21 +72,15 @@ void DebugSystem::initialise() {
 		// Convert to C-string for ImGui
 		std::string pathString = iniFilePath.string();  // Convert path to std::string
 		iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
+		// Use std::copy to copy the string safely
 		std::copy(pathString.begin(), pathString.end(), iniPath);
-		iniPath[pathString.size()] = '\0';  // Ensure null terminator
+		iniPath[pathString.size()] = '\0';  // Ensure null terminator at the end
 
 		io->IniFilename = iniPath;  // Assign only if file exists
 	}
 	else {
 		io->IniFilename = nullptr;  // Tell ImGui to use internal default settings
 	}
-	// Convert to C-string for ImGui
-	std::string pathString = iniFilePath.string();  // Convert path to std::string
-	iniPath = new char[pathString.size() + 1];      // Allocate memory for C-string
-
-	// Use std::copy to copy the string safely
-	std::copy(pathString.begin(), pathString.end(), iniPath);
-	iniPath[pathString.size()] = '\0';  // Ensure null terminator at the end
 
 	io->IniFilename = iniPath;
 
