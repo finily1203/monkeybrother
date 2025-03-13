@@ -67,7 +67,7 @@ void PlayerBehaviour::update(Entity entity) {
 	ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
 	myMath::Vector2D gravityScale = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
 	myMath::Vector2D& rotation = ecsCoordinator.getComponent<TransformComponent>(entity).orientation;
-	float mag = playerForce.GetMagnitude();
+	//float mag = playerForce.GetMagnitude();
 
 	
 	auto& physicsComp = ecsCoordinator.getComponent<PhysicsComponent>(entity);
@@ -166,12 +166,12 @@ void PlayerBehaviour::update(Entity entity) {
 	
 	GLFWFunctions::mouseXDelta = 0.0;
 
-	if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
+	/*if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
 		if ((*GLFWFunctions::keyState)[Key::SPACE]) {
 			PhysicsSystemRef->SetAlrJumped(false);  
 			forceManager.AddForce(entity, myMath::Vector2D(-mag, -mag));
 		}
-	}
+	}*/
 
 	//CAMERA BEHAVIOUR CURRENTLY PUT HERE FIRST SINCE IT IS AFFECTED BY PLAYER ENTITY
 	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(entity);

@@ -368,8 +368,8 @@ void GameViewWindow::Update() {
 			showAudioChannelPopup = true;
 			std::cout << "Dropped Audio: " << assetName << std::endl;
 		}
-		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("PREFAB_PAYLOAD")) {
-			const char* assetName = (const char*)payloadAud->Data;
+		else if (const ImGuiPayload* payloadFab = ImGui::AcceptDragDropPayload("PREFAB_PAYLOAD")) {
+			const char* assetName = (const char*)payloadFab->Data;
 			createDropEntity(assetName, PREFAB);
 			std::cout << "Dropped prefab: " << assetName << std::endl;
 		}
