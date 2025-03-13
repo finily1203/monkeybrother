@@ -1595,6 +1595,7 @@ void ECSCoordinator::LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::st
 // function that loads the game over menu entities from the JSON file
 void ECSCoordinator::LoadGameOverMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	cameraSystem.setCameraPosition({ 0, 0 });
 	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))
