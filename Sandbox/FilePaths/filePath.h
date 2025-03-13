@@ -79,4 +79,6 @@ public:
 	static std::string GetLevelCompletedMenuJSONPath();
 
 	static std::string GetAudioMappingsPath();
+	// retrieve the game over menu JSON path
+	static std::string GetGameOverMenuJSONPath();
 };

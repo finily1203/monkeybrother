@@ -143,6 +143,8 @@ public:
 	void LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the level completed menu entities from JSON
 	void LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the game over menu entities from JSON
+	void LoadGameOverMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 
 	template <typename T>
 	std::shared_ptr<T> getSpecificSystem();

@@ -200,18 +200,37 @@ void ECSCoordinator::update() {
 
 		if (GLFWFunctions::changeLevel) {
 			NavigationArrow::Cleanup();
+
+			auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("player"));
+			int sceneNum = 0;
+
+			if (ecsCoordinator.entityExists(ecsCoordinator.getEntityFromID("player")))
+			{
+				if (playerTransform.scale.GetX() < 0.1f || playerTransform.scale.GetY() < 0.1f) {
+					sceneNum = -3;
+				}
+				else {
+					sceneNum = GameViewWindow::getSceneNum();
+				}
+			}
+
 			//delete all live entities
 			for (auto& entity : getAllLiveEntities()) {
 				destroyEntity(entity);
 			}
-			int sceneNum = GameViewWindow::getSceneNum();
-			if (sceneNum == 1 || sceneNum == 2) {
+
+
+			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
 			}
 			else if (sceneNum == -1) {
 				LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+			}
+
+			else if (sceneNum == -3) {
+				LoadGameOverMenuFromJSON(ecsCoordinator, FilePathManager::GetGameOverMenuJSONPath());
 			}
 			GLFWFunctions::changeLevel = false;
 			GLFWFunctions::newSceneLoaded = true;
@@ -1170,16 +1189,6 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 				serializer.WriteObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
 			}
 		}
-
-		if (entityId == "rotationSpeedValue")
-		{
-			if (ecs.entityManager->getSignature(entity).test(getComponentType<FontComponent>()))
-			{
-				FontComponent textComponent = getComponent<FontComponent>(entity);
-				
-				serializer.WriteObject(textComponent.text, entityId, "entities.font.text.string");
-			}
-		}
 	}
 
 	// checks if the JSON object is able to be saved to the JSON file 
@@ -1372,6 +1381,96 @@ void ECSCoordinator::LoadQuitLevelMenuFromJSON(ECSCoordinator& ecs, std::string 
 
 // function that loads the level completed menu entities from the JSON file
 void ECSCoordinator::LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
+{
+	JSONSerializer serializer;
+
+	if (!serializer.Open(filename))
+	{
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	for (const auto& entityData : jsonObj["entities"])
+	{
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		// getting the entity Id of the current entity
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		//if layer is not determine auto it to layer 0
+		if (entityData.contains("layer")) {
+			int layer = entityData["layer"].get<int>();
+			layerManager.addEntityToLayer(layer, entityObj);
+		}
+		else {
+			//get top layer
+			int topLayer = layerManager.getLayerCount() - 1;
+			layerManager.addEntityToLayer(topLayer, entityObj);
+		}
+
+		// read all of the data from the JSON object and assign the data
+		// to the current entity
+		if (entityId != "placeholderentity") {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+		}
+
+		if (entityData.contains("button"))
+		{
+			ButtonComponent button{};
+			serializer.ReadObject(button.originalScale, entityId, "entities.transform.scale");
+			serializer.ReadObject(button.isButton, entityId, "entities.button.isButton");
+
+			ecs.addComponent(entityObj, button);
+		}
+
+		// add the component with all of the data populated from
+		// the JSON object
+		ecs.addComponent(entityObj, transform);
+
+		if (entityData.contains("background"))
+		{
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+
+			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("behaviour"))
+		{
+			BehaviourComponent behaviour{};
+
+			if (entityData["behaviour"].contains("none"))
+			{
+				serializer.ReadObject(behaviour.none, entityId, "entities.behaviour.none");
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+
+			else if (entityData["behaviour"].contains("button"))
+			{
+				serializer.ReadObject(behaviour.button, entityId, "entities.behaviour.button");
+				logicSystemRef->assignBehaviour(entityObj, std::make_shared<MouseBehaviour>());
+			}
+
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		ecs.entityManager->setEntityId(entityObj, entityId);
+		ecs.entityManager->setTextureId(entityObj, textureId);
+	}
+}
+
+// function that loads the game over menu entities from the JSON file
+void ECSCoordinator::LoadGameOverMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;
 

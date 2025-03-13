@@ -548,7 +548,7 @@ bool EnemyBehaviour::checkPlayerCollision(Entity enemyEntity, Entity playerEntit
         playerToMouth.GetY() * playerToMouth.GetY());
 
     // Check if the player is within the mouth area (using a smaller hit area)
-    float mouthRadius = enemyTransform.scale.GetX() * 0.3f; // Smaller than the actual width
+    float mouthRadius = enemyTransform.scale.GetX() * 0.5f;
 
     if (distance < (mouthRadius + playerRadius)) {
         // Perform a more precise OBB check
