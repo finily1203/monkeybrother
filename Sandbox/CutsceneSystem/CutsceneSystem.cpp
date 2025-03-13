@@ -78,7 +78,7 @@ void CutsceneSystem::update() {
     }
 
     // Only check for mouse clicks if we're in the cutscene scene AND past the initial delay
-    if (GameViewWindow::getSceneNum() == -2 && canAcceptInput()) {
+    if ((GameViewWindow::getSceneNum() == -2 || GameViewWindow::getSceneNum() == -4) && canAcceptInput()) {
         // Check left mouse button
         if (GLFWFunctions::mouseButtonState &&
             (*GLFWFunctions::mouseButtonState)[MouseButton::left]) {

@@ -52,12 +52,12 @@ void EffectPumpBehaviour::update(Entity entity) {
 
             // Handle different orientations
             if (orientation == 90.f) {  // Pointing up
-                forceVector.SetX(-1.f);
+                forceVector.SetX(1.f);
                 forceVector.SetY(0.f);
             }
             else if (orientation == 0.f) {  // Pointing right
                 forceVector.SetX(0.f);
-                forceVector.SetY(1.f);
+                forceVector.SetY(-1.f);
             }
             else {  // For any other angle, use the directional vector
                 myMath::Vector2D bubblesDirectionalVec = PhysicsSystemRef->directionalVector(orientation);

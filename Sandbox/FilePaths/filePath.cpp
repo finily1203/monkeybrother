@@ -283,6 +283,17 @@ std::string FilePathManager::GetIntroCutsceneJSONPath()
 	return jsonPathString;
 }   
 
+// this function retrieves the end cutscene JSON file
+std::string FilePathManager::GetEndCutsceneJSONPath()
+{
+	std::filesystem::path execPath = GetExecutablePath();
+	std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "endCutscene.json";
+
+	std::string jsonPathString = jsonPath.string();
+	
+    return jsonPathString;
+}
+
 std::string FilePathManager::GetFPSConfigJSONPath()
 {
     std::filesystem::path execPath = GetExecutablePath();

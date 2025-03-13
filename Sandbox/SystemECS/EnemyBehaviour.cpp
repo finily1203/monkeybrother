@@ -29,21 +29,6 @@ EnemyBehaviour::EnemyBehaviour() {
     attackAnimationCreated = false;
     timesAvoided = 0;
 
-	//For now all enemies have same way point
-    
-    //Test CW
-    //waypoints.push_back(myMath::Vector2D(-200, 50));
-    ////waypoints.push_back(myMath::Vector2D(200, 200));
-    //waypoints.push_back(myMath::Vector2D(300, 100));
-    //waypoints.push_back(myMath::Vector2D(-300, -100));
-
-    //waypoints.push_back(myMath::Vector2D(-100, 0));
-    //waypoints.push_back(myMath::Vector2D(-200, -200));
-    //waypoints.push_back(myMath::Vector2D(-200, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, -100));
-    //waypoints.push_back(myMath::Vector2D(-100, 100));
-    //waypoints.push_back(myMath::Vector2D(-200, 100));
-
 }
 
 void EnemyBehaviour::switchState(STATE newState) {  
@@ -52,96 +37,100 @@ void EnemyBehaviour::switchState(STATE newState) {
 
 void EnemyBehaviour::update(Entity entity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-	myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
+    myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
     //update waypoints of entity if it has been changed
-	if (hasWaypointsBeenChanged) {
-		waypoints = ecsCoordinator.getComponent<EnemyComponent>(entity).waypoints;
-		hasWaypointsBeenChanged = false;
-	}
-
-    // Handle avoidance timer if currently avoiding
-    if (isAvoidingWalls) {
-        avoidTimer -= GLFWFunctions::delta_time; 
-
-        if (avoidTimer <= 0.0f) {
-            isAvoidingWalls = false;
-            avoidTimer = 0.0f;
-            std::cout << "Avoidance complete" << std::endl;
-
-            // If in patrol mode, move to next waypoint
-            if (currentState == PATROL && !waypoints.empty()) {
-                if (currentWaypointIndex == waypoints.size() - 1) {
-                    currentWaypointIndex = 0;
-                }
-                else {
-                    currentWaypointIndex++;
-                }
-            }
-        }
-        else {
-            // Continue avoiding - move the entity based on its current velocity
-            transform.position.SetX(transform.position.GetX() + velocity.GetX());
-            transform.position.SetY(transform.position.GetY() + velocity.GetY());
-
-            std::cout << "Still avoiding - Timer: " << avoidTimer << std::endl;
-            return; // Skip normal behavior while avoiding
-        }
+    if (hasWaypointsBeenChanged) {
+        waypoints = ecsCoordinator.getComponent<EnemyComponent>(entity).waypoints;
+        hasWaypointsBeenChanged = false;
     }
 
-    //Check if enemy is avoiding walls
-    if (avoidWalls(entity))
-    {
-        startAvoid(entity);
-        return;
-    }
-
+    // Check if enemy sees player regardless of avoidance state
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
-	bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
-	if (enemySeePlayer) {
+    bool enemySeePlayer = doesEnemySeePlayer(entity, playerEntity);
+
+    if (enemySeePlayer) {
         if (currentState != ATTACK) {
+            isAvoidingWalls = false; // Cancel avoidance if player is spotted
+            avoidTimer = 0.0f;
+
             switchState(CHASE);
             auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
             enemy.currState = CHASE;
             attackAnimationCreated = false;
 
-            if (!chaseAnimationCreated)
-            {
-				createChaseAnimation(entity);
-				chaseAnimationCreated = true;
-                
+            if (!chaseAnimationCreated) {
+                createChaseAnimation(entity);
+                chaseAnimationCreated = true;
             }
         }
-	}
+    }
 
-    // Check for player collision if in chase state
-    if (currentState == CHASE) {
+    // Check for player collision if in chase state or patrol state
+    if (currentState == CHASE || currentState == PATROL) {
         bool collision = checkPlayerCollision(entity, playerEntity);
         if (collision) {
             switchState(ATTACK);
-			std::cout << "Player Collision Detected" << std::endl;
-			chaseAnimationCreated = false;
+            std::cout << "Player Collision Detected" << std::endl;
+            chaseAnimationCreated = false;
 
-            if (!attackAnimationCreated)
-            {
-                createAttackAnimation(entity);
+            if (!attackAnimationCreated) {
+                GLFWFunctions::attackAudio = true;
+                createAttackAnimation(entity, playerEntity);
                 attackAnimationCreated = true;
             }
         }
     }
 
-	switch (currentState) {
-	case PATROL:
-		//std::cout << "moving to waypoint " << currentWaypointIndex << std::endl;
-		updatePatrolState(entity);
-		break;
-	case CHASE:
+    // Handle avoidance state if we're not chasing the player
+    if (currentState != CHASE && currentState != ATTACK) {
+        // Handle avoidance timer if currently avoiding
+        if (isAvoidingWalls) {
+            avoidTimer -= GLFWFunctions::delta_time;
+
+            if (avoidTimer <= 0.0f) {
+                isAvoidingWalls = false;
+                avoidTimer = 0.0f;
+                std::cout << "Avoidance complete" << std::endl;
+
+                // If in patrol mode, move to next waypoint
+                if (currentState == PATROL && !waypoints.empty()) {
+                    if (currentWaypointIndex == waypoints.size() - 1) {
+                        currentWaypointIndex = 0;
+                    }
+                    else {
+                        currentWaypointIndex++;
+                    }
+                }
+            }
+            else {
+                // Continue avoiding - move the entity based on its current velocity
+                transform.position.SetX(transform.position.GetX() + velocity.GetX());
+                transform.position.SetY(transform.position.GetY() + velocity.GetY());
+
+                //std::cout << "Still avoiding - Timer: " << avoidTimer << std::endl;
+                return; // Skip normal behavior while avoiding
+            }
+        }
+
+        // Check if enemy is avoiding walls (only if not already chasing)
+        if (avoidWalls(entity)) {
+            startAvoid(entity);
+            return;
+        }
+    }
+
+    switch (currentState) {
+    case PATROL:
+        updatePatrolState(entity);
+        break;
+    case CHASE:
         updateChaseState(entity);
-		break;
-	case ATTACK:
-		updateAttackState(entity);
-		break;
-	}
+        break;
+    case ATTACK:
+        updateAttackState(entity);
+        break;
+    }
 }
 
 bool EnemyBehaviour::avoidWalls(Entity entity) {
@@ -178,6 +167,15 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
     // Calculate ray end point (a point in the direction of next waypoint)
     myMath::Vector2D rayEnd = (direction * minWallDistance);
 
+    myMath::Vector2D fishMin = {
+    transform.position.GetX() - (transform.scale.GetX() / 2),
+    transform.position.GetY() - (transform.scale.GetY() / 2)
+    };
+    myMath::Vector2D fishMax = {
+        transform.position.GetX() + (transform.scale.GetX() / 2),
+        transform.position.GetY() + (transform.scale.GetY() / 2)
+    };
+
     // Check all potential wall entities
     for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) {
@@ -196,15 +194,16 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
             float tMin = 0.0f;
             float tMax = 1.0f;
 
+            if (AABBIntersect(fishMin, fishMax, wallMin, wallMax)) {
+                std::cout << "Wall detected by AABB collision!" << std::endl;
+                return true;
+            }
+
             // Check if ray intersects with the wall's AABB
             if (rayIntersectAABB(transform.position, rayEnd, wallMin, wallMax, tMin, tMax)) {
                 // Only consider intersections within our minimum distance
                 if (tMin > 0.0f && tMin <= 1.0f) {
-                    // Print debug message
-                    //std::cout << "Wall Detected" << std::endl;
-					std::cout << "Wall Min: " << wallMin.GetX() << ", " << wallMin.GetY() << std::endl;
-					std::cout << "Wall Max: " << wallMax.GetX() << ", " << wallMax.GetY() << std::endl;
-                    std::cout << ecsCoordinator.getEntityID(wallEntity) << std::endl;
+                    std::cout << "Wall Detected by Ray Collision" << std::endl;
 
                     return true;
                 }
@@ -456,6 +455,11 @@ bool EnemyBehaviour::rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector
     return tMax >= 0 && tMin <= tMax;
 }
 
+bool EnemyBehaviour::AABBIntersect(const myMath::Vector2D& min1, const myMath::Vector2D& max1,
+    const myMath::Vector2D& min2, const myMath::Vector2D& max2) {
+    return (min1.GetX() < max2.GetX() && max1.GetX() > min2.GetX() &&
+        min1.GetY() < max2.GetY() && max1.GetY() > min2.GetY());
+}
 
 void EnemyBehaviour::updateChaseState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
@@ -617,7 +621,7 @@ void EnemyBehaviour::createChaseAnimation(Entity entity) {
 	layerManager.addEntityToLayer(newLayer, newAnimationEntity);
 }
 
-void EnemyBehaviour::createAttackAnimation(Entity entity) {
+void EnemyBehaviour::createAttackAnimation(Entity entity, Entity playerEntity) {
     Entity newAnimationEntity = ecsCoordinator.createEntity();
 
     ecsCoordinator.setEntityID(newAnimationEntity, "fishAttackAnimation");
@@ -625,10 +629,9 @@ void EnemyBehaviour::createAttackAnimation(Entity entity) {
 
     // Transform setup (Alert should be slightly offset from enemy position)
     TransformComponent transform{};
-    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
+	transform.position = playerTransform.position;
 
-    transform.position = { entityTransform.position.GetX() + (entityTransform.scale.GetX() * 0.4f), 
-                           entityTransform.position.GetY() - (entityTransform.scale.GetY() * 0.4f) };
     transform.scale.SetX(100.0f);
     transform.scale.SetY(100.0f);
 

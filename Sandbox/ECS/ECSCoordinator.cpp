@@ -179,7 +179,7 @@ void ECSCoordinator::update() {
 	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
-	else if (GameViewWindow::getSceneNum() == -2) {  // Cutscene
+	else if (GameViewWindow::getSceneNum() == -2) {  // Starting Cutscene
 		if (cutsceneSystem.isPlaying()) {
 			systemManager->update();
 		}
@@ -192,6 +192,22 @@ void ECSCoordinator::update() {
 			int sceneNum = 1;
 			GameViewWindow::setSceneNum(sceneNum);
 			LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
+			GLFWFunctions::newSceneLoaded = true;
+		}
+	}
+	else if (GameViewWindow::getSceneNum() == -4) { // Ending Cutscene
+		if (cutsceneSystem.isPlaying()) {
+			systemManager->update();
+		}
+		else if (cutsceneSystem.isFinished()) {
+			// Clean up cutscene entities
+			for (auto entity : getAllLiveEntities()) {
+				destroyEntity(entity);
+			}
+			// Load the first level
+			int sceneNum = -1;
+			GameViewWindow::setSceneNum(sceneNum);
+			LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 			GLFWFunctions::newSceneLoaded = true;
 		}
 	}
@@ -214,7 +230,7 @@ void ECSCoordinator::update() {
 				sceneNum = GameViewWindow::getSceneNum();
 
 			}
-			if (sceneNum == 1 || sceneNum == 2) {
+			if (sceneNum >= 1 && sceneNum <= 9) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
@@ -1131,6 +1147,94 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 	GameViewWindow::setSceneNum(cutsceneScene);
 	//GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
 }
+
+// function that loads the end cutscene and its entities from end cutscene JSON file
+void ECSCoordinator::LoadEndCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename) {
+	JSONSerializer serializer;
+	int cutsceneScene = -4;
+
+	if (!serializer.Open(filename)) {
+		std::cout << "Error: could not open file " << filename << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// Initialize cutscene system and clear any existing frames
+	cutsceneSystem.initialise();
+
+	// Load cutscene frames first
+	if (jsonObj.contains("cutsceneFrames")) {
+		for (const auto& frameData : jsonObj["cutsceneFrames"]) {
+			myMath::Vector2D position;
+			position.SetX(frameData["position"]["x"].get<float>());
+			position.SetY(frameData["position"]["y"].get<float>());
+
+			// Get zoom value (with default if not specified)
+			float zoom = frameData.contains("zoom") ?
+				frameData["zoom"].get<float>() : 1.0f;
+
+			float duration = frameData["duration"].get<float>();
+
+			// Add frame with zoom parameter
+
+			std::cout << "Position: " << position.GetX() << ", " << position.GetY() << std::endl;
+			cutsceneSystem.addFrame(position, zoom, duration);
+		}
+	}
+
+	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
+
+	// Load entities
+	for (const auto& entityData : jsonObj["entities"]) {
+		Entity entityObj = createEntity();
+		TransformComponent transform{};
+
+		std::string entityId = entityData["id"].get<std::string>();
+		std::string textureId = entityData["textureId"].get<std::string>();
+
+		// Add entity to default layer
+		layerManager.addEntityToLayer(0, entityObj);
+
+		// Parse transform data
+		if (entityData.contains("transform")) {
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+		}
+
+		std::cout << transform.position.GetX() << ", " << transform.position.GetY() << std::endl;
+
+		// Add components
+		ecs.addComponent(entityObj, transform);
+
+		// Add background component if specified
+		if (entityData.contains("background")) {
+			BackgroundComponent background{};
+			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
+			ecs.addComponent(entityObj, background);
+		}
+
+		// Add behaviour component
+		if (entityData.contains("behaviour")) {
+			BehaviourComponent behaviour{};
+			if (entityData["behaviour"].contains("none")) {
+				behaviour.none = true;
+				logicSystemRef->unassignBehaviour(entityObj);
+			}
+			ecs.addComponent(entityObj, behaviour);
+		}
+
+		// Set entity identifiers
+		ecs.setEntityID(entityObj, entityId);
+		ecs.setTextureID(entityObj, textureId);
+	}
+
+	// Start the cutscene immediately
+	cutsceneSystem.start();
+	GameViewWindow::setSceneNum(cutsceneScene);
+}
+
 void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename)
 {
 	JSONSerializer serializer;

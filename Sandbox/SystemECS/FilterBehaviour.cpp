@@ -79,7 +79,7 @@ void FilterBehaviour::update(Entity entity) {
                     player.isVisible = true;  // Make the player visible again
 
                     auto& filterPos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-                    auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
+                    //auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
 
                     // Manually normalize the collision normal
                     float magnitude = std::sqrt(normal.GetX() * normal.GetX() + normal.GetY() * normal.GetY());
@@ -100,6 +100,7 @@ void FilterBehaviour::update(Entity entity) {
                     playerPos.SetY(filterPos.GetY() + ejectDirection.GetY() * 10.f);
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
+                    GLFWFunctions::filterExitAudio = true;
 					createCloggedAnimation(entity);
                 }
                 else {

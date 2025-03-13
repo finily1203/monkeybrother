@@ -118,4 +118,8 @@ private:
 	bool changeBGM;
 	bool changePanel;
 	size_t prevFrame;
+
+	float rotationFadeTime = 2.f;
+	float currentRotationTime;
+	bool wasRotating;
 };
