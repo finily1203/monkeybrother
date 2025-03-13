@@ -443,14 +443,31 @@ void AudioSystem::update() {
             if (!rotationChannel) {
                 std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
                 playRotationEffect(rotationSound);
+                rotationChannel->setVolume(0.0f); // Start silent
+                currentRotationTime = 0.0f; // Reset fade timer
             }
             else {
                 bIsPlaying = false;
                 rotationChannel->isPlaying(&bIsPlaying);
                 if (!bIsPlaying) {
                     rotationChannel->setPaused(false);
+                    currentRotationTime = 0.0f; // Reset fade timer
                 }
             }
+
+            // Increment the rotation time counter
+            currentRotationTime += GLFWFunctions::delta_time; // You'll need to pass or get deltaTime
+
+            // Calculate fade ratio (0.0 to 1.0)
+            float fadeRatio = std::min(currentRotationTime / rotationFadeTime, 1.0f);
+			std::cout << fadeRatio << std::endl;
+
+            // Apply the faded volume
+            if (rotationChannel) {
+                rotationChannel->setVolume(sfxVol * fadeRatio);
+            }
+
+            wasRotating = true;
         }
         else {
             if (rotationChannel) {
@@ -458,6 +475,26 @@ void AudioSystem::update() {
             }
             rotationChannel = nullptr;
         }
+
+        //if (GLFWFunctions::isRotating) {
+        //    if (!rotationChannel) {
+        //        std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
+        //        playRotationEffect(rotationSound);
+        //    }
+        //    else {
+        //        bIsPlaying = false;
+        //        rotationChannel->isPlaying(&bIsPlaying);
+        //        if (!bIsPlaying) {
+        //            rotationChannel->setPaused(false);
+        //        }
+        //    }
+        //}
+        //else {
+        //    if (rotationChannel) {
+        //        rotationChannel->setPaused(true);
+        //    }
+        //    rotationChannel = nullptr;
+        //}
 
         if (GLFWFunctions::bumpAudio) {
             std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "Mossball_Bounce.wav");
