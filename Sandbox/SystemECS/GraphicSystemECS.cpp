@@ -49,10 +49,58 @@ double elapsedTimeSinceGrowStart(const PlayerComponent& player) {
 
 
 void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude) {
-   
+    // Check for player death first
+    if (GLFWFunctions::isPlayerDead) {
+
+        static bool deathAnimationStarted = false;
+        static float deathAnimationTime = 0.0f;
+        static int deathCurrentFrame = 0;
+
+        if (!deathAnimationStarted) {
+
+            deathAnimationStarted = true;
+            deathAnimationTime = 0.0f;
+            deathCurrentFrame = 0;
+            ecsCoordinator.setTextureID(playerEntity, "mossballDead");
+        }
+
+
+        animation.totalFrames = 24;
+        animation.columns = 8;
+        animation.rows = 3;
+
+
+        deathAnimationTime += GLFWFunctions::delta_time;
+        float frameDuration = 0.1f;
+
+        if (deathAnimationTime >= frameDuration && deathCurrentFrame < static_cast<int>(animation.totalFrames) - 1) {
+            deathCurrentFrame++;
+            deathAnimationTime = 0.0f;
+        }
+
+
+        animation.currentFrame = deathCurrentFrame;
+        animation.UpdateUVCoordinates();
+
+        // Draw the death animation
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture("mossballDead"),
+            transform.mdl_xform,
+            animation.currentUVs
+        );
+        return;
+    }
+    else {
+        // Reset death animation state when player is alive
+        static bool deathAnimationStarted = false;
+        if (deathAnimationStarted) {
+            deathAnimationStarted = false;
+        }
+    }
+
     const MovementAnimConfig& config = animation.movementConfig;
 
-   
     if (config.bodyTexture.empty() || config.eyesTexture.empty() ||
         config.bodyFrames == 0 || config.eyesFrames == 0) {
         // Use default animation
@@ -67,15 +115,12 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
     }
 
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
-
     static float eyesAnimTime = 0.0f;
     static int eyesCurrentFrame = 0;
 
-    
     if (config.movementThreshold > 0 && velocityMagnitude > config.movementThreshold) {
         player.lastMoveTime = glfwGetTime();
         player.isIdle = false;
-
         // Body animation
         AnimationComponent bodyAnimation = animation;
         bodyAnimation.isAnimated = true;
@@ -83,7 +128,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         bodyAnimation.columns = config.bodyColumns;
         bodyAnimation.rows = config.bodyRows;
         bodyAnimation.UpdateUVCoordinates();
-
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(config.bodyTexture),
@@ -91,12 +135,10 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             bodyAnimation.currentUVs
         );
 
-        
         if (config.eyeFrameDuration > 0) {
             eyesAnimTime += GLFWFunctions::delta_time;
             eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
                 % static_cast<int>(config.eyesFrames);
-
             AnimationComponent eyesAnimation = animation;
             eyesAnimation.isAnimated = true;
             eyesAnimation.totalFrames = config.eyesFrames;
@@ -104,7 +146,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             eyesAnimation.rows = config.eyesRows;
             eyesAnimation.currentFrame = eyesCurrentFrame;
             eyesAnimation.UpdateUVCoordinates();
-
             graphicsSystem.DrawObject(
                 GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(config.eyesTexture),
@@ -114,24 +155,19 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         }
     }
     else {
-        
         std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
-
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(defaultTexture),
             transform.mdl_xform,
             animation.currentUVs
         );
-
         // Reset eye animation
         eyesAnimTime = 0.0f;
         eyesCurrentFrame = 0;
-
         // Check for idle animation
         double currentTime = glfwGetTime();
-        const float IDLE_THRESHOLD = 3.0f; 
-
+        const float IDLE_THRESHOLD = 3.0f;
         if (!player.isIdle && !player.playingIdleAnim &&
             (currentTime - player.lastMoveTime > IDLE_THRESHOLD)) {
             player.isIdle = true;
@@ -968,17 +1004,6 @@ void GraphicSystemECS::update(float dt) {
 
                     // Skip further rendering for this entity
                     continue;
-                    
-                    if (GLFWFunctions::isPlayerDead) {
-                        ecsCoordinator.setTextureID(entity, "mossballDeath");
-                        auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-                        playerAnimation.totalFrames = 24;
-                        playerAnimation.columns = 8;
-                        playerAnimation.rows = 3;
-                    }
-                    else {
-                        ecsCoordinator.setTextureID(entity, "mossball");
-                    }
                     
                 }
 

@@ -655,14 +655,15 @@ void AudioSystem::update() {
                 std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
                 playRotationEffect(rotationSound);
                 rotationChannel->setVolume(0.0f); // Start silent
+                currentRotationTime = 0.0f; // Reset fade timer
             }
             else {
                 bIsPlaying = false;
                 rotationChannel->isPlaying(&bIsPlaying);
                 if (!bIsPlaying) {
                     rotationChannel->setPaused(false);
+                    currentRotationTime = 0.0f; // Reset fade timer
                 }
-                currentRotationTime = 0.0f; // Reset fade timer
             }
 
             // Increment the rotation time counter
@@ -670,6 +671,7 @@ void AudioSystem::update() {
 
             // Calculate fade ratio (0.0 to 1.0)
             float fadeRatio = std::min(currentRotationTime / rotationFadeTime, 1.0f);
+			std::cout << fadeRatio << std::endl;
 
             // Apply the faded volume
             if (rotationChannel) {
@@ -692,6 +694,26 @@ void AudioSystem::update() {
             }
             wasRotating = false;
         }
+
+        //if (GLFWFunctions::isRotating) {
+        //    if (!rotationChannel) {
+        //        std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
+        //        playRotationEffect(rotationSound);
+        //    }
+        //    else {
+        //        bIsPlaying = false;
+        //        rotationChannel->isPlaying(&bIsPlaying);
+        //        if (!bIsPlaying) {
+        //            rotationChannel->setPaused(false);
+        //        }
+        //    }
+        //}
+        //else {
+        //    if (rotationChannel) {
+        //        rotationChannel->setPaused(true);
+        //    }
+        //    rotationChannel = nullptr;
+        //}
 
         if (GLFWFunctions::bumpAudio) {
             std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "Mossball_Bounce.wav");
@@ -827,7 +849,7 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
 
     // Check if there's a custom channel mapping for this audio
     std::string customChannel = getCustomChannelForAudio(soundEffectName);
-    if (!customChannel.empty() && customChannel != "SFX") {
+    if (!customChannel.empty() && customChannel != "SFX_Collection" && customChannel != "SFX_Bounce") {
         // Use the custom mapping instead
         playAudioByMapping(soundEffectName, customChannel);
         return;

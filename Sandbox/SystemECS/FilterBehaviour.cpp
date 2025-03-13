@@ -43,17 +43,10 @@ void FilterBehaviour::update(Entity entity) {
             break;
         }
     }
-    
-	auto& filterTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+   
     auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
     myMath::Vector2D& playerPos = playerTransform.position;
     float radius = playerTransform.scale.GetX() * 0.5f;
-
-  //  bool isScaleNegative = false;
-  //  if (filterTransform.scale.GetX() < 0.f)
-  //  {
-		//isScaleNegative = true;
-  //  }
 
 
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);

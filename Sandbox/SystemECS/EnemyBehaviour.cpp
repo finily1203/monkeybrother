@@ -67,7 +67,7 @@ void EnemyBehaviour::update(Entity entity) {
     }
 
     // Check for player collision if in chase state or patrol state
-    if (currentState == CHASE || currentState == PATROL) {
+    //if (currentState == CHASE || currentState == PATROL) {
         bool collision = checkPlayerCollision(entity, playerEntity);
         if (collision) {
             switchState(ATTACK);
@@ -80,7 +80,7 @@ void EnemyBehaviour::update(Entity entity) {
                 attackAnimationCreated = true;
             }
         }
-    }
+    //}
 
     // Handle avoidance state if we're not chasing the player
     if (currentState != CHASE && currentState != ATTACK) {
@@ -539,6 +539,7 @@ bool EnemyBehaviour::checkPlayerCollision(Entity enemyEntity, Entity playerEntit
 
     // Calculate the enemy's facing direction based on orientation
     myMath::Vector2D facingDir(cos(enemyAngle), sin(enemyAngle));
+	
 
     // Calculate the front area of the enemy where the "mouth" would be
     // (where collision with player should be detected)
