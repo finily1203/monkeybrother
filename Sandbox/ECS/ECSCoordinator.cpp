@@ -234,9 +234,6 @@ void ECSCoordinator::update() {
 				destroyEntity(entity);
 			}
 
-			//auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("player"));
-			///int sceneNum = 0;
-
 			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;

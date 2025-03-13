@@ -420,7 +420,25 @@ CollisionSystemECS::OBB CollisionSystemECS::createOBBFromEntity(Entity entity)
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
 
     obb.center = transform.position;
-    obb.halfExtents = transform.scale * 0.5f;
+
+    if (transform.scale.GetX() < 0.f)
+    {
+        obb.halfExtents.SetX(-transform.scale.GetX() * 0.5f);
+	}
+	else
+	{
+		obb.halfExtents.SetX(transform.scale.GetX() * 0.5f);
+	}
+    if (transform.scale.GetY() < 0.f)
+    {
+        obb.halfExtents.SetX(-transform.scale.GetX() * 0.5f);
+	}
+	else
+	{
+		obb.halfExtents.SetY(transform.scale.GetY() * 0.5f);
+	}
+
+    //obb.halfExtents = transform.scale * 0.5f;
     obb.rotation = transform.orientation.GetX() * (M_PI / 180.0f);
 
     // Calculate local axes

@@ -43,10 +43,18 @@ void FilterBehaviour::update(Entity entity) {
             break;
         }
     }
-
+    
+	auto& filterTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(playerEntity);
     myMath::Vector2D& playerPos = playerTransform.position;
     float radius = playerTransform.scale.GetX() * 0.5f;
+
+  //  bool isScaleNegative = false;
+  //  if (filterTransform.scale.GetX() < 0.f)
+  //  {
+		//isScaleNegative = true;
+  //  }
+
 
     CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
     CollisionSystemECS::OBB filterOBB = collisionSystem.createOBBFromEntity(entity);
@@ -94,9 +102,12 @@ void FilterBehaviour::update(Entity entity) {
                     forceManager.AddForce(playerEntity, ejectDirection * ejectForceMagnitude);
                     forceManager.ApplyForce(playerEntity, ejectDirection, ejectForceMagnitude);
 
-                    // Move player further to avoid immediate re-collision
-                    //playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY()));  // Increased distance
-                    playerPos.SetX(filterPos.GetX() + ejectDirection.GetX() * 10.f + 50.f);
+					auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
+
+                    if (filterScl.GetX() < 0.f)
+                        playerPos.SetX(filterPos.GetX() - ejectDirection.GetX() * 10.f - 50.f);
+                    else
+                        playerPos.SetX(filterPos.GetX() + ejectDirection.GetX() * 10.f + 50.f);
                     playerPos.SetY(filterPos.GetY() + ejectDirection.GetY() * 10.f);
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
@@ -108,7 +119,10 @@ void FilterBehaviour::update(Entity entity) {
                     auto& filterPos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
                     auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
                     //playerPos = filterPos + myMath::Vector2D(50.0f, 0.f);
-                    playerPos = filterPos + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));
+					if (filterScl.GetX() < 0.f)
+						playerPos = filterPos + myMath::Vector2D(-50.0f, (filterScl.GetY() * 0.4f));
+					else
+                        playerPos = filterPos + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));
                     //playerPos = filterPos + myMath::Vector2D(filterScl.GetX(), (filterScl.GetY() * 0.9f));
                 }
             }

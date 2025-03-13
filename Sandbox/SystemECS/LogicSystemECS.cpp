@@ -863,13 +863,21 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		int mainMenuScene = -1;
 
+		if (GameViewWindow::getSceneNum() > 4)
+		{
+			mainMenuScene = -4;
+		}
+
 		for (auto& currEntity : allEntities)
 		{
 			ecsCoordinator.destroyEntity(currEntity);
 		}
 
 		GameViewWindow::setSceneNum(mainMenuScene);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+		if (mainMenuScene == -1)
+			ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+		else
+			ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
 	}
 
 	else if (entityId == "gameOverRetryButton")

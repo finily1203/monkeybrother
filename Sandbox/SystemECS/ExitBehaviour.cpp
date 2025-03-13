@@ -95,5 +95,11 @@ void ExitBehaviour::update(Entity entity) {
                 //exitArrowCreated = false;
             }
         }
+
+        if (GLFWFunctions::instantWin) {
+			auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+			playerTransform.position = entityTransform.position;
+			GLFWFunctions::instantWin = false;
+        }
     }
 }
