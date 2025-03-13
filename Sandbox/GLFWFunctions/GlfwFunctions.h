@@ -118,6 +118,9 @@ struct GLFWFunctions {
 	static bool useMouseRotation; // Add this with the other static booleans
 	static bool filterClogged; // rmb to remove this
 	static bool changeLevel;
+	static bool attackAudio;
+	static bool filterExitAudio;
+	static bool endCutsceneLastPanel;
 
 	static bool isPlayerDead;
 

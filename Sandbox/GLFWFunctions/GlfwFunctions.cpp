@@ -71,6 +71,9 @@ bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
 bool GLFWFunctions::showFPS = true;
 bool GLFWFunctions::isPlayerDead = false;
+bool GLFWFunctions::attackAudio = false;
+bool GLFWFunctions::filterExitAudio = false;
+bool GLFWFunctions::endCutsceneLastPanel = false;
 
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
@@ -257,6 +260,11 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
     else {
         isRotating = false;
     }
+
+	if ((*keyState)[Key::LSHIFT]) {
+		GameViewWindow::setSceneNum(-4);
+        ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
+	}
 
     //if ((*keyState)[Key::P]) {
     //    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

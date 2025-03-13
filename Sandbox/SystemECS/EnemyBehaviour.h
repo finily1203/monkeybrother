@@ -48,6 +48,7 @@ public:
 	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
 	bool isWallBlockingVision(myMath::Vector2D enemyPos, myMath::Vector2D playerPos);
 	bool rayIntersectAABB(myMath::Vector2D rayOrigin, myMath::Vector2D rayDir, myMath::Vector2D aabbMin, myMath::Vector2D aabbMax, float& tmin, float& tmax);
+	bool AABBIntersect(const myMath::Vector2D& min1, const myMath::Vector2D& max1, const myMath::Vector2D& min2, const myMath::Vector2D& max2);
 
 	void updateChaseState(Entity entity);
 	bool checkPlayerCollision(Entity entity, Entity playerEntity);
@@ -55,7 +56,7 @@ public:
 	void updateAttackState(Entity entity);
 
 	void createChaseAnimation(Entity entity);
-	void createAttackAnimation(Entity entity);
+	void createAttackAnimation(Entity entity, Entity playerEntity);
 
 private:
 	STATE currentState;

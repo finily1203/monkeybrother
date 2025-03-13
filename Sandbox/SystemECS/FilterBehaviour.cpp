@@ -79,7 +79,7 @@ void FilterBehaviour::update(Entity entity) {
                     player.isVisible = true;  // Make the player visible again
 
                     auto& filterPos = ecsCoordinator.getComponent<TransformComponent>(entity).position;
-                    auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
+                    //auto& filterScl = ecsCoordinator.getComponent<TransformComponent>(entity).scale;
 
                     // Manually normalize the collision normal
                     float magnitude = std::sqrt(normal.GetX() * normal.GetX() + normal.GetY() * normal.GetY());
@@ -87,7 +87,7 @@ void FilterBehaviour::update(Entity entity) {
                         myMath::Vector2D(normal.GetX() / magnitude, normal.GetY() / magnitude) :
                         myMath::Vector2D(1.0f, 1.0f);  // Default upward push if zero
 
-                    float ejectForceMagnitude = 0.f;  // Stronger ejection force
+                    float ejectForceMagnitude = 1.f;  // Stronger ejection force
 
                     // Apply impulse force only once
                     auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
@@ -95,9 +95,12 @@ void FilterBehaviour::update(Entity entity) {
                     forceManager.ApplyForce(playerEntity, ejectDirection, ejectForceMagnitude);
 
                     // Move player further to avoid immediate re-collision
-                    playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));  // Increased distance
+                    //playerPos = filterPos + ejectDirection * 100.0f + myMath::Vector2D(50.0f, (filterScl.GetY()));  // Increased distance
+                    playerPos.SetX(filterPos.GetX() + ejectDirection.GetX() * 10.f + 50.f);
+                    playerPos.SetY(filterPos.GetY() + ejectDirection.GetY() * 10.f);
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
+                    GLFWFunctions::filterExitAudio = true;
 					createCloggedAnimation(entity);
                 }
                 else {
@@ -118,6 +121,8 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
 
     ecsCoordinator.setEntityID(newAnimationEntity, "cloggedAnimation");
     ecsCoordinator.setTextureID(newAnimationEntity, "VFX_Finalised_DefunctFilter.png");
+
+	int layer = layerManager.getEntityLayer(entity);
 
     // Transform setup
     TransformComponent transform{};
@@ -140,5 +145,5 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
     // Add to default layer 0
-    layerManager.addEntityToLayer(0, newAnimationEntity);
+    layerManager.addEntityToLayer(layer, newAnimationEntity);
 }

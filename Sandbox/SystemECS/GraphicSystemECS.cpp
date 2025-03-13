@@ -970,7 +970,7 @@ void GraphicSystemECS::update(float dt) {
                     continue;
                     
                     if (GLFWFunctions::isPlayerDead) {
-                        ecsCoordinator.setTextureID(entity, "mossballDead");
+                        ecsCoordinator.setTextureID(entity, "mossballDeath");
                         auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
                         playerAnimation.totalFrames = 24;
                         playerAnimation.columns = 8;

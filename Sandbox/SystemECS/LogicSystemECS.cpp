@@ -433,7 +433,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			ecsCoordinator.destroyEntity(currEntity);
 		}
 
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		//audioSystem.playSoundEffect("UI_ButtonClick.wav");
 		//set scene to play cutscene
 		/*ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());*/
 		GameViewWindow::setSceneNum(-2); // Cutscene scene number

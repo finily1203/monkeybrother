@@ -128,4 +128,7 @@ private:
 	size_t prevFrame;
 
 	std::string getCustomChannelForAudio(const std::string& audioName);
+	float rotationFadeTime = 2.f;
+	float currentRotationTime;
+	bool wasRotating;
 };
