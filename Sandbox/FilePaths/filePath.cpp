@@ -325,3 +325,12 @@ std::string FilePathManager::GetLevelCompletedMenuJSONPath()
 
     return jsonPathString;
 }
+
+std::string FilePathManager::GetAudioMappingsPath() {
+    std::filesystem::path execPath = FilePathManager::GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "audio_mappings.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

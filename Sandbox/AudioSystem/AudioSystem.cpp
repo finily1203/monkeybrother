@@ -40,7 +40,8 @@ AudioSystem::AudioSystem() : bgmChannel(nullptr), soundEffectChannel(nullptr), a
 	channelList = new std::vector<std::pair<std::string,FMOD::Channel*>>();
 
     channelList->push_back(std::make_pair("BGM", bgmChannel));
-	channelList->push_back(std::make_pair("SFX", soundEffectChannel));
+    channelList->push_back(std::make_pair("SFX_Collection", soundEffectChannel));
+    channelList->push_back(std::make_pair("SFX_Bounce", soundEffectChannel));
 	channelList->push_back(std::make_pair("AssetBrowser", assetBrowserChannel));
 	channelList->push_back(std::make_pair("Ambience", ambienceChannel));
 	channelList->push_back(std::make_pair("Pump", pumpChannel));
@@ -130,12 +131,14 @@ void AudioSystem::update() {
         switch (currentFrame) {
         case 0: //scene 1
             if (!cutsceneAmbienceChannel) {
-                playCutsceneAmbience("IntroAmbience1");
+                std::string ambienceSound = getAudioFileForChannel("CutsceneAmbience", "IntroAmbience1");
+                playCutsceneAmbience(ambienceSound);
             }
             break;
         case 1: //scene 2
             if (!cutscenePanelChannel) {
-                playCutscenePanel("Panel2");
+                std::string panelSound = getAudioFileForChannel("CutscenePanel", "Panel2");
+                playCutscenePanel(panelSound);
             }
 
             if (cutscenePanelChannel) {
@@ -285,7 +288,8 @@ void AudioSystem::update() {
             bgmChannel->isPlaying(&isBgmPlaying);
         }
         if (!isBgmPlaying) {
-            playBgm("mainMenuBGM");
+            std::string bgmSound = getAudioFileForChannel("BGM", "mainMenuBGM");
+            playBgm(bgmSound);
         }
     }
 
@@ -315,11 +319,13 @@ void AudioSystem::update() {
         }
 
         if (!isBgmPlaying) {
-            playBgm("Iris_L2_BGM_Loop.wav");
+            std::string bgmSound = getAudioFileForChannel("BGM", "Iris_L2_BGM_Loop.wav");
+            playBgm(bgmSound);
         }
 
         if (!isAmbiencePlaying) {
-            playSong("Ambience.wav");
+            std::string ambienceSound = getAudioFileForChannel("Ambience", "Ambience.wav");
+            playSong(ambienceSound);
         }
 
         //std::cout << GameViewWindow::getSceneNum() << std::endl;
@@ -341,7 +347,8 @@ void AudioSystem::update() {
         if (GLFWFunctions::isTherePump) {
             if (GLFWFunctions::isPumpOn) {
                 if (!pumpChannel) {
-                    playPumpSound("pumpSound.wav");
+                    std::string pumpSound = getAudioFileForChannel("Pump", "pumpSound.wav");
+                    playPumpSound(pumpSound);
                 }
                 else {
                     // Ensure the pump sound is playing
@@ -434,7 +441,8 @@ void AudioSystem::update() {
 
         if (GLFWFunctions::isRotating) {
             if (!rotationChannel) {
-                playRotationEffect("Rotation.wav");
+                std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
+                playRotationEffect(rotationSound);
             }
             else {
                 bIsPlaying = false;
@@ -452,14 +460,15 @@ void AudioSystem::update() {
         }
 
         if (GLFWFunctions::bumpAudio) {
-            playSoundEffect("Mossball_Bounce.wav");
+            std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "Mossball_Bounce.wav");
+            playSoundEffect(bumpSound);
             GLFWFunctions::bumpAudio = false;
-
             std::cout << "Bump audio played." << std::endl;
         }
 
         if (GLFWFunctions::collectAudio) {
-            playSoundEffect("Collection.wav");
+            std::string collectSound = getAudioFileForChannel("SFX_Collection", "Collection.wav");
+            playSoundEffect(collectSound);
             GLFWFunctions::collectAudio = false;
         }
 
@@ -477,6 +486,12 @@ void AudioSystem::cleanup() {
 
 //Function to play song of given name 
 void AudioSystem::playSong(const std::string& songName) {
+    std::string customChannel = getCustomChannelForAudio(songName);
+    if (!customChannel.empty() && customChannel != "Ambience") {
+        // Use the custom mapping instead
+        playAudioByMapping(songName, customChannel);
+        return;
+    }
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
     if (ambienceChannel) {
         FMOD_RESULT result = ambienceChannel->stop();
@@ -499,6 +514,15 @@ void AudioSystem::playSong(const std::string& songName) {
 
 // function to play BGM of given name
 void AudioSystem::playBgm(const std::string& songName) {
+
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(songName);
+    if (!customChannel.empty() && customChannel != "BGM") {
+        // Use the custom mapping instead
+        playAudioByMapping(songName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
     if (bgmChannel) {
         FMOD_RESULT result = bgmChannel->stop();
@@ -523,6 +547,16 @@ void AudioSystem::playBgm(const std::string& songName) {
 // Function to play the pump sound of given name
 void AudioSystem::playPumpSound(const std::string& soundName)
 {
+
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(soundName);
+    if (!customChannel.empty() && customChannel != "Pump") {
+        // Use the custom mapping instead
+        playAudioByMapping(soundName, customChannel);
+        return;
+    }
+
+
     FMOD::Sound* audioSong = assetsManager.GetAudio(soundName);
 
     if (pumpChannel) {
@@ -547,6 +581,15 @@ void AudioSystem::playPumpSound(const std::string& soundName)
 // Function to play sound effect of given name
 void AudioSystem::playSoundEffect(const std::string& soundEffectName)
 {
+
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(soundEffectName);
+    if (!customChannel.empty() && customChannel != "SFX") {
+        // Use the custom mapping instead
+        playAudioByMapping(soundEffectName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
     soundEffectChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &soundEffectChannel);
@@ -563,6 +606,14 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
 // function to play rotation effect of given name
 void AudioSystem::playRotationEffect(const std::string& soundEffectName)
 {
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(soundEffectName);
+    if (!customChannel.empty() && customChannel != "Rotation") {
+        // Use the custom mapping instead
+        playAudioByMapping(soundEffectName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSound = assetsManager.GetAudio(soundEffectName);
     rotationChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &rotationChannel);
@@ -579,6 +630,14 @@ void AudioSystem::playRotationEffect(const std::string& soundEffectName)
 // function to play sound asset browser of given name
 void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
 {
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(soundName);
+    if (!customChannel.empty() && customChannel != "AssetBrowser") {
+        // Use the custom mapping instead
+        playAudioByMapping(soundName, customChannel);
+        return;
+    }
+
 	FMOD::Sound* audioSound = assetsManager.GetAudio(soundName);
 	assetBrowserChannel = nullptr;
 	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &assetBrowserChannel);
@@ -595,6 +654,14 @@ void AudioSystem::playSoundAssetBrowser(const std::string& soundName)
 // function to play cutscene ambience of given name
 void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
 {
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(ambienceName);
+    if (!customChannel.empty()) {
+        // Use the custom mapping instead
+        playAudioByMapping(ambienceName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
     cutsceneAmbienceChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneAmbienceChannel);
@@ -611,6 +678,14 @@ void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
 // function to play cutscene ambience 2 of given name
 void AudioSystem::playCutsceneAmbience2(const std::string& ambienceName)
 {
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(ambienceName);
+    if (!customChannel.empty()) {
+        // Use the custom mapping instead
+        playAudioByMapping(ambienceName, customChannel);
+        return;
+    }
+
 	FMOD::Sound* audioSound = assetsManager.GetAudio(ambienceName);
 	cutsceneAmbienceChannel2 = nullptr;
 	FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneAmbienceChannel2);
@@ -625,6 +700,14 @@ void AudioSystem::playCutsceneAmbience2(const std::string& ambienceName)
 
 // function to play cutscene panel of given name
 void AudioSystem::playCutscenePanel(const std::string& panelName) {
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(panelName);
+    if (!customChannel.empty()) {
+        // Use the custom mapping instead
+        playAudioByMapping(panelName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSound = assetsManager.GetAudio(panelName);
     cutscenePanelChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutscenePanelChannel);
@@ -640,6 +723,15 @@ void AudioSystem::playCutscenePanel(const std::string& panelName) {
 
 // function to play cutscene human of given name
 void AudioSystem::playCutsceneHuman(const std::string& humanName) {
+
+    // Check if there's a custom channel mapping for this audio
+    std::string customChannel = getCustomChannelForAudio(humanName);
+    if (!customChannel.empty()) {
+        // Use the custom mapping instead
+        playAudioByMapping(humanName, customChannel);
+        return;
+    }
+
     FMOD::Sound* audioSound = assetsManager.GetAudio(humanName);
     cutsceneHumanChannel = nullptr;
     FMOD_RESULT result = assetsManager.GetAudioSystem()->playSound(audioSound, nullptr, false, &cutsceneHumanChannel);
@@ -783,4 +875,80 @@ void AudioSystem::saveAudioSettingsToJSON(std::string const& filename, float sfx
 void AudioSystem::setChangeBGM(bool val)
 {
 	changeBGM = val;
+}
+
+void AudioSystem::playAudioByMapping(const std::string& audioName, const std::string& channelName) {
+    if (channelName == "BGM") {
+        playBgm(audioName);
+    }
+    else if (channelName == "SFX") {
+        playSoundEffect(audioName);
+    }
+    else if (channelName == "AssetBrowser") {
+        playSoundAssetBrowser(audioName);
+    }
+    else if (channelName == "Ambience") {
+        playSong(audioName);
+    }
+    else if (channelName == "Pump") {
+        playPumpSound(audioName);
+    }
+    else if (channelName == "Rotation") {
+        playRotationEffect(audioName);
+    }
+}
+
+bool AudioSystem::isAudioPlayingOnChannel(const std::string& channelName) {
+    bool isPlaying = false;
+
+    FMOD::Channel* channel = nullptr;
+
+    if (channelName == "BGM") {
+        channel = bgmChannel;
+    }
+    else if (channelName == "SFX") {
+        channel = soundEffectChannel;
+    }
+    else if (channelName == "AssetBrowser") {
+        channel = assetBrowserChannel;
+    }
+    else if (channelName == "Ambience") {
+        channel = ambienceChannel;
+    }
+    else if (channelName == "Pump") {
+        channel = pumpChannel;
+    }
+    else if (channelName == "Rotation") {
+        channel = rotationChannel;
+    }
+
+    if (channel) {
+        channel->isPlaying(&isPlaying);
+    }
+
+    return isPlaying;
+}
+
+std::string AudioSystem::getCustomChannelForAudio(const std::string& audioName) {
+    // Get the audio mappings from GameViewWindow
+    auto& mappings = *GameViewWindow::audioChannelMappings;
+
+    // Check if this audio has a custom mapping
+    if (mappings.find(audioName) != mappings.end()) {
+        return mappings[audioName];
+    }
+
+    // No custom mapping found
+    return "";
+}
+
+std::string AudioSystem::getAudioFileForChannel(const std::string& channelName, const std::string& defaultFile) {
+    // Look through mappings to find an audio file that maps to this channel
+    for (const auto& mapping : *GameViewWindow::audioChannelMappings) {
+        if (mapping.second == channelName) {
+            return mapping.first;
+        }
+    }
+    // Return the default if no mapping found
+    return defaultFile;
 }

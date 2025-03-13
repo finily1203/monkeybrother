@@ -496,804 +496,1042 @@ void Inspector::Update() {
 
 // Render the Inspector window + logic for modifying entity data
 void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID) {
-	auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
-	ImGui::Begin("Inspector");
-
-	if (selectedEntityID == -1) {
-		ImGui::TextDisabled("No entity selected");
-		ImGui::End();
-		return;
-	}
-
-	// Entity ID/Name display
-	std::string entityID = ecs.getEntityID(selectedEntityID);
-	ImGui::Text("Entity ID: %s", entityID.c_str());
-	ImGui::Separator();
-
-	// Add a Components button that opens a popup with all available components
-	if (ImGui::Button("Edit Components")) {
-		ImGui::OpenPopup("Component Editor");
-	}
-
-	// Component Editor Popup
-	if (ImGui::BeginPopupModal("Component Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("Add or remove components for entity: %s", entityID.c_str());
-		ImGui::Separator();
-
-		// Create checkboxes for each component type
-		// TransformComponent is a special case - all entities must have it
-		bool hasTransform = ecs.hasComponent<TransformComponent>(selectedEntityID);
-		ImGui::BeginDisabled();  // Disable the checkbox because all entities must have transforms
-		ImGui::Checkbox("Transform Component", &hasTransform);
-		ImGui::EndDisabled();
-		ImGui::SameLine();
-		ImGui::TextDisabled("(Required)");
-
-		// AABB Component
-		bool hasAABB = ecs.hasComponent<AABBComponent>(selectedEntityID);
-		if (ImGui::Checkbox("AABB Component", &hasAABB)) {
-			if (hasAABB && !ecs.hasComponent<AABBComponent>(selectedEntityID)) {
-				AABBComponent aabb;
-				// Initialize with default values based on entity's transform
-				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
-				aabb.left = -transform.scale.GetX() / 2.0f;
-				aabb.right = transform.scale.GetX() / 2.0f;
-				aabb.top = transform.scale.GetY() / 2.0f;
-				aabb.bottom = -transform.scale.GetY() / 2.0f;
-				ecs.addComponent(selectedEntityID, aabb);
-			}
-			else if (!hasAABB && ecs.hasComponent<AABBComponent>(selectedEntityID)) {
-				ecs.removeComponent<AABBComponent>(selectedEntityID);
-			}
-		}
-
-		// Physics Component
-		bool hasPhysics = ecs.hasComponent<PhysicsComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Physics Component", &hasPhysics)) {
-			if (hasPhysics && !ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
-				PhysicsComponent physics;
-				// Initialize with reasonable defaults
-				physics.mass = 1.0f;
-				physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
-				physics.dampening = 0.9f;
-				physics.maxVelocity = 200.0f;
-				ecs.addComponent(selectedEntityID, physics);
-			}
-			else if (!hasPhysics && ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
-				ecs.removeComponent<PhysicsComponent>(selectedEntityID);
-			}
-		}
-
-		// Animation Component
-		bool hasAnimation = ecs.hasComponent<AnimationComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Animation Component", &hasAnimation)) {
-			if (hasAnimation && !ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
-				AnimationComponent animation;
-				animation.isAnimated = true;
-				animation.totalFrames = 1.0f;
-				animation.frameTime = 0.05f;
-				animation.columns = 1.0f;
-				animation.rows = 1.0f;
-				ecs.addComponent(selectedEntityID, animation);
-			}
-			else if (!hasAnimation && ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
-				ecs.removeComponent<AnimationComponent>(selectedEntityID);
-			}
-		}
-
-		// Font Component
-		bool hasFont = ecs.hasComponent<FontComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Font Component", &hasFont)) {
-			if (hasFont && !ecs.hasComponent<FontComponent>(selectedEntityID)) {
-				FontComponent font;
-				font.text = "New Text";
-				font.textScale = 1.0f;
-				font.textBoxWidth = 300.0f;
-				font.color = myMath::Vector3D(1.0f, 1.0f, 1.0f);
-				font.fontId = "default";  // Assuming you have a default font
-				ecs.addComponent(selectedEntityID, font);
-			}
-			else if (!hasFont && ecs.hasComponent<FontComponent>(selectedEntityID)) {
-				ecs.removeComponent<FontComponent>(selectedEntityID);
-			}
-		}
-
-		// Player Component
-		bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Player Component", &hasPlayer)) {
-			// Check if a player already exists
-			bool playerExist = false;
-			if (hasPlayer && !ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
-				for (auto& entity : ecs.getAllLiveEntities()) {
-					if ((int)entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
-						playerExist = true;
-						break;
-					}
-				}
-
-				if (!playerExist) {
-					PlayerComponent player;
-					player.isPlayer = true;
-					ecs.addComponent(selectedEntityID, player);
-				}
-				else {
-					// Only one player allowed - show a warning
-					ImGui::OpenPopup("Player Warning");
-					hasPlayer = false;
-				}
-			}
-			else if (!hasPlayer && ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
-				ecs.removeComponent<PlayerComponent>(selectedEntityID);
-			}
-		}
-
-		// Warning popup for player component
-		if (ImGui::BeginPopupModal("Player Warning", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("Only one player entity can exist in the scene.");
-			ImGui::Separator();
-			if (ImGui::Button("OK", ImVec2(120, 0))) {
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		// Enemy Component
-		bool hasEnemy = ecs.hasComponent<EnemyComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Enemy Component", &hasEnemy)) {
-			if (hasEnemy && !ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
-				EnemyComponent enemy;
-				enemy.isEnemy = true;
-				enemy.isClockwise = true;
-				enemy.visionAngle = 60.0f;
-				enemy.visionDistance = 300.0f;
-				enemy.drawVisionDebug = true;
-				enemy.numWaypoints = 2;
-				// Add default waypoints
-				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
-				enemy.waypoints.push_back(transform.position);
-				enemy.waypoints.push_back(myMath::Vector2D(transform.position.GetX() + 100, transform.position.GetY()));
-				ecs.addComponent(selectedEntityID, enemy);
-			}
-			else if (!hasEnemy && ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
-				ecs.removeComponent<EnemyComponent>(selectedEntityID);
-			}
-		}
-
-		// Collectable Component
-		bool hasCollectable = ecs.hasComponent<CollectableComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Collectable Component", &hasCollectable)) {
-			if (hasCollectable && !ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
-				CollectableComponent collectable;
-				collectable.isCollectable = true;
-				ecs.addComponent(selectedEntityID, collectable);
-				GLFWFunctions::collectableCount++;
-			}
-			else if (!hasCollectable && ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
-				ecs.removeComponent<CollectableComponent>(selectedEntityID);
-				if (GLFWFunctions::collectableCount > 0)
-					GLFWFunctions::collectableCount--;
-			}
-		}
-
-		// Pump Component
-		bool hasPump = ecs.hasComponent<PumpComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Pump Component", &hasPump)) {
-			if (hasPump && !ecs.hasComponent<PumpComponent>(selectedEntityID)) {
-				PumpComponent pump;
-				pump.isPump = true;
-				pump.pumpForce = 3.0f;
-				ecs.addComponent(selectedEntityID, pump);
-			}
-			else if (!hasPump && ecs.hasComponent<PumpComponent>(selectedEntityID)) {
-				ecs.removeComponent<PumpComponent>(selectedEntityID);
-			}
-		}
-
-		// Exit Component
-		bool hasExit = ecs.hasComponent<ExitComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Exit Component", &hasExit)) {
-			if (hasExit && !ecs.hasComponent<ExitComponent>(selectedEntityID)) {
-				ExitComponent exit;
-				exit.isExit = true;
-				ecs.addComponent(selectedEntityID, exit);
-			}
-			else if (!hasExit && ecs.hasComponent<ExitComponent>(selectedEntityID)) {
-				ecs.removeComponent<ExitComponent>(selectedEntityID);
-			}
-		}
-
-		// Background Component
-		bool hasBackground = ecs.hasComponent<BackgroundComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Background Component", &hasBackground)) {
-			if (hasBackground && !ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
-				BackgroundComponent background;
-				background.isBackground = true;
-				ecs.addComponent(selectedEntityID, background);
-			}
-			else if (!hasBackground && ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
-				ecs.removeComponent<BackgroundComponent>(selectedEntityID);
-			}
-		}
-
-		// UI Component
-		bool hasUI = ecs.hasComponent<UIComponent>(selectedEntityID);
-		if (ImGui::Checkbox("UI Component", &hasUI)) {
-			if (hasUI && !ecs.hasComponent<UIComponent>(selectedEntityID)) {
-				UIComponent ui;
-				ui.isUI = true;
-				ecs.addComponent(selectedEntityID, ui);
-			}
-			else if (!hasUI && ecs.hasComponent<UIComponent>(selectedEntityID)) {
-				ecs.removeComponent<UIComponent>(selectedEntityID);
-			}
-		}
-
-		// Button Component
-		bool hasButton = ecs.hasComponent<ButtonComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Button Component", &hasButton)) {
-			if (hasButton && !ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
-				ButtonComponent button;
-				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
-				button.originalScale = transform.scale;
-				button.hoveredScale = myMath::Vector2D(transform.scale.GetX() * 1.1f, transform.scale.GetY() * 1.1f);
-				button.isButton = true;
-				ecs.addComponent(selectedEntityID, button);
-			}
-			else if (!hasButton && ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
-				ecs.removeComponent<ButtonComponent>(selectedEntityID);
-			}
-		}
-
-		// Filter Component
-		bool hasFilter = ecs.hasComponent<FilterComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Filter Component", &hasFilter)) {
-			if (hasFilter && !ecs.hasComponent<FilterComponent>(selectedEntityID)) {
-				FilterComponent filter;
-				filter.isFilter = true;
-				filter.isFilterClogged = false;
-				ecs.addComponent(selectedEntityID, filter);
-			}
-			else if (!hasFilter && ecs.hasComponent<FilterComponent>(selectedEntityID)) {
-				ecs.removeComponent<FilterComponent>(selectedEntityID);
-			}
-		}
-
-		// Moving Platform Component
-		bool hasMovPlatform = ecs.hasComponent<MovPlatformComponent>(selectedEntityID);
-		if (ImGui::Checkbox("Moving Platform Component", &hasMovPlatform)) {
-			if (hasMovPlatform && !ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
-				MovPlatformComponent movPlatform;
-				auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
-				movPlatform.speed = 50.0f;
-				movPlatform.maxDistance = 200.0f;
-				movPlatform.startPos = transform.position;
-				movPlatform.direction = myMath::Vector2D(1.0f, 0.0f);  // Default horizontal movement
-				ecs.addComponent(selectedEntityID, movPlatform);
-			}
-			else if (!hasMovPlatform && ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
-				ecs.removeComponent<MovPlatformComponent>(selectedEntityID);
-			}
-		}
-
-		// Platform Component
-		bool hasClosestPlatform = ecs.hasComponent<ClosestPlatform>(selectedEntityID);
-		if (ImGui::Checkbox("Platform Component", &hasClosestPlatform)) {
-			if (hasClosestPlatform && !ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
-				ClosestPlatform closestPlatform{};
-				closestPlatform.isClosest = false;
-				ecs.addComponent(selectedEntityID, closestPlatform);
-
-				// Automatically assign platform behavior when adding platform component
-				logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
-
-				// If you also need to update the behavior dropdown selection
-				currentItem = 6;
-			}
-			else if (!hasClosestPlatform && ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
-				ecs.removeComponent<ClosestPlatform>(selectedEntityID);
-			}
-		}
-
-		ImGui::Separator();
-		if (ImGui::Button("Close", ImVec2(120, 0))) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-
-	if (ecsCoordinator.getEntityID(selectedEntityID) == "placeholderentity") {}
-	else
-		if (ecsCoordinator.hasComponent<FontComponent>(selectedEntityID)) { //TextBox specific data modification feature
-			auto& fontComp = ecsCoordinator.getComponent<FontComponent>(selectedEntityID);
-			auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
-			auto signature = ecsCoordinator.getEntityID(selectedEntityID);
-
-			memset(textBuffer, 0, MAXTEXTSIZE);
-			size_t maxSize = 1000;
-			std::string tempStr = fontComp.text;
-
-			size_t length = std::min(tempStr.length(), maxSize);
-			for (size_t i = 0; i < length; i++)
-			{
-				textBuffer[i] = tempStr[i];
-			}
-
-			ImGui::PushID(selectedEntityID);
-
-
-
-			float colour[3] = { fontComp.color.GetX(),fontComp.color.GetY(),fontComp.color.GetZ() };
-			if (ImGui::DragFloat3("Colour", colour, 0.01f, 0.0f, 1.0f)) {
-				fontComp.color.SetX(colour[0]);
-				fontComp.color.SetY(colour[1]);
-				fontComp.color.SetZ(colour[2]);
-			}
-
-			float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-			if (ImGui::DragFloat2("Position", pos, 5.f)) {
-				transform.position.SetX(pos[0]);
-				transform.position.SetY(pos[1]);
-			}
-
-			float scale[1] = { fontComp.textScale };
-			if (ImGui::DragFloat("Scale", scale, 0.5f)) {
-				fontComp.textScale = scale[0];
-			}
-
-			float rotation[1] = { transform.orientation.GetX() };
-			if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-				transform.orientation.SetX(rotation[0]);
-			}
-
-			float textBox[1] = { fontComp.textBoxWidth };
-			if (ImGui::DragFloat("TextBox", textBox, 1.f)) {
-				fontComp.textBoxWidth = textBox[0];
-			}
-
-			ImGui::SetNextItemWidth(objAttributeSliderMaxLength);  // Set width of input field
-			ImGui::InputText("##Text", textBuffer, IM_ARRAYSIZE(textBuffer));
-			ImGui::SameLine();
-			ImGui::Text("Text");
-			fontComp.text = textBuffer;
-
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Remove")) {
-				ecsCoordinator.destroyEntity(selectedEntityID);
-			}
-
-			ImGui::PopID();
-			ImGui::Separator();
-
-		}
-		else if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) //Player specific data modification features
-			&& !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID)) {
-			auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
-			auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(selectedEntityID);
-			auto signature = ecsCoordinator.getEntityID(selectedEntityID);
-
-			ImGui::PushID(selectedEntityID);
-
-
-			float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-			if (ImGui::DragFloat2("Position", pos, 5.f)) {
-				transform.position.SetX(pos[0]);
-				transform.position.SetY(pos[1]);
-			}
-
-			float scale[1] = { transform.scale.GetX() };
-			if (ImGui::DragFloat("Scale", scale, 1.f)) {
-				transform.scale.SetX(scale[0]);
-				transform.scale.SetY(scale[0]);
-			}
-
-			float rotation[1] = { transform.orientation.GetX() };
-			if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-				transform.orientation.SetX(rotation[0]);
-			}
-
-			float velocity[1] = { physics.maxVelocity };
-			if (ImGui::DragFloat("Velocity", velocity, 1.f)) {
-				physics.maxVelocity = velocity[0];
-			}
-
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Remove")) {
-				ecsCoordinator.destroyEntity(selectedEntityID);
-			}
-
-			ImGui::PopID();
-			ImGui::Separator();
-		}
-		else
-		{ //Remaining object's data modification features
-			auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
-			auto signature = ecsCoordinator.getEntityID(selectedEntityID);
-
-			ImGui::PushID(selectedEntityID);
-
-
-			float pos[2] = { transform.position.GetX(), transform.position.GetY() };
-			if (ImGui::DragFloat2("Position", pos, 5.f)) {
-				transform.position.SetX(pos[0]);
-				transform.position.SetY(pos[1]);
-			}
-
-			float scale[2] = { transform.scale.GetX(), transform.scale.GetY() };
-			if (ImGui::DragFloat2("Scale", scale, 1.f)) {
-				transform.scale.SetX(scale[0]);
-				transform.scale.SetY(scale[1]);
-			}
-
-			float rotation[1] = { transform.orientation.GetX() };
-			if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
-				transform.orientation.SetX(rotation[0]);
-			}
-
-			static bool showIDPopup = false;
-			static char idBuffer[256];
-
-			if (ImGui::Button("Edit ID")) {
-				showIDPopup = true;
-				// Copy current ID to buffer when opening popup
-				strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
-				ImGui::OpenPopup("Edit Entity ID");
-			}
-
-			// Center the popup in the middle of the screen
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
-
-				if (ImGui::Button("Apply")) {
-					ecs.setEntityID(selectedEntityID, std::string(idBuffer));
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					showIDPopup = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Remove")) {
-				ecsCoordinator.destroyEntity(selectedEntityID);
-			}
-
-
-			ImGui::PopID();
-			ImGui::Separator();
-
-		}
-		int originalLayer = layerManager.getEntityLayer(selectedEntityID);
-		selectedLayer = originalLayer;
-		
-		ImGui::RadioButton("0", &selectedLayer, 0); ImGui::SameLine();
-		ImGui::RadioButton("1", &selectedLayer, 1); ImGui::SameLine();
-		ImGui::RadioButton("2", &selectedLayer, 2); ImGui::SameLine();
-		ImGui::RadioButton("3", &selectedLayer, 3);
-		ImGui::SameLine();
-		ImGui::Text("Layer");
-
-		if (selectedLayer != originalLayer) {
-			layerManager.shiftEntityToLayer(originalLayer, selectedLayer, selectedEntityID);
-		}
-
-	if (!logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID) 
-		&& ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
-		ecsCoordinator.removeComponent<ClosestPlatform>(selectedEntityID);
-	}
-
-	const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform", "Button", "Filter", "MovPlatform"};
-
-
-	if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
-		currentItem = 1;
-	}
-	else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(selectedEntityID)) {
-		currentItem = 2;
-	}
-	else if (logicSystemRef->hasBehaviour<ExitBehaviour>(selectedEntityID)) {
-		currentItem = 3;
-	}
-	else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(selectedEntityID)) {
-		currentItem = 4;
-	}
-	else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
-		currentItem = 5;
-	}
-	else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
-		currentItem = 6;
-	}
-	else if (logicSystemRef->hasBehaviour<MouseBehaviour>(selectedEntityID)) {
-		currentItem = 7;
-	}
-	else if (logicSystemRef->hasBehaviour<FilterBehaviour>(selectedEntityID)) {
-		currentItem = 8;
-	}
-	else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(selectedEntityID)) {
-		currentItem = 9;
-	}
-	else {
-		currentItem = 0;
-	}
-
-	// Create the behavior options box for the entity
-	ImGui::SetNextItemWidth(200);
-	if (ImGui::BeginCombo("##dropdown", items[currentItem])) {
-		for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
-			const bool typeSelected = (currentItem == i);
-			if (ImGui::Selectable(items[i], typeSelected)) {
-
-				if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID) && !ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID))
-					ecsCoordinator.removeComponent<PhysicsComponent>(selectedEntityID);
-
-				if (ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID)) {
-					ecsCoordinator.removeComponent<FilterComponent>(selectedEntityID);
-				}
-
-				PhysicsComponent physics;
-				FilterComponent filter;
-				// Add new component
-				switch (i) {
-				case 0:
-					if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
-						ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);
-					}
-
-					if (logicSystemRef->hasBehaviour(selectedEntityID))
-						logicSystemRef->unassignBehaviour(selectedEntityID);
-					break;
-				case 1:
-					//logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
-					physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f); // Enemy-specific values
-					if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
-						ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
-					break;
-				case 2:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>());
-					break;
-				case 3:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>());
-					break;
-				case 4:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
-					GLFWFunctions::collectableCount++;
-					break;
-				case 5:
-
-					// Check if player already exists
-					for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-						if (ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-							playerExists = true;
-							break;
-						}
-					}
-
-					// Open popup if attempting to create duplicate player
-					if (!playerExists) {
-						physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
-						physics.mass = 1.5f;
-						physics.dampening = 0.9f;
-						physics.maxVelocity = 200.0f;
-						physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f); // direction and magnitude
-						physics.maxAccumulatedForce = 40.0f;
-						if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID))
-							ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
-						if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
-							PlayerComponent player;
-							ecsCoordinator.addComponent(selectedEntityID, player);
-						}
-						logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
-					}
-					break;
-				case 6:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
-					break;
-				case 7:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
-					break;
-				case 8:
-					filter.isFilter = true;
-					filter.isFilterClogged = false;
-					if (!ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID))
-						ecsCoordinator.addComponent<FilterComponent>(selectedEntityID, filter);
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
-					break;
-				case 9:
-					logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MovPlatformBehaviour>());
-					break;
-				}
-
-				currentItem = i;
-			}
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::SameLine();
-	ImGui::Text("Behaviour");
-
-	if (assetsManager.checkIfAssetListChanged())
-	{
-		assetNames->clear();
-		for (auto& asset : assetsManager.getAssetList())
-		{
-			assetNames->push_back(asset);
-		}
-		assetsManager.setAssetListChanged(false);
-	}
-
-	// Add a static string to store the current selected item
-	static char selectedTexture[256] = "Select a texture...";
-	strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
-
-	// Create the texture dropdown box for the entity
-	ImGui::SetNextItemWidth(200);
-	if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
-	{
-		for (auto& asset : *assetNames)
-		{
-			if (assetsManager.getTextureList().find(asset) != assetsManager.getTextureList().end())
-			{
-				bool is_selected = (strcmp(selectedTexture, asset.c_str()) == 0);
-				if (ImGui::Selectable(asset.c_str(), is_selected))
-				{
-					strcpy_s(selectedTexture, asset.c_str());
-
-					ecsCoordinator.setTextureID(selectedEntityID, selectedTexture);
-				}
-
-				if (is_selected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::SameLine();
-	ImGui::Text("Texture");
-
-
-	if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
-		checked = true;
-		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
-		frameTime = animation.frameTime;
-		rows = static_cast<int>(animation.rows);
-		columns = static_cast<int>(animation.columns);
-		frames = static_cast<int>(animation.totalFrames);
-	}
-	else {
-		checked = false;
-	}
-
-	 // Spritesheet animation editor
-	if (ImGui::Checkbox("Animation", &checked)) {
-		if (checked) {
-			if (!ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
-				// Get sprite sheet info
-				
-				AnimationComponent animation{};
-				animation.isAnimated = true;
-				animation.totalFrames = 24.0f;
-				animation.frameTime = 0.05f;
-				animation.columns = 8.0f;
-				animation.rows = 3.0f;
-				ecsCoordinator.addComponent(selectedEntityID, animation);
-			}
-		}
-		else {
-			if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
-				ecsCoordinator.removeComponent<AnimationComponent>(selectedEntityID);
-			}
-		}
-	}
-
-	if (checked) {
-		auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
-
-		ImGui::PushItemWidth(100.0f);
-		ImGui::InputInt("TotalFrames", &frames, 1, 100);
-
-		ImGui::InputInt("Rows", &rows, 1, 100);
-
-		ImGui::InputInt("Columns", &columns, 1, 100);
-
-		//ImGui::PushItemWidth(100.0f);  // Width in pixels
-		if (ImGui::SliderFloat("##slider", &frameTime, 0.01f, 0.10f, "%.2f sec", ImGuiSliderFlags_NoInput))
-		{
-			animation.frameTime = frameTime;
-		}
-		ImGui::PopItemWidth();
-		Console().GetLog() << "rows: " << animation.rows << " columns: " << animation.columns << std::endl;
-		ImGui::SameLine();
-		ImGui::Text("Frame Time");
-
-		GLuint textureID = assetsManager.GetTexture(ecsCoordinator.getTextureID(selectedEntityID));
-		
-		ImGui::Image((void*)(intptr_t)textureID, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-
-		animation.rows = static_cast<float>(rows);
-		animation.columns = static_cast<float>(columns);
-		animation.totalFrames = static_cast<float>(frames);
-		
-	}
-
-	ImGui::End();
+    auto logicSystemRef = ecsCoordinator.getSpecificSystem<LogicSystemECS>();
+    ImGui::Begin("Inspector");
+
+    if (selectedEntityID == -1) {
+        ImGui::TextDisabled("No entity selected");
+        ImGui::End();
+        return;
+    }
+
+    // Entity ID/Name display
+    std::string entityID = ecs.getEntityID(selectedEntityID);
+    ImGui::Text("Entity ID: %s", entityID.c_str());
+    ImGui::Separator();
+
+    // Add a Components button that opens a popup with all available components
+    if (ImGui::Button("Edit Components")) {
+        ImGui::OpenPopup("Component Editor");
+    }
+
+    // Component Editor Popup
+    if (ImGui::BeginPopupModal("Component Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Add or remove components for entity: %s", entityID.c_str());
+        ImGui::Separator();
+
+        // Create checkboxes for each component type
+        // TransformComponent is a special case - all entities must have it
+        bool hasTransform = ecs.hasComponent<TransformComponent>(selectedEntityID);
+        ImGui::BeginDisabled();  // Disable the checkbox because all entities must have transforms
+        ImGui::Checkbox("Transform Component", &hasTransform);
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::TextDisabled("(Required)");
+
+        // AABB Component
+        bool hasAABB = ecs.hasComponent<AABBComponent>(selectedEntityID);
+        if (ImGui::Checkbox("AABB Component", &hasAABB)) {
+            if (hasAABB && !ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+                AABBComponent aabb;
+                // Initialize with default values based on entity's transform
+                auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+                aabb.left = -transform.scale.GetX() / 2.0f;
+                aabb.right = transform.scale.GetX() / 2.0f;
+                aabb.top = transform.scale.GetY() / 2.0f;
+                aabb.bottom = -transform.scale.GetY() / 2.0f;
+                ecs.addComponent(selectedEntityID, aabb);
+            }
+            else if (!hasAABB && ecs.hasComponent<AABBComponent>(selectedEntityID)) {
+                ecs.removeComponent<AABBComponent>(selectedEntityID);
+            }
+        }
+
+        // Physics Component
+        bool hasPhysics = ecs.hasComponent<PhysicsComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Physics Component", &hasPhysics)) {
+            if (hasPhysics && !ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+                PhysicsComponent physics;
+                // Initialize with reasonable defaults
+                physics.mass = 1.0f;
+                physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+                physics.dampening = 0.9f;
+                physics.maxVelocity = 200.0f;
+                ecs.addComponent<PhysicsComponent>(selectedEntityID, physics);
+            }
+            else if (!hasPhysics && ecs.hasComponent<PhysicsComponent>(selectedEntityID)) {
+                ecs.removeComponent<PhysicsComponent>(selectedEntityID);
+            }
+        }
+
+        // Animation Component
+        bool hasAnimation = ecs.hasComponent<AnimationComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Animation Component", &hasAnimation)) {
+            if (hasAnimation && !ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+                AnimationComponent animation;
+                animation.isAnimated = true;
+                animation.totalFrames = 1.0f;
+                animation.frameTime = 0.05f;
+                animation.columns = 1.0f;
+                animation.rows = 1.0f;
+                ecs.addComponent<AnimationComponent>(selectedEntityID, animation);
+            }
+            else if (!hasAnimation && ecs.hasComponent<AnimationComponent>(selectedEntityID)) {
+                ecs.removeComponent<AnimationComponent>(selectedEntityID);
+            }
+        }
+
+        //// Font Component
+        //bool hasFont = ecs.hasComponent<FontComponent>(selectedEntityID);
+        //if (ImGui::Checkbox("Font Component", &hasFont)) {
+        //    if (hasFont && !ecs.hasComponent<FontComponent>(selectedEntityID)) {
+        //        FontComponent font;
+        //        font.text = "New Text";
+        //        font.textScale = 1.0f;
+        //        font.textBoxWidth = 300.0f;
+        //        font.color = myMath::Vector3D(1.0f, 1.0f, 1.0f);
+        //        font.fontId = "default";  // Assuming you have a default font
+        //        ecs.addComponent<FontComponent>(selectedEntityID, font);
+        //    }
+        //    else if (!hasFont && ecs.hasComponent<FontComponent>(selectedEntityID)) {
+        //        ecs.removeComponent<FontComponent>(selectedEntityID);
+        //    }
+        //}
+
+        // Player Component
+        bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Player Component", &hasPlayer)) {
+            // Check if a player already exists
+            bool playerExist = false;
+            if (hasPlayer && !ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+                for (auto& entity : ecs.getAllLiveEntities()) {
+                    if ((int)entity != selectedEntityID && ecs.hasComponent<PlayerComponent>(entity)) {
+                        playerExist = true;
+                        break;
+                    }
+                }
+
+                if (!playerExist) {
+                    PlayerComponent player;
+                    player.isPlayer = true;
+                    ecs.addComponent<PlayerComponent>(selectedEntityID, player);
+                }
+                else {
+                    // Only one player allowed - show a warning
+                    ImGui::OpenPopup("Player Warning");
+                    hasPlayer = false;
+                }
+            }
+            else if (!hasPlayer && ecs.hasComponent<PlayerComponent>(selectedEntityID)) {
+                ecs.removeComponent<PlayerComponent>(selectedEntityID);
+            }
+        }
+
+        // Warning popup for player component
+        if (ImGui::BeginPopupModal("Player Warning", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Only one player entity can exist in the scene.");
+            ImGui::Separator();
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        // Enemy Component
+        bool hasEnemy = ecs.hasComponent<EnemyComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Enemy Component", &hasEnemy)) {
+            if (hasEnemy && !ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+                EnemyComponent enemy;
+                enemy.isEnemy = true;
+                enemy.isClockwise = true;
+                enemy.visionAngle = 60.0f;
+                enemy.visionDistance = 300.0f;
+                enemy.drawVisionDebug = true;
+                //enemy.numWaypoints = 2;
+                //// Add default waypoints
+                //auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+                //enemy.waypoints.push_back(transform.position);
+                //enemy.waypoints.push_back(myMath::Vector2D(transform.position.GetX() + 100, transform.position.GetY()));
+                ecs.addComponent<EnemyComponent>(selectedEntityID, enemy);
+            }
+            else if (!hasEnemy && ecs.hasComponent<EnemyComponent>(selectedEntityID)) {
+                ecs.removeComponent<EnemyComponent>(selectedEntityID);
+            }
+        }
+
+        // Collectable Component
+        bool hasCollectable = ecs.hasComponent<CollectableComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Collectable Component", &hasCollectable)) {
+            if (hasCollectable && !ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+                CollectableComponent collectable;
+                collectable.isCollectable = true;
+                ecs.addComponent<CollectableComponent>(selectedEntityID, collectable);
+                GLFWFunctions::collectableCount++;
+            }
+            else if (!hasCollectable && ecs.hasComponent<CollectableComponent>(selectedEntityID)) {
+                ecs.removeComponent<CollectableComponent>(selectedEntityID);
+                if (GLFWFunctions::collectableCount > 0)
+                    GLFWFunctions::collectableCount--;
+            }
+        }
+
+        // Pump Component
+        bool hasPump = ecs.hasComponent<PumpComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Pump Component", &hasPump)) {
+            if (hasPump && !ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+                PumpComponent pump;
+                pump.isPump = true;
+                pump.pumpForce = 3.0f;
+                ecs.addComponent<PumpComponent>(selectedEntityID, pump);
+            }
+            else if (!hasPump && ecs.hasComponent<PumpComponent>(selectedEntityID)) {
+                ecs.removeComponent<PumpComponent>(selectedEntityID);
+            }
+        }
+
+        // Exit Component
+        bool hasExit = ecs.hasComponent<ExitComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Exit Component", &hasExit)) {
+            if (hasExit && !ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+                ExitComponent exit;
+                exit.isExit = true;
+                ecs.addComponent<ExitComponent>(selectedEntityID, exit);
+            }
+            else if (!hasExit && ecs.hasComponent<ExitComponent>(selectedEntityID)) {
+                ecs.removeComponent<ExitComponent>(selectedEntityID);
+            }
+        }
+
+        // Background Component
+        bool hasBackground = ecs.hasComponent<BackgroundComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Background Component", &hasBackground)) {
+            if (hasBackground && !ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+                BackgroundComponent background;
+                background.isBackground = true;
+                ecs.addComponent<BackgroundComponent>(selectedEntityID, background);
+            }
+            else if (!hasBackground && ecs.hasComponent<BackgroundComponent>(selectedEntityID)) {
+                ecs.removeComponent<BackgroundComponent>(selectedEntityID);
+            }
+        }
+
+        // UI Component
+        bool hasUI = ecs.hasComponent<UIComponent>(selectedEntityID);
+        if (ImGui::Checkbox("UI Component", &hasUI)) {
+            if (hasUI && !ecs.hasComponent<UIComponent>(selectedEntityID)) {
+                UIComponent ui;
+                ui.isUI = true;
+                ecs.addComponent<UIComponent>(selectedEntityID, ui);
+            }
+            else if (!hasUI && ecs.hasComponent<UIComponent>(selectedEntityID)) {
+                ecs.removeComponent<UIComponent>(selectedEntityID);
+            }
+        }
+
+        // Button Component
+        bool hasButton = ecs.hasComponent<ButtonComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Button Component", &hasButton)) {
+            if (hasButton && !ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+                ButtonComponent button;
+                auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+                button.originalScale = transform.scale;
+                button.hoveredScale = myMath::Vector2D(transform.scale.GetX() * 1.1f, transform.scale.GetY() * 1.1f);
+                button.isButton = true;
+                ecs.addComponent<ButtonComponent>(selectedEntityID, button);
+            }
+            else if (!hasButton && ecs.hasComponent<ButtonComponent>(selectedEntityID)) {
+                ecs.removeComponent<ButtonComponent>(selectedEntityID);
+            }
+        }
+
+        // Filter Component
+        bool hasFilter = ecs.hasComponent<FilterComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Filter Component", &hasFilter)) {
+            if (hasFilter && !ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+                FilterComponent filter;
+                filter.isFilter = true;
+                filter.isFilterClogged = false;
+                ecs.addComponent<FilterComponent>(selectedEntityID, filter);
+            }
+            else if (!hasFilter && ecs.hasComponent<FilterComponent>(selectedEntityID)) {
+                ecs.removeComponent<FilterComponent>(selectedEntityID);
+            }
+        }
+
+        // Moving Platform Component
+        bool hasMovPlatform = ecs.hasComponent<MovPlatformComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Moving Platform Component", &hasMovPlatform)) {
+            if (hasMovPlatform && !ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+                MovPlatformComponent movPlatform;
+                auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
+                movPlatform.speed = 50.0f;
+                movPlatform.maxDistance = 200.0f;
+                movPlatform.startPos = transform.position;
+                movPlatform.direction = myMath::Vector2D(1.0f, 0.0f);  // Default horizontal movement
+                ecs.addComponent<MovPlatformComponent>(selectedEntityID, movPlatform);
+            }
+            else if (!hasMovPlatform && ecs.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+                ecs.removeComponent<MovPlatformComponent>(selectedEntityID);
+            }
+        }
+
+        // Navigation Component
+        bool hasNavigation = ecs.hasComponent<NavigationComponent>(selectedEntityID);
+        if (ImGui::Checkbox("Navigation Component", &hasNavigation)) {
+            if (hasNavigation && !ecs.hasComponent<NavigationComponent>(selectedEntityID)) {
+                NavigationComponent navigation;
+                navigation.isNavigation = true;
+                navigation.isVisible = true;
+                ecs.addComponent<NavigationComponent>(selectedEntityID, navigation);
+            }
+            else if (!hasNavigation && ecs.hasComponent<NavigationComponent>(selectedEntityID)) {
+                ecs.removeComponent<NavigationComponent>(selectedEntityID);
+            }
+        }
+
+        // Platform Component
+        bool hasClosestPlatform = ecs.hasComponent<ClosestPlatform>(selectedEntityID);
+        if (ImGui::Checkbox("Platform Component", &hasClosestPlatform)) {
+            if (hasClosestPlatform && !ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
+                ClosestPlatform closestPlatform{};
+                closestPlatform.isClosest = false;
+                ecs.addComponent<ClosestPlatform>(selectedEntityID, closestPlatform);
+
+                // Automatically assign platform behavior when adding platform component
+                logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
+
+                // If you also need to update the behavior dropdown selection
+                currentItem = 6;
+            }
+            else if (!hasClosestPlatform && ecs.hasComponent<ClosestPlatform>(selectedEntityID)) {
+                ecs.removeComponent<ClosestPlatform>(selectedEntityID);
+            }
+        }
+
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // Always display Transform Component properties
+    if (ecsCoordinator.hasComponent<TransformComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Transform Component", ImGuiTreeNodeFlags_DefaultOpen)) {
+            auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+
+            float pos[2] = { transform.position.GetX(), transform.position.GetY() };
+            if (ImGui::DragFloat2("Position", pos, 5.f)) {
+                transform.position.SetX(pos[0]);
+                transform.position.SetY(pos[1]);
+            }
+
+            float scale[2] = { transform.scale.GetX(), transform.scale.GetY() };
+            if (ImGui::DragFloat2("Scale", scale, 1.f)) {
+                transform.scale.SetX(scale[0]);
+                transform.scale.SetY(scale[1]);
+            }
+
+            float rotation[1] = { transform.orientation.GetX() };
+            if (ImGui::DragFloat("Rotation", rotation, 1.f)) {
+                transform.orientation.SetX(rotation[0]);
+            }
+        }
+    }
+
+    // AABB Component
+    if (ecsCoordinator.hasComponent<AABBComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("AABB Component")) {
+            auto& aabb = ecsCoordinator.getComponent<AABBComponent>(selectedEntityID);
+
+            ImGui::DragFloat("Left", &aabb.left, 1.0f);
+            ImGui::DragFloat("Right", &aabb.right, 1.0f);
+            ImGui::DragFloat("Top", &aabb.top, 1.0f);
+            ImGui::DragFloat("Bottom", &aabb.bottom, 1.0f);
+
+            // Add button to auto-calculate AABB from transform
+            if (ImGui::Button("Calculate from Transform")) {
+                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                aabb.left = -transform.scale.GetX() / 2.0f;
+                aabb.right = transform.scale.GetX() / 2.0f;
+                aabb.top = transform.scale.GetY() / 2.0f;
+                aabb.bottom = -transform.scale.GetY() / 2.0f;
+            }
+        }
+    }
+
+    // Physics Component
+    if (ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Physics Component")) {
+            auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(selectedEntityID);
+
+            ImGui::DragFloat("Mass", &physics.mass, 0.1f, 0.1f, 100.0f);
+
+            float gravity[2] = { physics.gravityScale.GetX(), physics.gravityScale.GetY() };
+            if (ImGui::DragFloat2("Gravity Scale", gravity, 0.1f)) {
+                physics.gravityScale.SetX(gravity[0]);
+                physics.gravityScale.SetY(gravity[1]);
+            }
+
+            ImGui::DragFloat("Jump Force", &physics.jump, 1.0f, 0.0f, 1000.0f);
+            ImGui::DragFloat("Dampening", &physics.dampening, 0.01f, 0.0f, 1.0f);
+
+            float velocity[2] = { physics.velocity.GetX(), physics.velocity.GetY() };
+            if (ImGui::DragFloat2("Velocity", velocity, 1.0f)) {
+                physics.velocity.SetX(velocity[0]);
+                physics.velocity.SetY(velocity[1]);
+            }
+
+            ImGui::DragFloat("Max Velocity", &physics.maxVelocity, 1.0f, 0.0f, 1000.0f);
+
+            float accel[2] = { physics.acceleration.GetX(), physics.acceleration.GetY() };
+            if (ImGui::DragFloat2("Acceleration", accel, 0.1f)) {
+                physics.acceleration.SetX(accel[0]);
+                physics.acceleration.SetY(accel[1]);
+            }
+
+            // Force properties
+            ImGui::Text("Force:");
+            float forceMag = physics.force.GetMagnitude();
+            if (ImGui::DragFloat("Magnitude", &forceMag, 0.5f, 0.0f, 100.0f)) {
+                physics.force.SetMagnitude(forceMag);
+            }
+
+            float forceDir[2] = { physics.force.GetDirection().GetX(), physics.force.GetDirection().GetY() };
+            if (ImGui::DragFloat2("Direction", forceDir, 0.01f, -1.0f, 1.0f)) {
+                // Normalize direction vector if needed
+                float length = sqrt(forceDir[0] * forceDir[0] + forceDir[1] * forceDir[1]);
+                if (length > 0.001f) {
+                    forceDir[0] /= length;
+                    forceDir[1] /= length;
+                }
+                physics.force.SetDirection(myMath::Vector2D(forceDir[0], forceDir[1]));
+            }
+
+            float accForce[2] = { physics.accumulatedForce.GetX(), physics.accumulatedForce.GetY() };
+            if (ImGui::DragFloat2("Accumulated Force", accForce, 0.5f)) {
+                physics.accumulatedForce.SetX(accForce[0]);
+                physics.accumulatedForce.SetY(accForce[1]);
+            }
+
+            ImGui::DragFloat("Max Accumulated Force", &physics.maxAccumulatedForce, 1.0f, 0.0f, 1000.0f);
+            ImGui::DragFloat("Previous Force", &physics.prevForce, 0.5f);
+            ImGui::DragFloat("Target Force", &physics.targetForce, 0.5f);
+        }
+    }
+
+    //// Font Component
+    //if (ecsCoordinator.hasComponent<FontComponent>(selectedEntityID)) {
+    //    if (ImGui::CollapsingHeader("Font Component", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //        auto& fontComp = ecsCoordinator.getComponent<FontComponent>(selectedEntityID);
+
+    //        // Create a text buffer large enough for editing
+    //        static char textBuffer[1024] = { 0 };
+    //        strncpy(textBuffer, fontComp.text.c_str(), sizeof(textBuffer) - 1);
+
+    //        if (ImGui::InputTextMultiline("Text", textBuffer, sizeof(textBuffer))) {
+    //            fontComp.text = textBuffer;
+    //        }
+
+    //        ImGui::DragFloat("Text Scale", &fontComp.textScale, 0.05f, 0.1f, 10.0f);
+    //        ImGui::DragFloat("Text Box Width", &fontComp.textBoxWidth, 1.0f, 10.0f, 2000.0f);
+
+    //        float color[3] = { fontComp.color.GetX(), fontComp.color.GetY(), fontComp.color.GetZ() };
+    //        if (ImGui::ColorEdit3("Text Color", color)) {
+    //            fontComp.color.SetX(color[0]);
+    //            fontComp.color.SetY(color[1]);
+    //            fontComp.color.SetZ(color[2]);
+    //        }
+
+    //        // Font selection dropdown
+    //        if (ImGui::BeginCombo("Font", fontComp.fontId.c_str())) {
+    //            for (auto& pair : assetsManager.getFontList()) {
+    //                const bool isSelected = (fontComp.fontId == pair.first);
+    //                if (ImGui::Selectable(pair.first.c_str(), isSelected)) {
+    //                    fontComp.fontId = pair.first;
+    //                }
+
+    //                if (isSelected) {
+    //                    ImGui::SetItemDefaultFocus();
+    //                }
+    //            }
+    //            ImGui::EndCombo();
+    //        }
+    //    }
+    //}
+
+    // Animation Component
+    if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Animation Component")) {
+            auto& animation = ecsCoordinator.getComponent<AnimationComponent>(selectedEntityID);
+
+            // Convert float values to integers for UI input
+            frameTime = animation.frameTime;
+            rows = static_cast<int>(animation.rows);
+            columns = static_cast<int>(animation.columns);
+            frames = static_cast<int>(animation.totalFrames);
+
+            // UI Controls
+            ImGui::PushItemWidth(100.0f);
+            if (ImGui::InputInt("TotalFrames", &frames, 1, 100)) {
+                animation.totalFrames = static_cast<float>(frames);
+            }
+
+            if (ImGui::InputInt("Rows", &rows, 1, 100)) {
+                animation.rows = static_cast<float>(rows);
+            }
+
+            if (ImGui::InputInt("Columns", &columns, 1, 100)) {
+                animation.columns = static_cast<float>(columns);
+            }
+
+            if (ImGui::SliderFloat("Frame Time", &frameTime, 0.01f, 0.10f, "%.2f sec", ImGuiSliderFlags_NoInput)) {
+                animation.frameTime = frameTime;
+            }
+            ImGui::PopItemWidth();
+
+            Console().GetLog() << "rows: " << animation.rows << " columns: " << animation.columns << std::endl;
+
+            GLuint textureID = assetsManager.GetTexture(ecsCoordinator.getTextureID(selectedEntityID));
+
+            ImGui::Image((void*)(intptr_t)textureID, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+        }
+    }
+
+    // Button Component
+    if (ecsCoordinator.hasComponent<ButtonComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Button Component")) {
+            auto& button = ecsCoordinator.getComponent<ButtonComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Button", &button.isButton);
+
+            /*float originalScale[2] = { button.originalScale.GetX(), button.originalScale.GetY() };
+            if (ImGui::DragFloat2("Original Scale", originalScale, 1.0f)) {
+                button.originalScale.SetX(originalScale[0]);
+                button.originalScale.SetY(originalScale[1]);
+            }
+
+            float hoveredScale[2] = { button.hoveredScale.GetX(), button.hoveredScale.GetY() };
+            if (ImGui::DragFloat2("Hovered Scale", hoveredScale, 1.0f)) {
+                button.hoveredScale.SetX(hoveredScale[0]);
+                button.hoveredScale.SetY(hoveredScale[1]);
+            }
+
+            if (ImGui::Button("Set Original From Transform")) {
+                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                button.originalScale = transform.scale;
+            }
+
+            if (ImGui::Button("Set Hovered Scale (110%)")) {
+                button.hoveredScale = myMath::Vector2D(
+                    button.originalScale.GetX() * 1.1f,
+                    button.originalScale.GetY() * 1.1f
+                );
+            }*/
+        }
+    }
+
+    // Enemy Component
+    if (ecsCoordinator.hasComponent<EnemyComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Enemy Component")) {
+            auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Enemy", &enemy.isEnemy);
+            ImGui::Checkbox("Is Clockwise", &enemy.isClockwise);
+            ImGui::DragFloat("Vision Angle", &enemy.visionAngle, 1.0f, 0.0f, 360.0f);
+            ImGui::DragFloat("Vision Distance", &enemy.visionDistance, 5.0f, 0.0f, 1000.0f);
+            ImGui::Checkbox("Draw Vision Debug", &enemy.drawVisionDebug);
+
+            // Display and edit waypoints
+            static int selectedWaypoint = -1;
+            ImGui::Text("Waypoints (%d):", enemy.numWaypoints);
+
+            // Add new waypoint button
+            if (ImGui::Button("Add Waypoint")) {
+                // Add new waypoint at a reasonable offset from the last one
+                myMath::Vector2D newPos;
+                if (enemy.waypoints.empty()) {
+                    auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                    newPos = transform.position;
+                }
+                else {
+                    newPos = enemy.waypoints.back();
+                    newPos.SetX(newPos.GetX() + 100.0f);
+                }
+                enemy.waypoints.push_back(newPos);
+                enemy.numWaypoints = static_cast<int>(enemy.waypoints.size());
+            }
+
+            // Remove selected waypoint button
+            ImGui::SameLine();
+            if (ImGui::Button("Remove Waypoint") && selectedWaypoint >= 0 && selectedWaypoint < enemy.waypoints.size()) {
+                enemy.waypoints.erase(enemy.waypoints.begin() + selectedWaypoint);
+                enemy.numWaypoints = static_cast<int>(enemy.waypoints.size());
+                selectedWaypoint = -1;
+            }
+
+            // List all waypoints
+            ImGui::BeginChild("WaypointsList", ImVec2(0, 150), true);
+            for (int i = 0; i < enemy.waypoints.size(); i++) {
+                auto& waypoint = enemy.waypoints[i];
+                char label[32];
+                sprintf_s(label, "Waypoint %d", i + 1);
+
+                bool isSelected = (selectedWaypoint == i);
+                if (ImGui::Selectable(label, isSelected)) {
+                    selectedWaypoint = i;
+                }
+
+                // Display waypoint coordinates
+                ImGui::SameLine(ImGui::GetWindowWidth() - 200);
+                ImGui::Text("(%.1f, %.1f)", waypoint.GetX(), waypoint.GetY());
+            }
+            ImGui::EndChild();
+
+            // Edit selected waypoint
+            if (selectedWaypoint >= 0 && selectedWaypoint < enemy.waypoints.size()) {
+                ImGui::Text("Edit Waypoint %d:", selectedWaypoint + 1);
+                float pos[2] = { enemy.waypoints[selectedWaypoint].GetX(), enemy.waypoints[selectedWaypoint].GetY() };
+                if (ImGui::DragFloat2("Position", pos, 5.0f)) {
+                    enemy.waypoints[selectedWaypoint].SetX(pos[0]);
+                    enemy.waypoints[selectedWaypoint].SetY(pos[1]);
+                }
+            }
+
+            // State dropdown
+            const char* states[] = { "Patrol", "Chase", "Attack" };
+            ImGui::Combo("Current State", &enemy.currState, states, IM_ARRAYSIZE(states));
+        }
+    }
+
+    // Player Component
+    if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Player Component")) {
+            auto& player = ecsCoordinator.getComponent<PlayerComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Player", &player.isPlayer);
+            /*ImGui::Checkbox("Is Visible", &player.isVisible);
+            ImGui::Checkbox("Is Growing", &player.isGrowing);
+
+            double growStartTime = player.growStartTime;
+            if (ImGui::DragScalar("Grow Start Time", ImGuiDataType_Double, &growStartTime, 0.1)) {
+                player.growStartTime = growStartTime;
+            }
+
+            ImGui::Checkbox("Is Idle", &player.isIdle);
+            ImGui::Checkbox("Playing Idle Animation", &player.playingIdleAnim);
+
+            double lastMoveTime = player.lastMoveTime;
+            if (ImGui::DragScalar("Last Move Time", ImGuiDataType_Double, &lastMoveTime, 0.1)) {
+                player.lastMoveTime = lastMoveTime;
+            }
+
+            double idleAnimStart = player.idleAnimStart;
+            if (ImGui::DragScalar("Idle Animation Start", ImGuiDataType_Double, &idleAnimStart, 0.1)) {
+                player.idleAnimStart = idleAnimStart;
+            }*/
+        }
+    }
+
+    // Pump Component
+    if (ecsCoordinator.hasComponent<PumpComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Pump Component")) {
+            auto& pump = ecsCoordinator.getComponent<PumpComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Pump", &pump.isPump);
+            ImGui::Checkbox("Is Animate", &pump.isAnimate);
+            ImGui::DragFloat("Pump Force", &pump.pumpForce, 0.1f, 0.0f, 20.0f);
+        }
+    }
+
+    // Exit Component
+    if (ecsCoordinator.hasComponent<ExitComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Exit Component")) {
+            auto& exit = ecsCoordinator.getComponent<ExitComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Exit", &exit.isExit);
+        }
+    }
+
+    // Collectable Component
+    if (ecsCoordinator.hasComponent<CollectableComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Collectable Component")) {
+            auto& collectable = ecsCoordinator.getComponent<CollectableComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Collectable", &collectable.isCollectable);
+        }
+    }
+
+    // Background Component
+    if (ecsCoordinator.hasComponent<BackgroundComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Background Component")) {
+            auto& background = ecsCoordinator.getComponent<BackgroundComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Background", &background.isBackground);
+        }
+    }
+
+    // UI Component
+    if (ecsCoordinator.hasComponent<UIComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("UI Component")) {
+            auto& ui = ecsCoordinator.getComponent<UIComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is UI", &ui.isUI);
+        }
+    }
+
+    // Filter Component
+    if (ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Filter Component")) {
+            auto& filter = ecsCoordinator.getComponent<FilterComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Filter", &filter.isFilter);
+            ImGui::Checkbox("Is Filter Clogged", &filter.isFilterClogged);
+        }
+    }
+
+    // Moving Platform Component
+    if (ecsCoordinator.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Moving Platform Component")) {
+            auto& movPlatform = ecsCoordinator.getComponent<MovPlatformComponent>(selectedEntityID);
+
+            ImGui::DragFloat("Speed", &movPlatform.speed, 1.0f, 0.0f, 200.0f);
+            ImGui::DragFloat("Max Distance", &movPlatform.maxDistance, 5.0f, 0.0f, 1000.0f);
+            ImGui::Checkbox("Moving Forward", &movPlatform.movForward);
+
+            float startPos[2] = { movPlatform.startPos.GetX(), movPlatform.startPos.GetY() };
+            if (ImGui::DragFloat2("Start Position", startPos, 5.0f)) {
+                movPlatform.startPos.SetX(startPos[0]);
+                movPlatform.startPos.SetY(startPos[1]);
+            }
+
+            float direction[2] = { movPlatform.direction.GetX(), movPlatform.direction.GetY() };
+            if (ImGui::DragFloat2("Direction", direction, 0.1f, -1.0f, 1.0f)) {
+                // Normalize direction
+                float length = sqrt(direction[0] * direction[0] + direction[1] * direction[1]);
+                if (length > 0.001f) {
+                    direction[0] /= length;
+                    direction[1] /= length;
+                }
+                movPlatform.direction.SetX(direction[0]);
+                movPlatform.direction.SetY(direction[1]);
+            }
+
+            if (ImGui::Button("Set Current Position as Start")) {
+                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                movPlatform.startPos = transform.position;
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Horizontal Movement")) {
+                movPlatform.direction.SetX(1.0f);
+                movPlatform.direction.SetY(0.0f);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Vertical Movement")) {
+                movPlatform.direction.SetX(0.0f);
+                movPlatform.direction.SetY(1.0f);
+            }
+        }
+    }
+
+    // Navigation Component
+    if (ecsCoordinator.hasComponent<NavigationComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Navigation Component")) {
+            auto& navigation = ecsCoordinator.getComponent<NavigationComponent>(selectedEntityID);
+
+            ImGui::Checkbox("Is Navigation", &navigation.isNavigation);
+            ImGui::Checkbox("Is Visible", &navigation.isVisible);
+        }
+    }
+
+    // Closest Platform Component
+    if (ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Platform Component")) {
+            auto& platform = ecsCoordinator.getComponent<ClosestPlatform>(selectedEntityID);
+
+            ImGui::Checkbox("Is Closest", &platform.isClosest);
+        }
+    }
+
+    // Add a divider before the behavior section
+    ImGui::Separator();
+
+    // Behavior Component
+    if (ecsCoordinator.hasComponent<BehaviourComponent>(selectedEntityID)) {
+        if (ImGui::CollapsingHeader("Behavior", ImGuiTreeNodeFlags_DefaultOpen)) {
+            // Behavior dropdown
+            const char* items[] = { "None", "Enemy", "Pump", "Exit", "Collectable", "Player", "Platform", "Button", "Filter", "MovPlatform", "Navigation" };
+
+            if (logicSystemRef->hasBehaviour<EnemyBehaviour>(selectedEntityID)) {
+                currentItem = 1;
+            }
+            else if (logicSystemRef->hasBehaviour<EffectPumpBehaviour>(selectedEntityID)) {
+                currentItem = 2;
+            }
+            else if (logicSystemRef->hasBehaviour<ExitBehaviour>(selectedEntityID)) {
+                currentItem = 3;
+            }
+            else if (logicSystemRef->hasBehaviour<CollectableBehaviour>(selectedEntityID)) {
+                currentItem = 4;
+            }
+            else if (logicSystemRef->hasBehaviour<PlayerBehaviour>(selectedEntityID)) {
+                currentItem = 5;
+            }
+            else if (logicSystemRef->hasBehaviour<PlatformBehaviour>(selectedEntityID)) {
+                currentItem = 6;
+            }
+            else if (logicSystemRef->hasBehaviour<MouseBehaviour>(selectedEntityID)) {
+                currentItem = 7;
+            }
+            else if (logicSystemRef->hasBehaviour<FilterBehaviour>(selectedEntityID)) {
+                currentItem = 8;
+            }
+            else if (logicSystemRef->hasBehaviour<MovPlatformBehaviour>(selectedEntityID)) {
+                currentItem = 9;
+            }
+            else {
+                currentItem = 0;
+            }
+
+            ImGui::SetNextItemWidth(200);
+            if (ImGui::BeginCombo("##BehaviorDropdown", items[currentItem])) {
+                for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+                    const bool typeSelected = (currentItem == i);
+                    if (ImGui::Selectable(items[i], typeSelected)) {
+                        // Add necessary components and remove incompatible ones based on behavior type
+                        if (i == 0) { // None
+                            if (ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+                                ecsCoordinator.removeComponent<PlayerComponent>(selectedEntityID);
+                            }
+                            if (logicSystemRef->hasBehaviour(selectedEntityID)) {
+                                logicSystemRef->unassignBehaviour(selectedEntityID);
+                            }
+                        }
+                        else if (i == 1) { // Enemy
+                            if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
+                                PhysicsComponent physics;
+                                physics.gravityScale = myMath::Vector2D(-0.98f, -0.98f);
+                                ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+                            }
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EnemyBehaviour>());
+                        }
+                        else if (i == 2) { // Pump
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<EffectPumpBehaviour>());
+                        }
+                        else if (i == 3) { // Exit
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<ExitBehaviour>());
+                        }
+                        else if (i == 4) { // Collectable
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<CollectableBehaviour>());
+                        }
+                        else if (i == 5) { // Player
+                            // Check if player already exists
+                            bool playerExists = false;
+                            for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
+                                if ((int)entity != selectedEntityID && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
+                                    playerExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (!playerExists) {
+                                if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
+                                    PhysicsComponent physics;
+                                    physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);
+                                    physics.mass = 1.5f;
+                                    physics.dampening = 0.9f;
+                                    physics.maxVelocity = 200.0f;
+                                    physics.force = Force(myMath::Vector2D(0.0f, 0.0f), 10.0f);
+                                    physics.maxAccumulatedForce = 40.0f;
+                                    ecsCoordinator.addComponent<PhysicsComponent>(selectedEntityID, physics);
+                                }
+
+                                if (!ecsCoordinator.hasComponent<PlayerComponent>(selectedEntityID)) {
+                                    PlayerComponent player;
+                                    player.isPlayer = true;
+                                    ecsCoordinator.addComponent<PlayerComponent>(selectedEntityID, player);
+                                }
+
+                                logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlayerBehaviour>());
+                            }
+                            else {
+                                ImGui::OpenPopup("Player Warning");
+                            }
+                        }
+                        else if (i == 6) { // Platform
+                            if (!ecsCoordinator.hasComponent<ClosestPlatform>(selectedEntityID)) {
+                                ClosestPlatform platform;
+                                platform.isClosest = false;
+                                ecsCoordinator.addComponent<ClosestPlatform>(selectedEntityID, platform);
+                            }
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<PlatformBehaviour>());
+                        }
+                        else if (i == 7) { // Button
+                            if (!ecsCoordinator.hasComponent<ButtonComponent>(selectedEntityID)) {
+                                ButtonComponent button;
+                                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                                button.originalScale = transform.scale;
+                                button.hoveredScale = myMath::Vector2D(transform.scale.GetX() * 1.1f, transform.scale.GetY() * 1.1f);
+                                button.isButton = true;
+                                ecsCoordinator.addComponent<ButtonComponent>(selectedEntityID, button);
+                            }
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MouseBehaviour>());
+                        }
+                        else if (i == 8) { // Filter
+                            if (!ecsCoordinator.hasComponent<FilterComponent>(selectedEntityID)) {
+                                FilterComponent filter;
+                                filter.isFilter = true;
+                                filter.isFilterClogged = false;
+                                ecsCoordinator.addComponent<FilterComponent>(selectedEntityID, filter);
+                            }
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<FilterBehaviour>());
+                        }
+                        else if (i == 9) { // MovPlatform
+                            if (!ecsCoordinator.hasComponent<MovPlatformComponent>(selectedEntityID)) {
+                                MovPlatformComponent movPlatform;
+                                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
+                                movPlatform.startPos = transform.position;
+                                movPlatform.direction = myMath::Vector2D(1.0f, 0.0f);
+                                movPlatform.speed = 50.0f;
+                                movPlatform.maxDistance = 200.0f;
+                                ecsCoordinator.addComponent<MovPlatformComponent>(selectedEntityID, movPlatform);
+                            }
+                            logicSystemRef->assignBehaviour(selectedEntityID, std::make_shared<MovPlatformBehaviour>());
+                        }
+
+                        currentItem = i;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+            ImGui::Text("Behavior");
+        }
+    }
+
+    // Entity ID and texture editing
+    ImGui::Separator();
+
+    if (assetsManager.checkIfAssetListChanged())
+    {
+        assetNames->clear();
+        for (auto& asset : assetsManager.getAssetList())
+        {
+            assetNames->push_back(asset);
+        }
+        assetsManager.setAssetListChanged(false);
+    }
+
+    // Add a static string to store the current selected item
+    static char selectedTexture[256] = "Select a texture...";
+    strcpy_s(selectedTexture, sizeof(selectedTexture), ecsCoordinator.getTextureID(selectedEntityID).c_str());
+
+    // Get the latest texture list directly from the assets manager
+    auto& textureList = assetsManager.getTextureList();
+
+    // Create the texture dropdown box for the entity
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::BeginCombo("##TextureDropdown", selectedTexture))
+    {
+        for (const auto& texturePair : textureList)
+        {
+            const std::string& asset = texturePair.first;
+            bool is_selected = (strcmp(selectedTexture, asset.c_str()) == 0);
+            if (ImGui::Selectable(asset.c_str(), is_selected))
+            {
+                strcpy_s(selectedTexture, asset.c_str());
+                ecsCoordinator.setTextureID(selectedEntityID, selectedTexture);
+            }
+
+            if (is_selected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+    ImGui::Text("Texture");
+
+    // Layer selection
+    int originalLayer = layerManager.getEntityLayer(selectedEntityID);
+    selectedLayer = originalLayer;
+
+    ImGui::RadioButton("0", &selectedLayer, 0); ImGui::SameLine();
+    ImGui::RadioButton("1", &selectedLayer, 1); ImGui::SameLine();
+    ImGui::RadioButton("2", &selectedLayer, 2); ImGui::SameLine();
+    ImGui::RadioButton("3", &selectedLayer, 3);
+    ImGui::SameLine();
+    ImGui::Text("Layer");
+
+    if (selectedLayer != originalLayer) {
+        layerManager.shiftEntityToLayer(originalLayer, selectedLayer, selectedEntityID);
+    }
+
+    // Entity ID editing
+    static bool showIDPopup = false;
+    static char idBuffer[256];
+
+    if (ImGui::Button("Edit ID")) {
+        showIDPopup = true;
+        strncpy_s(idBuffer, entityID.c_str(), sizeof(idBuffer));
+        ImGui::OpenPopup("Edit Entity ID");
+    }
+
+    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Edit Entity ID", &showIDPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::InputText("New ID", idBuffer, sizeof(idBuffer));
+
+        if (ImGui::Button("Apply")) {
+            ecs.setEntityID(selectedEntityID, std::string(idBuffer));
+            showIDPopup = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel")) {
+            showIDPopup = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::SameLine();
+
+    // Delete entity button
+    if (ImGui::Button("Delete Entity")) {
+        ImGui::OpenPopup("Delete Entity?");
+    }
+
+    // Delete confirmation popup
+    if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Are you sure you want to delete this entity?");
+        ImGui::Separator();
+
+        if (ImGui::Button("Delete", ImVec2(120, 0))) {
+            ecsCoordinator.destroyEntity(selectedEntityID);
+            selectedEntityID = -1;
+            draggedEntityID = -1;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::End();
 }
 
 void Inspector::LoadInspectorFromJSON(std::string const& filename)

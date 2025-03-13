@@ -79,6 +79,14 @@ public:
 	static float sfxPercentage;
 	static float musicPercentage;
 
+	// Play audio based on saved mapping
+	void playAudioByMapping(const std::string& audioName, const std::string& channelName);
+
+	// Check if an audio is currently playing on a specific channel
+	bool isAudioPlayingOnChannel(const std::string& channelName);
+
+	std::string getAudioFileForChannel(const std::string& channelName, const std::string& defaultFile);
+
 private:
 	//FMOD::System* audioSystem;
 	/*std::unordered_map<std::string, FMOD::Channel*> channelList;*/
@@ -118,4 +126,6 @@ private:
 	bool changeBGM;
 	bool changePanel;
 	size_t prevFrame;
+
+	std::string getCustomChannelForAudio(const std::string& audioName);
 };
