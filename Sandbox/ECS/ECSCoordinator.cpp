@@ -176,6 +176,13 @@ void ECSCoordinator::ensureFPSDisplay() {
 //based on the test modes it will render a different scene
 void ECSCoordinator::update() {
 	ensureFPSDisplay();
+
+	// Check if loading screen is active
+	if (loadingScreen.isLoading()) {
+		systemManager->update();
+		return;
+	}
+
 	if (GameViewWindow::getSceneNum() == -1) {  // Main Menu
 		systemManager->update();
 	}
@@ -188,11 +195,9 @@ void ECSCoordinator::update() {
 			for (auto entity : getAllLiveEntities()) {
 				destroyEntity(entity);
 			}
-			// Load the first level
-			int sceneNum = 4;
-			GameViewWindow::setSceneNum(sceneNum);
-			LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
-			GLFWFunctions::newSceneLoaded = true;
+
+			// Start loading screen for first level
+			loadingScreen.startLoading(1);
 		}
 	}
 	else if (GameViewWindow::getSceneNum() == -4) { // Ending Cutscene
@@ -237,9 +242,12 @@ void ECSCoordinator::update() {
 			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
-				LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(sceneNum));
+
+				// Start loading screen instead of loading immediately
+				loadingScreen.startLoading(sceneNum);
 			}
 			else if (sceneNum == -1) {
+				// For main menu, we can load directly without loading screen
 				LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 			}
 			else if (sceneNum == -3) {
@@ -248,6 +256,16 @@ void ECSCoordinator::update() {
 
 			GLFWFunctions::changeLevel = false;
 			GLFWFunctions::newSceneLoaded = true;
+		}
+
+		// Handle cheat code for skipping to next level with loading screen
+		if (GLFWFunctions::skipToNextLevel) {
+			int currentScene = GameViewWindow::getSceneNum();
+			int nextScene = currentScene + 1;
+			if (nextScene > 2) nextScene = 1; // Loop back to level 1 if we're at the last level
+
+			loadingScreen.startLoading(nextScene);
+			GLFWFunctions::skipToNextLevel = false;
 		}
 	}
 }
@@ -1574,6 +1592,7 @@ void ECSCoordinator::LoadLevelCompletedMenuFromJSON(ECSCoordinator& ecs, std::st
 // function that loads the game over menu entities from the JSON file
 void ECSCoordinator::LoadGameOverMenuFromJSON(ECSCoordinator& ecs, std::string const& filename)
 {
+	cameraSystem.setCameraPosition({ 0, 0 });
 	JSONSerializer serializer;
 
 	if (!serializer.Open(filename))

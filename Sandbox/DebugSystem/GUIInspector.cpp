@@ -1330,15 +1330,15 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
                         }
                         else if (i == 5) { // Player
                             // Check if player already exists
-                            bool playerExists = false;
+                            bool playerExist = false;
                             for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
                                 if ((int)entity != selectedEntityID && ecsCoordinator.hasComponent<PlayerComponent>(entity)) {
-                                    playerExists = true;
+                                    playerExist = true;
                                     break;
                                 }
                             }
 
-                            if (!playerExists) {
+                            if (!playerExist) {
                                 if (!ecsCoordinator.hasComponent<PhysicsComponent>(selectedEntityID)) {
                                     PhysicsComponent physics;
                                     physics.gravityScale = myMath::Vector2D(9.8f, 9.8f);

@@ -919,6 +919,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		}
 
 		GameViewWindow::setSceneNum(mainMenuScene);
+		cameraSystem.unlockFromComponent();
 		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
 	
