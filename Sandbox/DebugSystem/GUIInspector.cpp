@@ -581,23 +581,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
             }
         }
 
-        //// Font Component
-        //bool hasFont = ecs.hasComponent<FontComponent>(selectedEntityID);
-        //if (ImGui::Checkbox("Font Component", &hasFont)) {
-        //    if (hasFont && !ecs.hasComponent<FontComponent>(selectedEntityID)) {
-        //        FontComponent font;
-        //        font.text = "New Text";
-        //        font.textScale = 1.0f;
-        //        font.textBoxWidth = 300.0f;
-        //        font.color = myMath::Vector3D(1.0f, 1.0f, 1.0f);
-        //        font.fontId = "default";  // Assuming you have a default font
-        //        ecs.addComponent<FontComponent>(selectedEntityID, font);
-        //    }
-        //    else if (!hasFont && ecs.hasComponent<FontComponent>(selectedEntityID)) {
-        //        ecs.removeComponent<FontComponent>(selectedEntityID);
-        //    }
-        //}
-
         // Player Component
         bool hasPlayer = ecs.hasComponent<PlayerComponent>(selectedEntityID);
         if (ImGui::Checkbox("Player Component", &hasPlayer)) {
@@ -920,46 +903,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
         }
     }
 
-    //// Font Component
-    //if (ecsCoordinator.hasComponent<FontComponent>(selectedEntityID)) {
-    //    if (ImGui::CollapsingHeader("Font Component", ImGuiTreeNodeFlags_DefaultOpen)) {
-    //        auto& fontComp = ecsCoordinator.getComponent<FontComponent>(selectedEntityID);
-
-    //        // Create a text buffer large enough for editing
-    //        static char textBuffer[1024] = { 0 };
-    //        strncpy(textBuffer, fontComp.text.c_str(), sizeof(textBuffer) - 1);
-
-    //        if (ImGui::InputTextMultiline("Text", textBuffer, sizeof(textBuffer))) {
-    //            fontComp.text = textBuffer;
-    //        }
-
-    //        ImGui::DragFloat("Text Scale", &fontComp.textScale, 0.05f, 0.1f, 10.0f);
-    //        ImGui::DragFloat("Text Box Width", &fontComp.textBoxWidth, 1.0f, 10.0f, 2000.0f);
-
-    //        float color[3] = { fontComp.color.GetX(), fontComp.color.GetY(), fontComp.color.GetZ() };
-    //        if (ImGui::ColorEdit3("Text Color", color)) {
-    //            fontComp.color.SetX(color[0]);
-    //            fontComp.color.SetY(color[1]);
-    //            fontComp.color.SetZ(color[2]);
-    //        }
-
-    //        // Font selection dropdown
-    //        if (ImGui::BeginCombo("Font", fontComp.fontId.c_str())) {
-    //            for (auto& pair : assetsManager.getFontList()) {
-    //                const bool isSelected = (fontComp.fontId == pair.first);
-    //                if (ImGui::Selectable(pair.first.c_str(), isSelected)) {
-    //                    fontComp.fontId = pair.first;
-    //                }
-
-    //                if (isSelected) {
-    //                    ImGui::SetItemDefaultFocus();
-    //                }
-    //            }
-    //            ImGui::EndCombo();
-    //        }
-    //    }
-    //}
-
     // Animation Component
     if (ecsCoordinator.hasComponent<AnimationComponent>(selectedEntityID)) {
         if (ImGui::CollapsingHeader("Animation Component")) {
@@ -1004,30 +947,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
             auto& button = ecsCoordinator.getComponent<ButtonComponent>(selectedEntityID);
 
             ImGui::Checkbox("Is Button", &button.isButton);
-
-            /*float originalScale[2] = { button.originalScale.GetX(), button.originalScale.GetY() };
-            if (ImGui::DragFloat2("Original Scale", originalScale, 1.0f)) {
-                button.originalScale.SetX(originalScale[0]);
-                button.originalScale.SetY(originalScale[1]);
-            }
-
-            float hoveredScale[2] = { button.hoveredScale.GetX(), button.hoveredScale.GetY() };
-            if (ImGui::DragFloat2("Hovered Scale", hoveredScale, 1.0f)) {
-                button.hoveredScale.SetX(hoveredScale[0]);
-                button.hoveredScale.SetY(hoveredScale[1]);
-            }
-
-            if (ImGui::Button("Set Original From Transform")) {
-                auto& transform = ecsCoordinator.getComponent<TransformComponent>(selectedEntityID);
-                button.originalScale = transform.scale;
-            }
-
-            if (ImGui::Button("Set Hovered Scale (110%)")) {
-                button.hoveredScale = myMath::Vector2D(
-                    button.originalScale.GetX() * 1.1f,
-                    button.originalScale.GetY() * 1.1f
-                );
-            }*/
         }
     }
 
@@ -1110,26 +1029,7 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
             auto& player = ecsCoordinator.getComponent<PlayerComponent>(selectedEntityID);
 
             ImGui::Checkbox("Is Player", &player.isPlayer);
-            /*ImGui::Checkbox("Is Visible", &player.isVisible);
-            ImGui::Checkbox("Is Growing", &player.isGrowing);
-
-            double growStartTime = player.growStartTime;
-            if (ImGui::DragScalar("Grow Start Time", ImGuiDataType_Double, &growStartTime, 0.1)) {
-                player.growStartTime = growStartTime;
-            }
-
-            ImGui::Checkbox("Is Idle", &player.isIdle);
-            ImGui::Checkbox("Playing Idle Animation", &player.playingIdleAnim);
-
-            double lastMoveTime = player.lastMoveTime;
-            if (ImGui::DragScalar("Last Move Time", ImGuiDataType_Double, &lastMoveTime, 0.1)) {
-                player.lastMoveTime = lastMoveTime;
-            }
-
-            double idleAnimStart = player.idleAnimStart;
-            if (ImGui::DragScalar("Idle Animation Start", ImGuiDataType_Double, &idleAnimStart, 0.1)) {
-                player.idleAnimStart = idleAnimStart;
-            }*/
+            
         }
     }
 
