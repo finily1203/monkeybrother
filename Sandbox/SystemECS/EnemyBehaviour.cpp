@@ -11,7 +11,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
          Waypoints are also current set to a fixed path for all enemies.
 
          Joel Chu (c.weiyuan): defined the functions of EnemyBehaviour class
-                               100%
+                               90%
+         Jing Wen (jingwen.lee): helped out the patrol state for EnemyBehaviour class
+                                 10%
 *//*___________________________________________________________________________-*/
 
 #include "EnemyBehaviour.h"

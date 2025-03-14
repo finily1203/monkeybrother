@@ -246,7 +246,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 #ifdef _DEBUG
     if ((*keyState)[Key::NUM_2])
         allow_camera_movement = !allow_camera_movement;
-#endif
 
     if (!GameViewWindow::getPaused()) {
 
@@ -255,6 +254,8 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             isGuiOpen = ~isGuiOpen;
         }
     }
+
+#endif
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
         isRotating = true;
