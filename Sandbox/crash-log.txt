@@ -1,3 +1,1 @@
-[2025-03-14 10:48:03] Log started
-[2025-03-14 10:48:04] [json.exception.type_error.302] type must be number, but is null
-[2025-03-14 10:48:04] End Log
+[2025-03-14 13:47:55] Log started
