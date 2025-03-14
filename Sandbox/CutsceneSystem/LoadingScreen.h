@@ -1,3 +1,17 @@
+/*
+All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Liu YaoTing (yaoting.liu), Javier Chua (javierjunliang.chua)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  LoadingScreen.h
+@brief  :  This file contains the declaration of the loading screen. It acts as a
+           transition screen between scenes, displaying a loading animation while the
+           next scene is being loaded in the background. 
+
+            File Contributions: Liu YaoTing (100%)
+
+/*_______________________________________________________________________________________________________________*/
+
 // LoadingScreen.h
 #pragma once
 #include "EngineDefinitions.h"

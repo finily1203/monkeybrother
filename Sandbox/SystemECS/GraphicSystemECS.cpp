@@ -20,6 +20,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsComponent.h"
 #include "AABBComponent.h"
 #include "MovementComponent.h"
+#include "MovementComponent.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
 #include "PhysicsComponent.h"
@@ -1020,11 +1021,11 @@ void GraphicSystemECS::update(float dt) {
                 if (isEnemy)
                 {
 					auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
-                    if (enemy.drawVisionDebug) {
-						auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
-						graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
-                        graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
-                    }
+      //              if (enemy.drawVisionDebug) {
+						//auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
+						//graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
+      //                  graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
+      //              }
 
                     if (enemy.currState == 0) {
                         ecsCoordinator.setTextureID(entity, "goldfish");
