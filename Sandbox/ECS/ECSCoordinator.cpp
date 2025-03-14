@@ -189,7 +189,7 @@ void ECSCoordinator::update() {
 				destroyEntity(entity);
 			}
 			// Load the first level
-			int sceneNum = 1;
+			int sceneNum = 4;
 			GameViewWindow::setSceneNum(sceneNum);
 			LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(sceneNum));
 			GLFWFunctions::newSceneLoaded = true;

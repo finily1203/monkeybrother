@@ -695,26 +695,6 @@ void AudioSystem::update() {
             wasRotating = false;
         }
 
-        //if (GLFWFunctions::isRotating) {
-        //    if (!rotationChannel) {
-        //        std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
-        //        playRotationEffect(rotationSound);
-        //    }
-        //    else {
-        //        bIsPlaying = false;
-        //        rotationChannel->isPlaying(&bIsPlaying);
-        //        if (!bIsPlaying) {
-        //            rotationChannel->setPaused(false);
-        //        }
-        //    }
-        //}
-        //else {
-        //    if (rotationChannel) {
-        //        rotationChannel->setPaused(true);
-        //    }
-        //    rotationChannel = nullptr;
-        //}
-
         if (GLFWFunctions::bumpAudio) {
             std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "Mossball_Bounce.wav");
             playSoundEffect(bumpSound);
