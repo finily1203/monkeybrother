@@ -1279,7 +1279,7 @@ void ECSCoordinator::SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string 
 		std::string entityId = ecs.getEntityID(entity);
 		//std::string textureId = ecs.getTextureID(entity);
 
-		if (entityId == "sfxSoundbarArrow" || entityId == "musicSoundbarArrow")
+		if (entityId == "sfxSoundbarArrow" || entityId == "SoundbarArrow")
 		{
 			// ensuring that entity has TransformComponent
 			if (ecs.entityManager->getSignature(entity).test(getComponentType<TransformComponent>()))
