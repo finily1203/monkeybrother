@@ -89,6 +89,12 @@ void LoadingScreen::createLoadingEntities()
     }
     layerManager.addNewLayer(); // Add layer 0
 
+	// 0. create placeholder entity
+	Entity placeholderEntity = ecsCoordinator.createEntity();
+	ecsCoordinator.addComponent<TransformComponent>(placeholderEntity, TransformComponent{});
+	ecsCoordinator.setEntityID(placeholderEntity, "placeholderentity");
+	ecsCoordinator.setTextureID(placeholderEntity, "");
+
     // 1. Create background entity
     m_backgroundEntity = ecsCoordinator.createEntity();
     TransformComponent bgTransform{};
