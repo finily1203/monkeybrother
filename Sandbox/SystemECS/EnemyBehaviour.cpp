@@ -622,6 +622,13 @@ void EnemyBehaviour::createChaseAnimation(Entity entity) {
 	// take layer of entity and add animation to that layer
 	int newLayer = layerManager.getEntityLayer(entity);
 	layerManager.addEntityToLayer(newLayer, newAnimationEntity);
+
+    ecsCoordinator.setTextureID(entity, "goldfishAlert");
+    auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+    enemyAnimation.totalFrames = 5;
+	enemyAnimation.frameTime = 0.9f;
+    enemyAnimation.columns = 2;
+    enemyAnimation.rows = 3;
 }
 
 void EnemyBehaviour::createAttackAnimation(Entity entity, Entity playerEntity) {

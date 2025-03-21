@@ -1034,13 +1034,13 @@ void GraphicSystemECS::update(float dt) {
                         enemyAnimation.columns = 4;
                         enemyAnimation.rows = 6;
                     }
-                    else if (enemy.currState == 1) {
-                        ecsCoordinator.setTextureID(entity, "goldfishAlert");
-                        auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-                        enemyAnimation.totalFrames = 5;
-                        enemyAnimation.columns = 2;
-                        enemyAnimation.rows = 3;
-                    }
+                    //else if (enemy.currState == 1) {
+                    //    ecsCoordinator.setTextureID(entity, "goldfishAlert");
+                    //    auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                    //    enemyAnimation.totalFrames = 5;
+                    //    enemyAnimation.columns = 2;
+                    //    enemyAnimation.rows = 3;
+                    //}
                     else if (enemy.currState == 2) {
                         ecsCoordinator.setTextureID(entity, "goldfishBite");
 						auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
@@ -1048,9 +1048,28 @@ void GraphicSystemECS::update(float dt) {
                         enemyAnimation.columns = 4;
                         enemyAnimation.rows = 4;
                     }
+
+                    if (ecsCoordinator.getTextureID(entity) == "goldfishAlert")
+                    {
+                        auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                        double currentAbsoluteTime = glfwGetTime();
+                        double timeSinceCreation = currentAbsoluteTime - anim.creationTime;
+
+                        anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
+
+                        if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
+                            ecsCoordinator.setTextureID(entity, "goldfish");
+                            auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                            enemyAnimation.totalFrames = 24;
+                            enemyAnimation.frameTime = 0.05f;
+                            enemyAnimation.columns = 4;
+                            enemyAnimation.rows = 6;
+                        }
+                    }
                 }
 
-                if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
+                if (ecsCoordinator.getEntityID(entity) == "collectAnimation" || ecsCoordinator.getEntityID(entity) == "filterPush") {
                     auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
 
                     double currentAbsoluteTime = glfwGetTime();
@@ -1091,13 +1110,20 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                
+
                 if (ecsCoordinator.getTextureID(entity) != "") {
-                    //should not render the animation for filter in and filter out if filter is clogged
-                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter-out.png") {
+                    //render filter in animation when filter is not clogged
+                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png") {
                         if (GLFWFunctions::filterClogged) {
                             continue;
                         }
                     }
+					//if (ecsCoordinator.getTextureID(entity) == "filter-out.png") {
+					//	if (GLFWFunctions::filterClogged) {
+					//		continue;
+					//	}
+					//}
                     //should not render the bubble animation if pump is not on
                     if (ecsCoordinator.getTextureID(entity) == "bubbles 3.png") {
                         if (!GLFWFunctions::isPumpOn) {
