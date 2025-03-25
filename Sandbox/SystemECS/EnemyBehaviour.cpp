@@ -11,7 +11,9 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
          Waypoints are also current set to a fixed path for all enemies.
 
          Joel Chu (c.weiyuan): defined the functions of EnemyBehaviour class
-                               100%
+                               90%
+         Jing Wen (jingwen.lee): helped out the patrol state for EnemyBehaviour class
+                                 10%
 *//*___________________________________________________________________________-*/
 
 #include "EnemyBehaviour.h"
@@ -230,7 +232,7 @@ void EnemyBehaviour::startAvoid(Entity entity) {
         if (length > 0) {
             // Normalize and reverse direction
             myMath::Vector2D oppositeDir(-currentDir.GetX() / length, -currentDir.GetY() / length);
-            float speed = 5.0f; // Same speed as normal movement
+            float speed = 1.5f; // Same speed as normal movement
 
             // Set avoiding flag and timer
             isAvoidingWalls = true;
@@ -323,7 +325,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    float speed = 5.0f; 
+    float speed = 1.5f; 
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -513,7 +515,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    const float maxSpeed = 5.0f;
+    const float maxSpeed = 1.5f;
     physics.velocity = dirToPlayer * maxSpeed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -620,6 +622,13 @@ void EnemyBehaviour::createChaseAnimation(Entity entity) {
 	// take layer of entity and add animation to that layer
 	int newLayer = layerManager.getEntityLayer(entity);
 	layerManager.addEntityToLayer(newLayer, newAnimationEntity);
+
+    ecsCoordinator.setTextureID(entity, "goldfishAlert");
+    auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+    enemyAnimation.totalFrames = 5;
+	enemyAnimation.frameTime = 0.9f;
+    enemyAnimation.columns = 2;
+    enemyAnimation.rows = 3;
 }
 
 void EnemyBehaviour::createAttackAnimation(Entity entity, Entity playerEntity) {

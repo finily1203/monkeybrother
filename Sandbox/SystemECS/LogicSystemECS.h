@@ -35,7 +35,7 @@ public:
 	void onMouseClick(GLFWwindow* window, double mouseX, double mouseY);
 	void onMouseHover(double mouseX, double mouseY);
 	void onMouseDrag(GLFWwindow* window, double mouseX, double mouseY);
-	
+
 	std::string getHoveredButton() const { return currHoveredButton; }
 	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
 

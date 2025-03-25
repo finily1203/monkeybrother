@@ -135,7 +135,7 @@ void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mous
 					handleButtonClick(window, entity);
 
 					std::string entityId = ecsCoordinator.getEntityID(entity);
-					
+
 					// this statement is only applicable when we press and hold down and drag
 					// the mouse cursor on the sfxSoundbarBase and musicSoundbarBase
 					if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase" ||
@@ -168,7 +168,7 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 
 	// setting the correct audio arrow based on the soundbar Id
 	std::string soundbarArrow = (getSoundbarId() == "sfxSoundbarBase") ? "sfxSoundbarArrow" :
-								(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
+		(getSoundbarId() == "musicSoundbarBase") ? "musicSoundbarArrow" : "";
 
 	std::string sliderNotch = (getSliderId() == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
 
@@ -331,10 +331,10 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 bool MouseBehaviour::mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform)
 {
 	float const scalar = 0.85f;
-    float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 1.8f;
-    float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 1.85f;
-    float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
-    float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
+	float buttonLeft = transform.position.GetX() - transform.scale.GetX() * scalar / 1.8f;
+	float buttonRight = transform.position.GetX() + transform.scale.GetX() * scalar / 1.85f;
+	float buttonTop = transform.position.GetY() + transform.scale.GetY() * scalar / 2.f;
+	float buttonBottom = transform.position.GetY() - transform.scale.GetY() * scalar / 2.f;
 
 	return (mouseX >= static_cast<double>(buttonLeft) && mouseX <= static_cast<double>(buttonRight) && mouseY >= static_cast<double>(buttonBottom) && mouseY <= static_cast<double>(buttonTop));
 }
@@ -535,7 +535,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		// destroy the pause menu 
 		for (auto currEntity : allEntities)
 		{
-			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" || 
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
 				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
 				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
 				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
@@ -558,10 +558,10 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	{
 		std::unordered_set<std::string> optionsMenuEntityNames = {
 			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
-			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
+			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow",
+			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2",
 			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2",
 			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
 			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
 		};
@@ -693,10 +693,10 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		std::unordered_set<std::string> optionsMenuEntityNames = {
 			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
-			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
+			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow",
+			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2",
 			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
+			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2",
 			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
 			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
 		};
@@ -922,7 +922,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		cameraSystem.unlockFromComponent();
 		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 	}
-	
+
 }
 
 // MouseBehaviour object instance destructor

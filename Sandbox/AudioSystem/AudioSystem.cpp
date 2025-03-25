@@ -290,9 +290,9 @@ void AudioSystem::update() {
         * EndingCutscene_Ambience_1: Play at Start Loop and play all the way
         * 1 - 7   - play at start of panel
         * 8 and 9 - play at start of panel
-		* 10 - 12 - play at start of panel
+        * 10 - 12 - play at start of panel
         * 13 - 14 - play at start of panel
-		* 15      - play right after 13 - 14
+        * 15      - play right after 13 - 14
         */
 
         size_t currentFrame = cutsceneSystem.getCurrentFrameIndex();
@@ -513,8 +513,8 @@ void AudioSystem::update() {
         }
     }
 
-    //only play if scene is 1 or 2
-    else if(GameViewWindow::getSceneNum() >= 1 && GameViewWindow::getSceneNum() <= 9)
+    //only play if scene is 1 to 9
+    else if (GameViewWindow::getSceneNum() >= 1 && GameViewWindow::getSceneNum() <= 9)
     {
         if (!changeBGM) {
             if (bgmChannel) {
@@ -671,7 +671,7 @@ void AudioSystem::update() {
 
             // Calculate fade ratio (0.0 to 1.0)
             float fadeRatio = std::min(currentRotationTime / rotationFadeTime, 1.0f);
-			std::cout << fadeRatio << std::endl;
+            std::cout << fadeRatio << std::endl;
 
             // Apply the faded volume
             if (rotationChannel) {
@@ -708,14 +708,14 @@ void AudioSystem::update() {
             GLFWFunctions::collectAudio = false;
         }
 
-		if (GLFWFunctions::attackAudio) {
-			playSoundEffect("Fish_Attack.wav");
-			GLFWFunctions::attackAudio = false;
-		}
+        if (GLFWFunctions::attackAudio) {
+            playSoundEffect("Fish_Attack.wav");
+            GLFWFunctions::attackAudio = false;
+        }
 
         if (GLFWFunctions::filterExitAudio) {
-			playSoundEffect("Filter_Exit.wav");
-			GLFWFunctions::filterExitAudio = false;
+            playSoundEffect("Filter_Exit.wav");
+            GLFWFunctions::filterExitAudio = false;
         }
     }
 
@@ -769,6 +769,8 @@ void AudioSystem::playBgm(const std::string& songName) {
     }
 
     FMOD::Sound* audioSong = assetsManager.GetAudio(songName);
+	//std::cout << songName << std::endl;
+
     if (bgmChannel) {
         FMOD_RESULT result = bgmChannel->stop();
         if (result != FMOD_OK) {
@@ -845,8 +847,8 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
     if (soundEffectChannel) {
         if (soundEffectName == "Fish_Attack.wav")
         {
-			soundEffectChannel->setVolume(sfxVol * 2.f);
-		}
+            soundEffectChannel->setVolume(sfxVol * 2.f);
+        }
         else
         {
             soundEffectChannel->setVolume(sfxVol);
@@ -921,9 +923,9 @@ void AudioSystem::playCutsceneAmbience(const std::string& ambienceName)
     }
 
     if (cutsceneAmbienceChannel) {
-        if(ambienceName == "EndingCutscene_Ambience_1") 
-			cutsceneAmbienceChannel->setVolume(genVol * 3.0f);
-		else
+        if (ambienceName == "EndingCutscene_Ambience_1")
+            cutsceneAmbienceChannel->setVolume(genVol * 3.0f);
+        else
             cutsceneAmbienceChannel->setVolume(genVol * 2.0f);
         cutsceneAmbienceChannel->setPaused(false);
     }
@@ -1198,6 +1200,9 @@ std::string AudioSystem::getCustomChannelForAudio(const std::string& audioName) 
 
 std::string AudioSystem::getAudioFileForChannel(const std::string& channelName, const std::string& defaultFile) {
     // Look through mappings to find an audio file that maps to this channel
+    if(defaultFile == "Iris_L2_BGM_Loop.wav") return defaultFile;
+	if (defaultFile == "mainMenuBGM") return defaultFile;
+
     for (const auto& mapping : *GameViewWindow::audioChannelMappings) {
         if (mapping.second == channelName) {
             return mapping.first;

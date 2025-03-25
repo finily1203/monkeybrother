@@ -41,7 +41,7 @@ void CollectableBehaviour::update(Entity entity) {
                 playerTransform.scale.SetX(playerTransform.scale.GetX() + 25.0f);
                 playerTransform.scale.SetY(playerTransform.scale.GetY() + 25.0f);
                 auto& playerPhysics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
-                playerPhysics.mass += 0.5f;
+                playerPhysics.mass += 1.0f;
 
                 
                 if (ecsCoordinator.hasComponent<PlayerComponent>(playerEntity)) {
