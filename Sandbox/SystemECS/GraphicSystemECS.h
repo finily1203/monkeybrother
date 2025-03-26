@@ -5,11 +5,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   GraphicSystemECS.h
 @brief:  This header file inherits the System class from ECS base system class.
-		 This class is used to handle the communication between ECS and graphic
-		 system.
-		 Joel Chu (c.weiyuan): Declared class GraphicSystemECS with its functions.
-							   inherited from System class.
-							   100%
+         This class is used to handle the communication between ECS and graphic
+         system.
+         Joel Chu (c.weiyuan): Declared class GraphicSystemECS with its functions.
+                              inherited from System class.
+                              100%
 *//*___________________________________________________________________________-*/
 #pragma once
 #include "EngineDefinitions.h"
@@ -18,32 +18,60 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsSystem.h"
 #include "CameraSystem2D.h"
 #include "LogicSystemECS.h"
+#include <vector>
+#include <unordered_map>
+
+// Forward declaration of entity type enum
+enum class EntityType;
 
 class GraphicSystemECS : public System
 {
 public:
-	GraphicSystemECS() = default;
+    GraphicSystemECS();
 
-	//Inherited functions from System class
-	//Initialise and cleanup currently do not do anything
-	void initialise() override;
-	void cleanup() override;
+    //Inherited functions from System class
+    void initialise() override;
+    void cleanup() override;
 
-	//Update function to update the graphics system
-	//uses functions from GraphicsSystem class to update, draw
-	//and render objects.
-	void update(float dt) override;
+    //Update function to update the graphics system
+    //uses functions from GraphicsSystem class to update, draw
+    //and render objects.
+    void update(float dt) override;
 
-	std::string getSystemECS() override;
-	void handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
-	void handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
-	void handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude);
-
-	void updateTutorialArrows();
-	void updateButtons();
+    std::string getSystemECS() override;
 
 private:
-	MouseBehaviour mouseBehaviour;
-	bool fpsEntityCreated = false;
+    // Helper methods for player animations
+    double elapsedTimeSinceGrowStart(const PlayerComponent& player);
+    void handlePlayerGrowthAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
+    void handlePlayerIdleAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation);
+    void handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude);
 
+    // Helper methods for UI elements
+    void updateTutorialArrows();
+    void updateButtons();
+
+    // Optimization methods
+    EntityType getEntityType(const std::string& entityId);
+    void cacheUIEntities();
+    void handleSoundBarNotches();
+    void batchRender(int layerIndex);
+
+    // Member variables
+    MouseBehaviour mouseBehaviour;
+    bool fpsEntityCreated = false;
+
+    // Cached matrices for performance
+    myMath::Matrix3x3 viewMatrix;
+    myMath::Matrix3x3 identityMatrix;
+
+    // Cached empty UVs for non-animated entities
+    std::vector<glm::vec2> cachedEmptyUVs;
+
+    // UI element caching
+    std::vector<Entity> sfxNotchEntities;
+    std::vector<Entity> musicNotchEntities;
+    Entity sfxArrowEntity = 0;
+    Entity musicArrowEntity = 0;
+    bool uiCacheInitialized = false;
 };
