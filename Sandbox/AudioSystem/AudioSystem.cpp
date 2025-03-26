@@ -671,7 +671,7 @@ void AudioSystem::update() {
 
             // Calculate fade ratio (0.0 to 1.0)
             float fadeRatio = std::min(currentRotationTime / rotationFadeTime, 1.0f);
-            std::cout << fadeRatio << std::endl;
+            //std::cout << fadeRatio << std::endl;
 
             // Apply the faded volume
             if (rotationChannel) {

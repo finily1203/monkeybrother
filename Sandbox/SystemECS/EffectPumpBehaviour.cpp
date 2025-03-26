@@ -17,6 +17,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
+#define M_PI   3.14159265358979323846264338327950288f
 
 void EffectPumpBehaviour::update(Entity entity) {
     timer += GLFWFunctions::delta_time;
@@ -42,7 +43,7 @@ void EffectPumpBehaviour::update(Entity entity) {
         CollisionSystemECS::OBB bubblesOBB = collisionSystem.createOBBFromEntity(entity);
 
         auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
-        float rotation = bubblesTransform.orientation.GetX();
+        float rotation = bubblesTransform.orientation.GetX();   
         myMath::Vector2D direction = PhysicsSystemRef->directionalVector(rotation);
 
         Force force = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
@@ -54,10 +55,52 @@ void EffectPumpBehaviour::update(Entity entity) {
 
         bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, bubblesOBB, normal, penetration);
         if (isColliding) {
+            //std::cout << playerTransform.orientation.GetX() << std::endl;
+
+   //         force.SetDirection(direction);
+   //         forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);
+   //         forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
+
+   //         int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
+   //         float forceDirAngle = atan2(direction.GetY(), direction.GetX()) * (180.0f / M_PI);
+
+   //         //playerOrientation = (playerOrientation + 360) % 360;
+   //         //forceDirAngle = (static_cast<int>(forceDirAngle) + 360) % 360;
+
+			//if (playerOrientation < 0) playerOrientation += 360;
+
+   //         float angleDifference = fabs(playerOrientation - forceDirAngle);
+
+   //         std::cout << "Player Orientation: " << playerTransform.orientation.GetX() << std::endl;
+   //         std::cout << "Force Direction Angle: " << forceDirAngle << std::endl;
+
+   //         forceManager.ClearForce(playerEntity);
+
             force.SetDirection(direction);
             forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);
             forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
-            forceManager.ClearForce(playerEntity);
+
+            int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
+            myMath::Vector2D PlayerDir = PhysicsSystemRef->directionalVector(playerOrientation);
+
+			std::cout << PlayerDir.GetX() << ", " << PlayerDir.GetY() << std::endl;
+
+            float threshold = 0.3f;
+
+            //its kinda weird here but since pumpForce is -ve, use the -ve PlayerDir
+			myMath::Vector2D dirDiff = direction - (-PlayerDir);
+
+			std::cout << "Dir Diff: " << dirDiff.GetX() << ", " << dirDiff.GetY() << std::endl;
+
+            if (dirDiff.GetX() < threshold)
+            {
+                forceManager.ClearForce(playerEntity);
+            }
+			if (dirDiff.GetY() < threshold)
+			{
+				forceManager.ClearForce(playerEntity);
+			}
+            
         }
     }
 }
