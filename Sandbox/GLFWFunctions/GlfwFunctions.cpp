@@ -257,12 +257,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
 #endif
 
-    if ((*keyState)[Key::LSHIFT])
-    {
-        GameViewWindow::setSceneNum(-4);
-        ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
-    }
-
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
         isRotating = true;
     }
