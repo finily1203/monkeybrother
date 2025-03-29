@@ -511,6 +511,12 @@ void AudioSystem::update() {
             std::string bgmSound = getAudioFileForChannel("BGM", "mainMenuBGM");
             playBgm(bgmSound);
         }
+
+        //play ambience
+		if (!ambienceChannel) {
+			std::string ambienceSound = getAudioFileForChannel("Ambience", "Ambience");
+			playSong(ambienceSound);
+		}
     }
 
     //only play if scene is 1 to 9
@@ -544,7 +550,7 @@ void AudioSystem::update() {
         }
 
         if (!isAmbiencePlaying) {
-            std::string ambienceSound = getAudioFileForChannel("Ambience", "Ambience.wav");
+            std::string ambienceSound = getAudioFileForChannel("Ambience", "Ambience");
             playSong(ambienceSound);
         }
 
@@ -603,7 +609,7 @@ void AudioSystem::update() {
 
             // If not playing, replay the sound unless stopAudio is true
             if (!bIsPlaying && !GLFWFunctions::audioStopped && currSongIndex >= 0) {
-                playSong("Ambience.wav");
+                playSong("Ambience");
             }
 
             if (GLFWFunctions::audioPaused || GameViewWindow::getPaused()) {
@@ -695,11 +701,16 @@ void AudioSystem::update() {
             wasRotating = false;
         }
 
-        if (GLFWFunctions::bumpAudio) {
-            std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "Mossball_Bounce.wav");
+        if (GLFWFunctions::bumpAudio && GLFWFunctions::bumpTimer <= 0.0f) {
+            std::string bumpSound = getAudioFileForChannel("SFX_Bounce", "UnderWater_Bump-Bounce.wav");
             playSoundEffect(bumpSound);
             GLFWFunctions::bumpAudio = false;
+            GLFWFunctions::bumpTimer = GLFWFunctions::bumpDuration;
             std::cout << "Bump audio played." << std::endl;
+        }
+
+        if (GLFWFunctions::bumpTimer > 0.f) {
+			GLFWFunctions::bumpTimer -= GLFWFunctions::delta_time;
         }
 
         if (GLFWFunctions::collectAudio) {
@@ -751,7 +762,7 @@ void AudioSystem::playSong(const std::string& songName) {
     }
 
     if (ambienceChannel) {
-        ambienceChannel->setVolume(genVol * 5.0f);
+        ambienceChannel->setVolume(genVol * 2.0f);
         ambienceChannel->setPaused(false);
     }
 
@@ -1202,6 +1213,7 @@ std::string AudioSystem::getAudioFileForChannel(const std::string& channelName, 
     // Look through mappings to find an audio file that maps to this channel
     if(defaultFile == "Iris_L2_BGM_Loop.wav") return defaultFile;
 	if (defaultFile == "mainMenuBGM") return defaultFile;
+	if (defaultFile == "Ambience") return defaultFile;
 
     for (const auto& mapping : *GameViewWindow::audioChannelMappings) {
         if (mapping.second == channelName) {

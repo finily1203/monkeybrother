@@ -74,9 +74,13 @@ bool GLFWFunctions::isPlayerDead = false;
 bool GLFWFunctions::attackAudio = false;
 bool GLFWFunctions::filterExitAudio = false;
 bool GLFWFunctions::endCutsceneLastPanel = false;
+bool GLFWFunctions::buttonHoverAudio = false;
 
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
+float GLFWFunctions::bumpTimer = 0.0f;
+const float GLFWFunctions::bumpDuration = 3.0f;
+
 bool GLFWFunctions::newSceneLoaded = false;
 
 MouseBehaviour mouseBehaviour;

@@ -94,7 +94,9 @@ struct GLFWFunctions {
 	static bool fullscreen;
 
 	static float pauseTimer;
+	static float bumpTimer;
 	const static float pauseDuration;
+	const static float bumpDuration;
 	static bool newSceneLoaded;
 
 	static int audioNum;
@@ -121,6 +123,7 @@ struct GLFWFunctions {
 	static bool attackAudio;
 	static bool filterExitAudio;
 	static bool endCutsceneLastPanel;
+	static bool buttonHoverAudio;
 
 	static bool isPlayerDead;
 

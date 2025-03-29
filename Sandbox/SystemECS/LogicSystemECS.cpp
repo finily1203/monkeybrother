@@ -312,6 +312,10 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 					glfwSetCursor(GLFWFunctions::pWindow, cursor);
 					GLFWFunctions::isHovering = true;
 					setHoveredButton(ecsCoordinator.getEntityID(entity));
+					if (!GLFWFunctions::buttonHoverAudio){
+						audioSystem.playSoundEffect("MenuHoverOverSFX_2.wav");
+						GLFWFunctions::buttonHoverAudio = true;
+					}
 					return;
 				}
 			}
@@ -323,6 +327,7 @@ void MouseBehaviour::onMouseHover(double mouseX, double mouseY)
 	if (!GLFWFunctions::isHovering)
 	{
 		glfwSetCursor(GLFWFunctions::pWindow, nullptr);
+		GLFWFunctions::buttonHoverAudio = false;
 	}
 }
 
@@ -352,7 +357,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the main menu quit button
 	if (entityId == "quitButton" || entityId == "quitWindowButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
@@ -396,7 +401,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 			ecsCoordinator.destroyEntity(currEntity);
 		}
 
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 		// resetting all values
 		GLFWFunctions::gameOver = false;
 		GLFWFunctions::gamePaused = false;
@@ -458,7 +463,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the options button
 	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		// if pause menu already exists, destroy the pause menu
 		if (GLFWFunctions::pauseMenuCount == 1)
@@ -494,7 +499,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the how to play button
 	else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		if (GLFWFunctions::pauseMenuCount == 1)
 		{
@@ -529,7 +534,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	{
 		if (entityId == "resumeButton")
 		{
-			audioSystem.playSoundEffect("UI_ButtonClick.wav");
+			audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 		}
 
 		// destroy the pause menu 
@@ -635,7 +640,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the logic for exiting the level and goes back to the main menu button
 	else if (entityId == "pauseQuitButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		// destroy all the entities in the current scene
 		for (auto currEntity : allEntities)
@@ -689,7 +694,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	// this handles the logic for the confirm button
 	else if (entityId == "confirmButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		std::unordered_set<std::string> optionsMenuEntityNames = {
 			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
@@ -808,7 +813,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "quitToMainMenuButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		for (auto& currEntity : allEntities)
 		{
@@ -821,7 +826,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "returnToPauseMenuButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		for (auto& currEntity : allEntities)
 		{
@@ -839,7 +844,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "nextLevelButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		if (!GLFWFunctions::changeLevel)
 		{
@@ -859,7 +864,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "mainMenuButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		int mainMenuScene = -1;
 
@@ -882,7 +887,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "gameOverRetryButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		for (auto currEntity : allEntities)
 		{
@@ -909,7 +914,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 	else if (entityId == "gameOverQuitButton")
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
 
 		int mainMenuScene = -1;
 
