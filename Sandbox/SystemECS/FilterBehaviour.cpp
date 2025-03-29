@@ -75,6 +75,8 @@ void FilterBehaviour::update(Entity entity) {
                 auto currentTime = std::chrono::steady_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::seconds>(currentTime - collisionTime).count();
 
+                std::cout << duration << std::endl;
+
                 if (duration >= 2) {
                     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
                     player.isVisible = true;  // Make the player visible again
@@ -116,7 +118,7 @@ void FilterBehaviour::update(Entity entity) {
 					if (filterScl.GetX() < 0.f)
 						playerPos = filterPos + myMath::Vector2D(-50.0f, (filterScl.GetY() * 0.4f));
 					else
-                        playerPos = filterPos + myMath::Vector2D(50.0f, (filterScl.GetY() * 0.4f));
+                        playerPos = filterPos + myMath::Vector2D(50.0f, 0.f);
                     //playerPos = filterPos + myMath::Vector2D(filterScl.GetX(), (filterScl.GetY() * 0.9f));
                 }
             }
@@ -139,6 +141,7 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
     transform.position = entityTransform.position;
     transform.scale.SetX(entityTransform.scale.GetX());
     transform.scale.SetY(entityTransform.scale.GetY());
+	transform.orientation.SetX(entityTransform.orientation.GetX());
 
     ecsCoordinator.addComponent(newAnimationEntity, transform);
 
