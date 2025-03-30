@@ -37,6 +37,10 @@ void CutsceneSystem::initialise() {
 }
 // check if the cutscene can accept input
 void CutsceneSystem::update() {
+    if (WindowSystem::GetAltTab() || WindowSystem::GetCtrlAltDel()) {
+        // Don't update the cutscene when the window doesn't have focus
+        return;
+    }
     // Update delay timer
     if (m_delayTimer < m_initialDelay) {
         m_delayTimer += GLFWFunctions::delta_time;

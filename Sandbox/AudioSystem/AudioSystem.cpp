@@ -72,6 +72,47 @@ void AudioSystem::initialise() {
 //setting volume and to update the song being played
 void AudioSystem::update() {
     bool bIsPlaying = false;
+    if (WindowSystem::GetAltTab() || WindowSystem::GetCtrlAltDel()) {
+        // Pause all audio channels when window loses focus
+        if (bgmChannel) {
+            bool isPaused = false;
+            bgmChannel->getPaused(&isPaused);
+            if (!isPaused) {
+                bgmChannel->setPaused(true);
+            }
+        }
+        if (soundEffectChannel) soundEffectChannel->setPaused(true);
+        if (assetBrowserChannel) assetBrowserChannel->setPaused(true);
+        if (ambienceChannel) ambienceChannel->setPaused(true);
+        if (pumpChannel) pumpChannel->setPaused(true);
+        if (rotationChannel) rotationChannel->setPaused(true);
+        if (cutsceneAmbienceChannel) cutsceneAmbienceChannel->setPaused(true);
+        if (cutsceneAmbienceChannel2) cutsceneAmbienceChannel2->setPaused(true);
+        if (cutscenePanelChannel) cutscenePanelChannel->setPaused(true);
+        if (cutsceneHumanChannel) cutsceneHumanChannel->setPaused(true);
+
+        // Early return to avoid processing the rest of the update
+        return;
+    }
+    else {
+        // Resume all audio channels when window regains focus
+        if (bgmChannel) {
+            bool isPaused = false;
+            bgmChannel->getPaused(&isPaused);
+            if (isPaused) {
+                bgmChannel->setPaused(false);
+            }
+        }
+        if (soundEffectChannel) soundEffectChannel->setPaused(false);
+        if (assetBrowserChannel) assetBrowserChannel->setPaused(false);
+        if (ambienceChannel) ambienceChannel->setPaused(false);
+        if (pumpChannel) pumpChannel->setPaused(false);
+        if (rotationChannel) rotationChannel->setPaused(false);
+        if (cutsceneAmbienceChannel) cutsceneAmbienceChannel->setPaused(false);
+        if (cutsceneAmbienceChannel2) cutsceneAmbienceChannel2->setPaused(false);
+        if (cutscenePanelChannel) cutscenePanelChannel->setPaused(false);
+        if (cutsceneHumanChannel) cutsceneHumanChannel->setPaused(false);
+    }
 
 	//std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
 
