@@ -42,7 +42,8 @@ void CutsceneSystem::update() {
         m_delayTimer += GLFWFunctions::delta_time;
     }
     // Skip to end if ENTER is held
-    if ((*GLFWFunctions::keyState)[Key::ENTER]) {
+    if ((*GLFWFunctions::keyState)[Key::ENTER] &&
+        (GameViewWindow::getSceneNum() == -2 || GameViewWindow::getSceneNum() == -4)) {
         skipToEnd();
         return;
     }
@@ -205,7 +206,17 @@ void CutsceneSystem::skipToEnd() {
     m_currentFrameIndex = m_frames->size();
     m_isPlaying = false;
     cameraSystem.setCameraPosition(myMath::Vector2D(0.0f, 0.0f));
-    cameraSystem.setCameraZoom(1.0f);
+
+    // Set the appropriate zoom level for the next scene
+    if (GameViewWindow::getSceneNum() == -2) {  // Opening cutscene
+        cameraSystem.setCameraZoom(1.0f);  // Set proper zoom for loading screen
+    }
+    else if (GameViewWindow::getSceneNum() == -4) {  // Ending cutscene
+        cameraSystem.setCameraZoom(0.2f);  // Set proper zoom for main menu
+    }
+
+    // Mark that we've explicitly set the zoom
+    hasZoomBeenSet = true;
 }
 // check if the cutscene can accept input
 size_t CutsceneSystem::getCurrentFrameIndex() const {

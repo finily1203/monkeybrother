@@ -84,8 +84,11 @@ void LoadingScreen::startLoading(int targetSceneNum)
     {
         ecsCoordinator.destroyEntity(entity);
     }
+    
 	cameraSystem.setCameraPosition({ 0,0 });
     cameraSystem.unlockFromComponent();
+
+    cameraSystem.setCameraZoom(1.0f);
     // Now create loading screen entities
     createLoadingEntities();
 }
