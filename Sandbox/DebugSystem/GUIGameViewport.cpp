@@ -829,7 +829,7 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<PumpComponent>(entity)) {
 		auto& pump = ecs.getComponent<PumpComponent>(entity);
 		pump.isPump = true;
-		pump.pumpForce = 3.0f;
+		//pump.pumpForce = 3.0f;
 		entityJSON["pump"] = {
 			{"isPump", pump.isPump},
 			{"pumpForce", pump.pumpForce},
