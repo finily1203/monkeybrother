@@ -5,11 +5,11 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 @course: CSD2401
 @file:   EffectPumpBehaviour.cpp
 @brief:  This source file includes the implementation of the EffectPumpBehaviour
-		 that logicSystemECS uses to handle the behaviour of the pump entities.
-		 Pump entities will push the player entity and has a on and off duration
+         that logicSystemECS uses to handle the behaviour of the pump entities.
+         Pump entities will push the player entity and has a on and off duration
 
-		 Joel Chu (c.weiyuan): defined the functions of EffectPumpBehaviour class
-							   100%
+         Joel Chu (c.weiyuan): defined the functions of EffectPumpBehaviour class
+                               100%
 *//*___________________________________________________________________________-*/
 
 #include "EffectPumpBehaviour.h"
@@ -17,7 +17,8 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
 
-	
+#define M_PI   3.14159265358979323846264338327950288f
+
 void EffectPumpBehaviour::update(Entity entity) {
     timer += GLFWFunctions::delta_time;
     if (GLFWFunctions::isPumpOn && timer >= onDuration) {
@@ -40,35 +41,66 @@ void EffectPumpBehaviour::update(Entity entity) {
         float radius = playerTransform.scale.GetX() * 0.5f;
         CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
         CollisionSystemECS::OBB bubblesOBB = collisionSystem.createOBBFromEntity(entity);
+
+        auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
+        float rotation = bubblesTransform.orientation.GetX();   
+        myMath::Vector2D direction = PhysicsSystemRef->directionalVector(rotation);
+
+        Force force = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).force;
+        ForceManager& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
+
+        float pumpForce = ecsCoordinator.getComponent<PumpComponent>(entity).pumpForce;
         myMath::Vector2D normal{};
         float penetration{};
+
         bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, bubblesOBB, normal, penetration);
         if (isColliding) {
-            float pumpForce = ecsCoordinator.getComponent<PumpComponent>(entity).pumpForce;
-            ForceManager& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity).forceManager;
-            float orientation = bubblesTransform.orientation.GetX();
+            //std::cout << playerTransform.orientation.GetX() << std::endl;
 
-            myMath::Vector2D forceVector;
+   //         force.SetDirection(direction);
+   //         forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);
+   //         forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
 
-            // Handle different orientations
-            if (orientation == 90.f) {  // Pointing up
-                forceVector.SetX(1.f);
-                forceVector.SetY(0.f);
+   //         int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
+   //         float forceDirAngle = atan2(direction.GetY(), direction.GetX()) * (180.0f / M_PI);
+
+   //         //playerOrientation = (playerOrientation + 360) % 360;
+   //         //forceDirAngle = (static_cast<int>(forceDirAngle) + 360) % 360;
+
+			//if (playerOrientation < 0) playerOrientation += 360;
+
+   //         float angleDifference = fabs(playerOrientation - forceDirAngle);
+
+   //         std::cout << "Player Orientation: " << playerTransform.orientation.GetX() << std::endl;
+   //         std::cout << "Force Direction Angle: " << forceDirAngle << std::endl;
+
+   //         forceManager.ClearForce(playerEntity);
+
+            force.SetDirection(direction);
+            forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);
+            forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
+
+            int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
+            myMath::Vector2D PlayerDir = PhysicsSystemRef->directionalVector(playerOrientation);
+
+			std::cout << PlayerDir.GetX() << ", " << PlayerDir.GetY() << std::endl;
+
+            float threshold = 0.3f;
+
+            //its kinda weird here but since pumpForce is -ve, use the -ve PlayerDir
+			myMath::Vector2D dirDiff = direction - (-PlayerDir);
+
+			std::cout << "Dir Diff: " << dirDiff.GetX() << ", " << dirDiff.GetY() << std::endl;
+
+            if (dirDiff.GetX() < threshold)
+            {
+                forceManager.ClearForce(playerEntity);
             }
-            else if (orientation == 0.f) {  // Pointing right
-                forceVector.SetX(0.f);
-                forceVector.SetY(-1.f);
-            }
-            else {  // For any other angle, use the directional vector
-                myMath::Vector2D bubblesDirectionalVec = PhysicsSystemRef->directionalVector(orientation);
-                forceVector = bubblesDirectionalVec;
-            }
-
-            forceManager.AddForce(playerEntity, forceVector * pumpForce);
-            forceManager.ApplyForce(playerEntity, forceVector, pumpForce);
-
-            std::cout << "Collision with pump - Force applied. Orientation: " << orientation << std::endl;
-            std::cout << "Force vector: " << forceVector.GetX() << ", " << forceVector.GetY() << std::endl;
+			if (dirDiff.GetY() < threshold)
+			{
+				forceManager.ClearForce(playerEntity);
+			}
+            
         }
     }
 }

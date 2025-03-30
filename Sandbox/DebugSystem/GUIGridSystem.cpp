@@ -1,3 +1,20 @@
+/*
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author :  Owen Lew (z.lew)
+@team   :  MonkeHood
+@course :  CSD2401
+@file   :  GUIGridSystem.cpp
+@brief  :  This file contains the function definition of the grid system in the debug system
+
+*Owen Lew (z.lew):
+        - Integrated a tilegrid system for the debug system
+		- Users can now see the grid in the debug system
+        - tilegrid can be used to place tiles / platforms in the game 
+
+File Contributions: Owen Lew (100%)
+
+/*_______________________________________________________________________________________________________________*/
+
 #include "GUIGridSystem.h"
 #include "GlobalCoordinator.h"
 #include "GUIConsole.h"

@@ -1,3 +1,17 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ECSDefinitions.h
+@brief:  This header file helps to define the variables / types used in the ECS
+		 system. This is to ensure that the variables are consistent throughout
+		 the ECS system.
+
+		 Joel Chu (c.weiyuan): declared the properties for ECS class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #pragma once
 
 #include <queue>

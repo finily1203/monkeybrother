@@ -243,6 +243,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         (*keyState)[mappedKey] = true;
     }
 
+#ifdef _DEBUG
     if ((*keyState)[Key::NUM_2])
         allow_camera_movement = !allow_camera_movement;
 
@@ -254,17 +255,20 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         }
     }
 
+#endif
+
+    if ((*keyState)[Key::LSHIFT])
+    {
+        GameViewWindow::setSceneNum(-4);
+        ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
+    }
+
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
         isRotating = true;
     }
     else {
         isRotating = false;
     }
-
-	if ((*keyState)[Key::LSHIFT]) {
-		GameViewWindow::setSceneNum(-4);
-      ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
-	}
 
     //if ((*keyState)[Key::P]) {
     //    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

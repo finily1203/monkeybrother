@@ -1,3 +1,16 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   ExitBehaviour.cpp
+@brief:  This source file implements the ExitBehaviour class which is used
+		 by the logicSystemECS to handle the behaviour of the exit entity.
+
+         Joel Chu (c.weiyuan): defined the ExitBehaviour class
+                               100%
+*//*___________________________________________________________________________-*/
+
 #include "ExitBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"

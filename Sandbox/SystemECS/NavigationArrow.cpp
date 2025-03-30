@@ -1,4 +1,15 @@
-// NavigationArrow.cpp
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Liu YaoTing (yaoting.liu)
+@team:   MonkeHood
+@course: CSD2401
+@file:   NavigationArrow.cpp
+@brief:  This source file includes the implementation of the NavigationArrow
+		 that logicSystemECS uses to handle the behaviour of the navigation arrow entity.
+
+		 Liu YaoTing (yaoting.liu): defined the functions of NavigationArrow class
+							   100%
+*//*___________________________________________________________________________-*/
 #include "NavigationArrow.h"
 #include "GlobalCoordinator.h"
 #include "PlayerComponent.h"

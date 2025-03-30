@@ -106,6 +106,7 @@ void FilterBehaviour::update(Entity entity) {
                     GLFWFunctions::filterClogged = true;
                     GLFWFunctions::filterExitAudio = true;
 					createCloggedAnimation(entity);
+					createFilterPushAnimation(entity);
                 }
                 else {
                     // Keep player hidden near the filter during the 2-second delay
@@ -148,6 +149,41 @@ void FilterBehaviour::createCloggedAnimation(Entity entity) {
     animation.frameTime = 0.05f;
     animation.columns = 3.0f;
     animation.rows = 3.0f;
+
+    ecsCoordinator.addComponent(newAnimationEntity, animation);
+
+    // Add to default layer 0
+    layerManager.addEntityToLayer(layer, newAnimationEntity);
+}
+
+void FilterBehaviour::createFilterPushAnimation(Entity entity)
+{
+    Entity newAnimationEntity = ecsCoordinator.createEntity();
+
+    ecsCoordinator.setEntityID(newAnimationEntity, "filterPush");
+    ecsCoordinator.setTextureID(newAnimationEntity, "filter-out.png");
+
+    int layer = layerManager.getEntityLayer(entity);
+
+    // Transform setup
+    TransformComponent transform{};
+    auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+	transform.position.SetX(entityTransform.position.GetX() + entityTransform.scale.GetX());
+    transform.position.SetY(entityTransform.position.GetY() + (entityTransform.scale.GetY() * 0.3));
+    transform.scale.SetX(100.f);
+    transform.scale.SetY(100.f);
+	transform.orientation.SetX(entityTransform.orientation.GetX() + 180.f);
+
+    ecsCoordinator.addComponent(newAnimationEntity, transform);
+
+    // Animation setup
+    AnimationComponent animation{};
+    animation.isAnimated = true;
+    animation.totalFrames = 8.0f;
+    animation.frameTime = 0.15f;
+    animation.columns = 8.0f;
+    animation.rows = 1.0f;
 
     ecsCoordinator.addComponent(newAnimationEntity, animation);
 
