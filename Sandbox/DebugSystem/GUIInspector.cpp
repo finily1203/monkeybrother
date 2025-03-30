@@ -457,33 +457,33 @@ void Inspector::Update() {
 		}
 	}
 
-	if (openDeletePopup) {
-		ImGui::OpenPopup("Delete Entity?");
-		openDeletePopup = false;
-	}
+	//if (openDeletePopup) {
+	//	ImGui::OpenPopup("Delete Entity?");
+	//	openDeletePopup = false;
+	//}
 
-	ImVec2 middle = ImGui::GetMainViewport()->GetCenter();
-	ImGui::SetNextWindowPos(middle, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	//ImVec2 middle = ImGui::GetMainViewport()->GetCenter();
+	//ImGui::SetNextWindowPos(middle, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-	// Delete Entity warning popup
-	if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("Are you sure you want to delete this entity?");
-		ImGui::Separator();
+	//// Delete Entity warning popup
+	//if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+	//	ImGui::Text("Are you sure you want to delete this entity?");
+	//	ImGui::Separator();
 
-		if (ImGui::Button("Delete", ImVec2(120, 0))) {
-			ecsCoordinator.destroyEntity(selectEntityID);
-			selectEntityID = -1;
-			draggedEntityID = -1;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SetItemDefaultFocus();
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-			selectEntityID = -1;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
+	//	if (ImGui::Button("Delete", ImVec2(120, 0))) {
+	//		ecsCoordinator.destroyEntity(selectEntityID);
+	//		selectEntityID = -1;
+	//		draggedEntityID = -1;
+	//		ImGui::CloseCurrentPopup();
+	//	}
+	//	ImGui::SetItemDefaultFocus();
+	//	ImGui::SameLine();
+	//	if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+	//		//selectEntityID = -1;
+	//		ImGui::CloseCurrentPopup();
+	//	}
+	//	ImGui::EndPopup();
+	//}
 
 	// Handle selection mode cancellation
 	if (isSelectingEntity && !ImGui::IsPopupOpen("Select Entity")) {
