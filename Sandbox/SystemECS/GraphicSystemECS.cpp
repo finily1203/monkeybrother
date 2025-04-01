@@ -886,6 +886,20 @@ void GraphicSystemECS::update(float dt) {
                         }
                     }
 
+                    else if (ecsCoordinator.getEntityID(entity) == "tutorialClick")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "tutorial_inactive");
+                            
+                        }
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "tutorial_active");
+                      
+                        }
+                    }
+
                     else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu" || 
                              ecsCoordinator.getEntityID(entity) == "closeTutorialMenu")
                     {
@@ -1140,14 +1154,17 @@ void GraphicSystemECS::update(float dt) {
     }
 }
 
-// this is to update the left and right arrows scale in real-time
+// this is to update the left and right arrows scale in real-time 
+//ADDDED TUTORIAL BUTTON TO THIS TOO @IAN
 void GraphicSystemECS::updateTutorialArrows()
 {
     Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
     Entity previousArrow = ecsCoordinator.getEntityFromID("previousTutorialPage");
+	Entity tutorialButton = ecsCoordinator.getEntityFromID("tutorialClick");
 
     TransformComponent& nextTransform = ecsCoordinator.getComponent<TransformComponent>(nextArrow);
     TransformComponent& previousTransform = ecsCoordinator.getComponent<TransformComponent>(previousArrow);
+	TransformComponent& tutorialTransform = ecsCoordinator.getComponent<TransformComponent>(tutorialButton);
 
     if (GLFWFunctions::tutorialCurrentPage >= 1 && GLFWFunctions::tutorialCurrentPage < 8)
     {
@@ -1171,6 +1188,16 @@ void GraphicSystemECS::updateTutorialArrows()
     {
         previousTransform.scale.SetX(0.f);
         previousTransform.scale.SetY(0.f);
+    }
+
+    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8) 
+    {
+		tutorialTransform.scale.SetX(0.f);
+		tutorialTransform.scale.SetY(0.f);
+	}
+    else {
+        tutorialTransform.scale.SetX(300.f);
+        tutorialTransform.scale.SetY(150.f);
     }
 }
 

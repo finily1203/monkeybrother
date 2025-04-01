@@ -512,7 +512,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
 					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
 					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton" || 
+					ecsCoordinator.getEntityID(currEntity) == "tutorialClick") 	//added tutorial button
 				{
 					ecsCoordinator.destroyEntity(currEntity);
 				}
@@ -605,7 +606,8 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 				ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
 				ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
 				ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
-				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage")
+				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage" ||
+				ecsCoordinator.getEntityID(currEntity) == "tutorialClick") //added tutorial button
 			{
 				ecsCoordinator.destroyEntity(currEntity);
 			}
@@ -635,6 +637,53 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	else if (entityId == "previousTutorialPage")
 	{
 		GLFWFunctions::tutorialCurrentPage--;
+	}
+
+	//ADDED TUTORIAL BUTTON LOGIC HERE @IAN
+	else if (entityId == "tutorialClick")
+	{
+		audioSystem.playSoundEffect("UnderWater_Button_press_2.wav");
+		int tutorialPage = GLFWFunctions::tutorialCurrentPage; // takes note for tutorial page to select which level
+
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "tutorialBaseBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
+				ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
+				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage" ||
+				ecsCoordinator.getEntityID(currEntity) == "tutorialClick") //added tutorial button
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		GLFWFunctions::tutorialMenuCount--;
+		GLFWFunctions::tutorialCurrentPage = 1;
+
+		// checks tutorial page, 
+		// if page is 2, load scene Tutorial Move // scene 11
+		// if page is 3 or 5, load scene Tutorial Pump // scene 13
+		// if page is 7, load scene Tutorial Filter // scene 12
+
+		GLFWFunctions::changeLevel = true;
+		GLFWFunctions::newSceneLoaded = true;
+
+		if (tutorialPage == 2)
+		{
+			int sceneNum = 11;
+			loadingScreen.startLoading(sceneNum);
+		}
+		else if (tutorialPage == 3 || tutorialPage == 5)
+		{
+			int sceneNum = 13;
+			loadingScreen.startLoading(sceneNum);
+		}
+		else if (tutorialPage == 7)
+		{
+			int sceneNum = 12;
+			loadingScreen.startLoading(sceneNum);
+		}
 	}
 
 	// this handles the logic for exiting the level and goes back to the main menu button

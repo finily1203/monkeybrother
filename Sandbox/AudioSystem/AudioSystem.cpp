@@ -701,7 +701,7 @@ void AudioSystem::update() {
             if (!rotationChannel) {
                 std::string rotationSound = getAudioFileForChannel("Rotation", "Rotation.wav");
                 playRotationEffect(rotationSound);
-                rotationChannel->setVolume(0.0f); // Start silent
+                rotationChannel->setVolume(0.1f); // Start silent
                 currentRotationTime = 0.0f; // Reset fade timer
             }
             else {

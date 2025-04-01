@@ -243,7 +243,7 @@ void ECSCoordinator::update() {
 				destroyEntity(entity);
 			}
 
-			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5) {
+			if (sceneNum == 1 || sceneNum == 2 || sceneNum == 3 || sceneNum == 4 || sceneNum == 5 || sceneNum == 11 || sceneNum == 12 || sceneNum == 13) {
 				GLFWFunctions::gamePaused = false;
 				GLFWFunctions::filterClogged = false;
 
