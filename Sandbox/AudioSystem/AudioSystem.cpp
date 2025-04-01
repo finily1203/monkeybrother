@@ -901,6 +901,11 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
         {
             soundEffectChannel->setVolume(sfxVol * 2.f);
         }
+        else if (soundEffectName == "UnderWater_Bump-Bounce.wav" || 
+                 soundEffectName == "Collection.wav")
+        {
+            soundEffectChannel->setVolume(sfxVol * 0.3f);
+        }
         else
         {
             soundEffectChannel->setVolume(sfxVol);
