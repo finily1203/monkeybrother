@@ -137,6 +137,8 @@ public:
 	void SaveOptionsSettingsToJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the cutscene data from JSON file
 	void LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
+	// load the end cutscene data from JSON file
+	void LoadEndCutsceneFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the tutorial page entities from JSON
 	void LoadTutorialMenuFromJSON(ECSCoordinator& ecs, std::string const& filename);
 	// load the quit level menu entities from JSON

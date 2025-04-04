@@ -1,4 +1,15 @@
-// NavigationArrow.h
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Liu YaoTing (yaoting.liu)
+@team:   MonkeHood
+@course: CSD2401
+@file:   NavigationArrow.h
+@brief:  This header file includes the declaration of the NavigationArrow
+		 that logicSystemECS uses to handle the navigation arrow entity.
+
+         Liu YaoTing (yaoting.liu): defined the functions of NavigationArrow class
+                               100%
+*//*___________________________________________________________________________-*/
 #pragma once
 #include "EngineDefinitions.h"
 #include <GL/glew.h>

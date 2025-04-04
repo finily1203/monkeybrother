@@ -73,9 +73,16 @@ bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
 bool GLFWFunctions::showFPS = true;
 bool GLFWFunctions::isPlayerDead = false;
+bool GLFWFunctions::attackAudio = false;
+bool GLFWFunctions::filterExitAudio = false;
+bool GLFWFunctions::endCutsceneLastPanel = false;
+bool GLFWFunctions::buttonHoverAudio = false;
 
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;
+float GLFWFunctions::bumpTimer = 0.0f;
+const float GLFWFunctions::bumpDuration = 3.0f;
+
 bool GLFWFunctions::newSceneLoaded = false;
 
 MouseBehaviour* mouseBehaviour = nullptr;
@@ -247,6 +254,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         (*keyState)[mappedKey] = true;
     }
 
+#ifdef _DEBUG
     if ((*keyState)[Key::NUM_2])
         allow_camera_movement = !allow_camera_movement;
 
@@ -257,6 +265,8 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             isGuiOpen = ~isGuiOpen;
         }
     }
+
+#endif
 
     if ((*keyState)[Key::A] || (*keyState)[Key::D]) {
         isRotating = true;
@@ -426,16 +436,61 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                 glfwSetWindowAttrib(pWindow, GLFW_DECORATED, GLFW_TRUE);
                 glfwSetWindowAttrib(pWindow, GLFW_RESIZABLE, GLFW_FALSE);
 
-
                 windowWidth = windowedWidth;
                 windowHeight = windowedHeight;
             }
 
-
             glViewport(0, 0, windowWidth, windowHeight);
 
-            std::cout << "Fullscreen: " << (fullscreen ? "ON" : "OFF") << std::endl;
-            std::cout << "Window dimensions: " << windowWidth << "x" << windowHeight << std::endl;
+            // Update main menu background scale if in main menu
+            if (GameViewWindow::getSceneNum() == -1) {
+                // Find the main menu background entity
+                Entity MainMenuBgEntity = ecsCoordinator.getEntityFromID("mainMenuBg");
+                if (ecsCoordinator.entityExists(MainMenuBgEntity)) {
+                    // Get current window/screen dimensions - use updated window dimensions
+                    int scalingWidth = windowWidth;
+                    int scalingHeight = windowHeight;
+
+                    // Get transform component
+                    auto& transform = ecsCoordinator.getComponent<TransformComponent>(MainMenuBgEntity);
+
+                    float widthRatio = static_cast<float>(scalingWidth) / 1920.0f;
+                    float heightRatio = static_cast<float>(scalingHeight) / 1080.0f;
+
+                    // Use the larger ratio to ensure full coverage
+                    float scaleFactor = std::max(widthRatio, heightRatio);
+
+                    // Apply the scaling - maintains proportional coverage
+                    transform.scale.SetX(10000.0f * scaleFactor);
+                    transform.scale.SetY(10000.0f * scaleFactor);
+
+                }
+            }
+
+            
+
+            Entity GameOverBgEntity = ecsCoordinator.getEntityFromID("gameoverBG");
+
+            if (ecsCoordinator.entityExists(GameOverBgEntity)) {
+                // Get current window/screen dimensions - use updated window dimensions
+                int scalingWidth = windowWidth;
+                int scalingHeight = windowHeight;
+
+                // Get transform component
+                auto& transform = ecsCoordinator.getComponent<TransformComponent>(GameOverBgEntity);
+
+                float widthRatio = static_cast<float>(scalingWidth) / 1920.0f;
+                float heightRatio = static_cast<float>(scalingHeight) / 1080.0f;
+
+                // Use the larger ratio to ensure full coverage
+                float scaleFactor = std::max(widthRatio, heightRatio);
+
+                // Apply the scaling - maintains proportional coverage
+                transform.scale.SetX(1920.0f * scaleFactor);
+                transform.scale.SetY(1080.0f * scaleFactor);
+            }
+           
+
         }
 
     }

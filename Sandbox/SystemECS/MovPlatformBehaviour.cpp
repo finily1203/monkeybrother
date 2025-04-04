@@ -1,3 +1,18 @@
+/*!
+All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+@author: Joel Chu (c.weiyuan)
+@team:   MonkeHood
+@course: CSD2401
+@file:   MovPlatformBehaviour.cpp
+@brief:  This source file includes the implementation of the Moving platform
+		 behaviour class used by the LogicSystemECS to handle the behaviour of
+		 the moving platforms. Though it is not used in the current game, it is
+		 additional feature that can be used for the levels
+
+		 Joel Chu (c.weiyuan): defined the functions of MovPlatformBehaviour class
+							   100%
+*//*___________________________________________________________________________-*/
+
 #include "MovPlatformBehaviour.h"
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"

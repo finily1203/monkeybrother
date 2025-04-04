@@ -116,13 +116,21 @@ bool GameViewWindow::isNamingSaveFile;
 std::map<int, std::string> *GameViewWindow::saveFileNames;
 int GameViewWindow::confirmDeleteSaveID;
 
+bool GameViewWindow::showAudioChannelPopup = false;
+std::string* GameViewWindow::draggedAudioName;
+std::map<std::string, std::string>* GameViewWindow::audioChannelMappings;
+
 //Initialize game viewport system
 void GameViewWindow::Initialise() {
 	LoadViewportConfigFromJSON(FilePathManager::GetIMGUIViewportJSONPath());
 	LoadSceneFromJSON(FilePathManager::GetSceneJSONPath());
-
+	if (!draggedAudioName)
+		draggedAudioName = new std::string();
 	if (!saveFileNames)
 		saveFileNames = new std::map<int, std::string>();
+	if (!audioChannelMappings)
+		audioChannelMappings = new std::map<std::string, std::string>();
+	LoadAudioChannelMappings();
 
 	gridSystem.initialise(128.f,100,100);
 
@@ -339,27 +347,29 @@ void GameViewWindow::Update() {
 	ImGui::SetCursorPos(renderPos);
 	ImTextureID textureID = (ImTextureID)(intptr_t)viewportTexture;
 	ImGui::Image(textureID, aspectSize, ImVec2(0, 1), ImVec2(1, 0));
-
 	if (ImGui::BeginDragDropTarget()) {
 		if (const ImGuiPayload* payloadTex = ImGui::AcceptDragDropPayload("TEXTURE_PAYLOAD")) {
 			const char* assetName = (const char*)payloadTex->Data;
 			createDropEntity(assetName, TEXTURE);
 			std::cout << "Dropped Texture: " << assetName << std::endl;
-
 		}
 		else if (const ImGuiPayload* payloadShdr = ImGui::AcceptDragDropPayload("SHADER_PAYLOAD")) {
 			const char* assetName = (const char*)payloadShdr->Data;
 			std::cout << "Dropped Shader: " << assetName << std::endl;
-
 		}
 		else if (const ImGuiPayload* payloadFont = ImGui::AcceptDragDropPayload("FONT_PAYLOAD")) {
 			const char* assetName = (const char*)payloadFont->Data;
 			createDropEntity(assetName, FONT);
 			std::cout << "Dropped Font: " << assetName << std::endl;
-
 		}
-		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("PREFAB_PAYLOAD")) {
+		else if (const ImGuiPayload* payloadAud = ImGui::AcceptDragDropPayload("AUDIO_PAYLOAD")) {
 			const char* assetName = (const char*)payloadAud->Data;
+			*draggedAudioName = assetName;
+			showAudioChannelPopup = true;
+			std::cout << "Dropped Audio: " << assetName << std::endl;
+		}
+		else if (const ImGuiPayload* payloadFab = ImGui::AcceptDragDropPayload("PREFAB_PAYLOAD")) {
+			const char* assetName = (const char*)payloadFab->Data;
 			createDropEntity(assetName, PREFAB);
 			std::cout << "Dropped prefab: " << assetName << std::endl;
 		}
@@ -367,6 +377,8 @@ void GameViewWindow::Update() {
 	}
 
 	Console::GetLog() << "zoom" << currentZoom << std::endl;
+
+	DisplayAudioChannelPopup();
 
 	ImGui::End();
 }
@@ -378,8 +390,14 @@ void GameViewWindow::Cleanup() {
 		viewportTexture = 0;
 	}
 
+	delete draggedAudioName;
+	draggedAudioName = nullptr;
+
 	delete saveFileNames;
 	saveFileNames = nullptr;
+
+	delete audioChannelMappings;
+	audioChannelMappings = nullptr;
 }
 //Set up Opengl texture to store game scene
 void GameViewWindow::SetupViewportTexture() {
@@ -811,7 +829,7 @@ nlohmann::ordered_json GameViewWindow::AddNewEntityToJSON(TransformComponent& tr
 	if (ecs.hasComponent<PumpComponent>(entity)) {
 		auto& pump = ecs.getComponent<PumpComponent>(entity);
 		pump.isPump = true;
-		pump.pumpForce = 3.0f;
+		//pump.pumpForce = 3.0f;
 		entityJSON["pump"] = {
 			{"isPump", pump.isPump},
 			{"pumpForce", pump.pumpForce},
@@ -1388,6 +1406,9 @@ void GameViewWindow::SaveToNamedFile(int saveID, const char* saveName) {
 	for (int i = 0; i < layerManager.getLayerCount(); i++) {
 		for (auto entity : layerManager.getEntitiesFromLayer(i)) {
 			std::string entityId = ecsCoordinator.getEntityID(entity);
+			if (entityId == "fpsDisplay" || entityId == "nav_arrow") {
+				continue;
+			}
 			std::string textureId = ecsCoordinator.getTextureID(entity);
 			if (entityId != "placeholderentity") {
 				TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
@@ -1636,4 +1657,144 @@ std::map<int, std::string> GameViewWindow::ScanForSaveFiles() {
 	}
 
 	return saveFiles;
+}
+
+void GameViewWindow::DisplayAudioChannelPopup() {
+	if (!showAudioChannelPopup) return;
+
+	ImGui::OpenPopup("Select Audio Channel");
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	if (ImGui::BeginPopupModal("Select Audio Channel", &showAudioChannelPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Select channel for audio: %s", draggedAudioName->c_str());
+
+		// Show current assignment if it exists
+		auto existingMapping = audioChannelMappings->find(*draggedAudioName);
+		if (existingMapping != audioChannelMappings->end()) {
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f),
+				"Currently assigned to: %s", existingMapping->second.c_str());
+		}
+
+		ImGui::Separator();
+
+		// Get channel list from AudioSystem
+		auto channelList = audioSystem.getChannelList();
+
+		// Display each channel as a button
+		for (auto& channelPair : channelList) {
+			std::string channelName = channelPair.first;
+
+			// Highlight the currently assigned channel
+			bool isCurrentChannel = (existingMapping != audioChannelMappings->end() &&
+				existingMapping->second == channelName);
+
+			if (isCurrentChannel) {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
+			}
+
+			if (ImGui::Button(channelName.c_str(), ImVec2(200, 30))) {
+				// Check if any other audio is already assigned to this channel and remove that mapping
+				for (auto it = audioChannelMappings->begin(); it != audioChannelMappings->end(); ) {
+					if (it->second == channelName && it->first != *draggedAudioName) {
+						// This channel is already assigned to another audio file
+						std::cout << "Removing previous assignment: " << it->first << " from channel " << channelName << std::endl;
+						it = audioChannelMappings->erase(it);
+					}
+					else {
+						++it;
+					}
+				}
+
+				// Save the new mapping
+				(*audioChannelMappings)[*draggedAudioName] = channelName;
+				SaveAudioChannelMappings();
+
+				// Play the audio on the selected channel
+				audioSystem.playAudioByMapping(*draggedAudioName, channelName);
+
+				showAudioChannelPopup = false;
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (isCurrentChannel) {
+				ImGui::PopStyleColor();
+			}
+		}
+
+		ImGui::Separator();
+
+		// Add option to remove the mapping
+		if (existingMapping != audioChannelMappings->end()) {
+			if (ImGui::Button("Remove Assignment", ImVec2(200, 30))) {
+				audioChannelMappings->erase(*draggedAudioName);
+				SaveAudioChannelMappings();
+				showAudioChannelPopup = false;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+			showAudioChannelPopup = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+}
+
+void GameViewWindow::SaveAudioChannelMappings() {
+	JSONSerializer serializer;
+	std::string filePath = FilePathManager::GetAudioMappingsPath();
+
+	nlohmann::json jsonObj;
+
+	// First try to open existing file to preserve other settings
+	if (serializer.Open(filePath)) {
+		jsonObj = serializer.GetJSONObject();
+	}
+
+	// Create or update the audioMappings section
+	jsonObj["audioMappings"] = nlohmann::json::object();
+
+	// Add each mapping to the JSON
+	for (const auto& mapping : *audioChannelMappings) {
+		jsonObj["audioMappings"][mapping.first] = mapping.second;
+	}
+
+	// Save the JSON object to file
+	std::ofstream file(filePath);
+	if (file.is_open()) {
+		file << jsonObj.dump(2);
+		file.close();
+		std::cout << "Audio channel mappings saved to: " << filePath << std::endl;
+	}
+	else {
+		std::cerr << "Error: Could not save audio mappings to: " << filePath << std::endl;
+	}
+}
+
+// Load audio channel mappings from JSON
+void GameViewWindow::LoadAudioChannelMappings() {
+	JSONSerializer serializer;
+	std::string filePath = FilePathManager::GetAudioMappingsPath();
+
+	if (!serializer.Open(filePath)) {
+		std::cout << "No audio channel mappings file found. Will create one when needed." << std::endl;
+		return;
+	}
+
+	nlohmann::json jsonObj = serializer.GetJSONObject();
+
+	// Check if audioMappings section exists
+	if (jsonObj.contains("audioMappings") && jsonObj["audioMappings"].is_object()) {
+		// Clear existing mappings
+		audioChannelMappings->clear();
+
+		// Load each mapping from the JSON
+		for (auto it = jsonObj["audioMappings"].begin(); it != jsonObj["audioMappings"].end(); ++it) {
+			(*audioChannelMappings)[it.key()] = it.value();
+		}
+
+		std::cout << "Loaded " << audioChannelMappings->size() << " audio channel mappings" << std::endl;
+	}
 }

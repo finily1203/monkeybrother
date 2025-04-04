@@ -132,6 +132,8 @@ public:
 
 	static std::map<int, std::string> ScanForSaveFiles();
 
+	static std::map<std::string, std::string>* audioChannelMappings;
+
 
 
 private:
@@ -197,4 +199,10 @@ private:
 	static bool isNamingSaveFile;
 	static std::map<int, std::string>* saveFileNames;
 	static int confirmDeleteSaveID;
+
+	static bool showAudioChannelPopup;
+	static std::string *draggedAudioName;
+	static void DisplayAudioChannelPopup();
+	static void SaveAudioChannelMappings();
+	static void LoadAudioChannelMappings();
 };

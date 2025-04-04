@@ -71,12 +71,16 @@ public:
 	static std::string GetGameplaySettingsJSONPath();
 	// retrieve the intro cutscene JSON path
 	static std::string GetIntroCutsceneJSONPath();
+	// retrieve the end cutscene JSON path
+	static std::string GetEndCutsceneJSONPath();
 	// retrieve the tutorial page JSON path
 	static std::string GetTutorialJSONPath();
 	// retrieve the quit to main menu JSON path
 	static std::string GetQuitLevelMenuJSONPath();
 	// retrieve the level completed menu JSON path
 	static std::string GetLevelCompletedMenuJSONPath();
+
+	static std::string GetAudioMappingsPath();
 	// retrieve the game over menu JSON path
 	static std::string GetGameOverMenuJSONPath();
 	// retrieve the button config JSON path

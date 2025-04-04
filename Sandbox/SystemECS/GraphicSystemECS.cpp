@@ -20,6 +20,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicsComponent.h"
 #include "AABBComponent.h"
 #include "MovementComponent.h"
+#include "MovementComponent.h"
 #include "AnimationComponent.h"
 #include "EnemyComponent.h"
 #include "PhysicsComponent.h"
@@ -49,10 +50,58 @@ double elapsedTimeSinceGrowStart(const PlayerComponent& player) {
 
 
 void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, TransformComponent& transform, AnimationComponent& animation, float velocityMagnitude) {
-   
+    // Check for player death first
+    if (GLFWFunctions::isPlayerDead) {
+
+        static bool deathAnimationStarted = false;
+        static float deathAnimationTime = 0.0f;
+        static int deathCurrentFrame = 0;
+
+        if (!deathAnimationStarted) {
+
+            deathAnimationStarted = true;
+            deathAnimationTime = 0.0f;
+            deathCurrentFrame = 0;
+            ecsCoordinator.setTextureID(playerEntity, "mossballDead");
+        }
+
+
+        animation.totalFrames = 24;
+        animation.columns = 8;
+        animation.rows = 3;
+
+
+        deathAnimationTime += GLFWFunctions::delta_time;
+        float frameDuration = 0.1f;
+
+        if (deathAnimationTime >= frameDuration && deathCurrentFrame < static_cast<int>(animation.totalFrames) - 1) {
+            deathCurrentFrame++;
+            deathAnimationTime = 0.0f;
+        }
+
+
+        animation.currentFrame = deathCurrentFrame;
+        animation.UpdateUVCoordinates();
+
+        // Draw the death animation
+        graphicsSystem.DrawObject(
+            GraphicsSystem::DrawMode::TEXTURE,
+            assetsManager.GetTexture("mossballDead"),
+            transform.mdl_xform,
+            animation.currentUVs
+        );
+        return;
+    }
+    else {
+        // Reset death animation state when player is alive
+        static bool deathAnimationStarted = false;
+        if (deathAnimationStarted) {
+            deathAnimationStarted = false;
+        }
+    }
+
     const MovementAnimConfig& config = animation.movementConfig;
 
-   
     if (config.bodyTexture.empty() || config.eyesTexture.empty() ||
         config.bodyFrames == 0 || config.eyesFrames == 0) {
         // Use default animation
@@ -67,15 +116,12 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
     }
 
     auto& player = ecsCoordinator.getComponent<PlayerComponent>(playerEntity);
-
     static float eyesAnimTime = 0.0f;
     static int eyesCurrentFrame = 0;
 
-    
     if (config.movementThreshold > 0 && velocityMagnitude > config.movementThreshold) {
         player.lastMoveTime = glfwGetTime();
         player.isIdle = false;
-
         // Body animation
         AnimationComponent bodyAnimation = animation;
         bodyAnimation.isAnimated = true;
@@ -83,7 +129,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         bodyAnimation.columns = config.bodyColumns;
         bodyAnimation.rows = config.bodyRows;
         bodyAnimation.UpdateUVCoordinates();
-
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(config.bodyTexture),
@@ -91,12 +136,10 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             bodyAnimation.currentUVs
         );
 
-        
         if (config.eyeFrameDuration > 0) {
             eyesAnimTime += GLFWFunctions::delta_time;
             eyesCurrentFrame = static_cast<int>(eyesAnimTime / config.eyeFrameDuration)
                 % static_cast<int>(config.eyesFrames);
-
             AnimationComponent eyesAnimation = animation;
             eyesAnimation.isAnimated = true;
             eyesAnimation.totalFrames = config.eyesFrames;
@@ -104,7 +147,6 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
             eyesAnimation.rows = config.eyesRows;
             eyesAnimation.currentFrame = eyesCurrentFrame;
             eyesAnimation.UpdateUVCoordinates();
-
             graphicsSystem.DrawObject(
                 GraphicsSystem::DrawMode::TEXTURE,
                 assetsManager.GetTexture(config.eyesTexture),
@@ -114,24 +156,19 @@ void GraphicSystemECS::handlePlayerMovementAnimation(Entity playerEntity, Transf
         }
     }
     else {
-        
         std::string defaultTexture = ecsCoordinator.getTextureID(playerEntity);
-
         graphicsSystem.DrawObject(
             GraphicsSystem::DrawMode::TEXTURE,
             assetsManager.GetTexture(defaultTexture),
             transform.mdl_xform,
             animation.currentUVs
         );
-
         // Reset eye animation
         eyesAnimTime = 0.0f;
         eyesCurrentFrame = 0;
-
         // Check for idle animation
         double currentTime = glfwGetTime();
-        const float IDLE_THRESHOLD = 3.0f; 
-
+        const float IDLE_THRESHOLD = 3.0f;
         if (!player.isIdle && !player.playingIdleAnim &&
             (currentTime - player.lastMoveTime > IDLE_THRESHOLD)) {
             player.isIdle = true;
@@ -849,6 +886,20 @@ void GraphicSystemECS::update(float dt) {
                         }
                     }
 
+                    else if (ecsCoordinator.getEntityID(entity) == "tutorialClick")
+                    {
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "tutorial_inactive");
+                            
+                        }
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "tutorial_active");
+                      
+                        }
+                    }
+
                     else if (ecsCoordinator.getEntityID(entity) == "closePauseMenu" || ecsCoordinator.getEntityID(entity) == "closeOptionsMenu" || 
                              ecsCoordinator.getEntityID(entity) == "closeTutorialMenu")
                     {
@@ -969,17 +1020,6 @@ void GraphicSystemECS::update(float dt) {
                     // Skip further rendering for this entity
                     continue;
                     
-                    if (GLFWFunctions::isPlayerDead) {
-                        ecsCoordinator.setTextureID(entity, "mossballDead");
-                        auto& playerAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-                        playerAnimation.totalFrames = 24;
-                        playerAnimation.columns = 8;
-                        playerAnimation.rows = 3;
-                    }
-                    else {
-                        ecsCoordinator.setTextureID(entity, "mossball");
-                    }
-                    
                 }
 
                 if (isFilter) {
@@ -995,11 +1035,11 @@ void GraphicSystemECS::update(float dt) {
                 if (isEnemy)
                 {
 					auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
-                    if (enemy.drawVisionDebug) {
-						auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
-						graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
-                        graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
-                    }
+      //              if (enemy.drawVisionDebug) {
+						//auto& transformation = ecsCoordinator.getComponent<TransformComponent>(entity);
+						//graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, enemy.visionDistance, cameraSystem.getViewMatrix());
+      //                  graphicsSystem.drawDebugVisionCone(transformation, enemy.visionAngle, (enemy.visionDistance / 3.0f), cameraSystem.getViewMatrix());
+      //              }
 
                     if (enemy.currState == 0) {
                         ecsCoordinator.setTextureID(entity, "goldfish");
@@ -1008,13 +1048,13 @@ void GraphicSystemECS::update(float dt) {
                         enemyAnimation.columns = 4;
                         enemyAnimation.rows = 6;
                     }
-                    else if (enemy.currState == 1) {
-                        ecsCoordinator.setTextureID(entity, "goldfishAlert");
-                        auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
-                        enemyAnimation.totalFrames = 5;
-                        enemyAnimation.columns = 2;
-                        enemyAnimation.rows = 3;
-                    }
+                    //else if (enemy.currState == 1) {
+                    //    ecsCoordinator.setTextureID(entity, "goldfishAlert");
+                    //    auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                    //    enemyAnimation.totalFrames = 5;
+                    //    enemyAnimation.columns = 2;
+                    //    enemyAnimation.rows = 3;
+                    //}
                     else if (enemy.currState == 2) {
                         ecsCoordinator.setTextureID(entity, "goldfishBite");
 						auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
@@ -1022,9 +1062,28 @@ void GraphicSystemECS::update(float dt) {
                         enemyAnimation.columns = 4;
                         enemyAnimation.rows = 4;
                     }
+
+                    if (ecsCoordinator.getTextureID(entity) == "goldfishAlert")
+                    {
+                        auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
+
+                        double currentAbsoluteTime = glfwGetTime();
+                        double timeSinceCreation = currentAbsoluteTime - anim.creationTime;
+
+                        anim.currentFrame = static_cast<int>((timeSinceCreation / anim.frameTime)) % static_cast<int>(anim.totalFrames);
+
+                        if (anim.currentFrame == static_cast<int>(anim.totalFrames) - 1) {
+                            ecsCoordinator.setTextureID(entity, "goldfish");
+                            auto& enemyAnimation = ecsCoordinator.getComponent<AnimationComponent>(entity);
+                            enemyAnimation.totalFrames = 24;
+                            enemyAnimation.frameTime = 0.05f;
+                            enemyAnimation.columns = 4;
+                            enemyAnimation.rows = 6;
+                        }
+                    }
                 }
 
-                if (ecsCoordinator.getEntityID(entity) == "collectAnimation") {
+                if (ecsCoordinator.getEntityID(entity) == "collectAnimation" || ecsCoordinator.getEntityID(entity) == "filterPush") {
                     auto& anim = ecsCoordinator.getComponent<AnimationComponent>(entity);
 
                     double currentAbsoluteTime = glfwGetTime();
@@ -1065,13 +1124,20 @@ void GraphicSystemECS::update(float dt) {
                     }
                 }
 
+                
+
                 if (ecsCoordinator.getTextureID(entity) != "") {
-                    //should not render the animation for filter in and filter out if filter is clogged
-                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png" || ecsCoordinator.getTextureID(entity) == "filter-out.png") {
+                    //render filter in animation when filter is not clogged
+                    if (ecsCoordinator.getTextureID(entity) == "filter_in.png") {
                         if (GLFWFunctions::filterClogged) {
                             continue;
                         }
                     }
+					//if (ecsCoordinator.getTextureID(entity) == "filter-out.png") {
+					//	if (GLFWFunctions::filterClogged) {
+					//		continue;
+					//	}
+					//}
                     //should not render the bubble animation if pump is not on
                     if (ecsCoordinator.getTextureID(entity) == "bubbles 3.png") {
                         if (!GLFWFunctions::isPumpOn) {
@@ -1088,14 +1154,17 @@ void GraphicSystemECS::update(float dt) {
     }
 }
 
-// this is to update the left and right arrows scale in real-time
+// this is to update the left and right arrows scale in real-time 
+//ADDDED TUTORIAL BUTTON TO THIS TOO @IAN
 void GraphicSystemECS::updateTutorialArrows()
 {
     Entity nextArrow = ecsCoordinator.getEntityFromID("nextTutorialPage");
     Entity previousArrow = ecsCoordinator.getEntityFromID("previousTutorialPage");
+	Entity tutorialButton = ecsCoordinator.getEntityFromID("tutorialClick");
 
     TransformComponent& nextTransform = ecsCoordinator.getComponent<TransformComponent>(nextArrow);
     TransformComponent& previousTransform = ecsCoordinator.getComponent<TransformComponent>(previousArrow);
+	TransformComponent& tutorialTransform = ecsCoordinator.getComponent<TransformComponent>(tutorialButton);
 
     if (GLFWFunctions::tutorialCurrentPage >= 1 && GLFWFunctions::tutorialCurrentPage < 8)
     {
@@ -1119,6 +1188,16 @@ void GraphicSystemECS::updateTutorialArrows()
     {
         previousTransform.scale.SetX(0.f);
         previousTransform.scale.SetY(0.f);
+    }
+
+    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8) 
+    {
+		tutorialTransform.scale.SetX(0.f);
+		tutorialTransform.scale.SetY(0.f);
+	}
+    else {
+        tutorialTransform.scale.SetX(300.f);
+        tutorialTransform.scale.SetY(150.f);
     }
 }
 

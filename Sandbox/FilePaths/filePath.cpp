@@ -283,6 +283,17 @@ std::string FilePathManager::GetIntroCutsceneJSONPath()
 	return jsonPathString;
 }   
 
+// this function retrieves the end cutscene JSON file
+std::string FilePathManager::GetEndCutsceneJSONPath()
+{
+	std::filesystem::path execPath = GetExecutablePath();
+	std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "endCutscene.json";
+
+	std::string jsonPathString = jsonPath.string();
+	
+    return jsonPathString;
+}
+
 std::string FilePathManager::GetFPSConfigJSONPath()
 {
     std::filesystem::path execPath = GetExecutablePath();
@@ -326,9 +337,16 @@ std::string FilePathManager::GetLevelCompletedMenuJSONPath()
     return jsonPathString;
 }
 
+std::string FilePathManager::GetAudioMappingsPath() {
+    std::filesystem::path execPath = FilePathManager::GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "audio_mappings.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}
 // this function retrieves the game over menu JSON file
-std::string FilePathManager::GetGameOverMenuJSONPath()
-{
+std::string FilePathManager::GetGameOverMenuJSONPath() {
     std::filesystem::path execPath = GetExecutablePath();
     std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "gameOverMenu.json";
 
