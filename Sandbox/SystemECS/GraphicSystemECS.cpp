@@ -892,7 +892,7 @@ void GraphicSystemECS::updateTutorialArrows()
         previousTransform.scale.SetY(0.f);
     }
     
-    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 4 || 
+    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 3 || GLFWFunctions::tutorialCurrentPage == 4 ||
         GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8)
     {
 		tutorialTransform.scale.SetX(0.f);
