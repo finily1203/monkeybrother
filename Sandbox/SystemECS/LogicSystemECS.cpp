@@ -61,22 +61,9 @@ void LogicSystemECS::update(float dt) {
 			NavigationArrow::CreateNavigationArrow(entity);
 		}
 	}
-
-	// Handle mouse cursor visibility based on game state
-	int currentScene = GameViewWindow::getSceneNum();
-	bool isInGameplay = currentScene > 0 && !GLFWFunctions::gamePaused && !loadingScreen.isLoading();
-	bool isInCutscene = currentScene == -2 || currentScene == -4;
-	bool isEditorActive = GLFWFunctions::debug_flag || GLFWFunctions::isGuiOpen;
-
-
-	if (isEditorActive) {
-		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
-	
-	else if (isInGameplay || isInCutscene || GLFWFunctions::useMouseRotation) {
+	if (GLFWFunctions::useMouseRotation) {
 		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
-	
 	else {
 		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
