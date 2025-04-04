@@ -45,5 +45,7 @@ public:
 private:
 	MouseBehaviour mouseBehaviour;
 	bool fpsEntityCreated = false;
+	myMath::Vector2D lastMossPosition;
+	float lastMossHeight = 0.0f;
 
 };

@@ -499,6 +499,121 @@ void GraphicSystemECS::update(float dt) {
             else if (entityId == "gameLogo") {
                 ecsCoordinator.setTextureID(entity, "gameLogo");
             }
+            else if (entityId == "MSANIM_3BG") {
+                ecsCoordinator.setTextureID(entity, "MSANIM_3BG");
+            }
+            else if (entityId == "MSANIM_5MOSS") {
+                ecsCoordinator.setTextureID(entity, "MSANIM_5MOSS");
+
+                // Bounce parameters
+                const float bounceSpeed = 2.0f;
+                const float bounceHeight = 60.0f;
+                float time = static_cast<float>(glfwGetTime());
+
+  
+                auto originalPosition = transform.position;
+
+
+                float bounceValue = cos(bounceSpeed * time);
+                float bounceOffset = bounceHeight * bounceValue;
+                transform.position.SetY(originalPosition.GetY() + bounceOffset);
+
+
+                lastMossPosition = transform.position;
+                lastMossHeight = bounceOffset;
+
+           
+                transform.mdl_xform = graphicsSystem.UpdateObject(
+                    transform.position, transform.scale, transform.orientation,
+                    isUIElement ? identityMatrix : viewMatrix
+                );
+                graphicsSystem.DrawObject(
+                    GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture("MSANIM_5MOSS"),
+                    transform.mdl_xform,
+                    animation.currentUVs
+                );
+
+             
+                transform.position = originalPosition;
+                continue;
+            }
+
+            else if (entityId == "MSANIM_2SHADOW") {
+                ecsCoordinator.setTextureID(entity, "MSANIM_2SHADOW");
+
+                auto originalPosition = transform.position;
+                auto originalScale = transform.scale;
+
+             
+                float offsetX = lastMossHeight * 0.3f;
+                float heightRatio = 1.0f - (lastMossHeight / 120.0f);
+                float scaleFactor = 0.7f + 0.3f * heightRatio;
+
+                transform.position.SetX(originalPosition.GetX() + offsetX);
+                transform.scale.SetX(originalScale.GetX() * (scaleFactor * 1.2f));
+                transform.scale.SetY(originalScale.GetY() * scaleFactor);
+
+            
+                transform.mdl_xform = graphicsSystem.UpdateObject(
+                    transform.position, transform.scale, transform.orientation,
+                    isUIElement ? identityMatrix : viewMatrix
+                );
+                graphicsSystem.DrawObject(
+                    GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture("MSANIM_2SHADOW"),
+                    transform.mdl_xform,
+                    animation.currentUVs
+                );
+
+                // Restore original values
+                transform.position = originalPosition;
+                transform.scale = originalScale;
+                continue;
+            }
+
+            else if (entityId == "MSANIM_4TANGFISH" || entityId == "MSANIM_4GOLDFISH") {
+                ecsCoordinator.setTextureID(entity, entityId);
+
+                // Animation parameters
+                const float swimSpeed = 0.4f;
+                const float swimAmplitude = 10.0f;
+                const float chaseFactor = 0.6f;
+                const float bounceDelay = 0.2f;
+                const float depthScale = 0.8f;
+                float time = static_cast<float>(glfwGetTime());
+
+                auto originalPosition = transform.position;
+                auto originalScale = transform.scale;
+
+                // Fish vertical and horizontal motion
+                float swimWave = cos(swimSpeed * time) * swimAmplitude; // Opposes moss
+                float seesawBounce = -lastMossHeight * chaseFactor;
+                float horizontalWobble = sin(2.0f * (time - bounceDelay)) * 5.0f;
+
+                transform.position.SetY(originalPosition.GetY() + swimWave + seesawBounce);
+                transform.position.SetX(originalPosition.GetX() + horizontalWobble);
+                transform.scale = originalScale * depthScale;
+
+                
+                transform.mdl_xform = graphicsSystem.UpdateObject(
+                    transform.position, transform.scale, transform.orientation,
+                    isUIElement ? identityMatrix : viewMatrix
+                );
+                graphicsSystem.DrawObject(
+                    GraphicsSystem::DrawMode::TEXTURE,
+                    assetsManager.GetTexture(entityId),
+                    transform.mdl_xform,
+                    animation.currentUVs
+                );
+
+           
+                transform.position = originalPosition;
+                transform.scale = originalScale;
+                continue;
+            }
+
+
             // Pause menu background
             else if (entityId == "pauseMenuBg") {
                 ecsCoordinator.setTextureID(entity, "pauseMenu");
