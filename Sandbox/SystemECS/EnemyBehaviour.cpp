@@ -232,7 +232,7 @@ void EnemyBehaviour::startAvoid(Entity entity) {
         if (length > 0) {
             // Normalize and reverse direction
             myMath::Vector2D oppositeDir(-currentDir.GetX() / length, -currentDir.GetY() / length);
-            float speed = 1.5f; // Same speed as normal movement
+            float speed = 0.2f; // Same speed as normal movement
 
             // Set avoiding flag and timer
             isAvoidingWalls = true;
@@ -325,7 +325,7 @@ void EnemyBehaviour::updatePatrolState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    float speed = 1.5f; 
+    float speed = 0.2f; 
     physics.velocity = direction * speed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
@@ -515,7 +515,7 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
         transform.scale.SetY(std::abs(transform.scale.GetY()));
     }
 
-    const float maxSpeed = 1.5f;
+    const float maxSpeed = 0.3f;
     physics.velocity = dirToPlayer * maxSpeed;
     transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
     transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());

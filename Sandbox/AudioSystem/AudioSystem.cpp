@@ -803,7 +803,7 @@ void AudioSystem::playSong(const std::string& songName) {
     }
 
     if (ambienceChannel) {
-        ambienceChannel->setVolume(genVol * 2.0f);
+        ambienceChannel->setVolume(genVol * 3.0f);
         ambienceChannel->setPaused(false);
     }
 
@@ -904,7 +904,7 @@ void AudioSystem::playSoundEffect(const std::string& soundEffectName)
         else if (soundEffectName == "UnderWater_Bump-Bounce.wav" || 
                  soundEffectName == "Collection.wav")
         {
-            soundEffectChannel->setVolume(sfxVol * 0.3f);
+            soundEffectChannel->setVolume(sfxVol * 0.2f);
         }
         else
         {
