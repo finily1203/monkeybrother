@@ -460,6 +460,27 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                     transform.scale.SetY(10000.0f * scaleFactor);
 
                 }
+                
+                Entity MainMenu3BgEntity = ecsCoordinator.getEntityFromID("MSANIM_3BG");
+                if (ecsCoordinator.entityExists(MainMenu3BgEntity)) {
+                    // Get current window/screen dimensions - use updated window dimensions
+                    int scalingWidth = windowWidth;
+                    int scalingHeight = windowHeight;
+
+                    // Get transform component
+                    auto& transform = ecsCoordinator.getComponent<TransformComponent>(MainMenu3BgEntity);
+
+                    float widthRatio = static_cast<float>(scalingWidth) / 1920.0f;
+                    float heightRatio = static_cast<float>(scalingHeight) / 1080.0f;
+
+                    // Use the larger ratio to ensure full coverage
+                    float scaleFactor = std::max(widthRatio, heightRatio);
+
+                    // Apply the scaling - maintains proportional coverage
+                    transform.scale.SetX(10000.0f * scaleFactor);
+                    transform.scale.SetY(10000.0f * scaleFactor);
+
+                }
             }
 
             
