@@ -126,6 +126,8 @@ struct GLFWFunctions {
 	static bool buttonHoverAudio;
 
 	static bool isPlayerDead;
+	static int sizeIndex;
+	static bool sizeChange;
 
 	static double mouseXDelta; // Add this to track mouse movement
 

@@ -408,6 +408,7 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		GLFWFunctions::pauseMenuCount = 0;
 		GLFWFunctions::optionsMenuCount = 0;
 		GLFWFunctions::newSceneLoaded = true;
+		GLFWFunctions::filterClogged = false;
 
 		//ecsCoordinator.test5();
 
@@ -919,7 +920,11 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 
 		if (GameViewWindow::getSceneNum() > 4)
 		{
-			mainMenuScene = -4;
+			//if is tutorial scene go to main menu not cutscene
+			if (GameViewWindow::getSceneNum() != 11 && GameViewWindow::getSceneNum() != 12 && GameViewWindow::getSceneNum() != 13)
+			{
+				mainMenuScene = -4;
+			}
 		}
 
 		for (auto& currEntity : allEntities)

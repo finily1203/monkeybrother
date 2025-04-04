@@ -335,6 +335,15 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 {
 	NavigationArrow::Reset();
 	GLFWFunctions::collectableCount = 0;
+	if (GameViewWindow::getSceneNum() == 11 || GameViewWindow::getSceneNum() == 12 || GameViewWindow::getSceneNum() == 13)
+	{
+		GLFWFunctions::sizeIndex = 1;
+	}
+	else
+	{
+		GLFWFunctions::sizeIndex = 0;
+	}
+	GLFWFunctions::filterClogged = false;
 	JSONSerializer serializer;
 	cameraSystem.setCameraZoom(1.0f);
 	// checks if JSON file could be opened

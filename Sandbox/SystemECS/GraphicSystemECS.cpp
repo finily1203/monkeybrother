@@ -620,6 +620,9 @@ void GraphicSystemECS::update(float dt) {
                 else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton") {
                     ecsCoordinator.setTextureID(entity, entityId != hoveredButton ? "unactiveTutorialButton" : "activeTutorialButton");
                 }
+                else if (entityId == "tutorialClick") {
+                    ecsCoordinator.setTextureID(entity, entityId != hoveredButton ? "tutorial_inactive" : "tutorial_active");
+                }
                 else if (entityId == "confirmButton") {
                     ecsCoordinator.setTextureID(entity, entityId != hoveredButton ? "unactiveConfirmButton" : "activeConfirmButton");
                 }
@@ -888,8 +891,9 @@ void GraphicSystemECS::updateTutorialArrows()
         previousTransform.scale.SetX(0.f);
         previousTransform.scale.SetY(0.f);
     }
-
-    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8) 
+    
+    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 4 || 
+        GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8)
     {
 		tutorialTransform.scale.SetX(0.f);
 		tutorialTransform.scale.SetY(0.f);

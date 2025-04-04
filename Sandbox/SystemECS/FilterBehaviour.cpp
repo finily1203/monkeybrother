@@ -56,6 +56,9 @@ void FilterBehaviour::update(Entity entity) {
     float penetration{};
 
     if (!isFilterUsed) {
+        if (GLFWFunctions::sizeIndex <= 0) {
+            return;
+        }
         bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, filterOBB, normal, penetration);
         if (isColliding) {
             if (!filterComponent.isFilterClogged) {
@@ -107,6 +110,8 @@ void FilterBehaviour::update(Entity entity) {
                     isFilterUsed = true;
                     GLFWFunctions::filterClogged = true;
                     GLFWFunctions::filterExitAudio = true;
+                    GLFWFunctions::sizeIndex--;
+                    GLFWFunctions::sizeChange = true;
 					createCloggedAnimation(entity);
 					createFilterPushAnimation(entity);
                 }

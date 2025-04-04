@@ -61,6 +61,7 @@ int GLFWFunctions::optionsMenuCount = 0;
 int GLFWFunctions::tutorialMenuCount = 0;
 int GLFWFunctions::tutorialCurrentPage = 1;
 int GLFWFunctions::rotationSpeed = 0;
+
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
 bool GLFWFunctions::firstCollision = false;
@@ -75,6 +76,9 @@ bool GLFWFunctions::attackAudio = false;
 bool GLFWFunctions::filterExitAudio = false;
 bool GLFWFunctions::endCutsceneLastPanel = false;
 bool GLFWFunctions::buttonHoverAudio = false;
+
+int GLFWFunctions::sizeIndex = 0;
+bool GLFWFunctions::sizeChange = false;
 
 float GLFWFunctions::pauseTimer = 0.0f;
 const float GLFWFunctions::pauseDuration = 4.0f;

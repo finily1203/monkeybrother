@@ -561,7 +561,7 @@ void AudioSystem::update() {
     }
 
     //only play if scene is 1 to 9
-    else if (GameViewWindow::getSceneNum() >= 1 && GameViewWindow::getSceneNum() <= 9)
+    else if (GameViewWindow::getSceneNum() >= 1 && GameViewWindow::getSceneNum() <= 13)
     {
         if (!changeBGM) {
             if (bgmChannel) {

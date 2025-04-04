@@ -51,6 +51,35 @@ void PlayerBehaviour::update(Entity entity) {
 		return;
 	}
 
+	if (GLFWFunctions::sizeChange)
+	{
+		//[50, 75, 150, 200]
+		auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+		//check sizeIndex first
+		if (GLFWFunctions::sizeIndex == 0)
+		{
+			transform.scale.SetX(50.f);
+			transform.scale.SetY(50.f);
+		}
+		else if (GLFWFunctions::sizeIndex == 1)
+		{
+			transform.scale.SetX(75.f);
+			transform.scale.SetY(75.f);
+		}
+		else if (GLFWFunctions::sizeIndex == 2)
+		{
+			transform.scale.SetX(150.0f);
+			transform.scale.SetY(150.0f);
+		}
+		else if (GLFWFunctions::sizeIndex == 3)
+		{
+			transform.scale.SetX(200.0f);
+			transform.scale.SetY(200.0f);
+		}
+
+		GLFWFunctions::sizeChange = false;
+	}
+
 	if (playDeathAnimation) {
 		playDeathAnimation = false;
 		deathAnimationProgress = 0.0f;
