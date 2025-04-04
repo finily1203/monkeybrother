@@ -79,4 +79,6 @@ public:
 	static std::string GetLevelCompletedMenuJSONPath();
 	// retrieve the game over menu JSON path
 	static std::string GetGameOverMenuJSONPath();
+	// retrieve the button config JSON path
+	static std::string GetButtonsIdJSONPath();
 };

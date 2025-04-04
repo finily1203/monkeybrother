@@ -100,6 +100,535 @@ void MouseBehaviour::update(Entity entity) {
 	(void)entity;
 }
 
+void MouseBehaviour::setUpButtonActions()
+{
+	std::ifstream inputFile(FilePathManager::GetButtonsIdJSONPath());
+	nlohmann::json buttonsIdJSON;
+
+	if (inputFile.is_open())
+	{
+		inputFile >> buttonsIdJSON;
+		inputFile.close();
+	}
+
+	std::vector<std::function<void()>> buttonFunctions = {
+		[this]() { handleStartButton(); }, 
+		[this]() { handleQuitButton(pWindow); },
+		[this]() { handleQuitButton(pWindow); },
+		[this]() { handleOptionsButton(); },
+		[this]() { handleOptionsButton(); },
+		[this]() { handleTutorialButton(); },
+		[this]() { handleTutorialButton(); },
+		[this]() { handleResumeButton(); },
+		[this]() { handleResumeButton(); },
+		[this]() { handleCloseOptionsButton(); },
+		[this]() { handleCloseTutorialButton(); },
+		[this]() { handleNextPageButton(); },
+		[this]() { handlePreviousPageButton(); },
+		[this]() { handlePauseQuitButton(); },
+		[this]() { handlePauseRetryButton(); },
+		[this]() { handlePauseRetryButton(); },
+		[this]() { handleAudioBarDrag("sfxSoundbarBase"); },
+		[this]() { handleAudioBarDrag("musicSoundbarBase"); },
+		[this]() { handleConfirmButton(); },
+		[this]() { handleRotationSpeedSlider("rotationSpeedSlider"); },
+		[this]() { handleQuitToMainMenuButton(); },
+		[this]() { handleQuitToMainMenuButton(); },
+		[this]() { handleQuitToMainMenuButton(); },
+		[this]() { handleReturnToPauseMenuButton(); },
+		[this]() { handleNextLevelButton(); }
+	};
+
+	int index{};
+	for (auto const& buttonId : buttonsIdJSON["buttons"])
+	{
+		if (index < buttonFunctions.size())
+		{
+			buttonActions[buttonId] = buttonFunctions[index];
+		}
+
+		index++;
+	}
+}
+
+void MouseBehaviour::handleStartButton()
+{
+	// resetting the values back to the original values and setting the scene variable to 1
+	GLFWFunctions::gamePaused = false;
+	GLFWFunctions::optionsMenuCount = 0;
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+
+	cameraSystem.setCameraZoom(0.8f);
+	for (auto currEntity : allEntities)
+	{
+		ecsCoordinator.destroyEntity(currEntity);
+	}
+
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+	//set scene to play cutscene
+	GameViewWindow::setSceneNum(-2); // Cutscene scene number
+	ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());
+}
+
+void MouseBehaviour::handleQuitButton(GLFWwindow* window)
+{
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
+void MouseBehaviour::handleOptionsButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	// if pause menu already exists, destroy the pause menu
+	if (GLFWFunctions::pauseMenuCount == 1)
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		// decrement the count since the pause menu is already destroyed
+		GLFWFunctions::pauseMenuCount--;
+	}
+
+	// ensure that there an options menu does not exist in the scene before creating and loading
+	// the options menu to the scene
+	if (GLFWFunctions::optionsMenuCount < 1)
+	{
+		GLFWFunctions::optionsMenuCount++;
+		ecsCoordinator.LoadOptionsMenuFromJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+	}
+}
+
+void MouseBehaviour::handleTutorialButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	if (GLFWFunctions::pauseMenuCount == 1)
+	{
+		for (auto currEntity : allEntities)
+		{
+			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+			{
+				ecsCoordinator.destroyEntity(currEntity);
+			}
+		}
+
+		// decrement the count since the pause menu is already destroyed
+		GLFWFunctions::pauseMenuCount--;
+	}
+
+	if (GLFWFunctions::tutorialMenuCount < 1)
+	{
+		GLFWFunctions::tutorialMenuCount++;
+		ecsCoordinator.LoadTutorialMenuFromJSON(ecsCoordinator, FilePathManager::GetTutorialJSONPath());
+	}
+}
+
+void MouseBehaviour::handleResumeButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	// destroy the pause menu 
+	for (auto currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+			ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+			ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	// set the game pause state to be false and decrement the pause menu count
+	GLFWFunctions::gamePaused = false;
+	GLFWFunctions::pauseMenuCount--;
+}
+
+void MouseBehaviour::handleCloseOptionsButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	std::unordered_set<std::string> optionsMenuEntityNames = {
+		"optionsMenuBg", "closeOptionsMenu", "confirmButton",
+		"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow",
+		"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2",
+		"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+		"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2",
+		"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
+		"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
+	};
+
+	// destroy the options menu
+	for (auto currEntity : allEntities)
+	{
+		if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	// decrement the options menu count
+	GLFWFunctions::optionsMenuCount--;
+
+	// checks the current scene is a game level, not the main menu scene and a pause menu does 
+	// not exist in the current scene
+	if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+	{
+		// load the pause menu and increment the pause menu count
+		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+		GLFWFunctions::pauseMenuCount++;
+	}
+
+	// set the game pause state to true
+	GLFWFunctions::gamePaused = true;
+	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
+}
+
+void MouseBehaviour::handleCloseTutorialButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	for (auto currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == "tutorialBaseBg" ||
+			ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
+			ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
+			ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
+			ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage")
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	GLFWFunctions::tutorialMenuCount--;
+	GLFWFunctions::tutorialCurrentPage = 1;
+
+	// checks the current scene is a game level, not the main menu scene and a pause menu does 
+	// not exist in the current scene
+	if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+	{
+		// load the pause menu and increment the pause menu count
+		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+		GLFWFunctions::pauseMenuCount++;
+	}
+
+	// set the game pause state to true
+	GLFWFunctions::gamePaused = true;
+}
+
+void MouseBehaviour::handleNextPageButton()
+{
+	GLFWFunctions::tutorialCurrentPage++;
+}
+
+void MouseBehaviour::handlePreviousPageButton()
+{
+	GLFWFunctions::tutorialCurrentPage--;
+}
+
+void MouseBehaviour::handlePauseQuitButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	// destroy all the entities in the current scene
+	for (auto currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
+			ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
+			ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	// decrement the pause menu count and load the main menu back into the scene
+	GLFWFunctions::pauseMenuCount--;
+	GLFWFunctions::quitLevelMenuCount++;
+	ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
+}
+
+void MouseBehaviour::handlePauseRetryButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+
+	// destroying all entities in the scene
+	for (auto currEntity : allEntities)
+	{
+		ecsCoordinator.destroyEntity(currEntity);
+	}
+
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+	// resetting all values
+	GLFWFunctions::gameOver = false;
+	GLFWFunctions::gamePaused = false;
+	GLFWFunctions::pauseMenuCount = 0;
+	GLFWFunctions::optionsMenuCount = 0;
+	GLFWFunctions::newSceneLoaded = true;
+
+	// reloading the scene based on the scene number
+	if (GameViewWindow::getSceneNum() != 0)
+	{
+		int scene = GameViewWindow::getSceneNum();
+		ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
+	}
+
+	else
+	{
+		ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
+	}
+}
+
+void MouseBehaviour::handleAudioBarDrag(std::string const& entityId)
+{
+	// getting the window's width, height and cursor position x and y values
+	double mouseX{}, mouseY{};
+	int windowWidth{}, windowHeight{};
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+	glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+	setSoundbarId(entityId);
+
+	// finding the actual mouse cursor position based on the window dimensions
+	float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+	// determine which audio arrow will be used
+	std::string audioArrowId = (entityId == "sfxSoundbarBase") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
+
+	// looping through all live entities
+	for (auto& currEntity : allEntities)
+	{
+		// update the arrow position based on the arrow entity Id
+		if (ecsCoordinator.getEntityID(currEntity) == audioArrowId)
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+			transform.position.SetX(cursorXCentered);
+			break;
+		}
+	}
+}
+
+void MouseBehaviour::handleRotationSpeedSlider(std::string const& entityId)
+{
+	// getting the window's width, height and cursor position x and y values
+	double mouseX{}, mouseY{};
+	int windowWidth{}, windowHeight{};
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
+	glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
+	setSliderId(entityId);
+	std::string const& currentSlider = getSliderId();
+
+	// finding the actual mouse cursor position based on the window dimensions
+	float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
+
+	std::string sliderNotchId = (entityId == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
+
+	TransformComponent sliderTransform{}, notchTransform{};
+	bool foundSlider = false;
+	bool foundSliderNotch = false;
+
+	for (auto& currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == entityId)
+		{
+			sliderTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+			foundSlider = true;
+		}
+
+		else if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
+		{
+			notchTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+			foundSliderNotch = true;
+		}
+
+		if (foundSlider && foundSliderNotch)
+		{
+			break;
+		}
+	}
+
+	float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
+	float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
+	float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 1.95f) - notchHalfWidth;
+
+
+	for (auto& currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
+			transform.position.SetX(cursorXCentered);
+
+			if (currentSlider == "rotationSpeedSlider")
+			{
+				float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
+				GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
+				GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
+				GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
+			}
+
+			break;
+		}
+	}
+}
+
+void MouseBehaviour::handleConfirmButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	std::unordered_set<std::string> optionsMenuEntityNames = {
+		"optionsMenuBg", "closeOptionsMenu", "confirmButton",
+		"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow",
+		"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2",
+		"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
+		"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2",
+		"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
+		"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
+	};
+
+	// initializing sfxPercentage and musicPercentage variables
+	float sfxPercentage = AudioSystem::sfxPercentage;
+	float musicPercentage = AudioSystem::musicPercentage;
+
+	int rotationSpeed = GLFWFunctions::rotationSpeed;
+
+	// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
+	ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+	// save the sfx and music percentages to the audio settings JSON file
+	audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
+	cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
+
+	//change on audio side as well
+	audioSystem.setGenVol(musicPercentage);
+	audioSystem.setBgmVol(musicPercentage);
+	audioSystem.setSfxVol(sfxPercentage);
+
+	for (auto currEntity : allEntities)
+	{
+		if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	// decrement the options menu count
+	GLFWFunctions::optionsMenuCount--;
+
+	// check that the current scene is a level scene and a pause menu does not exist in the
+	// current scene
+	if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
+	{
+		// load the pause menu and increment the pause menu count
+		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+		GLFWFunctions::pauseMenuCount++;
+	}
+
+	// set the game pause state to true
+	GLFWFunctions::gamePaused = true;
+}
+
+void MouseBehaviour::handleQuitToMainMenuButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+	int mainMenuScene = -1;
+
+	if (GLFWFunctions::quitLevelMenuCount == 1)
+	{
+		GLFWFunctions::quitLevelMenuCount--;
+	}
+
+	for (auto& currEntity : allEntities)
+	{
+		ecsCoordinator.destroyEntity(currEntity);
+	}
+
+	GameViewWindow::setSceneNum(mainMenuScene);
+	ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+}
+
+void MouseBehaviour::handleReturnToPauseMenuButton()
+{
+	auto allEntities = ecsCoordinator.getAllLiveEntities();
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	if (GLFWFunctions::quitLevelMenuCount == 1)
+	{
+		GLFWFunctions::quitLevelMenuCount--;
+	}
+
+	for (auto& currEntity : allEntities)
+	{
+		if (ecsCoordinator.getEntityID(currEntity) == "quitLevelMenuBase" ||
+			ecsCoordinator.getEntityID(currEntity) == "quitToMainMenuButton" ||
+			ecsCoordinator.getEntityID(currEntity) == "returnToPauseMenuButton")
+		{
+			ecsCoordinator.destroyEntity(currEntity);
+		}
+	}
+
+	GLFWFunctions::pauseMenuCount++;
+	ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
+}
+
+void MouseBehaviour::handleNextLevelButton()
+{
+	GLFWFunctions::levelCompletedMenuCount--;
+	audioSystem.playSoundEffect("UI_ButtonClick.wav");
+
+	if (!GLFWFunctions::changeLevel)
+	{
+		int currScene = GameViewWindow::getSceneNum();
+		currScene++;
+
+		if (currScene > 5)
+		{
+			currScene = -1;
+		}
+
+		GameViewWindow::setSceneNum(currScene);
+		GLFWFunctions::changeLevel = true;
+		GLFWFunctions::newSceneLoaded = true;
+	}
+}
+
+
 // function that handles logic code for mouse click action, mainly mouse click for buttons
 void MouseBehaviour::onMouseClick(GLFWwindow* window, double mouseX, double mouseY)
 {
@@ -347,573 +876,12 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 	setSoundbarId("");
 	setSliderId("");
 
-	// below are all the if statements that check which button is the current entity that you are
-	// clicking on
-	// this handles the main menu quit button
-	if (entityId == "quitButton" || entityId == "quitWindowButton")
+	if (buttonActions.count(entityId))
 	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
+		buttonActions[entityId]();
 	}
 
-	// this handles the retry button
-	//else if (entityId == "retryButton")
-	//{
-	//	// destroying all entities in the scene
-	//	for (auto currEntity : allEntities)
-	//	{
-	//		ecsCoordinator.destroyEntity(currEntity);
-	//	}
-
-	//	audioSystem.playSoundEffect("UI_ButtonClick.wav");
-	//	// resetting all values
-	//	GLFWFunctions::gameOver = false;
-	//	GLFWFunctions::gamePaused = false;
-	//	GLFWFunctions::pauseMenuCount = 0;
-	//	GLFWFunctions::optionsMenuCount = 0;
-
-	//	//ecsCoordinator.test5();
-
-	//	// reloading the scene based on the scene number
-	//	if (GameViewWindow::getSceneNum() != 0)
-	//	{
-	//		int scene = GameViewWindow::getSceneNum();
-	//		ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-	//	}
-
-	//	else
-	//	{
-	//		ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-	//	}
-	//}
-
-	else if (entityId == "pauseRetryButton")
-	{
-		// destroying all entities in the scene
-		for (auto currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		// resetting all values
-		GLFWFunctions::gameOver = false;
-		GLFWFunctions::gamePaused = false;
-		GLFWFunctions::pauseMenuCount = 0;
-		GLFWFunctions::optionsMenuCount = 0;
-		GLFWFunctions::newSceneLoaded = true;
-
-		//ecsCoordinator.test5();
-
-		// reloading the scene based on the scene number
-		if (GameViewWindow::getSceneNum() != 0)
-		{
-			int scene = GameViewWindow::getSceneNum();
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		}
-
-		else
-		{
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		}
-	}
-
-	// this handles the start button
-	else if (entityId == "startButton")
-	{
-		// resetting the values back to the original values and setting the scene variable to 1
-		GLFWFunctions::gamePaused = false;
-		GLFWFunctions::optionsMenuCount = 0;
-		//int levelOneScene = 1;
-
-		cameraSystem.setCameraZoom(0.8f);
-		for (auto currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		//set scene to play cutscene
-		/*ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());*/
-		GameViewWindow::setSceneNum(-2); // Cutscene scene number
-		ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());
-
-		//GameViewWindow::setSceneNum(levelOneScene);
-		//audioSystem.setChangeBGM(false);
-		//GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
-
-		//if (GameViewWindow::getSceneNum() != 0)
-		//{
-		//	int scene = GameViewWindow::getSceneNum();
-		//	ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		//}
-
-		//else
-		//{
-		//	ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		//}
-	}
-
-	// this handles the options button
-	else if (entityId == "optionsButton" || entityId == "pauseOptionsButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		// if pause menu already exists, destroy the pause menu
-		if (GLFWFunctions::pauseMenuCount == 1)
-		{
-			for (auto currEntity : allEntities)
-			{
-				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-				{
-					ecsCoordinator.destroyEntity(currEntity);
-				}
-			}
-
-			// decrement the count since the pause menu is already destroyed
-			GLFWFunctions::pauseMenuCount--;
-		}
-
-		// ensure that there an options menu does not exist in the scene before creating and loading
-		// the options menu to the scene
-		if (GLFWFunctions::optionsMenuCount < 1)
-		{
-			GLFWFunctions::optionsMenuCount++;
-			ecsCoordinator.LoadOptionsMenuFromJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
-		}
-	}
-
-	// this handles the how to play button
-	else if (entityId == "tutorialButton" || entityId == "pauseTutorialButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		if (GLFWFunctions::pauseMenuCount == 1)
-		{
-			for (auto currEntity : allEntities)
-			{
-				if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-					ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-					ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-					ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-				{
-					ecsCoordinator.destroyEntity(currEntity);
-				}
-			}
-
-			// decrement the count since the pause menu is already destroyed
-			GLFWFunctions::pauseMenuCount--;
-		}
-
-		if (GLFWFunctions::tutorialMenuCount < 1)
-		{
-			GLFWFunctions::tutorialMenuCount++;
-			ecsCoordinator.LoadTutorialMenuFromJSON(ecsCoordinator, FilePathManager::GetTutorialJSONPath());
-		}
-	}
-
-	// this handles the closing of the pause menu button and resume level button
-	else if (entityId == "closePauseMenu" || entityId == "resumeButton")
-	{
-		if (entityId == "resumeButton")
-		{
-			audioSystem.playSoundEffect("UI_ButtonClick.wav");
-		}
-
-		// destroy the pause menu 
-		for (auto currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" || 
-				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		// set the game pause state to be false and decrement the pause menu count
-		GLFWFunctions::gamePaused = false;
-		GLFWFunctions::pauseMenuCount--;
-	}
-
-	// this handles the closing of the options menu button
-	else if (entityId == "closeOptionsMenu")
-	{
-		std::unordered_set<std::string> optionsMenuEntityNames = {
-			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
-			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
-			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
-			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
-		};
-
-		// destroy the options menu
-		for (auto currEntity : allEntities)
-		{
-			if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		// decrement the options menu count
-		GLFWFunctions::optionsMenuCount--;
-
-		// checks the current scene is a game level, not the main menu scene and a pause menu does 
-		// not exist in the current scene
-		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
-		{
-			// load the pause menu and increment the pause menu count
-			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-			GLFWFunctions::pauseMenuCount++;
-		}
-
-		// set the game pause state to true
-		GLFWFunctions::gamePaused = true;
-		cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
-	}
-
-	else if (entityId == "closeTutorialMenu")
-	{
-		for (auto currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == "tutorialBaseBg" ||
-				ecsCoordinator.getEntityID(currEntity) == "closeTutorialMenu" ||
-				ecsCoordinator.getEntityID(currEntity) == "pageCounter" ||
-				ecsCoordinator.getEntityID(currEntity) == "nextTutorialPage" ||
-				ecsCoordinator.getEntityID(currEntity) == "previousTutorialPage")
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		GLFWFunctions::tutorialMenuCount--;
-		GLFWFunctions::tutorialCurrentPage = 1;
-
-		// checks the current scene is a game level, not the main menu scene and a pause menu does 
-		// not exist in the current scene
-		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
-		{
-			// load the pause menu and increment the pause menu count
-			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-			GLFWFunctions::pauseMenuCount++;
-		}
-
-		// set the game pause state to true
-		GLFWFunctions::gamePaused = true;
-	}
-
-	else if (entityId == "nextTutorialPage")
-	{
-		GLFWFunctions::tutorialCurrentPage++;
-	}
-
-	else if (entityId == "previousTutorialPage")
-	{
-		GLFWFunctions::tutorialCurrentPage--;
-	}
-
-	// this handles the logic for exiting the level and goes back to the main menu button
-	else if (entityId == "pauseQuitButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		// destroy all the entities in the current scene
-		for (auto currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-				ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-				ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		// decrement the pause menu count and load the main menu back into the scene
-		GLFWFunctions::pauseMenuCount--;
-		ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
-	}
-
-	// this handles the logic code for the sfx and music soundbarBase buttons
-	else if (entityId == "sfxSoundbarBase" || entityId == "musicSoundbarBase")
-	{
-		// getting the window's width, height and cursor position x and y values
-		double mouseX{}, mouseY{};
-		int windowWidth{}, windowHeight{};
-		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
-		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
-		setSoundbarId(entityId);
-
-		// finding the actual mouse cursor position based on the window dimensions
-		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-		// determine which audio arrow will be used
-		std::string audioArrowId = (entityId == "sfxSoundbarBase") ? "sfxSoundbarArrow" : "musicSoundbarArrow";
-
-		// looping through all live entities
-		for (auto& currEntity : allEntities)
-		{
-			// update the arrow position based on the arrow entity Id
-			if (ecsCoordinator.getEntityID(currEntity) == audioArrowId)
-			{
-				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
-				transform.position.SetX(cursorXCentered);
-				break;
-			}
-		}
-	}
-
-	// this handles the logic for the confirm button
-	else if (entityId == "confirmButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		std::unordered_set<std::string> optionsMenuEntityNames = {
-			"optionsMenuBg", "closeOptionsMenu", "confirmButton",
-			"sfxSoundbarBase", "musicSoundbarBase", "sfxSoundbarArrow", 
-			"musicSoundbarArrow", "sfxNotch0", "sfxNotch1", "sfxNotch2", 
-			"sfxNotch3", "sfxNotch4", "sfxNotch5", "sfxNotch6", "sfxNotch7",
-			"sfxNotch8", "sfxNotch9", "musicNotch0", "musicNotch1", "musicNotch2", 
-			"musicNotch3", "musicNotch4", "musicNotch5", "musicNotch6", "musicNotch7",
-			"musicNotch8", "musicNotch9", "rotationSpeedSlider", "rotationSpeedSliderNotch"
-		};
-
-		// initializing sfxPercentage and musicPercentage variables
-		float sfxPercentage = AudioSystem::sfxPercentage;
-		float musicPercentage = AudioSystem::musicPercentage;
-
-		int rotationSpeed = GLFWFunctions::rotationSpeed;
-
-		// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
-		ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
-		// save the sfx and music percentages to the audio settings JSON file
-		audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
-		cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
-
-		//change on audio side as well
-		audioSystem.setGenVol(musicPercentage);
-		audioSystem.setBgmVol(musicPercentage);
-		audioSystem.setSfxVol(sfxPercentage);
-
-		for (auto currEntity : allEntities)
-		{
-			if (optionsMenuEntityNames.count(ecsCoordinator.getEntityID(currEntity)))
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		// decrement the options menu count
-		GLFWFunctions::optionsMenuCount--;
-
-		// check that the current scene is a level scene and a pause menu does not exist in the
-		// current scene
-		if (GameViewWindow::getSceneNum() > -1 && GLFWFunctions::pauseMenuCount < 1)
-		{
-			// load the pause menu and increment the pause menu count
-			ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-			GLFWFunctions::pauseMenuCount++;
-		}
-
-		// set the game pause state to true
-		GLFWFunctions::gamePaused = true;
-	}
-
-	else if (entityId == "rotationSpeedSlider")
-	{
-		// getting the window's width, height and cursor position x and y values
-		double mouseX{}, mouseY{};
-		int windowWidth{}, windowHeight{};
-		glfwGetCursorPos(GLFWFunctions::pWindow, &mouseX, &mouseY);
-		glfwGetWindowSize(GLFWFunctions::pWindow, &windowWidth, &windowHeight);
-		setSliderId(entityId);
-		std::string const& currentSlider = getSliderId();
-
-		// finding the actual mouse cursor position based on the window dimensions
-		float cursorXCentered = static_cast<float>(mouseX) - (windowWidth / 2.f);
-
-		std::string sliderNotchId = (entityId == "rotationSpeedSlider") ? "rotationSpeedSliderNotch" : "";
-
-		TransformComponent sliderTransform{}, notchTransform{};
-		bool foundSlider = false;
-		bool foundSliderNotch = false;
-
-		for (auto& currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == entityId)
-			{
-				sliderTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
-				foundSlider = true;
-			}
-
-			else if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
-			{
-				notchTransform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
-				foundSliderNotch = true;
-			}
-
-			if (foundSlider && foundSliderNotch)
-			{
-				break;
-			}
-		}
-
-		float notchHalfWidth = notchTransform.scale.GetX() / 2.f;
-		float sliderLeft = sliderTransform.position.GetX() - (sliderTransform.scale.GetX() / 2.f) + notchHalfWidth;
-		float sliderRight = sliderTransform.position.GetX() + (sliderTransform.scale.GetX() / 1.95f) - notchHalfWidth;
-
-
-		for (auto& currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == sliderNotchId)
-			{
-				TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(currEntity);
-				transform.position.SetX(cursorXCentered);
-
-				if (currentSlider == "rotationSpeedSlider")
-				{
-					float normalizedPos = (cursorXCentered - sliderLeft) / (sliderRight - sliderLeft);
-					GLFWFunctions::rotationSpeed = static_cast<int>(90.f + (normalizedPos * 64.f));
-					GLFWFunctions::rotationSpeed = static_cast<int>(std::ceil((GLFWFunctions::rotationSpeed / 10)) * 10);
-					GLFWFunctions::rotationSpeed = std::max(90, std::min(150, GLFWFunctions::rotationSpeed));
-				}
-
-				break;
-			}
-		}
-	}
-
-	else if (entityId == "quitToMainMenuButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		for (auto& currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		GameViewWindow::setSceneNum(-1);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
-	}
-
-	else if (entityId == "returnToPauseMenuButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		for (auto& currEntity : allEntities)
-		{
-			if (ecsCoordinator.getEntityID(currEntity) == "quitLevelMenuBase" ||
-				ecsCoordinator.getEntityID(currEntity) == "quitToMainMenuButton" ||
-				ecsCoordinator.getEntityID(currEntity) == "returnToPauseMenuButton")
-			{
-				ecsCoordinator.destroyEntity(currEntity);
-			}
-		}
-
-		GLFWFunctions::pauseMenuCount++;
-		ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-	}
-
-	else if (entityId == "nextLevelButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		if (!GLFWFunctions::changeLevel)
-		{
-			int currScene = GameViewWindow::getSceneNum();
-			currScene++;
-
-			if (currScene > 5)
-			{
-				currScene = -1;
-			}
-
-			GameViewWindow::setSceneNum(currScene);
-			GLFWFunctions::changeLevel = true;
-			GLFWFunctions::newSceneLoaded = true;
-		}
-	}
-
-	else if (entityId == "mainMenuButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		int mainMenuScene = -1;
-
-		for (auto& currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		GameViewWindow::setSceneNum(mainMenuScene);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
-	}
-
-	else if (entityId == "gameOverRetryButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		for (auto currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		GLFWFunctions::gameOver = false;
-		GLFWFunctions::gamePaused = false;
-		GLFWFunctions::pauseMenuCount = 0;
-		GLFWFunctions::optionsMenuCount = 0;
-		GLFWFunctions::newSceneLoaded = true;
-
-		if (GameViewWindow::getSceneNum() != 0)
-		{
-			int scene = GameViewWindow::getSceneNum();
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetSaveJSONPath(scene));
-		}
-
-		else
-		{
-			ecsCoordinator.LoadEntityFromJSON(ecsCoordinator, FilePathManager::GetEntitiesJSONPath());
-		}
-	}
-
-	else if (entityId == "gameOverQuitButton")
-	{
-		audioSystem.playSoundEffect("UI_ButtonClick.wav");
-
-		int mainMenuScene = -1;
-
-		for (auto currEntity : allEntities)
-		{
-			ecsCoordinator.destroyEntity(currEntity);
-		}
-
-		GameViewWindow::setSceneNum(mainMenuScene);
-		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
-	}
-	
+	(void)window;
 }
 
 // MouseBehaviour object instance destructor
