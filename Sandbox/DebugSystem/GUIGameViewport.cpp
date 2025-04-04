@@ -1406,6 +1406,9 @@ void GameViewWindow::SaveToNamedFile(int saveID, const char* saveName) {
 	for (int i = 0; i < layerManager.getLayerCount(); i++) {
 		for (auto entity : layerManager.getEntitiesFromLayer(i)) {
 			std::string entityId = ecsCoordinator.getEntityID(entity);
+			if (entityId == "fpsDisplay" || entityId == "nav_arrow") {
+				continue;
+			}
 			std::string textureId = ecsCoordinator.getTextureID(entity);
 			if (entityId != "placeholderentity") {
 				TransformComponent transform = ecsCoordinator.getComponent<TransformComponent>(entity);
