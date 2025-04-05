@@ -96,7 +96,12 @@ void ExitBehaviour::update(Entity entity) {
         if (isColliding) {
             if (!GLFWFunctions::changeLevel) {
                 GLFWFunctions::gamePaused = true;
-                ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
+
+                if (GLFWFunctions::levelCompletedMenuCount < 1)
+                {
+                    ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
+                    GLFWFunctions::levelCompletedMenuCount++;
+                }
                 //int currScn = GameViewWindow::getSceneNum();
                 //currScn++;
                 //if (currScn > 2) currScn = -1;

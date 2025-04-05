@@ -255,7 +255,11 @@ void ECSCoordinator::update() {
 				LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 			}
 			else if (sceneNum == -3) {
-				LoadGameOverMenuFromJSON(ecsCoordinator, FilePathManager::GetGameOverMenuJSONPath());
+				if (GLFWFunctions::gameOverMenuCount < 1)
+				{
+					GLFWFunctions::gameOverMenuCount++;
+					LoadGameOverMenuFromJSON(ecsCoordinator, FilePathManager::GetGameOverMenuJSONPath());
+				}
 			}
 
 			GLFWFunctions::changeLevel = false;

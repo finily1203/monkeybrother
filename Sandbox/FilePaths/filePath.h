@@ -83,4 +83,6 @@ public:
 	static std::string GetAudioMappingsPath();
 	// retrieve the game over menu JSON path
 	static std::string GetGameOverMenuJSONPath();
+	// retrieve the button config JSON path
+	static std::string GetButtonsIdJSONPath();
 };

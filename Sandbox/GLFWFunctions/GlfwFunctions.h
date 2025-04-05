@@ -106,6 +106,9 @@ struct GLFWFunctions {
 	static int pauseMenuCount;
 	static int optionsMenuCount;
 	static int tutorialMenuCount;
+	static int levelCompletedMenuCount;
+	static int quitLevelMenuCount;
+	static int gameOverMenuCount;
 	static int tutorialCurrentPage;
 	static int rotationSpeed;
 

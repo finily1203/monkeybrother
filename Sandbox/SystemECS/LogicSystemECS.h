@@ -18,6 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "ECSCoordinator.h"
 #include "GraphicsSystem.h"
 #include <unordered_set>
+#include <functional>
 
 
 class BehaviourECS {
@@ -28,7 +29,7 @@ public:
 
 class MouseBehaviour : public BehaviourECS {
 public:
-	MouseBehaviour() : cursor(glfwCreateStandardCursor(GLFW_HAND_CURSOR)), isDragging(false) {}
+	MouseBehaviour() : cursor(glfwCreateStandardCursor(GLFW_HAND_CURSOR)), isDragging(false), pWindow(glfwGetCurrentContext()) { setUpButtonActions(); }
 	~MouseBehaviour();
 
 	void update(Entity entity) override;
@@ -36,6 +37,27 @@ public:
 	void onMouseHover(double mouseX, double mouseY);
 	void onMouseDrag(GLFWwindow* window, double mouseX, double mouseY);
 
+	void setUpButtonActions();
+
+	void handleStartButton();
+	void handleQuitButton(GLFWwindow* window);
+	void handleOptionsButton();
+	void handleTutorialButton();
+	void handleResumeButton();
+	void handleCloseOptionsButton();
+	void handleCloseTutorialButton();
+	void handleNextPageButton();
+	void handlePreviousPageButton();
+	void handlePauseQuitButton();
+	void handleRetryButton();
+	void handleAudioBarDrag(std::string const& entityId);
+	void handleRotationSpeedSlider(std::string const& entityId);
+	void handleConfirmButton();
+	void handleQuitToMainMenuButton();
+	void handleReturnToPauseMenuButton();
+	void handleNextLevelButton();
+	void handleStartTutorialButton();
+	
 	std::string getHoveredButton() const { return currHoveredButton; }
 	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
 
@@ -48,14 +70,18 @@ public:
 	bool getIsDragging() const { return isDragging; }
 	void setIsDragging(bool dragging) { isDragging = dragging; }
 
+	void setWindow(GLFWwindow* window) { pWindow = window; }
+
 private:
 	bool mouseIsOverButton(double mouseX, double mouseY, TransformComponent& transform);
 	void handleButtonClick(GLFWwindow* window, Entity entity);
 	GLFWcursor* cursor = nullptr;
+	GLFWwindow* pWindow = nullptr;
 	std::string currHoveredButton;
 	std::string draggingSoundbarId;
 	std::string draggingSliderId;
 	bool isDragging;
+	std::unordered_map<std::string, std::function<void()>> buttonActions;
 };
 
 class LogicSystemECS : public System

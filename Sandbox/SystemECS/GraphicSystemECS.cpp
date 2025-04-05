@@ -1036,7 +1036,7 @@ void GraphicSystemECS::updateButtons()
     {
         nextLevelTransform.scale.SetX(0.f);
         nextLevelTransform.scale.SetY(0.f);
-        mainMenuTransform.position.SetX(5.f);
+        mainMenuTransform.position.SetX(-5.f);
     }
 
     else

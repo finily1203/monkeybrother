@@ -354,3 +354,14 @@ std::string FilePathManager::GetGameOverMenuJSONPath() {
 
     return jsonPathString;
 }
+
+// this function retrieves the button config JSON file
+std::string FilePathManager::GetButtonsIdJSONPath()
+{
+    std::filesystem::path execPath = GetExecutablePath();
+    std::filesystem::path jsonPath = execPath.parent_path() / "Sandbox" / "assets" / "json" / "buttonsId.json";
+
+    std::string jsonPathString = jsonPath.string();
+
+    return jsonPathString;
+}

@@ -59,7 +59,10 @@ int GLFWFunctions::collectableCount = 0;
 int GLFWFunctions::pauseMenuCount = 0;
 int GLFWFunctions::optionsMenuCount = 0;
 int GLFWFunctions::tutorialMenuCount = 0;
+int GLFWFunctions::gameOverMenuCount = 0;
 int GLFWFunctions::tutorialCurrentPage = 1;
+int GLFWFunctions::levelCompletedMenuCount = 0;
+int GLFWFunctions::quitLevelMenuCount = 0;
 int GLFWFunctions::rotationSpeed = 0;
 
 bool GLFWFunctions::bumpAudio = false;
@@ -87,7 +90,7 @@ const float GLFWFunctions::bumpDuration = 3.0f;
 
 bool GLFWFunctions::newSceneLoaded = false;
 
-MouseBehaviour mouseBehaviour;
+MouseBehaviour* mouseBehaviour = nullptr;
 double GLFWFunctions::mouseXDelta = 0.0;
 
 std::unordered_map<Key, bool>* GLFWFunctions::keyState = nullptr;
@@ -136,6 +139,11 @@ bool GLFWFunctions::init(int width, int height, std::string title, bool isfullsc
     /* Make the window's context current */
     glfwMakeContextCurrent(GLFWFunctions::pWindow);
     glfwSwapInterval(0); //vsync
+
+    if (!mouseBehaviour) {
+        mouseBehaviour = new MouseBehaviour();
+    }
+
     callEvents();
     /*if (useMouseRotation) {
 		glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -317,13 +325,13 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         //audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;
 
-        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1)
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1 && GLFWFunctions::levelCompletedMenuCount != 1 && GLFWFunctions::quitLevelMenuCount != 1 && GLFWFunctions::gameOverMenuCount != 1)
         {
             GLFWFunctions::pauseMenuCount++;
             ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
         }
 
-        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1))
+        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1 || GLFWFunctions::levelCompletedMenuCount != 1 || GLFWFunctions::quitLevelMenuCount != 1 || GLFWFunctions::gameOverMenuCount != 1))
         {
             for (auto currEntity : ecsCoordinator.getAllLiveEntities())
             {
@@ -567,7 +575,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
             if (!debug_flag)
             {
-                mouseBehaviour.onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
+                mouseBehaviour->onMouseClick(window, static_cast<double>(cursorXCentered), static_cast<double>(cursorYCentered));
             }
         }
     }
@@ -576,7 +584,7 @@ void GLFWFunctions::mouseButtonEvent(GLFWwindow* window, int button, int action,
 
         if (mappedButton == MouseButton::left)
         {
-            mouseBehaviour.setIsDragging(false);
+            mouseBehaviour->setIsDragging(false);
         }
     }
 
@@ -591,15 +599,15 @@ void GLFWFunctions::cursorPositionEvent(GLFWwindow* window, double xpos, double 
     mouseXDelta = xpos - lastX;
     lastX = xpos;
     //On relase it doesn't use since we use cursorPositionEvent for debugging
-    if (mouseBehaviour.getIsDragging())
+    if (mouseBehaviour->getIsDragging())
     {
-        mouseBehaviour.onMouseDrag(window, xpos, ypos);
+        mouseBehaviour->onMouseDrag(window, xpos, ypos);
     }
 #ifdef _DEBUG
     std::cout << "Cursor position: " << xpos << ", " << ypos << std::endl;
-    if (mouseBehaviour.getIsDragging())
+    if (mouseBehaviour->getIsDragging())
     {
-        mouseBehaviour.onMouseDrag(window, xpos, ypos);
+        mouseBehaviour->onMouseDrag(window, xpos, ypos);
     }
 #endif
 }
@@ -673,7 +681,11 @@ void GLFWFunctions::glfwCleanup() {
         mouseButtonState = nullptr;
     }
 
-    mouseBehaviour.~MouseBehaviour();
+    if (mouseBehaviour)
+    {
+        delete mouseBehaviour;
+        mouseBehaviour = nullptr;
+    }
 
     glfwTerminate();
 }
