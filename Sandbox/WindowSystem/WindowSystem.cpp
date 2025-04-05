@@ -142,7 +142,7 @@ void WindowSystem::update() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glClearColor(0.588f, 0.365f, 0.122f, 0.6f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	GLFWFunctions::getFps();
 

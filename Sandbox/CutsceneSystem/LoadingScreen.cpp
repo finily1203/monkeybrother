@@ -114,17 +114,24 @@ void LoadingScreen::createLoadingEntities()
 	ecsCoordinator.setTextureID(placeholderEntity, "");
 
     // 1. Create background entity
+ 
     m_backgroundEntity = ecsCoordinator.createEntity();
     TransformComponent bgTransform{};
     bgTransform.position.SetX(0.0f);
     bgTransform.position.SetY(0.0f);
-    bgTransform.scale.SetX(1920.0f);
-    bgTransform.scale.SetY(1080.0f);
-    ecsCoordinator.addComponent(m_backgroundEntity, bgTransform);
 
-    BackgroundComponent background{};
-    background.isBackground = true;
-    ecsCoordinator.addComponent(m_backgroundEntity, background);
+    if (GLFWFunctions::fullscreen) {
+        // Use exact dimensions for fullscreen
+        bgTransform.scale.SetX(1920.0f);
+        bgTransform.scale.SetY(1200.0f);
+    }
+    else {
+        // Use exact dimensions for windowed mode
+        bgTransform.scale.SetX(1600.0f);
+        bgTransform.scale.SetY(900.0f);
+    }
+
+    ecsCoordinator.addComponent(m_backgroundEntity, bgTransform);
 
     ecsCoordinator.setEntityID(m_backgroundEntity, "loadingBackground");
     ecsCoordinator.setTextureID(m_backgroundEntity, "loadingBackground"); // Use your existing background texture
