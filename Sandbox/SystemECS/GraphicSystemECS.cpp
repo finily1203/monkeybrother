@@ -889,7 +889,7 @@ void GraphicSystemECS::update(float dt) {
             std::string textureId = ecsCoordinator.getTextureID(entity);
             if (!textureId.empty()) {
 
-                if (textureId == "filter_in.png" && GLFWFunctions::filterClogged) {
+                if (textureId == "filter-in.png" && GLFWFunctions::filterClogged) {
                     continue;
                 }
 

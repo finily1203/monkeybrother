@@ -18,6 +18,7 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "LogicSystemECS.h"
 #include "GlobalCoordinator.h"
 #include "PhyColliSystemECS.h"
+#include "GUIGameViewport.h"
 
 //filter needs to reduce size of mossball by one
 //after filter is used, it is clogged so will use a diff texture
@@ -176,9 +177,15 @@ void FilterBehaviour::createFilterPushAnimation(Entity entity)
     // Transform setup
     TransformComponent transform{};
     auto& entityTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
-
-	transform.position.SetX(entityTransform.position.GetX() + entityTransform.scale.GetX());
-    transform.position.SetY(entityTransform.position.GetY() + (entityTransform.scale.GetY() * 0.3));
+    if (GameViewWindow::getSceneNum() == 12) {
+        transform.position.SetX(entityTransform.position.GetX() + (entityTransform.scale.GetX() * 0.6f));
+        transform.position.SetY(entityTransform.position.GetY() - (entityTransform.scale.GetY() * 0.5f));
+	}
+    else
+    {
+        transform.position.SetX(entityTransform.position.GetX() + (entityTransform.scale.GetX() * 0.8f));
+        transform.position.SetY(entityTransform.position.GetY() + (entityTransform.scale.GetY() * 0.3));
+    }
     transform.scale.SetX(100.f);
     transform.scale.SetY(100.f);
 	transform.orientation.SetX(entityTransform.orientation.GetX() + 180.f);

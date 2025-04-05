@@ -673,16 +673,19 @@ void MouseBehaviour::handleButtonClick(GLFWwindow* window, Entity entity)
 		if (tutorialPage == 2)
 		{
 			int sceneNum = 11;
+			GameViewWindow::setSceneNum(sceneNum);
 			loadingScreen.startLoading(sceneNum);
 		}
-		else if (tutorialPage == 3 || tutorialPage == 5)
+		else if (tutorialPage == 5)
 		{
 			int sceneNum = 13;
+			GameViewWindow::setSceneNum(sceneNum);
 			loadingScreen.startLoading(sceneNum);
 		}
 		else if (tutorialPage == 7)
 		{
 			int sceneNum = 12;
+			GameViewWindow::setSceneNum(sceneNum);
 			loadingScreen.startLoading(sceneNum);
 		}
 	}
