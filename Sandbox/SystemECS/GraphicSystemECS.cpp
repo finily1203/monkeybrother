@@ -972,12 +972,28 @@ void GraphicSystemECS::update(float dt) {
 
                     else if (ecsCoordinator.getEntityID(entity) == "gameOverRetryButton")
                     {
-                        ecsCoordinator.setTextureID(entity, "buttonRetry");
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveRetryButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeRetryButton");
+                        }
                     }
 
                     else if (ecsCoordinator.getEntityID(entity) == "gameOverQuitButton")
                     {
-                        ecsCoordinator.setTextureID(entity, "buttonQuit");
+                        if (ecsCoordinator.getEntityID(entity) != mouseBehaviour.getHoveredButton())
+                        {
+                            ecsCoordinator.setTextureID(entity, "unactiveMainMenuButton");
+                        }
+
+                        else
+                        {
+                            ecsCoordinator.setTextureID(entity, "activeMainMenuButton");
+                        }
                     }
                 }
 
@@ -1190,7 +1206,7 @@ void GraphicSystemECS::updateTutorialArrows()
         previousTransform.scale.SetY(0.f);
     }
 
-    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8) 
+    if (GLFWFunctions::tutorialCurrentPage == 1 || GLFWFunctions::tutorialCurrentPage == 4 || GLFWFunctions::tutorialCurrentPage == 6 || GLFWFunctions::tutorialCurrentPage == 8) 
     {
 		tutorialTransform.scale.SetX(0.f);
 		tutorialTransform.scale.SetY(0.f);

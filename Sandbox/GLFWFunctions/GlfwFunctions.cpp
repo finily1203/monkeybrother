@@ -59,6 +59,7 @@ int GLFWFunctions::collectableCount = 0;
 int GLFWFunctions::pauseMenuCount = 0;
 int GLFWFunctions::optionsMenuCount = 0;
 int GLFWFunctions::tutorialMenuCount = 0;
+int GLFWFunctions::gameOverMenuCount = 0;
 int GLFWFunctions::tutorialCurrentPage = 1;
 int GLFWFunctions::levelCompletedMenuCount = 0;
 int GLFWFunctions::quitLevelMenuCount = 0;
@@ -320,13 +321,13 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         //audioPaused = ~audioPaused;
         GLFWFunctions::gamePaused = true;
 
-        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1 && GLFWFunctions::levelCompletedMenuCount != 1 && GLFWFunctions::quitLevelMenuCount != 1)
+        if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1 && GLFWFunctions::tutorialMenuCount != 1 && GLFWFunctions::levelCompletedMenuCount != 1 && GLFWFunctions::quitLevelMenuCount != 1 && GLFWFunctions::gameOverMenuCount != 1)
         {
             GLFWFunctions::pauseMenuCount++;
             ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
         }
 
-        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1 || GLFWFunctions::levelCompletedMenuCount != 1 || GLFWFunctions::quitLevelMenuCount != 1))
+        else if (GLFWFunctions::pauseMenuCount == 1 && (GLFWFunctions::optionsMenuCount != 1 || GLFWFunctions::tutorialMenuCount != 1 || GLFWFunctions::levelCompletedMenuCount != 1 || GLFWFunctions::quitLevelMenuCount != 1 || GLFWFunctions::gameOverMenuCount != 1))
         {
             for (auto currEntity : ecsCoordinator.getAllLiveEntities())
             {

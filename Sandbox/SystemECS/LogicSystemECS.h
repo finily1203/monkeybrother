@@ -49,13 +49,14 @@ public:
 	void handleNextPageButton();
 	void handlePreviousPageButton();
 	void handlePauseQuitButton();
-	void handlePauseRetryButton();
+	void handleRetryButton();
 	void handleAudioBarDrag(std::string const& entityId);
 	void handleRotationSpeedSlider(std::string const& entityId);
 	void handleConfirmButton();
 	void handleQuitToMainMenuButton();
 	void handleReturnToPauseMenuButton();
 	void handleNextLevelButton();
+	void handleStartTutorialButton();
 	
 	std::string getHoveredButton() const { return currHoveredButton; }
 	void setHoveredButton(std::string const& hoveredButton) { currHoveredButton = hoveredButton; }
