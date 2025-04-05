@@ -779,10 +779,10 @@ void GraphicSystemECS::update(float dt) {
                     ecsCoordinator.setTextureID(entity, "rotationSpeedSlider");
                 }
                 else if (entityId == "gameOverRetryButton") {
-                    ecsCoordinator.setTextureID(entity, "buttonRetry");
+                    ecsCoordinator.setTextureID(entity, entityId != hoveredButton ? "unactiveRetryButton" : "activeRetryButton");
                 }
                 else if (entityId == "gameOverQuitButton") {
-                    ecsCoordinator.setTextureID(entity, "buttonQuit");
+                    ecsCoordinator.setTextureID(entity, entityId != hoveredButton ? "unactiveQuitButton" : "activeQuitButton");
                 }
             }
 

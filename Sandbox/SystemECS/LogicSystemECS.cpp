@@ -604,13 +604,26 @@ void MouseBehaviour::handleQuitToMainMenuButton()
 		GLFWFunctions::gameOverMenuCount--;
 	}
 
+	if (GameViewWindow::getSceneNum() > 4)
+	{
+		//if is tutorial scene go to main menu not cutscene
+		if (GameViewWindow::getSceneNum() != 11 && GameViewWindow::getSceneNum() != 12 && GameViewWindow::getSceneNum() != 13)
+		{
+			mainMenuScene = -4;
+		}
+	}
+
 	for (auto& currEntity : allEntities)
 	{
 		ecsCoordinator.destroyEntity(currEntity);
 	}
 
 	GameViewWindow::setSceneNum(mainMenuScene);
-	ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	if (mainMenuScene == -1)
+		ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
+	else
+		ecsCoordinator.LoadEndCutsceneFromJSON(ecsCoordinator, FilePathManager::GetEndCutsceneJSONPath());
+
 }
 
 // function that handles the logic for no button that returns back to the pause menu
