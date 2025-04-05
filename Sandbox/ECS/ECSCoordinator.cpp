@@ -875,7 +875,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 				// Apply the scaling - maintains 10000x10000 on 1920x1080 screens
 				// and scales proportionally for other resolutions
 				transform.scale.SetX(10000.0f * scaleFactor);
-				transform.scale.SetY(10000.0f * scaleFactor);
+				transform.scale.SetY(5400.0f * scaleFactor);
 			}
 			else {
 				// For windowed mode, use the same proportional scaling
@@ -887,7 +887,59 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 
 				// Apply the scaling - maintains proportional coverage
 				transform.scale.SetX(10000.0f * scaleFactor);
-				transform.scale.SetY(10000.0f * scaleFactor);
+				transform.scale.SetY(5400.0f * scaleFactor);
+			}
+			//serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
+			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");
+			serializer.ReadObject(transform.mdl_xform, entityId, "entities.transform.localTransform");
+			serializer.ReadObject(transform.mdl_to_ndc_xform, entityId, "entities.transform.projectionMatrix");
+
+		}
+
+		if (entityId == "MSANIM_3BG") {
+
+			serializer.ReadObject(transform.position, entityId, "entities.transform.position");
+			// Get current window/screen dimensions
+			int currentWidth = GLFWFunctions::windowWidth;
+			int currentHeight = GLFWFunctions::windowHeight;
+
+			// Ensure we have valid dimensions
+			if (currentWidth <= 0 || currentHeight <= 0) {
+				GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+				const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+				currentWidth = mode->width;
+				currentHeight = mode->height;
+			}
+
+			float aspectRatio = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
+
+			if (GLFWFunctions::fullscreen) {
+				// Get the primary monitor resolution
+				GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+				const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+
+				float widthRatio = static_cast<float>(mode->width) / 1920.0f;
+				float heightRatio = static_cast<float>(mode->height) / 1080.0f;
+
+				// Use the larger ratio to ensure full coverage on any monitor aspect ratio
+				float scaleFactor = std::max(widthRatio, heightRatio);
+
+				// Apply the scaling - maintains 10000x10000 on 1920x1080 screens
+				// and scales proportionally for other resolutions
+				transform.scale.SetX(10000.0f * scaleFactor);
+				transform.scale.SetY(5500.0f * scaleFactor);
+			}
+			else {
+				// For windowed mode, use the same proportional scaling
+				float widthRatio = static_cast<float>(currentWidth) / 1920.0f;
+				float heightRatio = static_cast<float>(currentHeight) / 1080.0f;
+
+				// Use the larger ratio to ensure full coverage
+				float scaleFactor = std::max(widthRatio, heightRatio);
+
+				// Apply the scaling - maintains proportional coverage
+				transform.scale.SetX(10000.0f * scaleFactor);
+				transform.scale.SetY(5500.0f * scaleFactor);
 			}
 			//serializer.ReadObject(transform.scale, entityId, "entities.transform.scale");
 			serializer.ReadObject(transform.orientation, entityId, "entities.transform.orientation");

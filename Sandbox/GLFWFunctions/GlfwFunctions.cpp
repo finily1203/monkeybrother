@@ -70,7 +70,7 @@ bool GLFWFunctions::isHovering = false;
 bool GLFWFunctions::gamePaused = false;
 bool GLFWFunctions::filterClogged = false; // rmb to remove this
 bool GLFWFunctions::changeLevel = false;
-bool GLFWFunctions::showFPS = true;
+bool GLFWFunctions::showFPS = false;
 bool GLFWFunctions::isPlayerDead = false;
 bool GLFWFunctions::attackAudio = false;
 bool GLFWFunctions::filterExitAudio = false;
@@ -459,7 +459,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
                     // Apply the scaling - maintains proportional coverage
                     transform.scale.SetX(10000.0f * scaleFactor);
-                    transform.scale.SetY(10000.0f * scaleFactor);
+                    transform.scale.SetY(5400.0f * scaleFactor);
 
                 }
                 
@@ -480,7 +480,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
 
                     // Apply the scaling - maintains proportional coverage
                     transform.scale.SetX(10000.0f * scaleFactor);
-                    transform.scale.SetY(10000.0f * scaleFactor);
+                    transform.scale.SetY(5500.0f * scaleFactor);
 
                 }
             }
@@ -507,6 +507,27 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                 transform.scale.SetX(1920.0f * scaleFactor);
                 transform.scale.SetY(1080.0f * scaleFactor);
             }
+
+            // In keyboardEvent function where you handle 'F' key for fullscreen toggle
+            //if (loadingScreen.isLoading()) {
+                Entity loadingBgEntity = ecsCoordinator.getEntityFromID("loadingBackground");
+                if (ecsCoordinator.entityExists(loadingBgEntity)) {
+                    // Get transform component
+                    auto& transform = ecsCoordinator.getComponent<TransformComponent>(loadingBgEntity);
+
+                    if (fullscreen) {
+                        // Use exact dimensions for fullscreen
+                        transform.scale.SetX(1920.0f);
+                        transform.scale.SetY(1200.0f);
+                    }
+                    else {
+                        // Use exact dimensions for windowed mode
+
+                        transform.scale.SetX(1600.0f);
+                        transform.scale.SetY(900.0f);
+                    }
+                }
+            //}
            
 
         }
