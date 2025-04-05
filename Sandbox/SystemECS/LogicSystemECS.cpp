@@ -112,32 +112,32 @@ void MouseBehaviour::setUpButtonActions()
 	}
 
 	std::vector<std::function<void()>> buttonFunctions = {
-		[this]() { handleStartButton(); }, 
-		[this]() { handleQuitButton(pWindow); },
-		[this]() { handleQuitButton(pWindow); },
-		[this]() { handleOptionsButton(); },
-		[this]() { handleOptionsButton(); },
-		[this]() { handleTutorialButton(); },
-		[this]() { handleTutorialButton(); },
-		[this]() { handleResumeButton(); },
-		[this]() { handleResumeButton(); },
-		[this]() { handleCloseOptionsButton(); },
-		[this]() { handleCloseTutorialButton(); },
-		[this]() { handleNextPageButton(); },
-		[this]() { handlePreviousPageButton(); },
-		[this]() { handlePauseQuitButton(); },
-		[this]() { handleRetryButton(); },
-		[this]() { handleRetryButton(); },
-		[this]() { handleAudioBarDrag("sfxSoundbarBase"); },
-		[this]() { handleAudioBarDrag("musicSoundbarBase"); },
-		[this]() { handleConfirmButton(); },
-		[this]() { handleRotationSpeedSlider("rotationSpeedSlider"); },
-		[this]() { handleQuitToMainMenuButton(); },
-		[this]() { handleQuitToMainMenuButton(); },
-		[this]() { handleQuitToMainMenuButton(); },
-		[this]() { handleReturnToPauseMenuButton(); },
-		[this]() { handleNextLevelButton(); },
-		[this]() { handleStartTutorialButton(); }
+		[this]() { handleStartButton(); },				// start button logic in main menu		
+		[this]() { handleQuitButton(pWindow); },		// quit button logic in the original file
+		[this]() { handleQuitButton(pWindow); },		// quit button logic in main menu
+		[this]() { handleOptionsButton(); },			// open options button logic from main menu
+		[this]() { handleOptionsButton(); },			// open options button logic from pause menu
+		[this]() { handleTutorialButton(); },			// open tutorial button logic from main menu
+		[this]() { handleTutorialButton(); },			// open tutorial button logic from pause menu
+		[this]() { handleResumeButton(); },				// resume button logic
+		[this]() { handleResumeButton(); },				// close pause menu logic
+		[this]() { handleCloseOptionsButton(); },		// close options button logic
+		[this]() { handleCloseTutorialButton(); },		// close tutorial button logic
+		[this]() { handleNextPageButton(); },			// next page button logic for tutorial menu
+		[this]() { handlePreviousPageButton(); },		// previous page button logic for tutorial menu
+		[this]() { handlePauseQuitButton(); },			// quit game button logic in pause menu
+		[this]() { handleRetryButton(); },				// retry button logic from pause menu
+		[this]() { handleRetryButton(); },				// retry button logic from game over menu
+		[this]() { handleAudioBarDrag("sfxSoundbarBase"); },			// sfx bar dragging logic
+		[this]() { handleAudioBarDrag("musicSoundbarBase"); },			// music bar dragging logic
+		[this]() { handleConfirmButton(); },			// confirm options settings button logic
+		[this]() { handleRotationSpeedSlider("rotationSpeedSlider"); },	// rotation speed dragging logic
+		[this]() { handleQuitToMainMenuButton(); },		// yes button logic from confirm quit menu
+		[this]() { handleQuitToMainMenuButton(); },		// main menu button logic from level completed menu
+		[this]() { handleQuitToMainMenuButton(); },		// main menu button logic from game over menu
+		[this]() { handleReturnToPauseMenuButton(); },	// no button logic from confirm quit menu
+		[this]() { handleNextLevelButton(); },			// next level button from level completed menu
+		[this]() { handleStartTutorialButton(); }		// start tutorial button from the tutorial menu
 	};
 
 	int index{};
@@ -152,6 +152,7 @@ void MouseBehaviour::setUpButtonActions()
 	}
 }
 
+// function that handles the logic for start button in the main menu
 void MouseBehaviour::handleStartButton()
 {
 	// resetting the values back to the original values and setting the scene variable to 1
@@ -171,6 +172,7 @@ void MouseBehaviour::handleStartButton()
 	ecsCoordinator.LoadIntroCutsceneFromJSON(ecsCoordinator, FilePathManager::GetIntroCutsceneJSONPath());
 }
 
+// function that handles the logic for quit game button 
 void MouseBehaviour::handleQuitButton(GLFWwindow* window)
 {
 	audioSystem.playSoundEffect("UI_ButtonClick.wav");
@@ -178,6 +180,7 @@ void MouseBehaviour::handleQuitButton(GLFWwindow* window)
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+// function that handles the logic for the options menu button
 void MouseBehaviour::handleOptionsButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -214,6 +217,7 @@ void MouseBehaviour::handleOptionsButton()
 	}
 }
 
+// function that handles the logic for the tutorial button
 void MouseBehaviour::handleTutorialButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -248,6 +252,7 @@ void MouseBehaviour::handleTutorialButton()
 	}
 }
 
+// function that handles the logic for the resume button and close pause menu button
 void MouseBehaviour::handleResumeButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -274,6 +279,7 @@ void MouseBehaviour::handleResumeButton()
 	GLFWFunctions::pauseMenuCount--;
 }
 
+// function that handles the logic for close options menu
 void MouseBehaviour::handleCloseOptionsButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -315,6 +321,7 @@ void MouseBehaviour::handleCloseOptionsButton()
 	cameraSystem.readGameplaySettingsFromJSON(FilePathManager::GetGameplaySettingsJSONPath());
 }
 
+// function that handles the logic for closing of tutorial menu button
 void MouseBehaviour::handleCloseTutorialButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -349,16 +356,19 @@ void MouseBehaviour::handleCloseTutorialButton()
 	GLFWFunctions::gamePaused = true;
 }
 
+// button that handles the logic for next page button for the tutorial menu
 void MouseBehaviour::handleNextPageButton()
 {
 	GLFWFunctions::tutorialCurrentPage++;
 }
 
+// function that handles the logic for previous page button for the tutorial menu
 void MouseBehaviour::handlePreviousPageButton()
 {
 	GLFWFunctions::tutorialCurrentPage--;
 }
 
+// function that handles the logic for quit game button inside the pause menu
 void MouseBehaviour::handlePauseQuitButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -386,6 +396,7 @@ void MouseBehaviour::handlePauseQuitButton()
 	ecsCoordinator.LoadQuitLevelMenuFromJSON(ecsCoordinator, FilePathManager::GetQuitLevelMenuJSONPath());
 }
 
+// function that handles the logic for retry level button
 void MouseBehaviour::handleRetryButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -418,6 +429,7 @@ void MouseBehaviour::handleRetryButton()
 	}
 }
 
+// function that handles the logic for both sfx and music audio bar slider dragging
 void MouseBehaviour::handleAudioBarDrag(std::string const& entityId)
 {
 	// getting the window's width, height and cursor position x and y values
@@ -446,6 +458,7 @@ void MouseBehaviour::handleAudioBarDrag(std::string const& entityId)
 	}
 }
 
+// function that handles the logic for rotation speed slider 
 void MouseBehaviour::handleRotationSpeedSlider(std::string const& entityId)
 {
 	// getting the window's width, height and cursor position x and y values
@@ -511,6 +524,7 @@ void MouseBehaviour::handleRotationSpeedSlider(std::string const& entityId)
 	}
 }
 
+// function that handles the logic for confirm button for the options settings
 void MouseBehaviour::handleConfirmButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -567,6 +581,7 @@ void MouseBehaviour::handleConfirmButton()
 	GLFWFunctions::gamePaused = true;
 }
 
+// function that handles the logic for quit game button and main menu button
 void MouseBehaviour::handleQuitToMainMenuButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -598,6 +613,7 @@ void MouseBehaviour::handleQuitToMainMenuButton()
 	ecsCoordinator.LoadMainMenuFromJSON(ecsCoordinator, FilePathManager::GetMainMenuJSONPath());
 }
 
+// function that handles the logic for no button that returns back to the pause menu
 void MouseBehaviour::handleReturnToPauseMenuButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
@@ -622,6 +638,7 @@ void MouseBehaviour::handleReturnToPauseMenuButton()
 	ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
 }
 
+// function that handles the logic for the next level button
 void MouseBehaviour::handleNextLevelButton()
 {
 	GLFWFunctions::levelCompletedMenuCount--;
@@ -643,6 +660,7 @@ void MouseBehaviour::handleNextLevelButton()
 	}
 }
 
+// function that handles the logic for start tutorial button
 void MouseBehaviour::handleStartTutorialButton()
 {
 	auto allEntities = ecsCoordinator.getAllLiveEntities();
