@@ -483,7 +483,7 @@ CollisionSystemECS::OBBv2 CollisionSystemECS::createOBBFromEntityv2(Entity entit
 
     OBBv2 obb;
     obb.center = transform.position;
-    obb.halfSize = transform.scale * 0.25f;
+    obb.halfSize = transform.scale * 0.35f;
 
     float angleRad = transform.orientation.GetX() * (3.14159265f / 180.0f); // assuming orientation.X is in degrees
 
