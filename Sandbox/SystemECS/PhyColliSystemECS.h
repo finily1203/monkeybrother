@@ -26,6 +26,24 @@ public:
         float rotation;        // Rotation in radians
         myMath::Vector2D axes[2];     // Local axes (normalized)
     };
+    struct OBBv2 {
+        myMath::Vector2D center;
+        myMath::Vector2D halfSize;
+        myMath::Vector2D axisX;
+        myMath::Vector2D axisY;
+
+        // Get OBB corner points
+        void getCorners(myMath::Vector2D corners[4]) const {
+            corners[0] = center + (axisX * halfSize.GetX()) + (axisY * halfSize.GetY());
+            corners[1] = center - (axisX * halfSize.GetX()) + (axisY * halfSize.GetY());
+            corners[2] = center - (axisX * halfSize.GetX()) - (axisY * halfSize.GetY());
+            corners[3] = center + (axisX * halfSize.GetX()) - (axisY * halfSize.GetY());
+        }
+    };
+    OBBv2 createOBBFromEntityv2(Entity entity);
+
+    bool checkOBBOBBCollision(const OBBv2& obb1, const OBBv2& obb2, myMath::Vector2D& normal, float& penetration);
+    void projectOBBv2(const OBBv2& obb, const myMath::Vector2D& axis, float& min, float& max);
 
 	// Create OBB from entity
     OBB createOBBFromEntity(Entity entity);

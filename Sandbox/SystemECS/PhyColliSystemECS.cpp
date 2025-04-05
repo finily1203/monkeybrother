@@ -478,6 +478,74 @@ void CollisionSystemECS::getOBBVertices(const OBB& obb, myMath::Vector2D vertice
     vertices[3] = obb.center + obb.axes[0] * obb.halfExtents.GetX() - obb.axes[1] * obb.halfExtents.GetY();
 }
 
+CollisionSystemECS::OBBv2 CollisionSystemECS::createOBBFromEntityv2(Entity entity) {
+    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+
+    OBBv2 obb;
+    obb.center = transform.position;
+    obb.halfSize = transform.scale * 0.25f;
+
+    float angleRad = transform.orientation.GetX() * (3.14159265f / 180.0f); // assuming orientation.X is in degrees
+
+    // Local axis in world space
+    obb.axisX = myMath::Vector2D(cos(angleRad), sin(angleRad));
+    obb.axisY = myMath::Vector2D(-sin(angleRad), cos(angleRad)); // 90° rotated
+
+    return obb;
+}
+
+void CollisionSystemECS::projectOBBv2(const OBBv2& obb, const myMath::Vector2D& axis, float& min, float& max) {
+    // Get OBB corners
+    myMath::Vector2D corners[4];
+    obb.getCorners(corners);
+
+    // Project each corner onto the axis
+    min = max = projectPoint(corners[0], axis);
+    for (int i = 1; i < 4; ++i) {
+        float projection = projectPoint(corners[i], axis);
+        if (projection < min) min = projection;
+        if (projection > max) max = projection;
+    }
+}
+
+bool CollisionSystemECS::checkOBBOBBCollision(const OBBv2& obb1, const OBBv2& obb2, myMath::Vector2D& normal, float& penetration) {
+    // Get the axes of both OBBs
+    myMath::Vector2D axes[4] = {
+        obb1.axisX, obb1.axisY,
+        obb2.axisX, obb2.axisY
+    };
+
+    float minPenetration = std::numeric_limits<float>::max();
+    myMath::Vector2D bestAxis;
+
+    // Loop through each axis to test for separation
+    for (int i = 0; i < 4; ++i) {
+        myMath::Vector2D axis = axes[i];
+
+        // Project both OBBs onto the axis
+        float min1, max1, min2, max2;
+        projectOBBv2(obb1, axis, min1, max1);
+        projectOBBv2(obb2, axis, min2, max2);
+
+        // Check for gap (separation)
+        if (max1 < min2 || max2 < min1) {
+            return false; // No collision
+        }
+
+        // Find overlap (penetration depth)
+        float overlap = std::min(max1, max2) - std::max(min1, min2);
+        if (overlap < minPenetration) {
+            minPenetration = overlap;
+            bestAxis = axis;
+        }
+    }
+
+    // If no separating axis was found, we have a collision
+    normal = bestAxis;
+    penetration = minPenetration;
+    return true;
+}
+
 // Circle vs OBB collision detection using SAT
 bool CollisionSystemECS::checkCircleOBBCollision(const myMath::Vector2D& circleCenter, float radius, const OBB& obb, myMath::Vector2D& normal, float& penetration)
 {
