@@ -802,7 +802,7 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 
 	GameViewWindow::setSceneNum(mainMenuScene);
 	audioSystem.setChangeBGM(false);
-
+	cameraSystem.unlockFromComponent();
 	cameraSystem.setCameraZoom(0.2f);
 	cameraSystem.setCameraPosition({0,0});
 
@@ -1268,6 +1268,15 @@ void ECSCoordinator::LoadIntroCutsceneFromJSON(ECSCoordinator& ecs, std::string 
 			ecs.addComponent(entityObj, background);
 		}
 
+		if (entityData.contains("UI"))
+		{
+			// read isUI from the JSON file
+			UIComponent UI{};
+			serializer.ReadObject(UI.isUI, entityId, "entities.UI.isUI");
+
+			ecs.addComponent(entityObj, UI);
+		}
+
 		// Add behaviour component
 		if (entityData.contains("behaviour")) {
 			BehaviourComponent behaviour{};
@@ -1354,6 +1363,15 @@ void ECSCoordinator::LoadEndCutsceneFromJSON(ECSCoordinator& ecs, std::string co
 			BackgroundComponent background{};
 			serializer.ReadObject(background.isBackground, entityId, "entities.background.isBackground");
 			ecs.addComponent(entityObj, background);
+		}
+
+		if (entityData.contains("UI"))
+		{
+			// read isUI from the JSON file
+			UIComponent UI{};
+			serializer.ReadObject(UI.isUI, entityId, "entities.UI.isUI");
+
+			ecs.addComponent(entityObj, UI);
 		}
 
 		// Add behaviour component

@@ -679,7 +679,11 @@ void GraphicSystemECS::update(float dt) {
 
 
             if (isUI) {
-                if (GLFWFunctions::collectableCount == 0) {
+                if (ecsCoordinator.getEntityID(entity) == "skipCutscene")
+                {
+                    ecsCoordinator.setTextureID(entity, "skip_cutscene_1x6.png");
+                }
+                else if (GLFWFunctions::collectableCount == 0) {
                     ecsCoordinator.setTextureID(entity, "UI Counter-3");
                 }
                 else if (GLFWFunctions::collectableCount == 1) {
