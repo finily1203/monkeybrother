@@ -38,7 +38,6 @@ void EnemyBehaviour::switchState(STATE newState) {
 }
 
 void EnemyBehaviour::update(Entity entity) {
-    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     myMath::Vector2D velocity = ecsCoordinator.getComponent<PhysicsComponent>(entity).velocity;
 
     //update waypoints of entity if it has been changed
@@ -54,7 +53,7 @@ void EnemyBehaviour::update(Entity entity) {
     if (enemySeePlayer) {
         if (currentState != ATTACK) {
             isAvoidingWalls = false; // Cancel avoidance if player is spotted
-            avoidTimer = 0.0f;
+            //avoidTimer = 0.0f;
 
             switchState(CHASE);
             auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
@@ -87,39 +86,40 @@ void EnemyBehaviour::update(Entity entity) {
     // Handle avoidance state if we're not chasing the player
     if (currentState != CHASE && currentState != ATTACK) {
         // Handle avoidance timer if currently avoiding
-        if (isAvoidingWalls) {
-            avoidTimer -= GLFWFunctions::delta_time;
+        //if (isAvoidingWalls) {
+        //    avoidTimer -= GLFWFunctions::delta_time;
 
-            if (avoidTimer <= 0.0f) {
-                isAvoidingWalls = false;
-                avoidTimer = 0.0f;
-                std::cout << "Avoidance complete" << std::endl;
+        //    if (avoidTimer <= 0.0f) {
+        //        isAvoidingWalls = false;
+        //        avoidTimer = 0.0f;
+        //        std::cout << "Avoidance complete" << std::endl;
 
-                // If in patrol mode, move to next waypoint
-                if (currentState == PATROL && !waypoints.empty()) {
-                    if (currentWaypointIndex == waypoints.size() - 1) {
-                        currentWaypointIndex = 0;
-                    }
-                    else {
-                        currentWaypointIndex++;
-                    }
-                }
-            }
-            else {
-                // Continue avoiding - move the entity based on its current velocity
-                transform.position.SetX(transform.position.GetX() + velocity.GetX());
-                transform.position.SetY(transform.position.GetY() + velocity.GetY());
+        //        // If in patrol mode, move to next waypoint
+        //        if (currentState == PATROL && !waypoints.empty()) {
+        //            if (currentWaypointIndex == waypoints.size() - 1) {
+        //                currentWaypointIndex = 0;
+        //            }
+        //            else {
+        //                currentWaypointIndex++;
+        //            }
+        //        }
+        //    }
+        //    else {
+        //        // Continue avoiding - move the entity based on its current velocity
+        //        transform.position.SetX(transform.position.GetX() + velocity.GetX());
+        //        transform.position.SetY(transform.position.GetY() + velocity.GetY());
 
-                //std::cout << "Still avoiding - Timer: " << avoidTimer << std::endl;
-                return; // Skip normal behavior while avoiding
-            }
-        }
-
-        // Check if enemy is avoiding walls (only if not already chasing)
-        if (avoidWalls(entity)) {
-            startAvoid(entity);
-            return;
-        }
+        //        //std::cout << "Still avoiding - Timer: " << avoidTimer << std::endl;
+        //        return; // Skip normal behavior while avoiding
+        //    }
+        //}
+        //transform.position.SetX(transform.position.GetX() + velocity.GetX());
+        //transform.position.SetY(transform.position.GetY() + velocity.GetY());
+        //// Check if enemy is avoiding walls (only if not already chasing)
+        //if (avoidWalls(entity)) {
+        //    startAvoid(entity);
+        //    return;
+        //}
     }
 
     switch (currentState) {
@@ -134,7 +134,7 @@ void EnemyBehaviour::update(Entity entity) {
         break;
     }
 }
-
+Entity collidingWall{};
 bool EnemyBehaviour::avoidWalls(Entity entity) {
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     //auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
@@ -178,6 +178,7 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
         transform.position.GetY() + (transform.scale.GetY() / 2)
     };
 
+    // CHANGE THIS PART
     // Check all potential wall entities
     for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
         if (ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) {
@@ -198,6 +199,8 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
 
             if (AABBIntersect(fishMin, fishMax, wallMin, wallMax)) {
                 std::cout << "Wall detected by AABB collision!" << std::endl;
+                collidingWall = wallEntity;
+
                 return true;
             }
 
@@ -206,7 +209,7 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
                 // Only consider intersections within our minimum distance
                 if (tMin > 0.0f && tMin <= 1.0f) {
                     std::cout << "Wall Detected by Ray Collision" << std::endl;
-
+					collidingWall = wallEntity;
                     return true;
                 }
             }
@@ -215,34 +218,41 @@ bool EnemyBehaviour::avoidWalls(Entity entity) {
 
     return false;
 }
+#define M_PI   3.14159265358979323846264338327950288f
 
 void EnemyBehaviour::startAvoid(Entity entity) {
     // Only start if not already avoiding
     if (!isAvoidingWalls) {
         auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
         auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
-		auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+        auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
+		auto& collidedWall = ecsCoordinator.getComponent<TransformComponent>(collidingWall);
 
         enemy.currState = PATROL;
 
-        // Store current direction to reverse it
+        // Get current velocity direction
         myMath::Vector2D currentDir = physics.velocity;
         float length = sqrt(currentDir.GetX() * currentDir.GetX() + currentDir.GetY() * currentDir.GetY());
 
         if (length > 0) {
-            // Normalize and reverse direction
-            myMath::Vector2D oppositeDir(-currentDir.GetX() / length, -currentDir.GetY() / length);
-            float speed = 0.2f; // Same speed as normal movement
+            // Normalize velocity
+            myMath::Vector2D normalizedDir = currentDir / length;
+            myMath::Vector2D wallNormal(-sin(collidedWall.orientation.GetX() * (M_PI / 180.0f)), cos(collidedWall.orientation.GetX() * (M_PI / 180.0f)));
+
+            // Reflect the direction using: R = V - 2 * (V . N) * N
+            float dotProduct = (normalizedDir.GetX() * wallNormal.GetX()) + (normalizedDir.GetY() * wallNormal.GetY());
+            myMath::Vector2D reflectedDir = normalizedDir - (wallNormal * (2.0f * dotProduct));
 
             // Set avoiding flag and timer
             isAvoidingWalls = true;
-            avoidTimer = 2.0f; // Set to 2 seconds for now
+            //avoidTimer = 2.0f; // Set to 2 seconds for now
 
-            // Update velocity to move in opposite direction
-            physics.velocity = oppositeDir * speed;
+            // Maintain movement speed
+            float speed = 2.5f;
+            physics.velocity = reflectedDir * speed;
 
-            // Update orientation to face the new direction
-            float angleRadians = atan2(oppositeDir.GetY(), oppositeDir.GetX());
+            // Update orientation to match new movement
+            float angleRadians = atan2(reflectedDir.GetY(), reflectedDir.GetX());
             float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
             transform.orientation.SetX(angleDegrees);
 
@@ -255,14 +265,9 @@ void EnemyBehaviour::startAvoid(Entity entity) {
             }
 
             // Update facing direction
-            if (oppositeDir.GetX() > 0) {
-                isFacingRight = true;
-            }
-            else {
-                isFacingRight = false;
-            }
+            isFacingRight = reflectedDir.GetX() > 0;
 
-            std::cout << "Wall Detected - Starting Avoidance" << std::endl;
+            std::cout << "Wall Detected - Reflecting Movement" << std::endl;
         }
     }
 }
@@ -277,73 +282,279 @@ std::vector<myMath::Vector2D>& EnemyBehaviour::getWaypoints() {
 int& EnemyBehaviour::getCurrentWaypointIndex() {
 	return currentWaypointIndex;
 }
+static bool wallDetected = false;
+static myMath::Vector2D avoidanceDirection;
+
+static Entity currentCollided;
+static Entity prevCollided;
+//void EnemyBehaviour::updatePatrolState(Entity entity) {
+//    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+//    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+//    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+//    auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+//    auto& currentWaypoints = getWaypoints();
+//    int& currentWPIndex = getCurrentWaypointIndex();
+//
+//    if (currentWaypoints.empty()) {
+//        return; // No waypoints available
+//    }
+//
+//    Console::GetLog() << "Waypoints: " << currentWaypoints.size() << std::endl;
+//    Console::GetLog() << "Current waypoint: " << currentWPIndex << std::endl;
+//
+//    myMath::Vector2D targetWP = currentWaypoints[currentWPIndex];
+//    myMath::Vector2D direction = targetWP - transform.position;
+//
+//    float squaredDist = direction.GetX() * direction.GetX() + direction.GetY() * direction.GetY();
+//    float threshold = 100.0f; // Distance threshold for switching waypoints
+//
+//    // Normalize direction
+//    float length = sqrt(squaredDist);
+//    if (length > 0) {
+//        direction.SetX(direction.GetX() / length);
+//        direction.SetY(direction.GetY() / length);
+//    }
+//
+//
+//    // Create an OBB for the fish
+//    CollisionSystemECS::OBBv2 fishOBB = collisionSystem.createOBBFromEntityv2(entity);
+//    // Check if a wall is blocking the path
+//    for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
+//        if (ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) {
+//            CollisionSystemECS::OBBv2 platformOBB = collisionSystem.createOBBFromEntityv2(wallEntity);
+//            myMath::Vector2D normal{};
+//            float penetration{};
+//
+//            // Use OBB vs OBB collision check
+//            if (collisionSystem.checkOBBOBBCollision(fishOBB, platformOBB, normal, penetration)) {
+//                currentCollided = wallEntity;
+//                if (prevCollided != currentCollided) {
+//                    Console::GetLog() << "Wall detected! Adjusting path..." << std::endl;
+//                    wallDetected = true;
+//
+//                    // Side-step around the obstacle
+//                    avoidanceDirection.SetX(-direction.GetY());  // Swap x/y to move perpendicular
+//                    avoidanceDirection.SetY(direction.GetX());
+//                    //avoidanceDirection.SetX(-direction.GetX());
+//                    //avoidanceDirection.SetY(-direction.GetY());
+//                    float avoidLength = sqrt(avoidanceDirection.GetX() * avoidanceDirection.GetX() + avoidanceDirection.GetY() * avoidanceDirection.GetY());
+//                    if (avoidLength > 0) {
+//                        avoidanceDirection.SetX(avoidanceDirection.GetX() / avoidLength);
+//                        avoidanceDirection.SetY(avoidanceDirection.GetY() / avoidLength);
+//                    }
+//                    currentWPIndex++;
+//                    direction = avoidanceDirection;
+//                    break; // Stop checking further walls
+//                }
+//                break;
+//            }
+//        }
+//    }
+//
+//
+//    // Set orientation of x based on angle
+//
+//    // Calculate rotation angle
+//    float angleRadians = (prevCollided != currentCollided) ? atan2(avoidanceDirection.GetY(), avoidanceDirection.GetX()) : atan2(direction.GetY(), direction.GetX());
+//    //float angleRadians = atan2(direction.GetY(), direction.GetX());
+//    float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
+//    transform.orientation.SetX(angleDegrees);
+//
+//    float speed = 1.5f;
+//
+//    if (prevCollided != currentCollided) {
+//        // Move in avoidance direction if a wall is in the way
+//        physics.velocity = avoidanceDirection * speed;
+//    }
+//    else {
+//        // Move normally toward the waypoint
+//        physics.velocity = direction * speed;
+//    }
+//
+//    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
+//    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
+//
+//    // If close enough to the waypoint, switch to the next one
+//    if (squaredDist < threshold) {
+//        currentWPIndex = (currentWPIndex + 1) % currentWaypoints.size();
+//    }
+//    
+//    if (prevCollided != currentCollided) {
+//        prevCollided = currentCollided;
+//    }
+//    else {
+//        prevCollided = prevCollided;
+//    }
+//}
+
+//void EnemyBehaviour::updatePatrolState(Entity entity) {
+//    auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+//    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
+//    auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
+//    auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
+//    auto& currentWaypoints = getWaypoints();
+//    int& currentWPIndex = getCurrentWaypointIndex();
+//
+//    if (currentWaypoints.empty()) {
+//        return; // No waypoints available
+//    }
+//
+//    Console::GetLog() << "Waypoints: " << currentWaypoints.size() << std::endl;
+//    Console::GetLog() << "Current waypoint: " << currentWPIndex << std::endl;
+//
+//    myMath::Vector2D targetWP = currentWaypoints[currentWPIndex];
+//    myMath::Vector2D direction = targetWP - transform.position;
+//
+//    float squaredDist = direction.GetX() * direction.GetX() + direction.GetY() * direction.GetY();
+//    float threshold = 100.0f; // Distance threshold for switching waypoints
+//
+//    // Normalize direction
+//    float length = sqrt(squaredDist);
+//    if (length > 0) {
+//        direction.SetX(direction.GetX() / length);
+//        direction.SetY(direction.GetY() / length);
+//    }
+//
+//    bool wallDetected = false;
+//    myMath::Vector2D avoidanceDirection;
+//
+//    // Create an OBB for the fish
+//    CollisionSystemECS::OBBv2 fishOBB = collisionSystem.createOBBFromEntityv2(entity);
+//
+//    // Check if a wall is blocking the path
+//    for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
+//        if (ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) {
+//            CollisionSystemECS::OBBv2 platformOBB = collisionSystem.createOBBFromEntityv2(wallEntity);
+//            myMath::Vector2D normal{};
+//            float penetration{};
+//
+//            // Use OBB vs OBB collision check
+//            if (collisionSystem.checkOBBOBBCollision(fishOBB, platformOBB, normal, penetration)) {
+//                Console::GetLog() << "Wall detected! Adjusting path..." << std::endl;
+//                wallDetected = true;
+//
+//                // Side-step around the obstacle
+//                avoidanceDirection.SetX(-direction.GetY());  // Swap x/y to move perpendicular
+//                avoidanceDirection.SetY(direction.GetX());
+//
+//                float avoidLength = sqrt(avoidanceDirection.GetX() * avoidanceDirection.GetX() + avoidanceDirection.GetY() * avoidanceDirection.GetY());
+//                if (avoidLength > 0) {
+//                    avoidanceDirection.SetX(avoidanceDirection.GetX() / avoidLength);
+//                    avoidanceDirection.SetY(avoidanceDirection.GetY() / avoidLength);
+//                }
+//
+//                break; // Stop checking further walls
+//            }
+//        }
+//    }
+//
+//    float speed = 1.5f;
+//    float angleRadians = wallDetected ? atan2(avoidanceDirection.GetY(), avoidanceDirection.GetX()) : atan2(direction.GetY(), direction.GetX());
+//    //float angleRadians = atan2(direction.GetY(), direction.GetX());
+//    float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
+//    transform.orientation.SetX(angleDegrees);
+//    if (wallDetected) {
+//        // Move in avoidance direction if a wall is in the way
+//        physics.velocity = avoidanceDirection * speed;
+//    }
+//    else {
+//        // Move normally toward the waypoint
+//        physics.velocity = direction * speed;
+//    }
+//
+//    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
+//    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
+//
+//    // If close enough to the waypoint, switch to the next one
+//    if (squaredDist < threshold) {
+//        currentWPIndex = (currentWPIndex + 1) % currentWaypoints.size();
+//    }
+//}
+// 
 
 void EnemyBehaviour::updatePatrolState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
     auto& currentWaypoints = getWaypoints();
     int& currentWPIndex = getCurrentWaypointIndex();
-    Force force = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-    //auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
-    myMath::Vector2D gravity = ecsCoordinator.getComponent<PhysicsComponent>(entity).gravityScale;
-    //float mass = ecsCoordinator.getComponent<PhysicsComponent>(entity).mass;
 
-    if (currentWaypoints.empty())
-    {
-        return; // No waypoints to follow
-    }
+    if (currentWaypoints.empty()) return;
 
     Console::GetLog() << "Waypoints: " << currentWaypoints.size() << std::endl;
-    Console::GetLog() << "Current waypoint: " << currentWPIndex << std::endl;
 
-    myMath::Vector2D targetWP = currentWaypoints[currentWPIndex];
-    myMath::Vector2D direction = targetWP - transform.position;
+    // Try from current index to the next closest waypoint
+    myMath::Vector2D selectedDirection;
+    bool foundClearPath = false;
+    CollisionSystemECS::OBBv2 fishOBB = collisionSystem.createOBBFromEntityv2(entity);
 
-    // Compute squared distance (avoid using .Length())
-    float squaredDist = direction.GetX() * direction.GetX() + direction.GetY() * direction.GetY();
-    float threshold = 100.0f; // Squared threshold (avoid sqrt)
+    for (int i = 0; i < currentWaypoints.size(); ++i) {
+        int tryIndex = (currentWPIndex + i) % currentWaypoints.size();
+        myMath::Vector2D potentialTarget = currentWaypoints[tryIndex];
+        myMath::Vector2D tryDir = potentialTarget - transform.position;
+        float distSq = tryDir.GetX() * tryDir.GetX() + tryDir.GetY() * tryDir.GetY();
+        float length = sqrt(distSq);
 
-    // Move toward waypoint
-    float length = sqrt(squaredDist); // Compute length only once
-    if (length > 0)
-    {
-        direction.SetX(direction.GetX() / length); // Normalize direction
-        direction.SetY(direction.GetY() / length);
-    }
-
-    float angleRadians = atan2(direction.GetY(), direction.GetX()); // Get rotation in radians
-    float angleDegrees = angleRadians * (180.0f / 3.14159265359f); // Convert to degrees if needed
-
-    transform.orientation.SetX(angleDegrees);
-    if (angleDegrees < -90 || angleDegrees > 90) 
-    {
-        transform.scale.SetY(-std::abs(transform.scale.GetY()));
-    }
-    else 
-    {
-        transform.scale.SetY(std::abs(transform.scale.GetY()));
-    }
-
-    float speed = 0.2f; 
-    physics.velocity = direction * speed;
-    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
-    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
-
-    // If close enough to waypoint, switch to the next one
-    if (squaredDist < threshold)
-    {
-        if (currentWPIndex == currentWaypoints.size() - 1)
-        {
-            currentWPIndex = 0; // Loop back to first waypoint
+        if (length > 0) {
+            tryDir.SetX(tryDir.GetX() / length);
+            tryDir.SetY(tryDir.GetY() / length);
         }
-        else
-        {
-            currentWPIndex++;
+
+        bool pathBlocked = false;
+
+        // Move fishOBB slightly in that direction to simulate next position
+        myMath::Vector2D simulatedPosition = transform.position + tryDir * 10.0f; // small probe step
+        fishOBB.center = simulatedPosition;
+
+        for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
+            if (!ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) continue;
+
+            auto wallOBB = collisionSystem.createOBBFromEntityv2(wallEntity);
+            myMath::Vector2D normal{};
+            float penetration{};
+
+            if (collisionSystem.checkOBBOBBCollision(fishOBB, wallOBB, normal, penetration)) {
+                pathBlocked = true;
+                break;
+            }
+        }
+
+        if (!pathBlocked) {
+            selectedDirection = tryDir;
+            currentWPIndex = tryIndex;
+            foundClearPath = true;
+            break;
         }
     }
 
+    float speed = 0.4f;
+
+    if (foundClearPath) {
+        float angleRadians = atan2(selectedDirection.GetY(), selectedDirection.GetX());
+        float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
+        transform.orientation.SetX(angleDegrees);
+
+        transform.scale.SetY((angleDegrees < -90 || angleDegrees > 90) ?
+            -std::abs(transform.scale.GetY()) :
+            std::abs(transform.scale.GetY()));
+
+        physics.velocity = selectedDirection * speed;
+        transform.position += physics.velocity;
+
+        // If close enough to the current waypoint, go to next
+        myMath::Vector2D toTarget = currentWaypoints[currentWPIndex] - transform.position;
+        float distSq = toTarget.GetX() * toTarget.GetX() + toTarget.GetY() * toTarget.GetY();
+        if (distSq < 100.0f) {
+            currentWPIndex = (currentWPIndex + 1) % currentWaypoints.size();
+        }
+    }
+    else {
+        Console::GetLog() << "No clear path to any waypoint!" << std::endl;
+        physics.velocity = myMath::Vector2D(0, 0); // Stop if trapped
+    }
 }
+
 // ==================================== PATROL STATE IMPLEMENTATION ==================================== //
 
 // ==================================== CHASE STATE IMPLEMENTATION ==================================== //
@@ -462,12 +673,11 @@ bool EnemyBehaviour::AABBIntersect(const myMath::Vector2D& min1, const myMath::V
     return (min1.GetX() < max2.GetX() && max1.GetX() > min2.GetX() &&
         min1.GetY() < max2.GetY() && max1.GetY() > min2.GetY());
 }
-
 void EnemyBehaviour::updateChaseState(Entity entity) {
     auto PhysicsSystemRef = ecsCoordinator.getSpecificSystem<PhysicsSystemECS>();
+    auto collisionSystem = PhysicsSystemRef->getCollisionSystem();
     auto& transform = ecsCoordinator.getComponent<TransformComponent>(entity);
     auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(entity);
-    //auto& forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
 
     // Get player entity
     auto playerEntity = ecsCoordinator.getEntityFromID("player");
@@ -475,58 +685,74 @@ void EnemyBehaviour::updateChaseState(Entity entity) {
 
     // Calculate direction to player
     myMath::Vector2D dirToPlayer = playerPos - transform.position;
-
     float distanceToPlayer = std::sqrt(std::pow(dirToPlayer.GetX(), 2.f) + std::pow(dirToPlayer.GetY(), 2.f));
 
-    // Check if player is within vision distance
     auto& enemyComponent = ecsCoordinator.getComponent<EnemyComponent>(entity);
 
     if (!doesEnemySeePlayer(entity, playerEntity)) {
         if (distanceToPlayer > enemyComponent.visionDistance) {
             switchState(PATROL);
-			auto& enemy = ecsCoordinator.getComponent<EnemyComponent>(entity);
-			enemy.currState = PATROL;
+            enemyComponent.currState = PATROL;
             chaseAnimationCreated = false;
             attackAnimationCreated = false;
             return;
         }
     }
 
-    // Normalize the direction vector
+    // Normalize the direction
     if (distanceToPlayer > 0) {
-        dirToPlayer.SetX(dirToPlayer.GetX() / distanceToPlayer);
-        dirToPlayer.SetY(dirToPlayer.GetY() / distanceToPlayer);
+        dirToPlayer /= distanceToPlayer;
     }
 
-    // Calculate rotation angle
-    float angleRadians = atan2(dirToPlayer.GetY(), dirToPlayer.GetX());
-    float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
+    // Predict next position
+    const float maxSpeed = 0.5f;
+    myMath::Vector2D nextPos = transform.position + dirToPlayer * maxSpeed;
 
-    // Set orientation of x based on angle
-    transform.orientation.SetX(angleDegrees);
+    // Create fish circle
+    float radius = transform.scale.GetX() * 0.5f;
+    bool hitWall = false;
+    myMath::Vector2D correctionNormal{};
 
-    // Handle flipping based on angle
-    if (angleDegrees < -90 || angleDegrees > 90)
-    {
-        transform.scale.SetY(-std::abs(transform.scale.GetY()));
+    for (auto wallEntity : ecsCoordinator.getAllLiveEntities()) {
+        if (!ecsCoordinator.hasComponent<ClosestPlatform>(wallEntity)) continue;
+
+        CollisionSystemECS::OBB wallOBB = collisionSystem.createOBBFromEntity(wallEntity);
+        myMath::Vector2D normal{};
+        float penetration{};
+
+        if (collisionSystem.checkCircleOBBCollision(nextPos, radius, wallOBB, normal, penetration)) {
+            hitWall = true;
+            correctionNormal = normal;
+            break;  // stop at first wall hit for simplicity
+        }
     }
-    else
-    {
-        transform.scale.SetY(std::abs(transform.scale.GetY()));
-    }
 
-    const float maxSpeed = 0.3f;
-    physics.velocity = dirToPlayer * maxSpeed;
-    transform.position.SetX(transform.position.GetX() + physics.velocity.GetX());
-    transform.position.SetY(transform.position.GetY() + physics.velocity.GetY());
+    if (hitWall) {
+        // Slide along the wall: remove the component of velocity in the normal's direction
+        myMath::Vector2D vel = dirToPlayer * maxSpeed;
+        float dot = myMath::DotProductVector2D(vel, correctionNormal);
+        myMath::Vector2D slideVel = vel - (correctionNormal * dot); // removes normal component
 
-    if (dirToPlayer.GetX() > 0) {
-        isFacingRight = true;
+        physics.velocity = slideVel;
     }
     else {
-        isFacingRight = false;
+        physics.velocity = dirToPlayer * maxSpeed;
     }
 
+    // Apply velocity
+    transform.position += physics.velocity;
+
+    // Rotation and flipping
+    float angleRadians = atan2(dirToPlayer.GetY(), dirToPlayer.GetX());
+    float angleDegrees = angleRadians * (180.0f / 3.14159265359f);
+    transform.orientation.SetX(angleDegrees);
+
+    if (angleDegrees < -90 || angleDegrees > 90)
+        transform.scale.SetY(-std::abs(transform.scale.GetY()));
+    else
+        transform.scale.SetY(std::abs(transform.scale.GetY()));
+
+    isFacingRight = (dirToPlayer.GetX() > 0);
 }
 
 bool EnemyBehaviour::checkPlayerCollision(Entity enemyEntity, Entity playerEntity) {

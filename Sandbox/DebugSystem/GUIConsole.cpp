@@ -29,7 +29,9 @@ Console* Console::instance = nullptr;
 std::ostringstream Console::currentLog;
 
 Console::Console() {
+#ifdef _DEBUG 
     LoadConsoleConfigFromJSON(FilePathManager::GetIMGUIConsoleJSONPath());
+#endif
     if (!items) {
         items = new std::vector<std::string>();
     }

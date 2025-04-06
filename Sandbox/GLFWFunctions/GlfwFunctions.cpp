@@ -378,7 +378,7 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
         }
-#ifdef _DEBUG  // or DEBUG, NDEBUG, depending on your build system
+#ifdef _DEBUG 
         if (mappedKey == Key::M) {
             showFPS = !showFPS; 
             std::cout << "FPS Display: " << (showFPS ? "ON" : "OFF") << std::endl;
