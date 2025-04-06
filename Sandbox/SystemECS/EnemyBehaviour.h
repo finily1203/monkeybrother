@@ -40,9 +40,6 @@ public:
 	std::vector<myMath::Vector2D>& getWaypoints();
 	int& getCurrentWaypointIndex();
 
-	bool avoidWalls(Entity entity);
-	void startAvoid(Entity entity);
-
 	void updatePatrolState(Entity entity);
 
 	bool doesEnemySeePlayer(Entity entity, Entity playerEntity);
