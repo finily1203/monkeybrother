@@ -378,12 +378,12 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
             instantLose = true;
             std::cout << "Instant Lose" << std::endl;
         }
-
+#ifdef _DEBUG  // or DEBUG, NDEBUG, depending on your build system
         if (mappedKey == Key::M) {
             showFPS = !showFPS; 
             std::cout << "FPS Display: " << (showFPS ? "ON" : "OFF") << std::endl;
         }
-
+#endif
         if ((*keyState)[Key::F] && action == GLFW_PRESS && !GameViewWindow::getPaused()) {
             fullscreen = !fullscreen;
             GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;

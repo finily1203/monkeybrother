@@ -184,7 +184,7 @@ void FilterBehaviour::createFilterPushAnimation(Entity entity)
     else
     {
         transform.position.SetX(entityTransform.position.GetX() + (entityTransform.scale.GetX() * 0.8f));
-        transform.position.SetY(entityTransform.position.GetY() + (entityTransform.scale.GetY() * 0.3));
+        transform.position.SetY(entityTransform.position.GetY() + (entityTransform.scale.GetY() * 0.3f));
     }
     transform.scale.SetX(100.f);
     transform.scale.SetY(100.f);

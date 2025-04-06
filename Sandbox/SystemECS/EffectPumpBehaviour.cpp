@@ -42,7 +42,6 @@ void EffectPumpBehaviour::update(Entity entity) {
         CollisionSystemECS::OBB playerOBB = collisionSystem.createOBBFromEntity(playerEntity);
         CollisionSystemECS::OBB bubblesOBB = collisionSystem.createOBBFromEntity(entity);
 
-        auto& physics = ecsCoordinator.getComponent<PhysicsComponent>(playerEntity);
         float rotation = bubblesTransform.orientation.GetX();   
         myMath::Vector2D direction = PhysicsSystemRef->directionalVector(rotation);
 
@@ -81,7 +80,7 @@ void EffectPumpBehaviour::update(Entity entity) {
             forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
 
             int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
-            myMath::Vector2D PlayerDir = PhysicsSystemRef->directionalVector(playerOrientation);
+            myMath::Vector2D PlayerDir = PhysicsSystemRef->directionalVector(static_cast<float>(playerOrientation));
 
 			std::cout << PlayerDir.GetX() << ", " << PlayerDir.GetY() << std::endl;
 

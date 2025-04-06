@@ -863,7 +863,6 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 				currentHeight = mode->height;
 			}
 
-			float aspectRatio = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
 
 			if (GLFWFunctions::fullscreen) {
 				// Get the primary monitor resolution
@@ -915,8 +914,6 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 				currentHeight = mode->height;
 			}
 
-			float aspectRatio = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
-
 			if (GLFWFunctions::fullscreen) {
 				// Get the primary monitor resolution
 				GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
@@ -967,7 +964,6 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 				currentHeight = mode->height;
 			}
 
-			float aspectRatio = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
 
 			if (GLFWFunctions::fullscreen) {
 				// Get the primary monitor resolution
@@ -1852,7 +1848,6 @@ void ECSCoordinator::LoadGameOverMenuFromJSON(ECSCoordinator& ecs, std::string c
 				currentHeight = mode->height;
 			}
 
-			float aspectRatio = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
 
 			if (GLFWFunctions::fullscreen) {
 				// Get the primary monitor resolution
