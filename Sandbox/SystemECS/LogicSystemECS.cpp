@@ -214,6 +214,29 @@ void MouseBehaviour::handleOptionsButton()
 	{
 		GLFWFunctions::optionsMenuCount++;
 		ecsCoordinator.LoadOptionsMenuFromJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+
+		Entity sfxArrowEntity = ecsCoordinator.getEntityFromID("sfxSoundbarArrow");
+		if (ecsCoordinator.hasComponent<TransformComponent>(sfxArrowEntity))
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(sfxArrowEntity);
+			transform.position.SetX(GLFWFunctions::sfxArrowPos);
+		}
+
+		// Update music arrow position
+		Entity musicArrowEntity = ecsCoordinator.getEntityFromID("musicSoundbarArrow");
+		if (ecsCoordinator.hasComponent<TransformComponent>(musicArrowEntity))
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(musicArrowEntity);
+			transform.position.SetX(GLFWFunctions::musicArrowPos);
+		}
+
+		// Update rotation speed slider notch position
+		Entity rotationSliderEntity = ecsCoordinator.getEntityFromID("rotationSpeedSliderNotch");
+		if (ecsCoordinator.hasComponent<TransformComponent>(rotationSliderEntity))
+		{
+			TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(rotationSliderEntity);
+			transform.position.SetX(GLFWFunctions::rotationSpeedPos);
+		}
 	}
 }
 
@@ -547,15 +570,38 @@ void MouseBehaviour::handleConfirmButton()
 	int rotationSpeed = GLFWFunctions::rotationSpeed;
 
 	// save the new audio arrow (for both sfx and music) position x to the options menu JSON file
-	ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
+	//ecsCoordinator.SaveOptionsSettingsToJSON(ecsCoordinator, FilePathManager::GetOptionsMenuJSONPath());
 	// save the sfx and music percentages to the audio settings JSON file
-	audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
-	cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
+	//audioSystem.saveAudioSettingsToJSON(FilePathManager::GetAudioSettingsJSONPath(), sfxPercentage, musicPercentage);
+	//cameraSystem.saveGameplaySettingsToJSON(FilePathManager::GetGameplaySettingsJSONPath(), rotationSpeed);
 
 	//change on audio side as well
 	audioSystem.setGenVol(musicPercentage);
 	audioSystem.setBgmVol(musicPercentage);
 	audioSystem.setSfxVol(sfxPercentage);
+
+	Entity sfxArrowEntity = ecsCoordinator.getEntityFromID("sfxSoundbarArrow");
+	if (ecsCoordinator.hasComponent<TransformComponent>(sfxArrowEntity)) 
+	{
+		TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(sfxArrowEntity);
+		transform.position.SetX(GLFWFunctions::sfxArrowPos);
+	}
+
+	// Update music arrow position
+	Entity musicArrowEntity = ecsCoordinator.getEntityFromID("musicSoundbarArrow");
+	if (ecsCoordinator.hasComponent<TransformComponent>(musicArrowEntity)) 
+	{
+		TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(musicArrowEntity);
+		transform.position.SetX(GLFWFunctions::musicArrowPos);
+	}
+
+	// Update rotation speed slider notch position
+	Entity rotationSliderEntity = ecsCoordinator.getEntityFromID("rotationSpeedSliderNotch");
+	if (ecsCoordinator.hasComponent<TransformComponent>(rotationSliderEntity)) 
+	{
+		TransformComponent& transform = ecsCoordinator.getComponent<TransformComponent>(rotationSliderEntity);
+		transform.position.SetX(GLFWFunctions::rotationSpeedPos);
+	}
 
 	for (auto currEntity : allEntities)
 	{
@@ -891,6 +937,14 @@ void MouseBehaviour::onMouseDrag(GLFWwindow* window, double mouseX, double mouse
 			}
 		}
 	}
+
+	TransformComponent& sfxArrowTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("sfxSoundbarArrow"));
+	TransformComponent& musicArrowTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("musicSoundbarArrow"));
+	TransformComponent& rotationSpeedTransform = ecsCoordinator.getComponent<TransformComponent>(ecsCoordinator.getEntityFromID("rotationSpeedSliderNotch"));
+
+	GLFWFunctions::sfxArrowPos = sfxArrowTransform.position.GetX();
+	GLFWFunctions::musicArrowPos = musicArrowTransform.position.GetX();
+	GLFWFunctions::rotationSpeedPos = rotationSpeedTransform.position.GetX();
 
 	(void)window;
 	(void)mouseY;

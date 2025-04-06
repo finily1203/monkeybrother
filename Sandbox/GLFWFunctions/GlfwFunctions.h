@@ -98,6 +98,9 @@ struct GLFWFunctions {
 	const static float pauseDuration;
 	const static float bumpDuration;
 	static bool newSceneLoaded;
+	static float sfxArrowPos;
+	static float musicArrowPos;
+	static float rotationSpeedPos;
 
 	static int audioNum;
 	static int windowWidth;

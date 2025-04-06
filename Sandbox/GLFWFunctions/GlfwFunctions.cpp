@@ -64,6 +64,9 @@ int GLFWFunctions::tutorialCurrentPage = 1;
 int GLFWFunctions::levelCompletedMenuCount = 0;
 int GLFWFunctions::quitLevelMenuCount = 0;
 int GLFWFunctions::rotationSpeed = 0;
+float GLFWFunctions::sfxArrowPos = -126.f;
+float GLFWFunctions::musicArrowPos = -124.f;
+float GLFWFunctions::rotationSpeedPos = 299.f;
 
 bool GLFWFunctions::bumpAudio = false;
 bool GLFWFunctions::collectAudio = false;
