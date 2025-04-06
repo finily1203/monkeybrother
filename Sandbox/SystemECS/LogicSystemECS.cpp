@@ -589,29 +589,30 @@ void MouseBehaviour::handleQuitToMainMenuButton()
 	GLFWFunctions::gamePaused = false;
 	int mainMenuScene = -1;
 
-	if (GLFWFunctions::quitLevelMenuCount == 1)
-	{
-		GLFWFunctions::quitLevelMenuCount--;
-	}
-
 	if (GLFWFunctions::levelCompletedMenuCount == 1)
 	{
 		GLFWFunctions::levelCompletedMenuCount--;
+
+		if (GameViewWindow::getSceneNum() > 4)
+		{
+			//if is tutorial scene go to main menu not cutscene
+			if (GameViewWindow::getSceneNum() != 11 && GameViewWindow::getSceneNum() != 12 && GameViewWindow::getSceneNum() != 13)
+			{
+				mainMenuScene = -4;
+			}
+		}
 	}
-	
-	if (GLFWFunctions::gameOverMenuCount == 1)
+
+	else if (GLFWFunctions::gameOverMenuCount == 1)
 	{
 		GLFWFunctions::gameOverMenuCount--;
 	}
 
-	if (GameViewWindow::getSceneNum() > 4)
+	else if (GLFWFunctions::quitLevelMenuCount == 1)
 	{
-		//if is tutorial scene go to main menu not cutscene
-		if (GameViewWindow::getSceneNum() != 11 && GameViewWindow::getSceneNum() != 12 && GameViewWindow::getSceneNum() != 13)
-		{
-			mainMenuScene = -4;
-		}
+		GLFWFunctions::quitLevelMenuCount--;
 	}
+
 
 	for (auto& currEntity : allEntities)
 	{

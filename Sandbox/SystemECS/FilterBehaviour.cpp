@@ -188,7 +188,10 @@ void FilterBehaviour::createFilterPushAnimation(Entity entity)
     }
     transform.scale.SetX(100.f);
     transform.scale.SetY(100.f);
-	transform.orientation.SetX(entityTransform.orientation.GetX() + 180.f);
+    if (GameViewWindow::getSceneNum() == 5)
+        transform.orientation.SetX(entityTransform.orientation.GetX());
+    else
+        transform.orientation.SetX(entityTransform.orientation.GetX() + 180.f);
 
     ecsCoordinator.addComponent(newAnimationEntity, transform);
 

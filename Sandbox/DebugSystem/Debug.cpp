@@ -60,7 +60,7 @@ void DebugSystem::initialise() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = &ImGui::GetIO();
-
+#ifdef DEBUG
 	// Set up ImGui layout file
 	std::filesystem::path execPath = FilePathManager::GetExecutablePath();
 	std::filesystem::path iniFilePath = execPath.parent_path() / "Sandbox" / "assets" / "imgui" / "imgui_layout.ini";
@@ -83,6 +83,9 @@ void DebugSystem::initialise() {
 	}
 
 	io->IniFilename = iniPath;
+#endif // DEBUG
+
+	
 
 	// Configure ImGui
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
