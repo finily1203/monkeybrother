@@ -38,8 +38,6 @@ void CollectableBehaviour::update(Entity entity) {
             bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, collectOBB, normal, penetration);
 
             if (isColliding) {
-                //playerTransform.scale.SetX(playerTransform.scale.GetX() + 25.0f);
-                //playerTransform.scale.SetY(playerTransform.scale.GetY() + 25.0f);
                 GLFWFunctions::sizeIndex++;
                 //prob dont need this but just in case
 				if (GLFWFunctions::sizeIndex > 3) {

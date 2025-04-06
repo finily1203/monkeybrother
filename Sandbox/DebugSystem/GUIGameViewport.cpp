@@ -276,21 +276,6 @@ void GameViewWindow::Update() {
 		GLFWFunctions::allow_camera_movement = true;
 	}
 
-	//if (/*ImGui::Button(clickedScreenPan ? "UnPan" : "Pan") || */ImGui::IsKeyPressed(ImGuiKey_E)) {
-	//	if (clickedScreenPan) {
-	//		// Clicking "UnPan" - enable camera movement
-	//		GLFWFunctions::allow_camera_movement = true;
-	//	}
-	//	else if (!clickedScreenPan && GLFWFunctions::allow_camera_movement == false) {
-	//		// Clicking "Pan" - disable camera movement
-	//		GLFWFunctions::allow_camera_movement = true;
-	//	}
-	//	
-	//	clickedScreenPan = !clickedScreenPan;
-	//}
-
-
-
 	ImGui::SameLine(0, optionsButtonPadding);
 
 

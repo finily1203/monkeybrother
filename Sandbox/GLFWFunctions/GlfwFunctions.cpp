@@ -280,46 +280,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
         isRotating = false;
     }
 
-    //if ((*keyState)[Key::P]) {
-    //    glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    //    audioPaused = ~audioPaused;
-    //    GLFWFunctions::gamePaused = true;
-
-    //    if (GLFWFunctions::pauseMenuCount < 1 && GLFWFunctions::optionsMenuCount != 1)
-    //    {
-    //        GLFWFunctions::pauseMenuCount++;
-    //        ecsCoordinator.LoadPauseMenuFromJSON(ecsCoordinator, FilePathManager::GetPauseMenuJSONPath());
-    //    }
-
-    //    else if (GLFWFunctions::optionsMenuCount != 1)
-    //    {
-    //        for (auto currEntity : ecsCoordinator.getAllLiveEntities())
-    //        {
-    //            if (ecsCoordinator.getEntityID(currEntity) == "pauseMenuBg" ||
-    //                ecsCoordinator.getEntityID(currEntity) == "closePauseMenu" ||
-    //                ecsCoordinator.getEntityID(currEntity) == "resumeButton" ||
-    //                ecsCoordinator.getEntityID(currEntity) == "pauseOptionsButton" ||
-    //                ecsCoordinator.getEntityID(currEntity) == "pauseTutorialButton" ||
-				//	ecsCoordinator.getEntityID(currEntity) == "pauseRetryButton" ||
-    //                ecsCoordinator.getEntityID(currEntity) == "pauseQuitButton")
-    //            {
-    //                ecsCoordinator.destroyEntity(currEntity);
-    //            }
-    //        }
-
-    //        GLFWFunctions::gamePaused = false;
-    //        GLFWFunctions::pauseMenuCount--;
-    //    }
-    //}
-
-    /*if ((*keyState)[Key::S])
-        audioStopped = ~audioStopped;*/
-
-    /*if ((*keyState)[Key::N]) {
-        audioNext = ~audioNext;
-        GLFWFunctions::audioNum = (GLFWFunctions::audioNum + 1) % 2;
-    }*/
-
     if ((*keyState)[Key::ESCAPE] && GameViewWindow::getSceneNum() > -1 && !GameViewWindow::getPaused() && GameViewWindow::getSceneNum() != -3) {
         glfwSetInputMode(GLFWFunctions::pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         //audioPaused = ~audioPaused;
@@ -535,8 +495,6 @@ void GLFWFunctions::keyboardEvent(GLFWwindow* window, int key, int scancode, int
                         transform.scale.SetY(900.0f);
                     }
                 }
-            //}
-           
 
         }
 

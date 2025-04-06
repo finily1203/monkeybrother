@@ -195,13 +195,6 @@ void PlayerBehaviour::update(Entity entity) {
 	
 	GLFWFunctions::mouseXDelta = 0.0;
 
-	/*if (PhysicsSystemRef->getIsColliding() && PhysicsSystemRef->GetAlrJumped()) {
-		if ((*GLFWFunctions::keyState)[Key::SPACE]) {
-			PhysicsSystemRef->SetAlrJumped(false);  
-			forceManager.AddForce(entity, myMath::Vector2D(-mag, -mag));
-		}
-	}*/
-
 	//CAMERA BEHAVIOUR CURRENTLY PUT HERE FIRST SINCE IT IS AFFECTED BY PLAYER ENTITY
 	auto& playerTransform = ecsCoordinator.getComponent<TransformComponent>(entity);
 	cameraSystem.lockToComponent(playerTransform);

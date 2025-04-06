@@ -457,34 +457,6 @@ void Inspector::Update() {
 		}
 	}
 
-	//if (openDeletePopup) {
-	//	ImGui::OpenPopup("Delete Entity?");
-	//	openDeletePopup = false;
-	//}
-
-	//ImVec2 middle = ImGui::GetMainViewport()->GetCenter();
-	//ImGui::SetNextWindowPos(middle, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-	//// Delete Entity warning popup
-	//if (ImGui::BeginPopupModal("Delete Entity?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-	//	ImGui::Text("Are you sure you want to delete this entity?");
-	//	ImGui::Separator();
-
-	//	if (ImGui::Button("Delete", ImVec2(120, 0))) {
-	//		ecsCoordinator.destroyEntity(selectEntityID);
-	//		selectEntityID = -1;
-	//		draggedEntityID = -1;
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::SetItemDefaultFocus();
-	//	ImGui::SameLine();
-	//	if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-	//		//selectEntityID = -1;
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::EndPopup();
-	//}
-
 	// Handle selection mode cancellation
 	if (isSelectingEntity && !ImGui::IsPopupOpen("Select Entity")) {
 		isSelectingEntity = false;
@@ -630,11 +602,6 @@ void Inspector::RenderInspectorWindow(ECSCoordinator& ecs, int selectedEntityID)
                 enemy.visionAngle = 60.0f;
                 enemy.visionDistance = 300.0f;
                 enemy.drawVisionDebug = true;
-                //enemy.numWaypoints = 2;
-                //// Add default waypoints
-                //auto& transform = ecs.getComponent<TransformComponent>(selectedEntityID);
-                //enemy.waypoints.push_back(transform.position);
-                //enemy.waypoints.push_back(myMath::Vector2D(transform.position.GetX() + 100, transform.position.GetY()));
                 ecs.addComponent<EnemyComponent>(selectedEntityID, enemy);
             }
             else if (!hasEnemy && ecs.hasComponent<EnemyComponent>(selectedEntityID)) {

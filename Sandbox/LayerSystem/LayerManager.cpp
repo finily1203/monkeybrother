@@ -32,16 +32,9 @@ void LayerManager::initialise() {
 
 	//for now only have four layer
 	addNumLayers(m_LayerCount);
-
-	//for testing purpose set layer 1 to invisible
-	//if layer 1 is invible, entities in layer 1 will not be updated (for both graphics and logic)
-	//setLayerVisibility(1, false);
 }
 
-void LayerManager::update() {
-	//print how many in layer 0
-	//std::cout << "Layer 0 has " << m_Layers->at(0).size() << " entities" << std::endl;
-}
+void LayerManager::update() {}
 
 void LayerManager::cleanup() {
 	saveLayerToJSON(FilePathManager::GetLayerJSONPath());

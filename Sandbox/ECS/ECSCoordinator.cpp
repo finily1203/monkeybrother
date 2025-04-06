@@ -373,10 +373,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 
 		// getting the entity Id of the current entity
 		std::string entityId = entityData["id"].get<std::string>();
-		/*std::string textureId = "";
-		if (entityData.contains("textureId")) {
-			textureId = entityData["textureId"].get<std::string>();
-		}*/
 		std::string textureId = entityData["textureId"].get<std::string>();
 
 		//if layer is not determine auto it to layer 0
@@ -450,14 +446,6 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		{
 			// read the movPlatform data from the JSON file
 			MovPlatformComponent movPlatform{};
-			/*
-			float speed;
-			float maxDistance;
-			bool movForward;
-
-			myMath::Vector2D startPos;
-			myMath::Vector2D direction;
-			*/
 			serializer.ReadObject(movPlatform.speed, entityId, "entities.movPlatform.speed");
 			serializer.ReadObject(movPlatform.maxDistance, entityId, "entities.movPlatform.maxDistance");
 			serializer.ReadObject(movPlatform.movForward, entityId, "entities.movPlatform.movForward");
@@ -782,17 +770,7 @@ void ECSCoordinator::LoadEntityFromJSON(ECSCoordinator& ecs, std::string const& 
 		// set the entityId for the current entity
 		ecs.entityManager->setEntityId(entityObj, entityId);
 		ecs.entityManager->setTextureId(entityObj, textureId);
-
-
-		//auto add entity to layer 0
-		/*layerManager.addEntityToLayer(0, entityObj);*/
 	}
-	/*for (auto& entity : ecsCoordinator.getAllLiveEntities()) {
-		Force playerForce = ecsCoordinator.getComponent<PhysicsComponent>(entity).force;
-		ForceManager forceManager = ecsCoordinator.getComponent<PhysicsComponent>(entity).forceManager;
-		float mag = playerForce.GetMagnitude();
-		forceManager.AddForce(entity, myMath::Vector2D(-.3, -.3));
-	}*/
 
 	//set player alive whenever new stage is loaded
 	GLFWFunctions::isPlayerDead = false;
@@ -1048,9 +1026,6 @@ void ECSCoordinator::LoadMainMenuFromJSON(ECSCoordinator& ecs, std::string const
 		ecs.setTextureID(entityObj, textureId);
 
 	}
-
-	/*GameViewWindow::setSceneNum(mainMenuScene);
-	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());*/
 }
 
 // function that loads the pause menu entities from pause menu JSON file
@@ -1153,12 +1128,6 @@ void ECSCoordinator::LoadOptionsMenuFromJSON(ECSCoordinator& ecs, std::string co
 	}
 
 	nlohmann::json jsonObj = serializer.GetJSONObject();
-
-	//float bgmVolPrc = 0.0f;
-	//float sfxVolPrc = 0.0f;
-
-	//serializer.ReadFloat(bgmVolPrc, "bgmVol");
-	//serializer.ReadFloat(sfxVolPrc, "sfxVol");
 
 	auto logicSystemRef = ecs.getSpecificSystem<LogicSystemECS>();
 
@@ -1938,19 +1907,6 @@ Entity ECSCoordinator::cloneEntity(Entity entity)
 
 //Test 5 tests to merge test 3 and test 4 (Physics and rendering without use of GLObject)
 void ECSCoordinator::test5() {
-	//if (GameViewWindow::getSceneNum() != 0)
-	//{
-	//  int scene = GameViewWindow::getSceneNum();
-	//  LoadEntityFromJSON(*this, FilePathManager::GetSaveJSONPath(scene));
-	//}
-
-	//else
-	//{
-	//  LoadEntityFromJSON(*this, FilePathManager::GetEntitiesJSONPath());
-	//}
-
-	//LoadIntroCutsceneFromJSON(*this, FilePathManager::GetIntroCutsceneJSONPath());
-
 	LoadMainMenuFromJSON(*this, FilePathManager::GetMainMenuJSONPath());
 	GameViewWindow::setSceneNum(-1); // Set to main menu scene
 	GameViewWindow::SaveSceneToJSON(FilePathManager::GetSceneJSONPath());
@@ -1960,7 +1916,6 @@ void ECSCoordinator::test5() {
 //Initialises all required components and systems for the ECS system
 void ECSCoordinator::initialiseSystemsAndComponents() {
 	std::cout << "Register Everything" << std::endl;
-	//registerComponent<GraphicsComponent>();
 	registerComponent<TransformComponent>();
 	registerComponent<AABBComponent>();
 	registerComponent<MovementComponent>();

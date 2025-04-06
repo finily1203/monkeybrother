@@ -297,10 +297,6 @@ void DebugSystem::update() {
 		AssetBrowser::Update();
 		ImGui::End();
 
-		//ImGui::Begin("Audio Panel"); //Asset Browser system
-		//AudioPanel::Update();
-		//ImGui::End();
-
 		ImGui::End();//dockspace
 
 		//Rendering of UI
@@ -323,7 +319,6 @@ void DebugSystem::cleanup() {
 	HierarchyList::Cleanup();
 	Inspector::Cleanup();
 	AssetBrowser::Cleanup();
-	//AudioPanel::Cleanup();
 	Console::Cleanup();
 
 	// Clear containers

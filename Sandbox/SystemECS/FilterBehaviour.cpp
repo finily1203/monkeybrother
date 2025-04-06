@@ -23,14 +23,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 //filter needs to reduce size of mossball by one
 //after filter is used, it is clogged so will use a diff texture
 
-
-//steps to take
-//get player entity position
-//get filter entity position
-//check if player entity collides with filter entity
-//only if it collides, reduce size of mossball by one
-//set isClogged to true
-
 void FilterBehaviour::update(Entity entity) {
     
     auto playerEntity = ecsCoordinator.getEntityFromID("player");

@@ -54,26 +54,6 @@ void EffectPumpBehaviour::update(Entity entity) {
 
         bool isColliding = collisionSystem.checkCircleOBBCollision(playerPos, radius, bubblesOBB, normal, penetration);
         if (isColliding) {
-            //std::cout << playerTransform.orientation.GetX() << std::endl;
-
-   //         force.SetDirection(direction);
-   //         forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);
-   //         forceManager.ApplyForce(playerEntity, force.GetDirection(), pumpForce);
-
-   //         int playerOrientation = static_cast<int>(playerTransform.orientation.GetX()) % 360;
-   //         float forceDirAngle = atan2(direction.GetY(), direction.GetX()) * (180.0f / M_PI);
-
-   //         //playerOrientation = (playerOrientation + 360) % 360;
-   //         //forceDirAngle = (static_cast<int>(forceDirAngle) + 360) % 360;
-
-			//if (playerOrientation < 0) playerOrientation += 360;
-
-   //         float angleDifference = fabs(playerOrientation - forceDirAngle);
-
-   //         std::cout << "Player Orientation: " << playerTransform.orientation.GetX() << std::endl;
-   //         std::cout << "Force Direction Angle: " << forceDirAngle << std::endl;
-
-   //         forceManager.ClearForce(playerEntity);
 
             force.SetDirection(direction);
             forceManager.AddForce(playerEntity, force.GetDirection() * pumpForce * GLFWFunctions::delta_time);

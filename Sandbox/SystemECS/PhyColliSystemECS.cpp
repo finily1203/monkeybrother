@@ -20,7 +20,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "AABBComponent.h"
 #include "MovementComponent.h"
 #include "ClosestPlatform.h"
-#include "GraphicsComponent.h"
 #include "PhysicsComponent.h"
 #include "PlayerComponent.h"
 

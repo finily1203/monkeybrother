@@ -102,15 +102,6 @@ void ExitBehaviour::update(Entity entity) {
                     ecsCoordinator.LoadLevelCompletedMenuFromJSON(ecsCoordinator, FilePathManager::GetLevelCompletedMenuJSONPath());
                     GLFWFunctions::levelCompletedMenuCount++;
                 }
-                //int currScn = GameViewWindow::getSceneNum();
-                //currScn++;
-                //if (currScn > 2) currScn = -1;
-                //GameViewWindow::setSceneNum(currScn);
-                //GLFWFunctions::changeLevel = true;
-                //GLFWFunctions::newSceneLoaded = true;
-
-                //// Reset exit arrow state for next level
-                //exitArrowCreated = false;
             }
         }
 

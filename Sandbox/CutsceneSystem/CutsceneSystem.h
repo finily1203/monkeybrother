@@ -18,7 +18,6 @@ All content @ 2025 DigiPen Institute of Technology Singapore, all rights reserve
 #pragma once
 #include "Systems.h"
 #include "vector2D.h"
-//#include "GlobalCoordinator.h"
 #include <vector>
 
 

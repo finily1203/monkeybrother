@@ -101,17 +101,6 @@ private:
 	FMOD::Channel* pumpChannel;
 	FMOD::Channel* rotationChannel;
 
-	/*
-	* IntroCutscene_Ambience_1: Play at Start Loop
-	* IntroCutscene_Panel_2: Play at start of panel
-	* IntroCutscene_Human_2: ^ , slowly fade out
-	* IntroCutscene_Ambience_2: Play at end of IntroCutscene_Panel_2 audio, loop
-	* 3 no audio, just rely on ambience
-	* 4 - 8 play at start of panel
-	*/
-
-	//FMOD::ChannelGroup* cutsceneGroup;
-
 	FMOD::Channel* cutsceneAmbienceChannel; // loops, play from panel 1 to 8
 	FMOD::Channel* cutsceneAmbienceChannel2; // loops, play from end of panel 2 to 8
 	FMOD::Channel* cutscenePanelChannel; //play one time audio per panel

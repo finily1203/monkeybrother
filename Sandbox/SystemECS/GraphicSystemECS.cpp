@@ -17,7 +17,6 @@ All content @ 2024 DigiPen Institute of Technology Singapore, all rights reserve
 #include "GraphicSystemECS.h"
 
 #include "TransformComponent.h"
-#include "GraphicsComponent.h"
 #include "AABBComponent.h"
 #include "MovementComponent.h"
 #include "MovementComponent.h"

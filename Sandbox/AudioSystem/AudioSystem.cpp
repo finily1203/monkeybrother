@@ -59,13 +59,11 @@ SystemType AudioSystem::getSystem() {
 void AudioSystem::initialise() {
     //read from audio JSON file
     readAudioSettingsFromJSON(FilePathManager::GetAudioSettingsJSONPath());
-	/*std::cout << sfxPercentage << musicPercentage << std::endl;*/
+
 	setGenVol(musicPercentage);
 	setBgmVol(musicPercentage);
 	setSfxVol(sfxPercentage);
 
-	//std::cout << "Audio System initialised." << std::endl;
-    /*genVol(0.35f), bgmVol(0.05f), sfxVol(0.5f)*/
 }
 
 //Update function for AudioSystem class to handle pausing, playing of song
@@ -113,8 +111,6 @@ void AudioSystem::update() {
         if (cutscenePanelChannel) cutscenePanelChannel->setPaused(false);
         if (cutsceneHumanChannel) cutsceneHumanChannel->setPaused(false);
     }
-
-	//std::cout << cutsceneSystem.getCurrentFrameIndex() << std::endl;
 
     //if scene is -2 which is cutscene
     if (GameViewWindow::getSceneNum() == -2)
@@ -595,9 +591,6 @@ void AudioSystem::update() {
             playSong(ambienceSound);
         }
 
-        //std::cout << GameViewWindow::getSceneNum() << std::endl;
-        // Check the state of the pump and play/stop the pump sound
-
         //check if there is a pump entity existing
 		for (auto entity : ecsCoordinator.getAllLiveEntities())
 		{
@@ -729,14 +722,9 @@ void AudioSystem::update() {
         }
         else {
             if (wasRotating) {
-                // Just stopped rotating - could implement fade out here too
                 if (rotationChannel) {
-                    // Option 1: Stop immediately
                     rotationChannel->stop();
                     rotationChannel = nullptr;
-
-                    // Option 2: Fade out (more complex, would need another timer)
-                    // For now we'll just stop immediately
                 }
             }
             wasRotating = false;

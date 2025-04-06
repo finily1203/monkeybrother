@@ -24,6 +24,4 @@ void NavigationBehaviour::update(Entity entity) {
         return;
     }
 
-    // Apply rotation for visual effect if needed
-    // transform.orientation.SetY(transform.orientation.GetY() + (15.0f * GLFWFunctions::delta_time));
 }
