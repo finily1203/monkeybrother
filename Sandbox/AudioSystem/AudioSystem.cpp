@@ -537,6 +537,13 @@ void AudioSystem::update() {
                 }
                 bgmChannel = nullptr;
             }
+            if (pumpChannel) {
+                FMOD_RESULT result = pumpChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for pump channel! (" << result << ")" << std::endl;
+                }
+                pumpChannel = nullptr;
+            }
             changeBGM = true;
         }
 
@@ -568,6 +575,17 @@ void AudioSystem::update() {
                 bgmChannel = nullptr;
             }
 			changeBGM = true;
+        }
+
+        if (GLFWFunctions::loadingScreen)
+        {
+            if (pumpChannel) {
+                FMOD_RESULT result = pumpChannel->stop();
+                if (result != FMOD_OK) {
+                    std::cout << "FMOD stop error for pump channel! (" << result << ")" << std::endl;
+                }
+                pumpChannel = nullptr;
+            }
         }
 
         // Ensure BGM and ambience play only if they are not already playing

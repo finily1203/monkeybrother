@@ -79,6 +79,7 @@ bool GLFWFunctions::attackAudio = false;
 bool GLFWFunctions::filterExitAudio = false;
 bool GLFWFunctions::endCutsceneLastPanel = false;
 bool GLFWFunctions::buttonHoverAudio = false;
+bool GLFWFunctions::loadingScreen = false;
 
 int GLFWFunctions::sizeIndex = 0;
 bool GLFWFunctions::sizeChange = false;

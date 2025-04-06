@@ -127,6 +127,7 @@ struct GLFWFunctions {
 	static bool filterExitAudio;
 	static bool endCutsceneLastPanel;
 	static bool buttonHoverAudio;
+	static bool loadingScreen;
 
 	static bool isPlayerDead;
 	static int sizeIndex;
